@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace FluenSharp.Tests
+namespace FluentSharp.Tests
 {
     public class Tests
     {

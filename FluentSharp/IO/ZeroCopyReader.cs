@@ -5,6 +5,7 @@ namespace FluentSharp.IO
     public class ZeroCopyReader
     {
         private ReadOnlyMemory<char> _unconsumedData;
+        private int _currentPosition;
 
         public ZeroCopyReader(string text) : this(text.AsMemory())
         {
@@ -15,12 +16,15 @@ namespace FluentSharp.IO
             _unconsumedData = memory;
             _currentPosition = 0;
         }
-
-        private int _currentPosition; 
-
+        
         public ReadOnlySpan<char> PeekChar()
         {
             return _unconsumedData.ReadCharFromMemory(_currentPosition);
+        }
+        
+        public ReadOnlySpan<char> PeekChar(int offset)
+        {
+            return _unconsumedData.ReadCharFromMemory(_currentPosition + offset);
         }
 
         public ReadOnlySpan<char> GetChar()
@@ -30,8 +34,9 @@ namespace FluentSharp.IO
             return chr;
         }
 
-        public void SkipBlankBlock()
+        public int SkipBlankBlock()
         {
+            var count = 0;
             while (true)
             {
                 var start = _currentPosition;
@@ -41,17 +46,45 @@ namespace FluentSharp.IO
                     _currentPosition = start;
                     break;
                 }
+
+                count += 1;
             }
+
+            return count;
         }
 
         private bool SkipEol()
         {
-            
+            if ('\n'.Equals(PeekChar()))
+            {
+                _currentPosition += 1;
+                return true;
+            }
+
+            if ('\r'.Equals(PeekChar())
+                && '\n'.Equals(PeekChar(1)))
+            {
+                _currentPosition += 2;
+                return true;
+            }
+
+            return false;
         }
 
-        private void SkipBlankInline()
+        private int SkipBlankInline()
         {
-            throw new NotImplementedException();
+            var start = _currentPosition;
+            while (' '.Equals(PeekChar()))
+            {
+                _currentPosition += 1;
+            }
+
+            return _currentPosition - start;
+        }
+
+        public bool IsNotEof()
+        {
+            return _currentPosition >= _unconsumedData.Length;
         }
     }
 }

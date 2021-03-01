@@ -6,6 +6,11 @@ namespace FluentSharp
     public struct Resource
     {
         public List<Entry> Body;
+
+        public Resource(List<Entry> body)
+        {
+            Body = body;
+        }
     }
 
     public interface Entry {}

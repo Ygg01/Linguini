@@ -18,14 +18,14 @@ namespace FluentSharp.IO
             return memory.Slice(pos,CharLength).Span;
         }
 
-        public static bool CompareContent(this ReadOnlySpan<char> memory, char other)
+        public static bool Equals(this char lhs, ReadOnlySpan<char> rhs)
         {
-            if (memory.Length != 1)
+            if (rhs.Length != 1)
             {
                 throw new ArgumentException("Expected single character span");
             }
-            var lhs = memory[0];
-            return other.Equals(lhs);
+            var chr = rhs[0];
+            return lhs.Equals(chr);
         }
     }
 }
