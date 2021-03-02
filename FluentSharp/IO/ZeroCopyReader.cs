@@ -4,8 +4,8 @@ namespace FluentSharp.IO
 {
     public class ZeroCopyReader
     {
-        private ReadOnlyMemory<char> _unconsumedData;
-        private int _currentPosition;
+        private readonly ReadOnlyMemory<char> _unconsumedData;
+        private int _position;
 
         public ZeroCopyReader(string text) : this(text.AsMemory())
         {
@@ -14,23 +14,27 @@ namespace FluentSharp.IO
         public ZeroCopyReader(ReadOnlyMemory<char> memory)
         {
             _unconsumedData = memory;
-            _currentPosition = 0;
-        }
-        
-        public ReadOnlySpan<char> PeekChar()
-        {
-            return _unconsumedData.ReadCharFromMemory(_currentPosition);
-        }
-        
-        public ReadOnlySpan<char> PeekChar(int offset)
-        {
-            return _unconsumedData.ReadCharFromMemory(_currentPosition + offset);
+            _position = 0;
         }
 
-        public ReadOnlySpan<char> GetChar()
+        public int Position => _position;
+        public bool IsNotEof => _position >= _unconsumedData.Length;
+        public bool IsEof => !IsNotEof;
+
+        public ReadOnlySpan<char> PeekCharSpan()
         {
-            var chr = PeekChar();
-            _currentPosition += 1;
+            return _unconsumedData.ReadCharSpan(_position);
+        }
+
+        public ReadOnlySpan<char> PeekCharSpan(int offset)
+        {
+            return _unconsumedData.ReadCharSpan(_position + offset);
+        }
+
+        public ReadOnlySpan<char> GetCharSpan()
+        {
+            var chr = PeekCharSpan();
+            _position += 1;
             return chr;
         }
 
@@ -39,11 +43,11 @@ namespace FluentSharp.IO
             var count = 0;
             while (true)
             {
-                var start = _currentPosition;
+                var start = _position;
                 SkipBlankInline();
                 if (!SkipEol())
                 {
-                    _currentPosition = start;
+                    _position = start;
                     break;
                 }
 
@@ -55,36 +59,34 @@ namespace FluentSharp.IO
 
         private bool SkipEol()
         {
-            if ('\n'.Equals(PeekChar()))
+            if ('\n'.EqualsSpans(PeekCharSpan()))
             {
-                _currentPosition += 1;
+                _position += 1;
                 return true;
             }
 
-            if ('\r'.Equals(PeekChar())
-                && '\n'.Equals(PeekChar(1)))
+            if ('\r'.EqualsSpans(PeekCharSpan())
+                && '\n'.EqualsSpans(PeekCharSpan(1)))
             {
-                _currentPosition += 2;
+                _position += 2;
                 return true;
             }
+
+            if (IsEof) return true;
 
             return false;
         }
 
         private int SkipBlankInline()
         {
-            var start = _currentPosition;
-            while (' '.Equals(PeekChar()))
+            var start = _position;
+            while (' '.EqualsSpans(PeekCharSpan()))
             {
-                _currentPosition += 1;
+                _position += 1;
             }
 
-            return _currentPosition - start;
+            return _position - start;
         }
 
-        public bool IsNotEof()
-        {
-            return _currentPosition >= _unconsumedData.Length;
-        }
     }
 }

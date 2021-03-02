@@ -5,33 +5,33 @@ namespace FluentSharp
 {
     public struct Resource
     {
-        public List<Entry> Body;
+        public List<IEntry> Body;
+        public List<ParseError> Errors;
 
-        public Resource(List<Entry> body)
+        public Resource(List<IEntry> body, List<ParseError> errors)
         {
             Body = body;
+            Errors = errors;
         }
     }
 
-    public interface Entry {}
-    
-    public struct Identifier : Entry
+    public struct Identifier : IEntry
     {
         public ReadOnlyMemory<char> Name;
     }
 
-    public struct Pattern: Entry
+    public struct Pattern : IEntry
     {
         public List<ReadOnlyMemory<char>> Elements;
     }
 
-    public struct Attribute: Entry
+    public struct Attribute : IEntry
     {
         public Identifier Id;
         public Pattern Value;
     }
 
-    public struct Message: Entry
+    public struct Message : IEntry
     {
         public Identifier Id;
         public Pattern? Value;
@@ -39,7 +39,7 @@ namespace FluentSharp
         public Comment? Comment;
     }
 
-    public struct Term: Entry
+    public struct Term : IEntry
     {
         public Identifier Id;
         public Pattern Value;
@@ -47,21 +47,13 @@ namespace FluentSharp
         public Comment? Comment;
     }
 
-
-    public enum CommentType : sbyte
+    public struct Comment : IEntry
     {
-        Comment,
-        GroupComment,
-        ResourceComment,
-    }
-
-    public struct Comment
-    {
-        public CommentType CommentType;
+        public CommentLevel CommentLevel;
         public ReadOnlyMemory<char> Content;
     }
 
-    public struct Junk
+    public struct Junk : IEntry
     {
         public ReadOnlyMemory<char> Content;
     }

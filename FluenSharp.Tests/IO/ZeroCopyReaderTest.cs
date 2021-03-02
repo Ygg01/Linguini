@@ -15,13 +15,12 @@ namespace FluentSharp.Tests.IO
         [TestCase("漢字", '漢')]
         [TestCase("かんじ", 'か')]
         [TestCase("Северный поток", 'С')]
-        [TestCase("", '\0')]
-        public void TestPeekChar(string text, char expected)
+        public void TestPeekChar(string text, char expected, bool eof = false)
         {
             ZeroCopyReader reader = new ZeroCopyReader(text);
-            Assert.That(expected.Equals(reader.PeekChar()));
-            Assert.That(expected.Equals(reader.PeekChar()));
-            Assert.That(expected.Equals(reader.PeekChar()));
+            Assert.That(expected.EqualsSpans(reader.PeekCharSpan()));
+            Assert.That(expected.EqualsSpans(reader.PeekCharSpan()));
+            Assert.That(expected.EqualsSpans(reader.PeekCharSpan()));
         }
 
         [Test]
@@ -30,13 +29,12 @@ namespace FluentSharp.Tests.IO
         [TestCase("漢字", '漢', '字')]
         [TestCase("かんじ", 'か', 'ん')]
         [TestCase("Северный поток", 'С', 'е')]
-        [TestCase("", '\0', '\0')]
-        public void TestPeekChar(string text, char expected1, char expected2)
+        public void TestPeekGetChar(string text, char expected1, char expected2)
         {
             ZeroCopyReader reader = new ZeroCopyReader(text);
-            Assert.That(expected1.Equals(reader.PeekChar()));
-            Assert.That(expected1.Equals(reader.GetChar()));
-            Assert.That(expected2.Equals(reader.PeekChar()));
+            Assert.That(expected1.EqualsSpans(reader.PeekCharSpan()));
+            Assert.That(expected1.EqualsSpans(reader.GetCharSpan()));
+            Assert.That(expected2.EqualsSpans(reader.PeekCharSpan()));
         }
 
         [Test]
@@ -45,39 +43,43 @@ namespace FluentSharp.Tests.IO
         [TestCase("漢字", '漢', '字')]
         [TestCase("かんじ", 'か', 'ん')]
         [TestCase("Северный поток", 'С', 'е')]
-        [TestCase("", '\0', '\0')]
         public void TestPeekCharOffset(string text, char expected1, char expected2)
         {
             ZeroCopyReader reader = new ZeroCopyReader(text);
-            Assert.That(expected1.Equals(reader.PeekChar()));
-            Assert.That(expected2.Equals(reader.PeekChar(1)));
-        }
-
-        [Test]
-        [Parallelizable]
-        [TestCase("st", 's', 't', true)]
-        [TestCase("str", 's', 't', false)]
-        [TestCase("漢字", '漢', '字', true)]
-        [TestCase("かんじ", 'か', 'ん', false)]
-        [TestCase("Северный поток", 'С', 'е', false)]
-        [TestCase("", '\0', '\0', true)]
-        public void TestEof(string text, char expected1, char expected2, bool eof)
-        {
-            ZeroCopyReader reader = new ZeroCopyReader(text);
-            Assert.That(expected1.Equals(reader.GetChar()));
-            Assert.That(expected2.Equals(reader.GetChar()));
-            Assert.That(reader.IsNotEof, Is.EqualTo(eof));
+            Assert.That(expected1.EqualsSpans(reader.PeekCharSpan()));
+            Assert.That(expected2.EqualsSpans(reader.PeekCharSpan(1)));
         }
 
         [Test]
         [Parallelizable]
         [TestCase("    \nb", 'b')]
-        [TestCase("    \r\nb", 'b')]
+        [TestCase("    \r\nb2", 'b')]
+        [TestCase("    \n漢字", '漢')]
+        [TestCase("    \nか", 'か')]
         public void TestSkipBlank(string text, char postSkipChar)
         {
             ZeroCopyReader reader = new ZeroCopyReader(text);
             reader.SkipBlankBlock();
-            Assert.That(postSkipChar.Equals(reader.GetChar()));
+            Assert.That(postSkipChar.EqualsSpans(reader.GetCharSpan()));
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCase("", false, null)]
+        [TestCase("a", true, 'a')]
+        public void TestTryReadCharSpan(string text, bool isChar, char? expected1)
+        {
+            ReadOnlyMemory<char> mem = new ReadOnlyMemory<char>(text.ToCharArray());
+            bool IsThereChar = mem.TryReadCharSpan(0, out var readChr);
+            Assert.That(IsThereChar, Is.EqualTo(isChar));
+            if (expected1 == null)
+            {
+                Assert.IsTrue(ZeroCopyUtil.Eof.Span == readChr);
+            }
+            else
+            {
+                Assert.That(expected1.EqualsSpans(readChr));
+            }
         }
     }
 }

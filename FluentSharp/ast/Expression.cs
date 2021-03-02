@@ -3,15 +3,7 @@ using System.Collections.Generic;
 
 namespace FluentSharp
 {
-    public interface Expression
-    {
-    }
-
-    public interface InlineExpression : Expression
-    {
-    }
-
-    public struct StringLiteral : InlineExpression
+    public struct StringLiteral : IInlineExpression
     {
         public ReadOnlyMemory<char> Value;
 
@@ -21,68 +13,74 @@ namespace FluentSharp
         }
     }
 
-    public struct NumberLiteral : InlineExpression
+    public struct NumberLiteral : IInlineExpression
     {
         public ReadOnlyMemory<char> Value;
     }
 
-    public struct FunctionReference : InlineExpression
+    public struct FunctionReference : IInlineExpression
     {
         public Identifier Id;
         public CallArguments Arguments;
     }
 
-    public struct MessageReference : InlineExpression
+    public struct MessageReference : IInlineExpression
     {
         public Identifier Id;
         public Identifier? Attribute;
     }
 
-    public struct TermReference : InlineExpression
+    public struct TermReference : IInlineExpression
     {
         public Identifier Id;
         public Identifier? Attribute;
         public CallArguments? Arguments;
     }
 
-    public struct VariableReference : InlineExpression
+    public struct VariableReference : IInlineExpression
     {
         public Identifier Id;
     }
 
-    public struct Placeable: InlineExpression
+    public struct Placeable : IInlineExpression
     {
-        public Expression Expression;
+        public IExpression Expression;
     }
 
     public struct CallArguments
     {
-        public List<InlineExpression> PositionalArgs;
+        public List<IInlineExpression> PositionalArgs;
         public List<NamedArgument> NamedArgs;
     }
 
     public struct NamedArgument
     {
         public Identifier Name;
-        public InlineExpression Value;
+        public IInlineExpression Value;
 
-        public NamedArgument(Identifier name, InlineExpression value)
+        public NamedArgument(Identifier name, IInlineExpression value)
         {
             Name = name;
             Value = value;
         }
     }
 
-    public class SelectExpression : Expression
+    public class SelectExpression : IExpression
     {
-        public InlineExpression Selector;
+        public IInlineExpression Selector;
         public List<Variant> Variants = new();
 
-        public SelectExpression(InlineExpression selector, List<Variant> variants)
+        public SelectExpression(IInlineExpression selector, List<Variant> variants)
         {
             Selector = selector;
             Variants = variants;
         }
+    }
+
+    public enum VariantType : sbyte
+    {
+        Identifier,
+        NumberLiteral,
     }
 
     public struct Variant
@@ -91,11 +89,5 @@ namespace FluentSharp
         public ReadOnlyMemory<char> Key;
         public Pattern Value;
         public bool IsDefault;
-    }
-
-    public enum VariantType : sbyte
-    {
-        Identifier,
-        NumberLiteral,
     }
 }
