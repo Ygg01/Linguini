@@ -72,8 +72,6 @@ namespace FluentSharp.IO
                 return true;
             }
 
-            if (IsEof) return true;
-
             return false;
         }
 

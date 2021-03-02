@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FluentSharp
+namespace FluentSharp.Ast
 {
     public struct Resource
     {
@@ -13,22 +13,6 @@ namespace FluentSharp
             Body = body;
             Errors = errors;
         }
-    }
-
-    public struct Identifier : IEntry
-    {
-        public ReadOnlyMemory<char> Name;
-    }
-
-    public struct Pattern : IEntry
-    {
-        public List<ReadOnlyMemory<char>> Elements;
-    }
-
-    public struct Attribute : IEntry
-    {
-        public Identifier Id;
-        public Pattern Value;
     }
 
     public struct Message : IEntry

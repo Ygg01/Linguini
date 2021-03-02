@@ -1,13 +1,32 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
-namespace FluentSharp
+namespace FluentSharp.Ast
 {
+    public struct Attribute
+    {
+        public Identifier Id;
+        public Pattern Value;
+    }
+
+    public struct Pattern
+    {
+        public List<ReadOnlyMemory<char>> Elements;
+    }
+
+    public struct Identifier
+    {
+        public ReadOnlyMemory<char> Name;
+    }
+
     public interface IExpression
     {
     }
 
     public enum CommentLevel : sbyte
     {
+        None = 0,
         Comment = 1,
         GroupComment = 2,
         ResourceComment = 3,

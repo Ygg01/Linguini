@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using FluentSharp.Ast;
 using FluentSharp.IO;
 
 namespace FluentSharp

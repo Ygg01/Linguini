@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FluentSharp
+namespace FluentSharp.Ast
 {
     public struct StringLiteral : IInlineExpression
     {
@@ -9,7 +9,7 @@ namespace FluentSharp
 
         public StringLiteral(ReadOnlyMemory<char> value)
         {
-            this.Value = value;
+            Value = value;
         }
     }
 
