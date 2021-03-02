@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace FluentSharp.Ast
+namespace Linguini.Ast
 {
     public struct Attribute
     {

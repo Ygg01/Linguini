@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FluentSharp.Ast
+namespace Linguini.Ast
 {
-    public struct Resource
+    public class Resource
     {
         public List<IEntry> Body;
         public List<ParseError> Errors;
@@ -15,7 +15,7 @@ namespace FluentSharp.Ast
         }
     }
 
-    public struct Message : IEntry
+    public class Message : IEntry
     {
         public Identifier Id;
         public Pattern? Value;
@@ -23,7 +23,7 @@ namespace FluentSharp.Ast
         public Comment? Comment;
     }
 
-    public struct Term : IEntry
+    public class Term : IEntry
     {
         public Identifier Id;
         public Pattern Value;
@@ -31,13 +31,13 @@ namespace FluentSharp.Ast
         public Comment? Comment;
     }
 
-    public struct Comment : IEntry
+    public class Comment : IEntry
     {
         public CommentLevel CommentLevel;
         public ReadOnlyMemory<char> Content;
     }
 
-    public struct Junk : IEntry
+    public class Junk : IEntry
     {
         public ReadOnlyMemory<char> Content;
     }

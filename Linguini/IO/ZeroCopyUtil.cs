@@ -2,7 +2,7 @@
 
 using System;
 
-namespace FluentSharp.IO
+namespace Linguini.IO
 {
     public static class ZeroCopyUtil
     {

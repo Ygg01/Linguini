@@ -3,21 +3,24 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using FluentSharp.Ast;
-using FluentSharp.IO;
+using Linguini.Ast;
+using Linguini.IO;
 
-namespace FluentSharp
+namespace Linguini
 {
     public class Parser
     {
         private ZeroCopyReader _reader;
         private List<ParseError> _errors = new();
 
-        public Resource Parse(TextReader input)
+        public Parser(TextReader input)
         {
             // TODO add buffering
             _reader = new ZeroCopyReader(input.ReadToEnd());
+        }
 
+        public Resource Parse()
+        {
             var body = new List<IEntry>();
 
             _reader.SkipBlankBlock();
@@ -27,8 +30,8 @@ namespace FluentSharp
 
             while (_reader.IsNotEof)
             {
-                var entry_start = _reader.Position;
-                IEntry entry = GetEntry(entry_start);
+                var entryStart = _reader.Position;
+                IEntry entry = GetEntry(entryStart);
 
                 if (lastComment != null)
                 {
@@ -109,8 +112,8 @@ namespace FluentSharp
 
     public class ParseError
     {
-        public ErrorType type;
-        public string? message;
+        public ErrorType Type;
+        public string? Message;
         public Range Position;
         public Range? Slice;
     }

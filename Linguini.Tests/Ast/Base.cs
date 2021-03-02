@@ -1,9 +1,7 @@
-﻿using System;
-using FluentSharp.Ast;
-using FluentSharp.IO;
+﻿using Linguini.Ast;
 using NUnit.Framework;
 
-namespace FluentSharp.Tests.Ast
+namespace Linguini.Tests.Ast
 {
     [Parallelizable]
     [TestFixture]

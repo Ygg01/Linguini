@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FluentSharp.IO
+namespace Linguini.IO
 {
     public class ZeroCopyReader
     {

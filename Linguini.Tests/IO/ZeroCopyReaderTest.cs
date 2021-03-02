@@ -1,8 +1,8 @@
 ﻿using System;
-using FluentSharp.IO;
+using Linguini.IO;
 using NUnit.Framework;
 
-namespace FluentSharp.Tests.IO
+namespace Linguini.Tests.IO
 {
     [Parallelizable]
     [TestFixture]

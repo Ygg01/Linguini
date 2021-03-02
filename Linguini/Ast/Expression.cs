@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FluentSharp.Ast
+namespace Linguini.Ast
 {
     public struct StringLiteral : IInlineExpression
     {
