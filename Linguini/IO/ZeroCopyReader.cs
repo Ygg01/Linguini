@@ -11,22 +11,17 @@ namespace Linguini.IO
         {
         }
 
-        public ZeroCopyReader(ReadOnlyMemory<char> memory)
+        private ZeroCopyReader(ReadOnlyMemory<char> memory)
         {
             _unconsumedData = memory;
             _position = 0;
         }
 
-        public int Position => _position;
-        public bool IsNotEof => _position >= _unconsumedData.Length;
+        public int Position { get; set; }
+        public bool IsNotEof => _position < _unconsumedData.Length;
         public bool IsEof => !IsNotEof;
 
-        public ReadOnlySpan<char> PeekCharSpan()
-        {
-            return _unconsumedData.ReadCharSpan(_position);
-        }
-
-        public ReadOnlySpan<char> PeekCharSpan(int offset)
+        public ReadOnlySpan<char> PeekCharSpan(int offset = 0)
         {
             return _unconsumedData.ReadCharSpan(_position + offset);
         }

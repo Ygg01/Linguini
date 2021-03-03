@@ -33,9 +33,8 @@ namespace Linguini.IO
             {
                 throw new ArgumentException("Expected single character span");
             }
-
-            var chr = rhs[0];
-            return lhs.Equals(chr);
+            
+            return rhs.Contains(lhs);
         }
 
         public static bool EqualsSpans(this char? lhs, ReadOnlySpan<char> rhs)
