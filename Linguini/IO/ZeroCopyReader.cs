@@ -81,5 +81,15 @@ namespace Linguini.IO
             return _position - start;
         }
 
+        public bool ExpectChar(char c)
+        {
+            if (c.EqualsSpans(PeekCharSpan()))
+            {
+                _position += 1;
+                return true;
+            }
+
+            return false;
+        }
     }
 }

@@ -29,7 +29,7 @@ namespace Linguini.IO
 
         public static bool EqualsSpans(this char lhs, ReadOnlySpan<char> rhs)
         {
-            if (rhs.Length != 1)
+            if (rhs.Length > 1)
             {
                 throw new ArgumentException("Expected single character span");
             }
