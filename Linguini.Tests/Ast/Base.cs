@@ -1,4 +1,5 @@
-﻿using Linguini.Ast;
+﻿using System;
+using Linguini.Ast;
 using NUnit.Framework;
 
 namespace Linguini.Tests.Ast
@@ -9,9 +10,6 @@ namespace Linguini.Tests.Ast
     public class Base
     {
         private static Message Message = new();
-        private static Comment Comment = new();
-        private static Term Term = new();
-        private static Junk Junk = new();
 
         [Test]
         public void TestTryConvert()
@@ -24,6 +22,10 @@ namespace Linguini.Tests.Ast
             Assert.False(msgToTerm, "Conversion Message to Term is illegal");
             var msgToJunk = Message.TryConvert<Comment>(out _);
             Assert.False(msgToJunk, "Conversion Message to Junk is illegal");
+            
+            var msgToStr = Message.TryConvert<String>(out _);
+            Assert.False(msgToStr, "Conversion Message to String is illegal");
+            
         }
     }
 }
