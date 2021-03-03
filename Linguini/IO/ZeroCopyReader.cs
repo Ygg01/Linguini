@@ -17,7 +17,12 @@ namespace Linguini.IO
             _position = 0;
         }
 
-        public int Position { get; set; }
+        public int Position
+        {
+            get => _position;
+            set => _position = value;
+        }
+
         public bool IsNotEof => _position < _unconsumedData.Length;
         public bool IsEof => !IsNotEof;
 
@@ -52,7 +57,7 @@ namespace Linguini.IO
             return count;
         }
 
-        private bool SkipEol()
+        public bool SkipEol()
         {
             if ('\n'.EqualsSpans(PeekCharSpan()))
             {
@@ -81,7 +86,7 @@ namespace Linguini.IO
             return _position - start;
         }
 
-        public bool ExpectChar(char c)
+        public bool ReadByteIf(char c)
         {
             if (c.EqualsSpans(PeekCharSpan()))
             {
@@ -90,6 +95,59 @@ namespace Linguini.IO
             }
 
             return false;
+        }
+
+        public ReadOnlyMemory<char> GetCommentLine()
+        {
+            var startPosition = _position;
+
+            while (!IsEol())
+            {
+                _position += 1;
+            }
+
+            return _unconsumedData.Slice(startPosition, _position - startPosition);
+        }
+
+        private bool IsEol()
+        {
+            var chr = PeekCharSpan();
+
+            if ('\n'.EqualsSpans(chr)) return true;
+            if ('\r'.EqualsSpans(chr)
+                && '\n'.EqualsSpans(PeekCharSpan(1)))
+            {
+                return true;
+            }
+
+            return IsEof;
+        }
+
+        public ReadOnlyMemory<char> ReadSlice(int start, int end)
+        {
+            return _unconsumedData.Slice(start, end - start);
+        }
+
+        public string ReadSliceToStr(int start, int end)
+        {
+            return new(_unconsumedData.Slice(start, end - start).ToArray());
+        }
+
+        public void SkipToNextEntry()
+        {
+            ReadOnlySpan<char> chr;
+            while (_unconsumedData.TryReadCharSpan(_position, out var span))
+            {
+                var newline = _position == 0
+                              || '\n'.EqualsSpans(PeekCharSpan(-1));
+
+                if (newline && (span.IsAlphaNumeric() || span.IsOneOf('#','-')))
+                {
+                    break;
+                }
+
+                _position += 1;
+            }
         }
     }
 }

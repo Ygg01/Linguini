@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace Linguini.IO
 {
@@ -27,24 +28,54 @@ namespace Linguini.IO
             return true;
         }
 
-        public static bool EqualsSpans(this char lhs, ReadOnlySpan<char> rhs)
+        public static bool EqualsSpans(this char chr, ReadOnlySpan<char> chrSpan)
         {
-            if (rhs.Length > 1)
+            if (chrSpan.Length > CharLength)
             {
-                throw new ArgumentException("Expected single character span");
+                throw new ArgumentException("Expected single character charSpan");
             }
-            
-            return rhs.Contains(lhs);
+
+            return chrSpan.Length != 0 && IsEqual(chrSpan, chr);
         }
 
-        public static bool EqualsSpans(this char? lhs, ReadOnlySpan<char> rhs)
+        public static bool EqualsSpans(this char? lhs, ReadOnlySpan<char> chrSpan)
         {
             if (lhs == null)
             {
-                return rhs == Eof.Span;
+                return chrSpan == Eof.Span;
             }
 
-            return EqualsSpans((char) lhs, rhs);
+            return EqualsSpans((char) lhs, chrSpan);
         }
+        
+        private static bool IsEqual(this ReadOnlySpan<char> charSpan, char c1)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                throw new ArgumentException("Character span must be exactly one `char` wide");
+            }
+            return MemoryMarshal.GetReference(charSpan) == c1;
+        }
+        
+        public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                throw new ArgumentException("Character span must be exactly one `char` wide");
+            }
+            var x = MemoryMarshal.GetReference(charSpan);
+            return x == c1 || x == c2;
+        }
+
+        public static bool IsAlphaNumeric(this ReadOnlySpan<char> charSpan)
+        {
+            var c = MemoryMarshal.GetReference(charSpan);
+            return IsInside(c, 'a', 'z')
+                   || IsInside(c, 'A', 'Z')
+                   || IsInside(c, '0', '9');
+        }
+
+        private static bool IsInside(char c, char min, char max) => (uint) (c - min) <= (uint) (max - min);
+        
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Linguini.Parser;
 
 namespace Linguini.Ast
@@ -35,7 +36,7 @@ namespace Linguini.Ast
     public class Comment : IEntry
     {
         public CommentLevel CommentLevel;
-        public readonly List<ReadOnlyMemory<char>> Content;
+        private readonly List<ReadOnlyMemory<char>> _content;
 
         public Comment() : this(CommentLevel.Comment, new())
         {
@@ -44,12 +45,27 @@ namespace Linguini.Ast
         public Comment(CommentLevel commentLevel, List<ReadOnlyMemory<char>> content)
         {
             CommentLevel = commentLevel;
-            Content = content;
+            _content = content;
+        }
+
+        public string Content()
+        {
+            StringBuilder sb = new();
+            for (int i = 0; i < _content.Count; i++)
+            {
+                sb.Append(_content[i].ToArray());
+            }
+
+            return sb.ToString();
         }
     }
 
     public class Junk : IEntry
     {
         public ReadOnlyMemory<char> Content;
+        public string ContentStr()
+        {
+            return new(Content.ToArray());
+        }
     }
 }

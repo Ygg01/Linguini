@@ -41,7 +41,7 @@ namespace Linguini.Tests.IO
         public void TestExpectChar(string text, char expectedChr, bool expected, char? peek)
         {
             ZeroCopyReader reader = new ZeroCopyReader(text);
-            Assert.AreEqual(expected, reader.ExpectChar(expectedChr));
+            Assert.AreEqual(expected, reader.ReadByteIf(expectedChr));
             Assert.True(peek.EqualsSpans(reader.PeekCharSpan()));
         }
 
@@ -95,9 +95,31 @@ namespace Linguini.Tests.IO
         public void TestTryReadCharSpan(string text, bool isChar, char? expected1)
         {
             ReadOnlyMemory<char> mem = new ReadOnlyMemory<char>(text.ToCharArray());
-            bool IsThereChar = mem.TryReadCharSpan(0, out var readChr);
-            Assert.That(IsThereChar, Is.EqualTo(isChar));
+            bool isThereChar = mem.TryReadCharSpan(0, out var readChr);
+            Assert.That(isThereChar, Is.EqualTo(isChar));
             Assert.That(expected1.EqualsSpans(readChr));
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCase("string", 0, 1, "s")]
+        [TestCase("string", 0, 2, "st")]
+        [TestCase("string", 0, 3, "str")]
+        [TestCase("string", 0, 4, "stri")]
+        [TestCase("string", 0, 5, "strin")]
+        [TestCase("string", 0, 6, "string")]
+        [TestCase("Северный поток", 0, 7, "Северны")]
+        [TestCase("かんじ", 0, 1, "か")]
+        [TestCase("かんじ", 0, 2, "かん")]
+        [TestCase("かんじ", 0, 3, "かんじ")]
+        [TestCase("かんじ", 1, 2, "ん")]
+        [TestCase("かんじ", 1, 3, "んじ")]
+        [TestCase("かんじ", 2, 3, "じ")]
+        public void TestTryReadSliceOk(string text, int start, int end, string expected)
+        {
+            ZeroCopyReader reader = new ZeroCopyReader(text);
+            Assert.AreEqual(expected, reader.ReadSliceToStr(start, end));
+            Assert.AreEqual(expected, reader.ReadSlice(start, end).ToArray());
         }
     }
 }
