@@ -3,13 +3,18 @@ using System.Collections.Generic;
 
 namespace Linguini.Ast
 {
-    public struct StringLiteral : IInlineExpression
+    public class TextLiteral : IInlineExpression, IPatternElement
     {
         public ReadOnlyMemory<char> Value;
 
-        public StringLiteral(ReadOnlyMemory<char> value)
+        public TextLiteral(ReadOnlyMemory<char> value)
         {
             Value = value;
+        }
+
+        public override string ToString()
+        {
+            return new(Value.ToArray());
         }
     }
 
@@ -42,9 +47,14 @@ namespace Linguini.Ast
         public Identifier Id;
     }
 
-    public struct Placeable : IInlineExpression
+    public struct Placeable : IInlineExpression, IPatternElementPlaceholder, IPatternElement
     {
         public IExpression Expression;
+
+        public Placeable(IExpression expression)
+        {
+            Expression = expression;
+        }
     }
 
     public struct CallArguments
@@ -68,7 +78,7 @@ namespace Linguini.Ast
     public class SelectExpression : IExpression
     {
         public IInlineExpression Selector;
-        public List<Variant> Variants = new();
+        public List<Variant> Variants;
 
         public SelectExpression(IInlineExpression selector, List<Variant> variants)
         {

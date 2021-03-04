@@ -41,7 +41,7 @@ namespace Linguini.Tests.IO
         public void TestExpectChar(string text, char expectedChr, bool expected, char? peek)
         {
             ZeroCopyReader reader = new ZeroCopyReader(text);
-            Assert.AreEqual(expected, reader.ReadByteIf(expectedChr));
+            Assert.AreEqual(expected, reader.ReadCharIf(expectedChr));
             Assert.True(peek.EqualsSpans(reader.PeekCharSpan()));
         }
 

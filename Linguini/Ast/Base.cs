@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace Linguini.Ast
 {
@@ -8,16 +9,37 @@ namespace Linguini.Ast
     {
         public Identifier Id;
         public Pattern Value;
+
+        public Attribute(Identifier id, Pattern value)
+        {
+            Id = id;
+            Value = value;
+        }
     }
 
-    public struct Pattern
+    public class Pattern
     {
-        public List<ReadOnlyMemory<char>> Elements;
+        public List<IPatternElement> Elements;
+
+        public Pattern(List<IPatternElement> elements)
+        {
+            Elements = elements;
+        }
+
+        public Pattern()
+        {
+            Elements = new List<IPatternElement>();
+        }
     }
 
-    public struct Identifier
+    public class Identifier
     {
         public ReadOnlyMemory<char> Name;
+
+        public Identifier(ReadOnlyMemory<char> name)
+        {
+            Name = name;
+        }
     }
 
     public interface IExpression
@@ -42,17 +64,31 @@ namespace Linguini.Ast
 
     public static class Base
     {
-        public static bool TryConvert<T>(this IEntry entry, [NotNullWhen(true)] out T outType)
+        public static bool TryConvert<TIn, TOut>(this TIn entry, [NotNullWhen(true)] out TOut? outType)
+            where TOut : TIn
         {
-            var type = typeof(T);
+            var type = typeof(TOut);
             if (type.IsInstanceOfType(entry))
             {
-                outType = (T) entry;
+                outType = (TOut) entry;
                 return true;
             }
 
             outType = default!;
             return false;
+        }
+
+        public static string Stringify(this Pattern? pattern)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (pattern != null && pattern.Elements.Count > 0)
+            {
+                for (int i = 0; i < pattern.Elements.Count; i++)
+                {
+                    sb.Append(pattern.Elements[i]);
+                }
+            }
+            return sb.ToString();
         }
     }
 }

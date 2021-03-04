@@ -8,7 +8,7 @@ namespace Linguini.IO
     public static class ZeroCopyUtil
     {
         private const int CharLength = 1;
-        public static ReadOnlyMemory<char> Eof = ReadOnlyMemory<char>.Empty;
+        public static readonly ReadOnlyMemory<char> Eof = ReadOnlyMemory<char>.Empty;
 
         public static ReadOnlySpan<char> ReadCharSpan(this ReadOnlyMemory<char> memory, int pos)
         {
@@ -47,24 +47,63 @@ namespace Linguini.IO
 
             return EqualsSpans((char) lhs, chrSpan);
         }
-        
+
         private static bool IsEqual(this ReadOnlySpan<char> charSpan, char c1)
         {
             if (charSpan.Length != CharLength)
             {
                 throw new ArgumentException("Character span must be exactly one `char` wide");
             }
+
             return MemoryMarshal.GetReference(charSpan) == c1;
         }
-        
+
+        public static bool IsAsciiAlphabetic(this ReadOnlySpan<char> charSpan)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var c = MemoryMarshal.GetReference(charSpan);
+            return IsInside(c, 'a', 'z')
+                   || IsInside(c, 'A', 'Z');
+        }
+
+        public static bool IsIdentifier(this ReadOnlySpan<char> charSpan)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var c = MemoryMarshal.GetReference(charSpan);
+            return IsInside(c, 'a', 'z')
+                   || IsInside(c, 'A', 'Z')
+                   || IsInside(c, '0', '9')
+                   || c == '-' || c == '_';
+        }
+
         public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2)
         {
             if (charSpan.Length != CharLength)
             {
-                throw new ArgumentException("Character span must be exactly one `char` wide");
+                return false;
             }
+
             var x = MemoryMarshal.GetReference(charSpan);
             return x == c1 || x == c2;
+        }
+
+        public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2, char c3, char c4)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var x = MemoryMarshal.GetReference(charSpan);
+            return x == c1 || x == c2 || x == c3 || x == c4;
         }
 
         public static bool IsAlphaNumeric(this ReadOnlySpan<char> charSpan)
@@ -76,6 +115,5 @@ namespace Linguini.IO
         }
 
         private static bool IsInside(char c, char min, char max) => (uint) (c - min) <= (uint) (max - min);
-        
     }
 }

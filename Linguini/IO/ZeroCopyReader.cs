@@ -75,7 +75,7 @@ namespace Linguini.IO
             return false;
         }
 
-        private int SkipBlankInline()
+        public int SkipBlankInline()
         {
             var start = _position;
             while (' '.EqualsSpans(PeekCharSpan()))
@@ -86,7 +86,7 @@ namespace Linguini.IO
             return _position - start;
         }
 
-        public bool ReadByteIf(char c)
+        public bool ReadCharIf(char c)
         {
             if (c.EqualsSpans(PeekCharSpan()))
             {
@@ -135,18 +135,41 @@ namespace Linguini.IO
 
         public void SkipToNextEntry()
         {
-            ReadOnlySpan<char> chr;
             while (_unconsumedData.TryReadCharSpan(_position, out var span))
             {
                 var newline = _position == 0
                               || '\n'.EqualsSpans(PeekCharSpan(-1));
 
-                if (newline && (span.IsAlphaNumeric() || span.IsOneOf('#','-')))
+                if (newline && (span.IsAlphaNumeric() || span.IsOneOf('#', '-')))
                 {
                     break;
                 }
 
                 _position += 1;
+            }
+        }
+
+        public bool TryPeekCharSpan(out ReadOnlySpan<char> span)
+        {
+            return _unconsumedData.TryReadCharSpan(_position, out span);
+        }
+
+        public void SkipBlank()
+        {
+            while (TryPeekCharSpan(out var span))
+            {
+                if (' '.EqualsSpans(span) || '\n'.EqualsSpans(span))
+                {
+                    _position += 1;
+                }
+                else if ('\r'.EqualsSpans(span) && '\n'.EqualsSpans(PeekCharSpan(1)))
+                {
+                    _position += 2;
+                }
+                else
+                {
+                    break;
+                }
             }
         }
     }
