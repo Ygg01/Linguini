@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 using Linguini.Parser;
+using Linguini.Serialization;
 
 namespace Linguini.Ast
 {
+
+    [JsonConverter(typeof(ResourceSerializer))]
     public class Resource
     {
         public List<IEntry> Body;
@@ -57,14 +61,15 @@ namespace Linguini.Ast
         }
     }
 
+    
+    [JsonConverter(typeof(CommentSerializer))]
     public class Comment : IEntry
     {
-        public CommentLevel CommentLevel;
-        private readonly List<ReadOnlyMemory<char>> _content;
-
-        public Comment() : this(CommentLevel.Comment, new())
-        {
-        }
+        [JsonInclude]
+        public CommentLevel CommentLevel; 
+        [JsonInclude]
+        public readonly List<ReadOnlyMemory<char>> _content;
+        
 
         public Comment(CommentLevel commentLevel, List<ReadOnlyMemory<char>> content)
         {
@@ -72,7 +77,7 @@ namespace Linguini.Ast
             _content = content;
         }
 
-        public string Content()
+        public string ContentStr()
         {
             StringBuilder sb = new();
             for (int i = 0; i < _content.Count; i++)

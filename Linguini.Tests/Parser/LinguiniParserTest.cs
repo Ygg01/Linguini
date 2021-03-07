@@ -28,7 +28,7 @@ namespace Linguini.Tests.Parser
             Assert.That(parsed.Body.Count, Is.EqualTo(1));
             Assert.True(parsed.Body[0].TryConvert<IEntry, Comment>(out var comment));
             Assert.AreEqual(expectedCommentLevel, comment!.CommentLevel);
-            Assert.AreEqual(expectedContent, comment.Content());
+            Assert.AreEqual(expectedContent, comment.ContentStr());
         }
 
         [Test]
@@ -76,7 +76,7 @@ namespace Linguini.Tests.Parser
             }
             else
             {
-                throw new Exception("failure");
+               Assert.Fail("Failed to parse");
             }
         }
 

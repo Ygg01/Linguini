@@ -1,0 +1,17 @@
+{
+  "type": "Resource",
+  "body": [
+    {
+      "type": "Comment",
+      "content": "comment"
+    },
+    {
+      "type": "GroupComment",
+      "content": "comment"
+    },
+    {
+      "type": "ResourceComment",
+      "content": "comment"
+    }
+  ]
+}
