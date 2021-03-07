@@ -20,7 +20,7 @@ namespace Linguini.Ast
             Errors = errors;
         }
     }
-
+    [JsonConverter(typeof(MessageSerializer))]
     public class Message : IEntry
     {
         public Identifier Id;

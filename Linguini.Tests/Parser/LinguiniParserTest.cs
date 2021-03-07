@@ -76,7 +76,34 @@ namespace Linguini.Tests.Parser
             }
             else
             {
-               Assert.Fail("Failed to parse");
+                Assert.Fail("Failed to parse");
+            }
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCase("# comment\na = b", true, "a", "comment")]
+        [TestCase("## comment\na = b", false, "a", "comment")]
+        public void TestMessageComment(string input, bool inTerm, string expMsg, string expComment)
+        {
+            var expBodySize = inTerm ? 1 : 2;
+            Resource parsed = new LinguiniParser(input).Parse();
+            Assert.AreEqual(0, parsed.Errors.Count);
+            Assert.AreEqual(expBodySize, parsed.Body.Count);
+            if (inTerm)
+            {
+                parsed.Body[0].TryConvert(out Message? msg);
+
+                Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
+                Assert.AreEqual(expComment, msg.Comment.ContentStr());
+            }
+            else
+            {
+                parsed.Body[0].TryConvert(out Comment comment);
+                parsed.Body[1].TryConvert(out Message msg);
+
+                Assert.AreEqual(expComment, comment.ContentStr());
+                Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
             }
         }
 

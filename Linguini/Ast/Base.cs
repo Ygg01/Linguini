@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Text.Json.Serialization;
+using Linguini.Serialization;
 
 namespace Linguini.Ast
 {
@@ -17,6 +19,7 @@ namespace Linguini.Ast
         }
     }
 
+    [JsonConverter(typeof(PatternSerializer))]
     public class Pattern
     {
         public List<IPatternElement> Elements;

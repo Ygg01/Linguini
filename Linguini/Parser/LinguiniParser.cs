@@ -68,7 +68,8 @@ namespace Linguini.Parser
                     junk.Content = _reader.ReadSlice(entryStart, _reader.Position);
                     body.Add(entry);
                 }
-                else if (entry.TryConvert<IEntry, Comment>(out var comment))
+                else if (entry.TryConvert<IEntry, Comment>(out var comment) 
+                         && comment.CommentLevel == CommentLevel.Comment)
                 {
                     lastComment = comment;
                 }

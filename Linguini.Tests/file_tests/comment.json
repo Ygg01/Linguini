@@ -3,15 +3,33 @@
   "body": [
     {
       "type": "Comment",
-      "content": "comment"
+      "content": "comment1"
     },
     {
       "type": "GroupComment",
-      "content": "comment"
+      "content": "comment2"
     },
     {
       "type": "ResourceComment",
-      "content": "comment"
+      "content": "comment3"
+    },
+    {
+      "type": "Message",
+      "id": {
+        "type": "Identifier",
+        "name": "a"
+      },
+      "value": {
+        "type": "Pattern",
+        "elements": [
+          {
+            "type": "TextElement",
+            "value": "b"
+          }
+        ]
+      },
+      "attributes": [],
+      "comment": null
     }
   ]
 }
