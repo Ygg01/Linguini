@@ -7,6 +7,7 @@
         ExpectedMessageField,
         MissingValue,
         UnbalancedClosingBrace,
-        TermAttributeAsPlaceable
+        TermAttributeAsPlaceable,
+        ExpectedTermField
     }
 }

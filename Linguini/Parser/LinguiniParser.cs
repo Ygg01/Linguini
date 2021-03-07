@@ -68,7 +68,7 @@ namespace Linguini.Parser
                     junk.Content = _reader.ReadSlice(entryStart, _reader.Position);
                     body.Add(entry);
                 }
-                else if (entry.TryConvert<IEntry, Comment>(out var comment) 
+                else if (entry.TryConvert<IEntry, Comment>(out var comment)
                          && comment.CommentLevel == CommentLevel.Comment)
                 {
                     lastComment = comment;
@@ -204,7 +204,44 @@ namespace Linguini.Parser
 
         private (IEntry, ParseError?) GetTerm(int entryStart)
         {
-            throw new NotImplementedException();
+            IEntry entry = new Junk();
+            if (!TryExpectByte('-', out var error))
+            {
+                return (entry, error);
+            }
+
+            if (!TryGetIdentifier(out var id, out error))
+            {
+                return (entry, error);
+            }
+
+            _reader.SkipBlankInline();
+            if (!TryExpectByte('=', out error))
+            {
+                return (entry, error);
+            }
+
+            _reader.SkipBlankInline();
+
+            if (!TryGetPattern(out var value, out error))
+            {
+                return (entry, error);
+            }
+
+            _reader.SkipBlankBlock();
+
+            var attribute = GetAttributes();
+
+            if (value != null)
+            {
+                entry = new Term(id, value, attribute, null);
+                return (entry, error);
+            }
+            else
+            {
+                error = ParseError.ExpectedTermField(id, entryStart, _reader.Position);
+                return (entry, error);
+            }
         }
 
         private (IEntry, ParseError?) GetMessage(int entryStart)
@@ -232,8 +269,7 @@ namespace Linguini.Parser
 
             if (pattern == null && attrs.Count < 1)
             {
-                string idStr = new(id.Name.ToArray());
-                return (entry, ParseError.ExpectedMessageField(idStr, entryStart, _reader.Position));
+                return (entry, ParseError.ExpectedMessageField(id.Name, entryStart, _reader.Position));
             }
 
             return (new Message(id, pattern, attrs, null), null);
@@ -470,7 +506,7 @@ namespace Linguini.Parser
                     // to LF endings
                     textElement = new TextSlice(
                         startPos,
-                        _reader.Position - 1, 
+                        _reader.Position - 1,
                         textElementType,
                         TextElementTermination.CRLF
                     );
@@ -595,7 +631,7 @@ namespace Linguini.Parser
                 return true;
             }
 
-            error = ParseError.MissingValue(id, _reader.Position);
+            error = ParseError.MissingValue(_reader.Position);
             attr = default!;
             return false;
         }

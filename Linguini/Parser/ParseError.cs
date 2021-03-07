@@ -43,9 +43,10 @@ namespace Linguini.Parser
             );
         }
 
-        public static ParseError ExpectedMessageField(string entryId, int start, int end)
+        public static ParseError ExpectedMessageField(ReadOnlyMemory<char> entryId, int start, int end)
         {
-            var sb = new StringBuilder().AppendFormat("Expected a message field for \"{0}\"", entryId);
+            var sb = new StringBuilder()
+                .Append(@"Expected a message field for """).Append(entryId).Append('"');
 
             return new(
                 ErrorType.ExpectedMessageField,
@@ -55,7 +56,7 @@ namespace Linguini.Parser
             );
         }
 
-        public static ParseError MissingValue(Identifier id, int pos)
+        public static ParseError MissingValue(int pos)
         {
             return new(
                 ErrorType.MissingValue,
@@ -81,6 +82,19 @@ namespace Linguini.Parser
                 ErrorType.TermAttributeAsPlaceable,
                 "Term attributes can't be used as a selector",
                 new Range(pos, pos + 1),
+                null
+            );
+        }
+
+        public static ParseError? ExpectedTermField(Identifier id, int start, int end)
+        {
+            var sb = new StringBuilder()
+                .Append("Expected a term field for \"").Append(id.Name).Append("\"");
+
+            return new(
+                kind: ErrorType.ExpectedTermField,
+                sb.ToString(),
+                new Range(start, end),
                 null
             );
         }

@@ -32,7 +32,7 @@ namespace Linguini.IO
         {
             if (chrSpan.Length > CharLength)
             {
-                throw new ArgumentException("Expected single character charSpan");
+                return false;
             }
 
             return chrSpan.Length != 0 && IsEqual(chrSpan, chr);
@@ -52,7 +52,7 @@ namespace Linguini.IO
         {
             if (charSpan.Length != CharLength)
             {
-                throw new ArgumentException("Character span must be exactly one `char` wide");
+                return false;
             }
 
             return MemoryMarshal.GetReference(charSpan) == c1;

@@ -53,7 +53,7 @@ namespace Linguini.Tests.Parser
 
         [Test]
         [Parallelizable]
-        // [TestCase(@"file_tests\empty")]
+        [TestCase(@"file_tests\empty")]
         [TestCase(@"file_tests\comment")]
         public void TestReadFile(string file)
         {
