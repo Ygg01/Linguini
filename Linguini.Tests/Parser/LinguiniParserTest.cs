@@ -52,17 +52,17 @@ namespace Linguini.Tests.Parser
 
         #endregion
 
-        #region TermTest
+        #region MessageTest
 
         [Test]
         [Parallelizable]
         [TestCase("a = b", "a", "b")]
         [TestCase("a = \"b\"", "a", "\"b\"")]
         [TestCase("# comment\na = \"b\"", "a", "\"b\"")]
-        [TestCase("a = b\n c", "a", "b\nc")]
+        [TestCase("hello = wo\n rld", "hello", "wo\nrld")]
         [TestCase("a = test\n  test", "a", "test\ntest")]
         [TestCase("a = test\r\n  test", "a", "test\ntest")]
-        [TestCase("a = \n  test", "a", "test")]
+        [TestCase("hello = \n  world", "hello", "world")]
         public void TestMessageParse(string input, string expName, string expValue)
         {
             Resource parsed = new LinguiniParser(input).Parse();
@@ -83,14 +83,16 @@ namespace Linguini.Tests.Parser
         [Test]
         [Parallelizable]
         [TestCase("# comment\na = b", true, "a", "comment")]
-        [TestCase("## comment\na = b", false, "a", "comment")]
-        public void TestMessageComment(string input, bool inTerm, string expMsg, string expComment)
+        [TestCase("## comment\nhello = world", false, "hello", "comment")]
+        [TestCase("# Msg Comment\n# with blank line.\n#\nhello = term",
+            true, "hello", "Msg Comment\nwith blank line.\n")]
+        public void TestMessageComment(string input, bool inMessage, string expMsg, string expComment)
         {
-            var expBodySize = inTerm ? 1 : 2;
+            var expBodySize = inMessage ? 1 : 2;
             Resource parsed = new LinguiniParser(input).Parse();
             Assert.AreEqual(0, parsed.Errors.Count);
             Assert.AreEqual(expBodySize, parsed.Body.Count);
-            if (inTerm)
+            if (inMessage)
             {
                 parsed.Body[0].TryConvert(out Message? msg);
 
@@ -108,5 +110,31 @@ namespace Linguini.Tests.Parser
         }
 
         #endregion
+
+        [Test]
+        [TestCase("# Term\r\n# blank line.\r\n#\r\n-term = Term", true, "term", "Term\nblank line.\n")]
+        public void TestTermComment(string input, bool inTerm, string expTerm, string expComment)
+
+        {
+            var expBodySize = inTerm ? 1 : 2;
+            Resource parsed = new LinguiniParser(input).Parse();
+            Assert.AreEqual(0, parsed.Errors.Count);
+            Assert.AreEqual(expBodySize, parsed.Body.Count);
+            if (inTerm)
+            {
+                parsed.Body[0].TryConvert(out Term? term);
+
+                Assert.AreEqual(expTerm, new string(term.Id.Name.ToArray()));
+                Assert.AreEqual(expComment, term.Comment.ContentStr());
+            }
+            else
+            {
+                parsed.Body[0].TryConvert(out Comment comment);
+                parsed.Body[1].TryConvert(out Term term);
+
+                Assert.AreEqual(expComment, comment.ContentStr());
+                Assert.AreEqual(expTerm, new string(term.Id.Name.ToArray()));
+            }
+        }
     }
 }

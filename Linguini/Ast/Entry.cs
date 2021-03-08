@@ -45,6 +45,7 @@ namespace Linguini.Ast
         }
     }
 
+    [JsonConverter(typeof(TermSerializer))]
     public class Term : IEntry
     {
         public Identifier Id;
@@ -77,11 +78,15 @@ namespace Linguini.Ast
             _content = content;
         }
 
-        public string ContentStr()
+        public string ContentStr(string lineEnd = "\n")
         {
             StringBuilder sb = new();
             for (int i = 0; i < _content.Count; i++)
             {
+                if (i > 0)
+                {
+                    sb.Append(lineEnd);
+                }
                 sb.Append(_content[i].ToArray());
             }
 

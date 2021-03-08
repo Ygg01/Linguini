@@ -10,7 +10,7 @@ namespace Linguini.IO
         private const int CharLength = 1;
         public static readonly ReadOnlyMemory<char> Eof = ReadOnlyMemory<char>.Empty;
 
-        public static ReadOnlySpan<char> ReadCharSpan(this ReadOnlyMemory<char> memory, int pos)
+        public static ReadOnlySpan<char> PeakCharAt(this ReadOnlyMemory<char> memory, int pos)
         {
             memory.TryReadCharSpan(pos, out var span);
             return span;

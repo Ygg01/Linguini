@@ -28,8 +28,14 @@ namespace Linguini.IO
 
         public ReadOnlySpan<char> PeekCharSpan(int offset = 0)
         {
-            return _unconsumedData.ReadCharSpan(_position + offset);
+            return _unconsumedData.PeakCharAt(_position + offset);
         }
+        
+        public ReadOnlySpan<char> PeekCharSpanAt(int pos)
+        {
+            return _unconsumedData.PeakCharAt(pos);
+        }
+
 
         public ReadOnlySpan<char> GetCharSpan()
         {

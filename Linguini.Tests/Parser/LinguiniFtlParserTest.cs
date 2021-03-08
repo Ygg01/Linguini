@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using Linguini.Ast;
 using Linguini.Parser;
@@ -14,7 +15,7 @@ namespace Linguini.Tests.Parser
     {
         private static string _baseTestDir = "";
 
-        public static string BaseTestDir
+        private static string BaseTestDir
         {
             get
             {
@@ -31,7 +32,17 @@ namespace Linguini.Tests.Parser
             }
         }
 
-        public static string GetFullPathFor(string file)
+        private static JsonSerializerOptions TestJsonOptions()
+        {
+            return new()
+            {
+                IgnoreReadOnlyFields = false,
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            };
+        }
+
+        private static string GetFullPathFor(string file)
         {
             List<string> list = new();
             list.Add(BaseTestDir);
@@ -40,7 +51,7 @@ namespace Linguini.Tests.Parser
         }
 
 
-        public static Resource ParseTextFile(string path)
+        private static Resource ParseTextFile(string path)
         {
             LinguiniParser parser;
             using (var reader = new StreamReader(path))
@@ -53,16 +64,14 @@ namespace Linguini.Tests.Parser
 
         [Test]
         [Parallelizable]
-        [TestCase(@"file_tests\empty")]
+        // [TestCase(@"file_tests\empty")]
         [TestCase(@"file_tests\comment")]
         public void TestReadFile(string file)
         {
             var path = GetFullPathFor(file);
             var res = ParseTextFile(@$"{path}.ftl");
-            JsonSerializerOptions options = new();
-            options.IgnoreReadOnlyFields = false;
-            options.WriteIndented = true;
-            string parsed = JsonSerializer.Serialize(res, options);
+
+            string parsed = JsonSerializer.Serialize(res, TestJsonOptions());
             string expected = File.ReadAllText(@$"{path}.json");
             Assert.AreEqual(expected, parsed);
         }

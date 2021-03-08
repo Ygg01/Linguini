@@ -140,13 +140,14 @@ namespace Linguini.Parser
                     break;
                 }
 
-                if ('\n'.EqualsSpans(_reader.PeekCharSpan()))
+                if ('\n'.EqualsSpans(_reader.PeekCharSpan())
+                  || ('\r'.EqualsSpans(_reader.PeekCharSpan()) && '\n'.EqualsSpans(_reader.PeekCharSpan(1))))
                 {
                     content.Add(_reader.GetCommentLine());
                 }
                 else
                 {
-                    if (!TryExpectByte(' ', out var e))
+                    if (!TryExpectChar(' ', out var e))
                     {
                         if (content.Count == 0)
                         {
@@ -170,7 +171,7 @@ namespace Linguini.Parser
             return true;
         }
 
-        private bool TryExpectByte(char c, out ParseError? error)
+        private bool TryExpectChar(char c, out ParseError? error)
         {
             if (_reader.ReadCharIf(c))
             {
@@ -205,7 +206,7 @@ namespace Linguini.Parser
         private (IEntry, ParseError?) GetTerm(int entryStart)
         {
             IEntry entry = new Junk();
-            if (!TryExpectByte('-', out var error))
+            if (!TryExpectChar('-', out var error))
             {
                 return (entry, error);
             }
@@ -216,7 +217,7 @@ namespace Linguini.Parser
             }
 
             _reader.SkipBlankInline();
-            if (!TryExpectByte('=', out error))
+            if (!TryExpectChar('=', out error))
             {
                 return (entry, error);
             }
@@ -253,7 +254,7 @@ namespace Linguini.Parser
             }
 
             _reader.SkipBlankInline();
-            if (!TryExpectByte('=', out error))
+            if (!TryExpectChar('=', out error))
             {
                 return (entry, error);
             }
@@ -293,7 +294,7 @@ namespace Linguini.Parser
         {
             // First character is already checked
             var ptr = _reader.Position + 1;
-            while (_reader.PeekCharSpan(ptr).IsIdentifier())
+            while (_reader.PeekCharSpanAt(ptr).IsIdentifier())
             {
                 ptr += 1;
             }
@@ -352,7 +353,7 @@ namespace Linguini.Parser
                         {
                             if (indent == 0)
                             {
-                                if ('\r'.EqualsSpans(b) && '\n'.EqualsSpans(b))
+                                if (!'\r'.EqualsSpans(b) && !'\n'.EqualsSpans(b))
                                 {
                                     break;
                                 }
@@ -556,7 +557,7 @@ namespace Linguini.Parser
             }
 
             _reader.SkipBlankInline();
-            if (!TryExpectByte('}', out error))
+            if (!TryExpectChar('}', out error))
             {
                 expr = null;
                 return false;
@@ -617,7 +618,7 @@ namespace Linguini.Parser
 
             _reader.SkipBlankInline();
 
-            if (!TryExpectByte('=', out err))
+            if (!TryExpectChar('=', out err))
             {
                 error = err;
                 attr = default!;
