@@ -8,6 +8,15 @@
         MissingValue,
         UnbalancedClosingBrace,
         TermAttributeAsPlaceable,
-        ExpectedTermField
+        ExpectedTermField,
+        MessageReferenceAsSelector,
+        MessageAttributeAsSelector,
+        TermReferenceAsSelector,
+        ExpectedSimpleExpressionAsSelector,
+        UnterminatedStringLiteral,
+        UnknownEscapeSequence,
+        ForbiddenCallee,
+        ExpectedLiteral,
+        ExpectedInlineExpression
     }
 }

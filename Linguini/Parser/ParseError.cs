@@ -98,5 +98,98 @@ namespace Linguini.Parser
                 null
             );
         }
+
+        public static ParseError MessageReferenceAsSelector(int pos)
+        {
+            return new(
+                ErrorType.MessageReferenceAsSelector,
+                "Message references can't be used as a selector",
+                new Range(pos, pos + 1),
+                null
+            );
+        }
+
+        public static ParseError MessageAttributeAsSelector(int pos)
+        {
+            return new(
+                ErrorType.MessageAttributeAsSelector,
+                "Message attributes can't be used as a selector",
+                new Range(pos, pos + 1),
+                null
+            );
+        }
+
+        public static ParseError TermReferenceAsSelector(int pos)
+        {
+            return new(
+                ErrorType.TermReferenceAsSelector,
+                "Term references can't be used as a selector",
+                new Range(pos, pos + 1),
+                null
+            );
+        }
+
+        public static ParseError ExpectedSimpleExpressionAsSelector(int pos)
+        {
+            return new(
+                ErrorType.ExpectedSimpleExpressionAsSelector,
+                "Expected a simple expression as selector",
+                new Range(pos, pos + 1),
+                null
+            );
+        }
+
+        public static ParseError UnterminatedStringLiteral(int pos)
+        {
+            return new(
+                ErrorType.UnterminatedStringLiteral,
+                "Unterminated string literal",
+                new Range(pos, pos + 1),
+                null
+            );
+        }
+
+        public static ParseError UnknownEscapeSequence(char seq, int pos)
+        {
+            var sb = new StringBuilder()
+                .AppendFormat("Unknown escape sequence \"{0}\"", seq);
+
+            return new(
+                ErrorType.UnknownEscapeSequence,
+                sb.ToString(),
+                new Range(pos, pos + 1),
+                null
+            );
+        }
+
+        public static ParseError ForbiddenCallee(int pos)
+        {
+            return new(
+                ErrorType.ForbiddenCallee,
+                "Callee is not allowed here",
+                new Range(pos, pos + 1),
+                null
+            );
+        }
+
+        public static ParseError ExpectedLiteral(int pos)
+        {
+            return new(
+                ErrorType.ExpectedLiteral,
+                "Expected a string or number literal",
+                new Range(pos, pos + 1),
+                null
+            );
+        }
+
+        public static ParseError ExpectedInlineExpression(int pos)
+        {
+            return new(
+                ErrorType.ExpectedInlineExpression,
+                "Expected an inline expression",
+                new Range(pos, pos + 1),
+                null
+            );
+        }
     }
 }

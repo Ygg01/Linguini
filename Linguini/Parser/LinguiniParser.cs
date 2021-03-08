@@ -4,9 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Net.Mail;
 using Linguini.Ast;
 using Linguini.IO;
 using Attribute = Linguini.Ast.Attribute;
+
+#pragma warning disable 8600
 
 namespace Linguini.Parser
 {
@@ -113,96 +116,6 @@ namespace Linguini.Parser
             return GetMessage(entryStart);
         }
 
-        private bool TryGetComment([NotNullWhen(true)] out Comment? comment, out ParseError? error)
-        {
-            var level = CommentLevel.None;
-            var content = new List<ReadOnlyMemory<char>>();
-
-            while (_reader.IsNotEof)
-            {
-                var lineLevel = GetCommentLevel();
-                if (lineLevel == CommentLevel.None)
-                {
-                    _reader.Position -= 1;
-                    break;
-                }
-
-                if (level != CommentLevel.None && lineLevel != level)
-                {
-                    _reader.Position -= (int) lineLevel;
-                    break;
-                }
-
-                level = lineLevel;
-
-                if (_reader.IsEof)
-                {
-                    break;
-                }
-
-                if ('\n'.EqualsSpans(_reader.PeekCharSpan())
-                  || ('\r'.EqualsSpans(_reader.PeekCharSpan()) && '\n'.EqualsSpans(_reader.PeekCharSpan(1))))
-                {
-                    content.Add(_reader.GetCommentLine());
-                }
-                else
-                {
-                    if (!TryExpectChar(' ', out var e))
-                    {
-                        if (content.Count == 0)
-                        {
-                            error = e;
-                            comment = default!;
-                            return false;
-                        }
-
-                        _reader.Position -= (int) lineLevel;
-                        break;
-                    }
-
-                    content.Add(_reader.GetCommentLine());
-                }
-
-                _reader.SkipEol();
-            }
-
-            comment = new Comment(level, content);
-            error = null;
-            return true;
-        }
-
-        private bool TryExpectChar(char c, out ParseError? error)
-        {
-            if (_reader.ReadCharIf(c))
-            {
-                error = null;
-                return true;
-            }
-
-            error = ParseError.ExpectedToken(c, _reader.Position);
-            return false;
-        }
-
-        private CommentLevel GetCommentLevel()
-        {
-            if (_reader.ReadCharIf('#'))
-            {
-                if (_reader.ReadCharIf('#'))
-                {
-                    if (_reader.ReadCharIf('#'))
-                    {
-                        return CommentLevel.ResourceComment;
-                    }
-
-                    return CommentLevel.GroupComment;
-                }
-
-                return CommentLevel.Comment;
-            }
-
-            return CommentLevel.None;
-        }
-
         private (IEntry, ParseError?) GetTerm(int entryStart)
         {
             IEntry entry = new Junk();
@@ -274,6 +187,104 @@ namespace Linguini.Parser
             }
 
             return (new Message(id, pattern, attrs, null), null);
+        }
+
+
+        #region CommentSyntax
+
+        private bool TryGetComment([NotNullWhen(true)] out Comment? comment, out ParseError? error)
+        {
+            var level = CommentLevel.None;
+            var content = new List<ReadOnlyMemory<char>>();
+
+            while (_reader.IsNotEof)
+            {
+                var lineLevel = GetCommentLevel();
+                if (lineLevel == CommentLevel.None)
+                {
+                    _reader.Position -= 1;
+                    break;
+                }
+
+                if (level != CommentLevel.None && lineLevel != level)
+                {
+                    _reader.Position -= (int) lineLevel;
+                    break;
+                }
+
+                level = lineLevel;
+
+                if (_reader.IsEof)
+                {
+                    break;
+                }
+
+                if ('\n'.EqualsSpans(_reader.PeekCharSpan())
+                    || ('\r'.EqualsSpans(_reader.PeekCharSpan()) && '\n'.EqualsSpans(_reader.PeekCharSpan(1))))
+                {
+                    content.Add(_reader.GetCommentLine());
+                }
+                else
+                {
+                    if (!TryExpectChar(' ', out var e))
+                    {
+                        if (content.Count == 0)
+                        {
+                            error = e;
+                            comment = default!;
+                            return false;
+                        }
+
+                        _reader.Position -= (int) lineLevel;
+                        break;
+                    }
+
+                    content.Add(_reader.GetCommentLine());
+                }
+
+                _reader.SkipEol();
+            }
+
+            comment = new Comment(level, content);
+            error = null;
+            return true;
+        }
+
+
+        private CommentLevel GetCommentLevel()
+        {
+            if (_reader.ReadCharIf('#'))
+            {
+                if (_reader.ReadCharIf('#'))
+                {
+                    if (_reader.ReadCharIf('#'))
+                    {
+                        return CommentLevel.ResourceComment;
+                    }
+
+                    return CommentLevel.GroupComment;
+                }
+
+                return CommentLevel.Comment;
+            }
+
+            return CommentLevel.None;
+        }
+
+        #endregion
+
+        #region CommonSyntax
+
+        private bool TryExpectChar(char c, out ParseError? error)
+        {
+            if (_reader.ReadCharIf(c))
+            {
+                error = null;
+                return true;
+            }
+
+            error = ParseError.ExpectedToken(c, _reader.Position);
+            return false;
         }
 
         private bool TryGetIdentifier([NotNullWhen(true)] out Identifier? id, out ParseError? error)
@@ -548,36 +559,9 @@ namespace Linguini.Parser
             return true;
         }
 
-        private bool TryGetPlaceable([NotNullWhen(true)] out IExpression? expr, out ParseError? error)
-        {
-            _reader.SkipBlank();
-            if (TryGetExpression(out expr, out error))
-            {
-                return false;
-            }
+        #endregion
 
-            _reader.SkipBlankInline();
-            if (!TryExpectChar('}', out error))
-            {
-                expr = null;
-                return false;
-            }
-
-            if (!expr.TryConvert(out TermReference termReference)
-                || termReference.Attribute == null)
-            {
-                error = ParseError.TermAttributeAsPlaceable(_reader.Position);
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool TryGetExpression(out IExpression expr, out ParseError? error)
-        {
-            throw new NotImplementedException();
-        }
-
+        #region AttributeSyntax
 
         private List<Attribute> GetAttributes()
         {
@@ -636,6 +620,345 @@ namespace Linguini.Parser
             attr = default!;
             return false;
         }
+
+        #endregion
+
+        #region ExpressionSyntax
+
+        private bool TryGetPlaceable([NotNullWhen(true)] out IExpression? expr, out ParseError? error)
+        {
+            _reader.SkipBlank();
+            if (!TryGetExpression(out expr, out error))
+            {
+                return false;
+            }
+
+            _reader.SkipBlankInline();
+            if (!TryExpectChar('}', out error))
+            {
+                expr = null;
+                return false;
+            }
+
+            if (expr.TryConvert(out TermReference termReference) && termReference.Attribute != null)
+            {
+                expr = null;
+                error = ParseError.TermAttributeAsPlaceable(_reader.Position);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool TryGetExpression([NotNullWhen(true)] out IExpression? retVal, out ParseError? error)
+        {
+            if (!TryGetInlineExpression(false, out var inlineExpression, out error))
+            {
+                retVal = inlineExpression;
+                return false;
+            }
+
+            _reader.SkipBlank();
+
+            if (!'-'.EqualsSpans(_reader.PeekCharSpan())
+                || !'>'.EqualsSpans(_reader.PeekCharSpan(1)))
+            {
+                if (inlineExpression.TryConvert(out TermReference termReference)
+                    && termReference.Attribute != null)
+                {
+                    error = ParseError.TermAttributeAsPlaceable(_reader.Position);
+                    retVal = null;
+                    return false;
+                }
+
+                retVal = inlineExpression;
+                return true;
+            }
+
+            if (inlineExpression.TryConvert(out MessageReference msgRef))
+            {
+                if (msgRef.Attribute == null)
+                {
+                    error = ParseError.MessageReferenceAsSelector(_reader.Position);
+                    retVal = null;
+                    return false;
+                }
+                else
+                {
+                    error = ParseError.MessageAttributeAsSelector(_reader.Position);
+                    retVal = null;
+                    return false;
+                }
+            }
+            else if (inlineExpression.TryConvert(out TermReference termRef))
+            {
+                if (termRef.Attribute == null)
+                {
+                    retVal = null;
+                    error = ParseError.TermReferenceAsSelector(_reader.Position);
+                    return false;
+                }
+            }
+            else
+            {
+                retVal = null;
+                error = ParseError.ExpectedSimpleExpressionAsSelector(_reader.Position);
+                return false;
+            }
+
+            // We found `->`
+            _reader.Position += 2;
+
+            _reader.SkipBlankInline();
+            if (!_reader.SkipEol())
+            {
+                error = ParseError.ExpectedCharRange(@"\n | \r\n", _reader.Position);
+                retVal = null;
+                return false;
+            }
+
+            _reader.SkipBlank();
+
+            if (!TryGetVariants(out List<Variant> variants, out error))
+            {
+                retVal = null;
+                return false;
+            }
+
+            retVal = new SelectExpression(inlineExpression, variants);
+            error = null;
+            return true;
+        }
+
+        private bool TryGetVariants(out List<Variant> variants, out ParseError error)
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        private bool TryGetInlineExpression(bool onlyLiteral, [NotNullWhen(true)] out IInlineExpression? expr,
+            out ParseError? error)
+        {
+            var peekChr = _reader.PeekCharSpan();
+            if ('"'.EqualsSpans(peekChr))
+            {
+                _reader.Position += 1;
+                var start = _reader.Position;
+                while (true)
+                {
+                    var b = _reader.PeekCharSpan();
+                    if ('\\'.EqualsSpans(b))
+                    {
+                        var c = _reader.PeekCharSpan(1);
+                        if (c.IsOneOf('\\', '{', '"'))
+                        {
+                            _reader.Position += 2;
+                        }
+                        else if ('u'.EqualsSpans(c))
+                        {
+                            _reader.Position += 2;
+                            if (!TrySkipUnicodeSequence(4, out error))
+                            {
+                                expr = null;
+                                return false;
+                            }
+                        }
+                        else if ('U'.EqualsSpans(c))
+                        {
+                            _reader.Position += 2;
+                            if (!TrySkipUnicodeSequence(6, out error))
+                            {
+                                expr = null;
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            var seq = c == null ? ' ' : c[0];
+                            error = ParseError.UnknownEscapeSequence(seq, _reader.Position);
+                            expr = null;
+                            return false;
+                        }
+                    }
+                    else if ('"'.EqualsSpans(b))
+                    {
+                        break;
+                    }
+                    else if ('\n'.EqualsSpans(b))
+                    {
+                        error = ParseError.UnterminatedStringLiteral(_reader.Position);
+                        expr = null;
+                        return false;
+                    }
+                    else
+                    {
+                        _reader.Position += 1;
+                    }
+                }
+
+                if (!TryExpectChar('"', out error))
+                {
+                    expr = null;
+                    return false;
+                }
+
+                var slice = _reader.ReadSlice(start, _reader.Position - 1);
+                expr = new TextLiteral(slice);
+                return true;
+            }
+
+            if (peekChr.IsAsciiDigit())
+            {
+                if (!TryGetNumberLiteral(out var num, out error))
+                {
+                    expr = null;
+                    return false;
+                }
+
+                expr = new NumberLiteral(num);
+                return true;
+            }
+
+            if ('-'.EqualsSpans(peekChr) && !onlyLiteral)
+            {
+                _reader.Position += 1;
+                if (peekChr.IsAsciiAlphabetic())
+                {
+                    _reader.Position += 1;
+                    if (!TryGetIdentifier(out var id, out error))
+                    {
+                        expr = null;
+                        return false;
+                    }
+
+                    if (!TryGetAttributeAccessor(out var attribute, out error))
+                    {
+                        expr = null;
+                        return false;
+                    }
+
+                    if (!TryCallArguments(out var args, out error))
+                    {
+                        expr = null;
+                        return false;
+                    }
+
+                    expr = new TermReference(id, attribute, args);
+                    error = null;
+                    return true;
+                }
+            }
+            else if ('$'.EqualsSpans(peekChr) && !onlyLiteral)
+            {
+                _reader.Position += 1;
+                if (!TryGetIdentifier(out var id, out error))
+                {
+                    expr = null;
+                    return false;
+                }
+
+                expr = new VariableReference(id);
+                return true;
+            }
+            else if (peekChr.IsAsciiAlphabetic())
+            {
+                _reader.Position += 1;
+                if (!TryGetIdentifier(out var id, out error))
+                {
+                    expr = null;
+                    return false;
+                }
+
+                if (!TryCallArguments(out var args, out error))
+                {
+                    expr = null;
+                    return false;
+                }
+
+                if (args != null)
+                {
+                    if (!id.Name.IsCallee())
+                    {
+                        error = ParseError.ForbiddenCallee(_reader.Position);
+                        expr = null;
+                        return false;
+                    }
+
+                    error = null;
+                    expr = new FunctionReference(id, args.Value);
+                    return true;
+                }
+                else
+                {
+                    if (!TryGetAttributeAccessor(out var attribute, out error))
+                    {
+                        expr = new MessageReference(id, attribute);
+                        return true;
+                    }
+                }
+            }
+            else if ('{'.EqualsSpans(peekChr) && !onlyLiteral)
+            {
+                _reader.Position += 1;
+                if (!TryGetPlaceable(out var exp, out error))
+                {
+                    expr = null;
+                    return false;
+                }
+
+                error = null;
+                expr = new Placeable(exp);
+                return true;
+            }
+
+            if (onlyLiteral)
+            {
+                error = ParseError.ExpectedLiteral(_reader.Position);
+                expr = null;
+                return false;
+            }
+
+            error = ParseError.ExpectedInlineExpression(_reader.Position);
+            expr = null;
+            return false;
+        }
+
+        private bool TryCallArguments(out CallArguments? args, out ParseError? error)
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        private bool TryGetAttributeAccessor(out Identifier? id, out ParseError? error)
+        {
+            if (_reader.ReadCharIf('.'))
+            {
+                if (!TryGetIdentifier(out id, out error))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            id = null;
+            error = null;
+            return true;
+        }
+
+        private bool TryGetNumberLiteral([NotNullWhen(true)] out ReadOnlyMemory<char> num, out ParseError? error)
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        private bool TrySkipUnicodeSequence(int length, out ParseError error)
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 
     public class TextSlice

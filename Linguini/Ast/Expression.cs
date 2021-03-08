@@ -18,36 +18,65 @@ namespace Linguini.Ast
         }
     }
 
-    public struct NumberLiteral : IInlineExpression
+    public class NumberLiteral : IInlineExpression
     {
         public ReadOnlyMemory<char> Value;
+
+        public NumberLiteral(ReadOnlyMemory<char> value)
+        {
+            Value = value;
+        }
     }
 
-    public struct FunctionReference : IInlineExpression
+    public class FunctionReference : IInlineExpression
     {
         public Identifier Id;
         public CallArguments Arguments;
+
+        public FunctionReference(Identifier id, CallArguments arguments)
+        {
+            Id = id;
+            Arguments = arguments;
+        }
     }
 
-    public struct MessageReference : IInlineExpression
+    public class MessageReference : IInlineExpression
     {
         public Identifier Id;
         public Identifier? Attribute;
+
+        public MessageReference(Identifier id, Identifier? attribute)
+        {
+            Id = id;
+            Attribute = attribute;
+        }
     }
 
-    public struct TermReference : IInlineExpression
+    public class TermReference : IInlineExpression
     {
         public Identifier Id;
         public Identifier? Attribute;
         public CallArguments? Arguments;
+
+        public TermReference(Identifier id, Identifier? attribute, CallArguments? arguments)
+        {
+            Id = id;
+            Attribute = attribute;
+            Arguments = arguments;
+        }
     }
 
-    public struct VariableReference : IInlineExpression
+    public class VariableReference : IInlineExpression
     {
         public Identifier Id;
+
+        public VariableReference(Identifier id)
+        {
+            Id = id;
+        }
     }
 
-    public struct Placeable : IInlineExpression, IPatternElementPlaceholder, IPatternElement
+    public class Placeable : IInlineExpression, IPatternElementPlaceholder, IPatternElement
     {
         public IExpression Expression;
 

@@ -69,6 +69,24 @@ namespace Linguini.IO
             return IsInside(c, 'a', 'z')
                    || IsInside(c, 'A', 'Z');
         }
+        
+        public static bool IsAsciiDigit(this ReadOnlySpan<char> charSpan)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var c = MemoryMarshal.GetReference(charSpan);
+            return IsInside(c, '0', '9');
+        }
+        
+        public static bool IsCallee(this ReadOnlyMemory<char> charSpan)
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
 
         public static bool IsIdentifier(this ReadOnlySpan<char> charSpan)
         {
@@ -93,6 +111,17 @@ namespace Linguini.IO
 
             var x = MemoryMarshal.GetReference(charSpan);
             return x == c1 || x == c2;
+        }
+
+        public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2, char c3)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var x = MemoryMarshal.GetReference(charSpan);
+            return x == c1 || x == c2 || x == c3;
         }
 
         public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2, char c3, char c4)
