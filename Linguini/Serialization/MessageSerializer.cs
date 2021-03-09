@@ -29,20 +29,21 @@ namespace Linguini.Serialization
                 JsonSerializer.Serialize(writer, msg.Value, options);                
             }
 
-            
+
             writer.WritePropertyName("attributes");
             writer.WriteStartArray();
             foreach (var attribute in msg.Attributes)
             {
                 JsonSerializer.Serialize(writer, attribute, options);
             }
+
             writer.WriteEndArray();
-            
-            
+
+
             if (msg.Comment != null || !options.IgnoreNullValues)
             {
                 writer.WritePropertyName("comment");
-                JsonSerializer.Serialize(writer, msg.Comment, options);                
+                JsonSerializer.Serialize(writer, msg.Comment, options);
             }
 
             writer.WriteEndObject();

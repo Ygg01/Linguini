@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Net.Mail;
 using Linguini.Ast;
 using Linguini.IO;
 using Attribute = Linguini.Ast.Attribute;
@@ -730,10 +729,101 @@ namespace Linguini.Parser
             return true;
         }
 
-        private bool TryGetVariants(out List<Variant> variants, out ParseError error)
+        private bool TryGetVariants(out List<Variant> variants, out ParseError? error)
         {
-            // TODO
-            throw new NotImplementedException();
+            variants = new List<Variant>();
+            var hasDefault = false;
+
+            while (true)
+            {
+                var isDefault = _reader.ReadCharIf('*');
+                if (isDefault)
+                {
+                    if (hasDefault)
+                    {
+                        error = ParseError.MultipleDefaultVariants(_reader.Position);
+                        return true;
+                    }
+
+                    hasDefault = true;
+                }
+
+                if (!_reader.ReadCharIf('['))
+                {
+                    break;
+                }
+
+                if (!TryGetVariantKey(out var variant, out error))
+                {
+                    return false;
+                }
+
+                if (!TryGetPattern(out var value, out error))
+                {
+                    return false;
+                }
+
+
+                if (value != null)
+                {
+                    variant.Value = value;
+                    variants.Add(variant);
+                    _reader.SkipBlank();
+                }
+                else
+                {
+                    error = ParseError.MissingValue(_reader.Position);
+                    return false;
+                }
+            }
+
+            if (hasDefault)
+            {
+                error = null;
+                return true;
+            }
+
+            error = ParseError.MissingDefaultVariant(_reader.Position);
+            return false;
+        }
+
+        private bool TryGetVariantKey([NotNullWhen(true)] out Variant? variantKey, out ParseError? error)
+        {
+            _reader.SkipBlank();
+            VariantType variantType;
+
+
+            if (_reader.PeekCharSpan().IsNumberStart())
+            {
+                variantType = VariantType.NumberLiteral;
+                if (!TryGetNumberLiteral(out var num, out error))
+                {
+                    variantKey = null;
+                    return false;
+                }
+
+                variantKey = new Variant(variantType, num);
+            }
+            else
+            {
+                variantType = VariantType.Identifier;
+                if (!TryGetIdentifier(out var id, out error))
+                {
+                    variantKey = null;
+                    return false;
+                }
+
+                variantKey = new Variant(variantType, id.Name);
+            }
+
+            _reader.SkipBlank();
+            if (!TryExpectChar(']', out error))
+            {
+                return false;
+            }
+
+
+            return true;
         }
 
         private bool TryGetInlineExpression(bool onlyLiteral, [NotNullWhen(true)] out IInlineExpression? expr,
@@ -925,8 +1015,99 @@ namespace Linguini.Parser
 
         private bool TryCallArguments(out CallArguments? args, out ParseError? error)
         {
-            // TODO
-            throw new NotImplementedException();
+            _reader.SkipBlank();
+            if (!_reader.ReadCharIf('('))
+            {
+                args = null;
+                error = null;
+                return true;
+            }
+
+            var positional = new List<IInlineExpression>();
+            var nameArgs = new List<NamedArgument>();
+            var argNames = new List<Identifier>();
+
+            _reader.SkipBlank();
+
+            while (_reader.IsNotEof)
+            {
+                if (IsCurrentByte(')'))
+                {
+                    break;
+                }
+
+                if (!TryGetInlineExpression(false, out var expr, out error))
+                {
+                    args = null;
+                    return false;
+                }
+
+                if (expr.TryConvert(out MessageReference msgRef)
+                    && msgRef.Attribute == null)
+                {
+                    var id = msgRef.Id;
+                    _reader.SkipBlank();
+                    if (IsCurrentByte(':'))
+                    {
+                        if (argNames.Contains(id))
+                        {
+                            args = null;
+                            error = ParseError.DuplicatedNamedArgument(id, _reader.Position);
+                            return false;
+                        }
+
+                        _reader.Position += 1;
+                        _reader.SkipBlank();
+
+                        if (!TryGetInlineExpression(true, out var val, out error))
+                        {
+                            args = null;
+                            return false;
+                        }
+
+                        argNames.Add(id);
+                        nameArgs.Add(new NamedArgument(id, val));
+                    }
+                    else
+                    {
+                        if (argNames.Count > 0)
+                        {
+                            args = null;
+                            error = ParseError.PositionalArgumentFollowsNamed(_reader.Position);
+                            return false;
+                        }
+
+                        positional.Add(expr);
+                    }
+                }
+                else
+                {
+                    if (argNames.Count > 0)
+                    {
+                        args = null;
+                        error = ParseError.PositionalArgumentFollowsNamed(_reader.Position);
+                        return false;
+                    }
+                }
+
+                _reader.SkipBlank();
+                _reader.ReadCharIf(',');
+                _reader.SkipBlank();
+            }
+
+            if (!TryExpectChar(')', out error))
+            {
+                args = null;
+                return false;
+            }
+
+            args = new CallArguments(positional, nameArgs);
+            return true;
+        }
+
+        private bool IsCurrentByte(char c)
+        {
+            return c.EqualsSpans(_reader.PeekCharSpan());
         }
 
         private bool TryGetAttributeAccessor(out Identifier? id, out ParseError? error)
@@ -948,14 +1129,68 @@ namespace Linguini.Parser
 
         private bool TryGetNumberLiteral([NotNullWhen(true)] out ReadOnlyMemory<char> num, out ParseError? error)
         {
-            // TODO
-            throw new NotImplementedException();
+            var start = _reader.Position;
+            _reader.ReadCharIf('-');
+            if (!TrySkipDigits(out error))
+            {
+                num = null;
+                return false;
+            }
+
+            if (_reader.ReadCharIf('.') && !TrySkipDigits(out error))
+            {
+                num = null;
+                return false;
+            }
+
+            num = _reader.ReadSlice(start, _reader.Position);
+            error = null;
+            return true;
         }
 
-        private bool TrySkipUnicodeSequence(int length, out ParseError error)
+        private bool TrySkipDigits(out ParseError? error)
         {
-            // TODO
-            throw new NotImplementedException();
+            var start = _reader.Position;
+            while (_reader.PeekCharSpan().IsAsciiDigit())
+            {
+                _reader.Position += 1;
+            }
+
+            if (start == _reader.Position)
+            {
+                error = ParseError.ExpectedCharRange("0-9", _reader.Position);
+                return false;
+            }
+
+            error = null;
+            return true;
+        }
+
+        private bool TrySkipUnicodeSequence(int length, out ParseError? error)
+        {
+            var start = _reader.Position;
+            for (int i = 0; i < length; i++)
+            {
+                if (_reader.PeekCharSpan().IsAsciiHexdigit())
+                {
+                    _reader.Position += 1;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (_reader.Position - start != length)
+            {
+                var end = _reader.IsEof ? _reader.Position : _reader.Position + 1;
+                var seq = _reader.ReadSliceToStr(start, end);
+                error = ParseError.InvalidUnicodeEscapeSequence(seq, _reader.Position);
+                return false;
+            }
+
+            error = null;
+            return true;
         }
 
         #endregion

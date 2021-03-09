@@ -91,6 +91,7 @@ namespace Linguini.Ast
                     sb.Append(pattern.Elements[i]);
                 }
             }
+
             return sb.ToString();
         }
     }

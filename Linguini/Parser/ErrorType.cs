@@ -1,6 +1,6 @@
 ﻿namespace Linguini.Parser
 {
-    public enum ErrorType
+    public enum ErrorType : byte
     {
         ExpectedToken,
         ExpectedCharRange,
@@ -17,6 +17,10 @@
         UnknownEscapeSequence,
         ForbiddenCallee,
         ExpectedLiteral,
-        ExpectedInlineExpression
+        ExpectedInlineExpression,
+        DuplicatedNamedArgument,
+        PositionalArgumentFollowsNamed,
+        MultipleDefaultVariants,
+        InvalidUnicodeEscapeSequence
     }
 }

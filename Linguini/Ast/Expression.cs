@@ -90,6 +90,12 @@ namespace Linguini.Ast
     {
         public List<IInlineExpression> PositionalArgs;
         public List<NamedArgument> NamedArgs;
+
+        public CallArguments(List<IInlineExpression> positionalArgs, List<NamedArgument> namedArgs)
+        {
+            PositionalArgs = positionalArgs;
+            NamedArgs = namedArgs;
+        }
     }
 
     public struct NamedArgument
@@ -122,11 +128,27 @@ namespace Linguini.Ast
         NumberLiteral,
     }
 
-    public struct Variant
+    public class Variant
     {
         public VariantType Type;
         public ReadOnlyMemory<char> Key;
         public Pattern Value;
         public bool IsDefault;
+
+        public Variant(VariantType type, ReadOnlyMemory<char> key)
+        {
+            Type = type;
+            Key = key;
+            Value = new Pattern();
+            IsDefault = false;
+        }
+
+        public Variant(VariantType type, ReadOnlyMemory<char> key, Pattern value, bool isDefault)
+        {
+            Type = type;
+            Key = key;
+            Value = value;
+            IsDefault = isDefault;
+        }
     }
 }

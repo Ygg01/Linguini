@@ -30,7 +30,7 @@ namespace Linguini.IO
         {
             return _unconsumedData.PeakCharAt(_position + offset);
         }
-        
+
         public ReadOnlySpan<char> PeekCharSpanAt(int pos)
         {
             return _unconsumedData.PeakCharAt(pos);

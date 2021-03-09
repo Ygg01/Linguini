@@ -7,7 +7,6 @@ using Linguini.Serialization;
 
 namespace Linguini.Ast
 {
-
     [JsonConverter(typeof(ResourceSerializer))]
     public class Resource
     {
@@ -20,6 +19,7 @@ namespace Linguini.Ast
             Errors = errors;
         }
     }
+
     [JsonConverter(typeof(MessageSerializer))]
     public class Message : IEntry
     {
@@ -62,15 +62,12 @@ namespace Linguini.Ast
         }
     }
 
-    
+
     [JsonConverter(typeof(CommentSerializer))]
     public class Comment : IEntry
     {
-        [JsonInclude]
-        public CommentLevel CommentLevel; 
-        [JsonInclude]
+        public CommentLevel CommentLevel;
         public readonly List<ReadOnlyMemory<char>> _content;
-        
 
         public Comment(CommentLevel commentLevel, List<ReadOnlyMemory<char>> content)
         {
@@ -87,6 +84,7 @@ namespace Linguini.Ast
                 {
                     sb.Append(lineEnd);
                 }
+
                 sb.Append(_content[i].ToArray());
             }
 

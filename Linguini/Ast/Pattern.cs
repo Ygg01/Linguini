@@ -8,7 +8,7 @@ namespace Linguini.Ast
         LineStart,
         Continuation,
     }
-    
+
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     public enum TextElementTermination : sbyte
     {
@@ -17,8 +17,8 @@ namespace Linguini.Ast
         PlaceableStart,
         EndOfFile
     }
-    
-    public enum TextElementType: sbyte
+
+    public enum TextElementType : sbyte
     {
         Blank,
         NonBlank,
@@ -27,7 +27,7 @@ namespace Linguini.Ast
     public interface IPatternElementPlaceholder
     {
     }
-    
+
     public interface IPatternElement
     {
     }
@@ -47,5 +47,4 @@ namespace Linguini.Ast
             Role = role;
         }
     }
-
 }

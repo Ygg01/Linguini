@@ -70,6 +70,30 @@ namespace Linguini.IO
                    || IsInside(c, 'A', 'Z');
         }
         
+        public static bool IsAsciiHexdigit(this ReadOnlySpan<char> charSpan)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var c = MemoryMarshal.GetReference(charSpan);
+            return IsInside(c, '0', '9')
+                   || IsInside(c, 'a', 'f')
+                   || IsInside(c, 'A', 'F');
+        }
+        
+        public static bool IsAsciiUppercase(this ReadOnlySpan<char> charSpan)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var c = MemoryMarshal.GetReference(charSpan);
+            return IsInside(c, 'A', 'Z');
+        }
+        
         public static bool IsAsciiDigit(this ReadOnlySpan<char> charSpan)
         {
             if (charSpan.Length != CharLength)
@@ -81,10 +105,31 @@ namespace Linguini.IO
             return IsInside(c, '0', '9');
         }
         
+        public static bool IsNumberStart(this ReadOnlySpan<char> charSpan)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var c = MemoryMarshal.GetReference(charSpan);
+            return IsInside(c, '0', '9') || c == '-';
+        }
+        
         public static bool IsCallee(this ReadOnlyMemory<char> charSpan)
         {
-            // TODO
-            throw new NotImplementedException();
+            bool isCallee = true;
+            for (int i = 0; i < charSpan.Length -1; i++)
+            {
+                var c = charSpan.Slice(i, i+1).Span;
+                if (!(c.IsAsciiUppercase()|| c.IsAsciiDigit() || c.IsOneOf('_', '-')))
+                {
+                    isCallee = false;
+                    break;
+                }
+            }
+
+            return isCallee;
         }
 
 

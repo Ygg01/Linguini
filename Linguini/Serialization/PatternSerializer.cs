@@ -36,6 +36,7 @@ namespace Linguini.Serialization
                     JsonSerializer.Serialize(writer, placeable, options);
                 }
             }
+
             writer.WriteEndArray();
             writer.WriteEndObject();
         }
