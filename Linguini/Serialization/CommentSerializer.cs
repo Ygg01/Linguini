@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Ast;
@@ -16,7 +17,20 @@ namespace Linguini.Serialization
         {
             writer.WriteStartObject();
             writer.WritePropertyName("type");
-            writer.WriteStringValue(value.CommentLevel.ToString());
+            switch (value.CommentLevel)
+            {
+                case CommentLevel.Comment:
+                    writer.WriteStringValue("CommentLevel");
+                    break;
+                case CommentLevel.GroupComment:
+                    writer.WriteStringValue("GroupComment");
+                    break;
+                case CommentLevel.ResourceComment:
+                    writer.WriteStringValue("ResourceComment");
+                    break;
+                default:
+                    throw new InvalidEnumArgumentException($"Unexpected value `{value.CommentLevel}`");
+            }
             writer.WritePropertyName("content");
             writer.WriteStringValue(value.ContentStr());
             writer.WriteEndObject();

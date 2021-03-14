@@ -92,11 +92,12 @@ namespace Linguini.Ast
         }
     }
 
+    [JsonConverter(typeof(JunkSerializer))]
     public class Junk : IEntry
     {
         public ReadOnlyMemory<char> Content;
 
-        public string ContentStr()
+        public string ContentStr(string lineEnd = "\n")
         {
             return new(Content.ToArray());
         }
