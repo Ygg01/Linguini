@@ -67,22 +67,21 @@ namespace Linguini.Tests.Parser
 
         [Test]
         [Parallelizable]
-        [TestCase(@"fixtures\eof_id")]
         [TestCase(@"fixtures\any_char")]
-        [TestCase(@"fixtures\cr")]
         [TestCase(@"fixtures\comments")]
+        [TestCase(@"fixtures\cr")]
+        [TestCase(@"fixtures\crlf")]
         [TestCase(@"fixtures\eof_comment")]
         [TestCase(@"fixtures\eof_empty")]
         [TestCase(@"fixtures\eof_id")]
         [TestCase(@"fixtures\eof_id_equals")]
+        [TestCase(@"fixtures\eof_junk")]
         [TestCase(@"fixtures\eof_value")]
         [TestCase(@"fixtures\zero_length")]
         [TestCase(@"fixtures\special_chars")]
         [TestCase(@"fixtures\junk")]
-        [TestCase(@"fixtures\eof_junk")]
         [TestCase(@"fixtures\tab")]
         
-        [TestCase(@"fixtures\crlf")]
         // Don't work
         // [TestCase(@"fixtures\leading_dots")]
         // [TestCase(@"fixtures\escaped_characters")]
@@ -93,7 +92,6 @@ namespace Linguini.Tests.Parser
         // [TestCase(@"fixtures\multiline_values")]
         // [TestCase(@"fixtures\numbers")]
         // [TestCase(@"fixtures\placeables")]
-        // [TestCase(@"fixtures\tab")]
         // [TestCase(@"fixtures\terms")]
         // [TestCase(@"fixtures\reference_expressions")]
         // [TestCase(@"fixtures\select_expressions")]
@@ -108,9 +106,10 @@ namespace Linguini.Tests.Parser
         {
             var path = GetFullPathFor(file);
             var res = ParseFtlFile(@$"{path}.ftl");
+            var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions());
 
             var expected = JToken.Parse( File.ReadAllText($@"{path}.json"));
-            var actual = JToken.Parse(JsonSerializer.Serialize(res, TestJsonOptions()));
+            var actual = JToken.Parse(ftlAstJson);
             actual.Should().BeEquivalentTo(expected);
         }
     }

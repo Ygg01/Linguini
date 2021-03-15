@@ -19,14 +19,14 @@ namespace Linguini.Serialization
             writer.WritePropertyName("type");
             writer.WriteStringValue("Message");
 
-            
+
             writer.WritePropertyName("id");
             ResourceSerializer.WriteIdentifier(writer, msg.Id);
 
             if (msg.Value != null || !options.IgnoreNullValues)
             {
                 writer.WritePropertyName("value");
-                JsonSerializer.Serialize(writer, msg.Value, options);                
+                JsonSerializer.Serialize(writer, msg.Value, options);
             }
 
 
@@ -48,7 +48,5 @@ namespace Linguini.Serialization
 
             writer.WriteEndObject();
         }
-
-
     }
 }

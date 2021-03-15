@@ -7,6 +7,7 @@ using Linguini.Serialization;
 
 namespace Linguini.Ast
 {
+    [JsonConverter(typeof(AttributeSerializer))]
     public struct Attribute
     {
         public Identifier Id;

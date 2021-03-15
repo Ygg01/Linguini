@@ -64,6 +64,7 @@ namespace Linguini.Tests.Parser
         [TestCase("a = test\r\n  test", "a", "test\ntest")]
         [TestCase("hello = \n  world", "hello", "world")]
         [TestCase("a = \ttest", "a", "\ttest")]
+        [TestCase("a=\n\n  bar\n  baz", "a", "bar\nbaz")]
         public void TestMessageParse(string input, string expName, string expValue)
         {
             Resource parsed = new LinguiniParser(input).Parse();
