@@ -467,7 +467,7 @@ namespace Linguini.Parser
                             var value = _reader.ReadSlice(start, end);
                             if (lastNonBlank == i)
                             {
-                                value = value.Trim();
+                                value = value.TrimEnd();
                             }
 
                             patterns.Add(new TextLiteral(value));

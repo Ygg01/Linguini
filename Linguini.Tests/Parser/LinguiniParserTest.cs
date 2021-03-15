@@ -63,6 +63,7 @@ namespace Linguini.Tests.Parser
         [TestCase("a = test\n  test", "a", "test\ntest")]
         [TestCase("a = test\r\n  test", "a", "test\ntest")]
         [TestCase("hello = \n  world", "hello", "world")]
+        [TestCase("a = \ttest", "a", "\ttest")]
         public void TestMessageParse(string input, string expName, string expValue)
         {
             Resource parsed = new LinguiniParser(input).Parse();
@@ -129,11 +130,11 @@ namespace Linguini.Tests.Parser
             }
             else
             {
-                parsed.Body[0].TryConvert(out Comment comment);
-                parsed.Body[1].TryConvert(out Term term);
+                parsed.Body[0].TryConvert(out Comment? comment);
+                parsed.Body[1].TryConvert(out Term? term);
 
-                Assert.AreEqual(expComment, comment.ContentStr());
-                Assert.AreEqual(expTerm, new string(term.Id.Name.ToArray()));
+                Assert.AreEqual(expComment, comment!.ContentStr());
+                Assert.AreEqual(expTerm, new string(term!.Id.Name.ToArray()));
             }
         }
     }

@@ -76,13 +76,13 @@ namespace Linguini.Tests.Parser
         [TestCase(@"fixtures\eof_id")]
         [TestCase(@"fixtures\eof_id_equals")]
         [TestCase(@"fixtures\eof_value")]
-        [TestCase(@"fixtures\tab")]
         [TestCase(@"fixtures\zero_length")]
         [TestCase(@"fixtures\special_chars")]
         [TestCase(@"fixtures\junk")]
         [TestCase(@"fixtures\eof_junk")]
-        [TestCase(@"fixtures\crlf")]
+        [TestCase(@"fixtures\tab")]
         
+        [TestCase(@"fixtures\crlf")]
         // Don't work
         // [TestCase(@"fixtures\leading_dots")]
         // [TestCase(@"fixtures\escaped_characters")]
@@ -108,11 +108,9 @@ namespace Linguini.Tests.Parser
         {
             var path = GetFullPathFor(file);
             var res = ParseFtlFile(@$"{path}.ftl");
-            var ftlJsonStr = JsonSerializer.Serialize(res, TestJsonOptions());
-            var jsonStr = File.ReadAllText($@"{path}.json");
 
-            var expected = JToken.Parse(jsonStr);
-            var actual = JToken.Parse(ftlJsonStr);
+            var expected = JToken.Parse( File.ReadAllText($@"{path}.json"));
+            var actual = JToken.Parse(JsonSerializer.Serialize(res, TestJsonOptions()));
             actual.Should().BeEquivalentTo(expected);
         }
     }

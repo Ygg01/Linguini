@@ -83,10 +83,10 @@ namespace Linguini.Ast
 
         public static string Stringify(this Pattern? pattern)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             if (pattern != null && pattern.Elements.Count > 0)
             {
-                for (int i = 0; i < pattern.Elements.Count; i++)
+                for (var i = 0; i < pattern.Elements.Count; i++)
                 {
                     sb.Append(pattern.Elements[i]);
                 }
