@@ -146,7 +146,7 @@ namespace Linguini.IO
                 var newline = _position == 0
                               || '\n'.EqualsSpans(PeekCharSpan(-1));
 
-                if (newline && (span.IsAlphaNumeric() || span.IsOneOf('#', '-')))
+                if (newline && (span.IsAsciiAlphabetic() || span.IsOneOf('#', '-')))
                 {
                     break;
                 }

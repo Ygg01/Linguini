@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using FluentAssertions;
 using Linguini.Ast;
 using Linguini.Parser;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using FluentAssertions.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Linguini.Tests.Parser
 {
@@ -64,13 +65,6 @@ namespace Linguini.Tests.Parser
             return parser.Parse();
         }
 
-        private static JsonDocument ParseJsonDocument(string path)
-        {
-            using var fileStream = File.Open(path, FileMode.Open);
-            using var reader = new BufferedStream(fileStream);
-            return JsonDocument.Parse(reader);
-        }
-
         [Test]
         [Parallelizable]
         [TestCase(@"fixtures\eof_id")]
@@ -85,11 +79,13 @@ namespace Linguini.Tests.Parser
         [TestCase(@"fixtures\tab")]
         [TestCase(@"fixtures\zero_length")]
         [TestCase(@"fixtures\special_chars")]
-
+        [TestCase(@"fixtures\junk")]
+        [TestCase(@"fixtures\eof_junk")]
+        [TestCase(@"fixtures\crlf")]
+        
         // Don't work
         // [TestCase(@"fixtures\leading_dots")]
         // [TestCase(@"fixtures\escaped_characters")]
-        // [TestCase(@"fixtures\crlf")]
         // [TestCase(@"fixtures\astral")]
         // [TestCase(@"fixtures\literal_expressions")]
         // [TestCase(@"fixtures\member_expressions")]
@@ -107,20 +103,16 @@ namespace Linguini.Tests.Parser
         // [TestCase(@"fixtures\term_parameters")]
         // [TestCase(@"fixtures\variables")]
         // [TestCase(@"fixtures\variant_keys")]
-        
-        // Looping
-        // [TestCase(@"fixtures\junk")]
-        // [TestCase(@"fixtures\eof_junk")]
         // [TestCase(@"fixtures\messages")]
-        
         public void TestReadFile(string file)
         {
             var path = GetFullPathFor(file);
             var res = ParseFtlFile(@$"{path}.ftl");
-            var ftlJson = JsonSerializer.Serialize(res, TestJsonOptions());
+            var ftlJsonStr = JsonSerializer.Serialize(res, TestJsonOptions());
+            var jsonStr = File.ReadAllText($@"{path}.json");
 
-            var expected = JToken.Parse(File.ReadAllText($@"{path}.json"));
-            var actual = JToken.Parse(ftlJson);
+            var expected = JToken.Parse(jsonStr);
+            var actual = JToken.Parse(ftlJsonStr);
             actual.Should().BeEquivalentTo(expected);
         }
     }

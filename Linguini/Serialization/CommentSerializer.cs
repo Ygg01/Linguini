@@ -20,7 +20,7 @@ namespace Linguini.Serialization
             switch (value.CommentLevel)
             {
                 case CommentLevel.Comment:
-                    writer.WriteStringValue("CommentLevel");
+                    writer.WriteStringValue("Comment");
                     break;
                 case CommentLevel.GroupComment:
                     writer.WriteStringValue("GroupComment");
