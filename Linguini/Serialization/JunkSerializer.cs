@@ -21,7 +21,7 @@ namespace Linguini.Serialization
             writer.WriteStartArray();
             writer.WriteEndArray();
             writer.WritePropertyName("content");
-            writer.WriteStringValue(value.ContentStr());
+            writer.WriteStringValue(value.AsStr());
             writer.WriteEndObject();
         }
     }

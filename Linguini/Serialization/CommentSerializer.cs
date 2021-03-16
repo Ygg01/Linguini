@@ -32,7 +32,7 @@ namespace Linguini.Serialization
                     throw new InvalidEnumArgumentException($"Unexpected value `{value.CommentLevel}`");
             }
             writer.WritePropertyName("content");
-            writer.WriteStringValue(value.ContentStr());
+            writer.WriteStringValue(value.AsStr());
             writer.WriteEndObject();
         }
     }

@@ -75,7 +75,7 @@ namespace Linguini.Ast
             _content = content;
         }
 
-        public string ContentStr(string lineEnd = "\n")
+        public string AsStr(string lineEnd = "\n")
         {
             StringBuilder sb = new();
             for (int i = 0; i < _content.Count; i++)
@@ -85,7 +85,7 @@ namespace Linguini.Ast
                     sb.Append(lineEnd);
                 }
 
-                sb.Append(_content[i].ToArray());
+                sb.Append(_content[i].Span);
             }
 
             return sb.ToString();
@@ -97,9 +97,9 @@ namespace Linguini.Ast
     {
         public ReadOnlyMemory<char> Content;
 
-        public string ContentStr(string lineEnd = "\n")
+        public string AsStr(string lineEnd = "\n")
         {
-            return new(Content.ToArray());
+            return new(Content.Span);
         }
     }
 }

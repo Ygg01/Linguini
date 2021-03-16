@@ -136,7 +136,7 @@ namespace Linguini.IO
 
         public string ReadSliceToStr(int start, int end)
         {
-            return new(_unconsumedData.Slice(start, end - start).ToArray());
+            return new(_unconsumedData.Slice(start, end - start).Span);
         }
 
         public void SkipToNextEntry()

@@ -28,7 +28,7 @@ namespace Linguini.Tests.Parser
             Assert.That(parsed.Body.Count, Is.EqualTo(1));
             Assert.True(parsed.Body[0].TryConvert<IEntry, Comment>(out var comment));
             Assert.AreEqual(expectedCommentLevel, comment!.CommentLevel);
-            Assert.AreEqual(expectedContent, comment.ContentStr());
+            Assert.AreEqual(expectedContent, comment.AsStr());
         }
 
         [Test]
@@ -73,7 +73,7 @@ namespace Linguini.Tests.Parser
             if (parsed.Body[0].TryConvert(out Message message)
                 && message.Value != null)
             {
-                Assert.AreEqual(expName, new string(message.Id.Name.ToArray()));
+                Assert.AreEqual(expName, message.Id.ToString());
                 Assert.AreEqual(expValue, message.Value.Stringify());
             }
             else
@@ -99,14 +99,14 @@ namespace Linguini.Tests.Parser
                 parsed.Body[0].TryConvert(out Message? msg);
 
                 Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
-                Assert.AreEqual(expComment, msg.Comment.ContentStr());
+                Assert.AreEqual(expComment, msg.Comment.AsStr());
             }
             else
             {
                 parsed.Body[0].TryConvert(out Comment comment);
                 parsed.Body[1].TryConvert(out Message msg);
 
-                Assert.AreEqual(expComment, comment.ContentStr());
+                Assert.AreEqual(expComment, comment.AsStr());
                 Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
             }
         }
@@ -127,15 +127,40 @@ namespace Linguini.Tests.Parser
                 parsed.Body[0].TryConvert(out Term? term);
 
                 Assert.AreEqual(expTerm, new string(term.Id.Name.ToArray()));
-                Assert.AreEqual(expComment, term.Comment.ContentStr());
+                Assert.AreEqual(expComment, term.Comment.AsStr());
             }
             else
             {
                 parsed.Body[0].TryConvert(out Comment? comment);
                 parsed.Body[1].TryConvert(out Term? term);
 
-                Assert.AreEqual(expComment, comment!.ContentStr());
+                Assert.AreEqual(expComment, comment!.AsStr());
                 Assert.AreEqual(expTerm, new string(term!.Id.Name.ToArray()));
+            }
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCase("num = {-3.14}", "num", "-3.14")]
+        [TestCase("num = {123}", "num", "123")]
+        public void TestNumExpressions(string input, string identifier, string value)
+        {
+            var res = new LinguiniParser(input).Parse();
+            
+            Assert.AreEqual(0, res.Errors.Count);
+            Assert.AreEqual(1, res.Body.Count);
+            Assert.IsInstanceOf(typeof(Message), res.Body[0]);
+            if (res.Body[0].TryConvert(out Message message))
+            {
+                Assert.AreEqual(1, message.Value.Elements.Count);
+                Assert.IsInstanceOf(typeof(Placeable), message.Value.Elements[0]);
+                message.Value.Elements[0].TryConvert(out Placeable placeable);
+                Assert.NotNull(placeable);
+                Assert.IsInstanceOf(typeof(NumberLiteral), placeable.Expression);
+                placeable.Expression.TryConvert(out NumberLiteral numberLiteral);
+                Assert.NotNull(numberLiteral);
+                Assert.AreEqual(identifier, message.Id.ToString());
+                Assert.AreEqual(value, numberLiteral!.ToString());
             }
         }
     }

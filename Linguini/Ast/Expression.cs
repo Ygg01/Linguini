@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using Linguini.Serialization;
 
 namespace Linguini.Ast
 {
@@ -14,7 +16,7 @@ namespace Linguini.Ast
 
         public override string ToString()
         {
-            return new(Value.ToArray());
+            return new(Value.Span);
         }
     }
 
@@ -25,6 +27,11 @@ namespace Linguini.Ast
         public NumberLiteral(ReadOnlyMemory<char> value)
         {
             Value = value;
+        }
+
+        public override string ToString()
+        {
+            return new(Value.Span);
         }
     }
 
@@ -76,6 +83,7 @@ namespace Linguini.Ast
         }
     }
 
+    [JsonConverter(typeof(PlaceableSerializer))]
     public class Placeable : IInlineExpression, IPatternElementPlaceholder, IPatternElement
     {
         public IExpression Expression;

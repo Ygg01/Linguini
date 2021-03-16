@@ -915,12 +915,7 @@ namespace Linguini.Parser
                 if (peekChr.IsAsciiAlphabetic())
                 {
                     _reader.Position += 1;
-                    if (!TryGetIdentifier(out var id, out error))
-                    {
-                        expr = null;
-                        return false;
-                    }
-
+                    var id = GetUncheckedIdentifier();
                     if (!TryGetAttributeAccessor(out var attribute, out error))
                     {
                         expr = null;
@@ -934,8 +929,19 @@ namespace Linguini.Parser
                     }
 
                     expr = new TermReference(id, attribute, args);
-                    error = null;
                     return true;
+                }
+                else
+                {
+                    _reader.Position -= 1;
+                    if (TryGetNumberLiteral(out var num, out error))
+                    {
+                        expr = new NumberLiteral(num);
+                        return true;
+                    }
+
+                    expr = null;
+                    return false;
                 }
             }
             else if ('$'.EqualsSpans(peekChr) && !onlyLiteral)

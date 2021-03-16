@@ -44,6 +44,11 @@ namespace Linguini.Ast
         {
             Name = name;
         }
+
+        public override string ToString()
+        {
+            return new(Name.Span);
+        }
     }
 
     public interface IExpression
