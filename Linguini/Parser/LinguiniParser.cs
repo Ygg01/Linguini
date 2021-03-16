@@ -290,6 +290,7 @@ namespace Linguini.Parser
         {
             if (_reader.PeekCharSpan().IsAsciiAlphabetic())
             {
+                _reader.Position += 1;
                 error = null;
                 id = GetUncheckedIdentifier();
                 return true;
@@ -299,17 +300,17 @@ namespace Linguini.Parser
             id = default!;
             return false;
         }
-
+        
         private Identifier GetUncheckedIdentifier()
         {
             // First character is already checked
-            var ptr = _reader.Position + 1;
+            var ptr = _reader.Position;
             while (_reader.PeekCharSpanAt(ptr).IsIdentifier())
             {
                 ptr += 1;
             }
 
-            Identifier id = new(_reader.ReadSlice(_reader.Position, ptr));
+            Identifier id = new(_reader.ReadSlice(_reader.Position - 1, ptr));
             _reader.Position = ptr;
             return id;
         }
@@ -959,11 +960,7 @@ namespace Linguini.Parser
             else if (peekChr.IsAsciiAlphabetic())
             {
                 _reader.Position += 1;
-                if (!TryGetIdentifier(out var id, out error))
-                {
-                    expr = null;
-                    return false;
-                }
+                var id = GetUncheckedIdentifier();
 
                 if (!TryCallArguments(out var args, out error))
                 {
@@ -988,9 +985,12 @@ namespace Linguini.Parser
                 {
                     if (!TryGetAttributeAccessor(out var attribute, out error))
                     {
-                        expr = new MessageReference(id, attribute);
-                        return true;
+                        expr = null;
+                        return false;
                     }
+
+                    expr = new MessageReference(id, attribute);
+                    return true;
                 }
             }
             else if ('{'.EqualsSpans(peekChr) && !onlyLiteral)

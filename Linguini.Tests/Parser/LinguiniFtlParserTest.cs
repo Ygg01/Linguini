@@ -67,28 +67,29 @@ namespace Linguini.Tests.Parser
 
         [Test]
         [Parallelizable]
-        [TestCase(@"fixtures\any_char")]
-        [TestCase(@"fixtures\astral")]
-        [TestCase(@"fixtures\comments")]
-        [TestCase(@"fixtures\cr")]
-        [TestCase(@"fixtures\crlf")]
-        [TestCase(@"fixtures\eof_comment")]
-        [TestCase(@"fixtures\eof_empty")]
-        [TestCase(@"fixtures\eof_id")]
-        [TestCase(@"fixtures\eof_id_equals")]
-        [TestCase(@"fixtures\eof_junk")]
-        [TestCase(@"fixtures\eof_value")]
-        [TestCase(@"fixtures\special_chars")]
-        [TestCase(@"fixtures\junk")]
-        [TestCase(@"fixtures\messages")]
-        [TestCase(@"fixtures\mixed_entries")]
-        [TestCase(@"fixtures\multiline_values")]
-        [TestCase(@"fixtures\tab")]
-        [TestCase(@"fixtures\terms")]
-        [TestCase(@"fixtures\zero_length")]
-        [TestCase(@"fixtures\whitespace_in_value")]
-        [TestCase(@"fixtures\literal_expressions")]
-        [TestCase(@"fixtures\numbers")]
+        // [TestCase(@"fixtures\any_char")]
+        // [TestCase(@"fixtures\astral")]
+        // [TestCase(@"fixtures\comments")]
+        // [TestCase(@"fixtures\cr")]
+        // [TestCase(@"fixtures\crlf")]
+        // [TestCase(@"fixtures\eof_comment")]
+        // [TestCase(@"fixtures\eof_empty")]
+        // [TestCase(@"fixtures\eof_id")]
+        // [TestCase(@"fixtures\eof_id_equals")]
+        // [TestCase(@"fixtures\eof_junk")]
+        // [TestCase(@"fixtures\eof_value")]
+        // [TestCase(@"fixtures\special_chars")]
+        // [TestCase(@"fixtures\junk")]
+        // [TestCase(@"fixtures\messages")]
+        // [TestCase(@"fixtures\mixed_entries")]
+        // [TestCase(@"fixtures\multiline_values")]
+        // [TestCase(@"fixtures\tab")]
+        // [TestCase(@"fixtures\terms")]
+        // [TestCase(@"fixtures\zero_length")]
+        // [TestCase(@"fixtures\whitespace_in_value")]
+        // [TestCase(@"fixtures\literal_expressions")]
+        // [TestCase(@"fixtures\numbers")]
+        // [TestCase(@"fixtures\obsolete")]
         
         // Don't work
         // [TestCase(@"fixtures\leading_dots")]
@@ -104,6 +105,20 @@ namespace Linguini.Tests.Parser
         // [TestCase(@"fixtures\variant_keys")]
        
         public void TestReadFile(string file)
+        {
+            var path = GetFullPathFor(file);
+            var res = ParseFtlFile(@$"{path}.ftl");
+            var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions());
+
+            var expected = JToken.Parse( File.ReadAllText($@"{path}.json"));
+            var actual = JToken.Parse(ftlAstJson);
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCase(@"test\mvp")]
+        public void TestMvp(string file)
         {
             var path = GetFullPathFor(file);
             var res = ParseFtlFile(@$"{path}.ftl");
