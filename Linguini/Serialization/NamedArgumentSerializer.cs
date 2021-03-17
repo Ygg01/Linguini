@@ -16,6 +16,8 @@ namespace Linguini.Serialization
         public override void Write(Utf8JsonWriter writer, NamedArgument value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
+            writer.WritePropertyName("type");
+            writer.WriteStringValue("NamedArgument");
             writer.WritePropertyName("name");
             JsonSerializer.Serialize(writer, value.Name, options);
             writer.WritePropertyName("value");

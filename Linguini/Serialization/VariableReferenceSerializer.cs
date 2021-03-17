@@ -16,7 +16,7 @@ namespace Linguini.Serialization
         {
             writer.WriteStartObject();
             writer.WritePropertyName("type");
-            writer.WriteStringValue("SelectExpression");
+            writer.WriteStringValue("VariableReference");
             writer.WritePropertyName("id");
             JsonSerializer.Serialize(writer, variableReference.Id, options);
             writer.WriteEndObject();

@@ -89,37 +89,19 @@ namespace Linguini.Tests.Parser
         [TestCase(@"fixtures\numbers")]
         [TestCase(@"fixtures\obsolete")]
         [TestCase(@"fixtures\placeables")]
+        [TestCase(@"fixtures\reference_expressions")]
+        [TestCase(@"fixtures\select_expressions")]
+        [TestCase(@"fixtures\select_indent")]
         [TestCase(@"fixtures\sparse_entries")]
         [TestCase(@"fixtures\special_chars")]
         [TestCase(@"fixtures\tab")]
+        [TestCase(@"fixtures\term_parameters")]
         [TestCase(@"fixtures\terms")]
+        [TestCase(@"fixtures\variables")]
+        [TestCase(@"fixtures\variant_keys")]
         [TestCase(@"fixtures\whitespace_in_value")]
         [TestCase(@"fixtures\zero_length")]
-        // Don't work
-        
-        // [TestCase(@"fixtures\reference_expressions")]
-        // [TestCase(@"fixtures\select_expressions")]
-        // [TestCase(@"fixtures\select_indent")]
-        // [TestCase(@"fixtures\term_parameters")]
-        // [TestCase(@"fixtures\variables")]
-        // [TestCase(@"fixtures\variant_keys")]
-       
         public void TestReadFile(string file)
-        {
-            var path = GetFullPathFor(file);
-            var res = ParseFtlFile(@$"{path}.ftl");
-            var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions());
-
-            var expected = JToken.Parse( File.ReadAllText($@"{path}.json"));
-            var actual = JToken.Parse(ftlAstJson);
-            actual.Should().BeEquivalentTo(expected);
-        }
-
-        [Test]
-        [Parallelizable]
-        // [TestCase(@"fixtures\select_expressions")]
-        [TestCase(@"test\mvp")]
-        public void TestMvp(string file)
         {
             var path = GetFullPathFor(file);
             var res = ParseFtlFile(@$"{path}.ftl");

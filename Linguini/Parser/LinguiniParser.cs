@@ -773,7 +773,7 @@ namespace Linguini.Parser
                 if (value != null)
                 {
                     variant.Value = value;
-                    variant.IsDefault = hasDefault;
+                    variant.IsDefault = isDefault;
                     variants.Add(variant);
                     _reader.SkipBlank();
                 }
@@ -1100,6 +1100,7 @@ namespace Linguini.Parser
                         error = ParseError.PositionalArgumentFollowsNamed(_reader.Position);
                         return false;
                     }
+                    positional.Add(expr);
                 }
 
                 _reader.SkipBlank();
