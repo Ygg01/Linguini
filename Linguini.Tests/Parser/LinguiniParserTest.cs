@@ -3,6 +3,9 @@ using Linguini.Ast;
 using Linguini.Parser;
 using NUnit.Framework;
 
+#pragma warning disable 8602
+#pragma warning disable 8600
+
 namespace Linguini.Tests.Parser
 {
     [Parallelizable]
@@ -99,7 +102,9 @@ namespace Linguini.Tests.Parser
                 parsed.Body[0].TryConvert(out Message? msg);
 
                 Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
+#pragma warning disable 8602
                 Assert.AreEqual(expComment, msg.Comment.AsStr());
+#pragma warning restore 8602
             }
             else
             {
@@ -146,7 +151,7 @@ namespace Linguini.Tests.Parser
         public void TestNumExpressions(string input, string identifier, string value)
         {
             var res = new LinguiniParser(input).Parse();
-            
+
             Assert.AreEqual(0, res.Errors.Count);
             Assert.AreEqual(1, res.Body.Count);
             Assert.IsInstanceOf(typeof(Message), res.Body[0]);

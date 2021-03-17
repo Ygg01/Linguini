@@ -28,14 +28,6 @@ namespace Linguini.Ast
         public List<Attribute> Attributes;
         public Comment? Comment;
 
-        public Message(Identifier id)
-        {
-            Id = id;
-            Value = null;
-            Attributes = new();
-            Comment = null;
-        }
-
         public Message(Identifier id, Pattern? pattern, List<Attribute> attrs, Comment? comment)
         {
             Id = id;

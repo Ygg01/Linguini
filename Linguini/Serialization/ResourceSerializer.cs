@@ -45,7 +45,8 @@ namespace Linguini.Serialization
             writer.WriteEndObject();
         }
 
-        public static void WriteInlineExpression(Utf8JsonWriter writer, IInlineExpression value, JsonSerializerOptions options)
+        public static void WriteInlineExpression(Utf8JsonWriter writer, IInlineExpression value,
+            JsonSerializerOptions options)
         {
             if (value.TryConvert(out TextLiteral textLiteral))
             {

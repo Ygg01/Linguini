@@ -180,14 +180,6 @@ namespace Linguini.IO
             return x == c1 || x == c2 || x == c3 || x == c4;
         }
 
-        public static bool IsAlphaNumeric(this ReadOnlySpan<char> charSpan)
-        {
-            var c = MemoryMarshal.GetReference(charSpan);
-            return IsInside(c, 'a', 'z')
-                   || IsInside(c, 'A', 'Z')
-                   || IsInside(c, '0', '9');
-        }
-
         private static bool IsInside(char c, char min, char max) => (uint) (c - min) <= (uint) (max - min);
     }
 }

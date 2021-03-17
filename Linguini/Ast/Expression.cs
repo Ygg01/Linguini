@@ -75,7 +75,7 @@ namespace Linguini.Ast
             Arguments = arguments;
         }
     }
-    
+
     [JsonConverter(typeof(VariableReferenceSerializer))]
     public class VariableReference : IInlineExpression
     {
@@ -157,14 +157,6 @@ namespace Linguini.Ast
             Key = key;
             Value = new Pattern();
             IsDefault = false;
-        }
-
-        public Variant(VariantType type, ReadOnlyMemory<char> key, Pattern value, bool isDefault)
-        {
-            Type = type;
-            Key = key;
-            Value = value;
-            IsDefault = isDefault;
         }
     }
 }
