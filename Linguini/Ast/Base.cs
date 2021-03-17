@@ -36,6 +36,7 @@ namespace Linguini.Ast
         }
     }
 
+    [JsonConverter(typeof(IdentifierSerializer))]
     public class Identifier
     {
         public ReadOnlyMemory<char> Name;

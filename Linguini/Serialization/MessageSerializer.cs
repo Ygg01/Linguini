@@ -21,14 +21,13 @@ namespace Linguini.Serialization
 
 
             writer.WritePropertyName("id");
-            ResourceSerializer.WriteIdentifier(writer, msg.Id);
+            JsonSerializer.Serialize(writer, msg.Id, options);
 
             if (msg.Value != null || !options.IgnoreNullValues)
             {
                 writer.WritePropertyName("value");
                 JsonSerializer.Serialize(writer, msg.Value, options);
             }
-
 
             writer.WritePropertyName("attributes");
             writer.WriteStartArray();

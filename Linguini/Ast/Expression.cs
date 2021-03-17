@@ -47,6 +47,7 @@ namespace Linguini.Ast
         }
     }
 
+    [JsonConverter(typeof(MessageReferenceSerializer))]
     public class MessageReference : IInlineExpression
     {
         public Identifier Id;

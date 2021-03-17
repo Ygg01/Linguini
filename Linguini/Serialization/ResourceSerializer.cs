@@ -44,15 +44,5 @@ namespace Linguini.Serialization
             writer.WriteEndArray();
             writer.WriteEndObject();
         }
-
-        public static void WriteIdentifier(Utf8JsonWriter writer, Identifier id)
-        {
-            writer.WriteStartObject();
-            writer.WritePropertyName("type");
-            writer.WriteStringValue("Identifier");
-            writer.WritePropertyName("name");
-            writer.WriteStringValue(id.Name.Span);
-            writer.WriteEndObject();
-        }
     }
 }

@@ -13,11 +13,11 @@ namespace Linguini.Serialization
             throw new NotImplementedException();
         }
 
-        public override void Write(Utf8JsonWriter writer, Comment value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, Comment comment, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
             writer.WritePropertyName("type");
-            switch (value.CommentLevel)
+            switch (comment.CommentLevel)
             {
                 case CommentLevel.Comment:
                     writer.WriteStringValue("Comment");
@@ -29,10 +29,10 @@ namespace Linguini.Serialization
                     writer.WriteStringValue("ResourceComment");
                     break;
                 default:
-                    throw new InvalidEnumArgumentException($"Unexpected value `{value.CommentLevel}`");
+                    throw new InvalidEnumArgumentException($"Unexpected comment `{comment.CommentLevel}`");
             }
             writer.WritePropertyName("content");
-            writer.WriteStringValue(value.AsStr());
+            writer.WriteStringValue(comment.AsStr());
             writer.WriteEndObject();
         }
     }

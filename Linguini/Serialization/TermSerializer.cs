@@ -18,7 +18,7 @@ namespace Linguini.Serialization
             writer.WritePropertyName("type");
             writer.WriteStringValue("Term");
             writer.WritePropertyName("id");
-            ResourceSerializer.WriteIdentifier(writer, term.Id);
+            JsonSerializer.Serialize(writer, term.Id, options);
             writer.WritePropertyName("value");
             JsonSerializer.Serialize(writer, term.Value, options);
 

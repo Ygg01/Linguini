@@ -12,15 +12,15 @@ namespace Linguini.Serialization
             throw new NotImplementedException();
         }
 
-        public override void Write(Utf8JsonWriter writer, Attribute value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, Attribute attribute, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
             writer.WritePropertyName("type");
             writer.WriteStringValue("Attribute");
             writer.WritePropertyName("id");
-            ResourceSerializer.WriteIdentifier(writer, value.Id);
+            JsonSerializer.Serialize(writer, attribute.Id, options);
             writer.WritePropertyName("value");
-            JsonSerializer.Serialize(writer, value.Value, options);
+            JsonSerializer.Serialize(writer, attribute.Value, options);
             writer.WriteEndObject();
         }
     }
