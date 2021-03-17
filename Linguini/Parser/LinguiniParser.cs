@@ -300,7 +300,7 @@ namespace Linguini.Parser
             id = default!;
             return false;
         }
-        
+
         private Identifier GetUncheckedIdentifier()
         {
             // First character is already checked
@@ -683,14 +683,25 @@ namespace Linguini.Parser
                     retVal = null;
                     return false;
                 }
-                else
+
+                error = ParseError.MessageAttributeAsSelector(_reader.Position);
+                retVal = null;
+                return false;
+            }
+
+            if (!inlineExpression.TryConvert(out TermReference termRef))
+            {
+                if (!inlineExpression.TryConvert<IInlineExpression, TextLiteral>(out _) &&
+                    !inlineExpression.TryConvert<IInlineExpression, NumberLiteral>(out _) &&
+                    !inlineExpression.TryConvert<IInlineExpression, VariableReference>(out _) &&
+                    !inlineExpression.TryConvert<IInlineExpression, FunctionReference>(out _))
                 {
-                    error = ParseError.MessageAttributeAsSelector(_reader.Position);
                     retVal = null;
+                    error = ParseError.ExpectedSimpleExpressionAsSelector(_reader.Position);
                     return false;
                 }
             }
-            else if (inlineExpression.TryConvert(out TermReference termRef))
+            else
             {
                 if (termRef.Attribute == null)
                 {
@@ -698,12 +709,6 @@ namespace Linguini.Parser
                     error = ParseError.TermReferenceAsSelector(_reader.Position);
                     return false;
                 }
-            }
-            else
-            {
-                retVal = null;
-                error = ParseError.ExpectedSimpleExpressionAsSelector(_reader.Position);
-                return false;
             }
 
             // We found `->`
@@ -768,6 +773,7 @@ namespace Linguini.Parser
                 if (value != null)
                 {
                     variant.Value = value;
+                    variant.IsDefault = hasDefault;
                     variants.Add(variant);
                     _reader.SkipBlank();
                 }
@@ -913,7 +919,7 @@ namespace Linguini.Parser
             if ('-'.EqualsSpans(peekChr) && !onlyLiteral)
             {
                 _reader.Position += 1;
-                if (peekChr.IsAsciiAlphabetic())
+                if (_reader.PeekCharSpan().IsAsciiAlphabetic())
                 {
                     _reader.Position += 1;
                     var id = GetUncheckedIdentifier();

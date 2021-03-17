@@ -5,24 +5,70 @@
       "type": "Message",
       "id": {
         "type": "Identifier",
-        "name": "aa-bb"
+        "name": "new-messages"
       },
       "value": {
         "type": "Pattern",
         "elements": [
           {
-            "type": "TextElement",
-            "value": "Value \\"
-          },
-          {
             "type": "Placeable",
             "expression": {
-              "type": "MessageReference",
-              "id": {
-                "type": "Identifier",
-                "name": "pl"
+              "type": "SelectExpression",
+              "selector": {
+                "type": "FunctionReference",
+                "id": {
+                  "type": "Identifier",
+                  "name": "BUILTIN"
+                },
+                "arguments": {
+                  "type": "CallArguments",
+                  "positional": [],
+                  "named": []
+                }
               },
-              "attribute": null
+              "variants": [
+                {
+                  "type": "Variant",
+                  "key": {
+                    "value": "0",
+                    "type": "NumberLiteral"
+                  },
+                  "value": {
+                    "type": "Pattern",
+                    "elements": [
+                      {
+                        "type": "TextElement",
+                        "value": "Zero"
+                      }
+                    ]
+                  },
+                  "default": false
+                },
+                {
+                  "type": "Variant",
+                  "key": {
+                    "type": "Identifier",
+                    "name": "other"
+                  },
+                  "value": {
+                    "type": "Pattern",
+                    "elements": [
+                      {
+                        "type": "Placeable",
+                        "expression": {
+                          "value": "",
+                          "type": "StringLiteral"
+                        }
+                      },
+                      {
+                        "type": "TextElement",
+                        "value": "Other"
+                      }
+                    ]
+                  },
+                  "default": true
+                }
+              ]
             }
           }
         ]

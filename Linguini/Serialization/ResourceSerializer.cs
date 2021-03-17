@@ -44,5 +44,47 @@ namespace Linguini.Serialization
             writer.WriteEndArray();
             writer.WriteEndObject();
         }
+
+        public static void WriteInlineExpression(Utf8JsonWriter writer, IInlineExpression value, JsonSerializerOptions options)
+        {
+            if (value.TryConvert(out TextLiteral textLiteral))
+            {
+                writer.WriteStartObject();
+                writer.WritePropertyName("value");
+                writer.WriteStringValue(textLiteral.Value.Span);
+                writer.WritePropertyName("type");
+                writer.WriteStringValue("StringLiteral");
+                writer.WriteEndObject();
+            }
+            else if (value.TryConvert(out NumberLiteral numberLiteral))
+            {
+                writer.WriteStartObject();
+                writer.WritePropertyName("value");
+                writer.WriteStringValue(numberLiteral.Value.Span);
+                writer.WritePropertyName("type");
+                writer.WriteStringValue("NumberLiteral");
+                writer.WriteEndObject();
+            }
+            else if (value.TryConvert(out MessageReference msgRef))
+            {
+                JsonSerializer.Serialize(writer, msgRef, options);
+            }
+            else if (value.TryConvert(out FunctionReference funcRef))
+            {
+                JsonSerializer.Serialize(writer, funcRef, options);
+            }
+            else if (value.TryConvert(out Placeable placeable))
+            {
+                JsonSerializer.Serialize(writer, placeable, options);
+            }
+            else if (value.TryConvert(out TermReference termReference))
+            {
+                JsonSerializer.Serialize(writer, termReference, options);
+            }
+            else if (value.TryConvert(out VariableReference variableReference))
+            {
+                JsonSerializer.Serialize(writer, variableReference, options);
+            }
+        }
     }
 }

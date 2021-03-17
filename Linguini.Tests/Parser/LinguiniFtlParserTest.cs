@@ -80,28 +80,26 @@ namespace Linguini.Tests.Parser
         [TestCase(@"fixtures\eof_value")]
         [TestCase(@"fixtures\escaped_characters")]
         [TestCase(@"fixtures\junk")]
+        [TestCase(@"fixtures\leading_dots")]
         [TestCase(@"fixtures\literal_expressions")]
+        [TestCase(@"fixtures\member_expressions")]
         [TestCase(@"fixtures\messages")]
         [TestCase(@"fixtures\mixed_entries")]
         [TestCase(@"fixtures\multiline_values")]
         [TestCase(@"fixtures\numbers")]
         [TestCase(@"fixtures\obsolete")]
         [TestCase(@"fixtures\placeables")]
+        [TestCase(@"fixtures\sparse_entries")]
         [TestCase(@"fixtures\special_chars")]
         [TestCase(@"fixtures\tab")]
         [TestCase(@"fixtures\terms")]
         [TestCase(@"fixtures\whitespace_in_value")]
         [TestCase(@"fixtures\zero_length")]
-       
-        
-        
         // Don't work
-        // [TestCase(@"fixtures\leading_dots")]
-        // [TestCase(@"fixtures\member_expressions")]
+        
         // [TestCase(@"fixtures\reference_expressions")]
         // [TestCase(@"fixtures\select_expressions")]
         // [TestCase(@"fixtures\select_indent")]
-        // [TestCase(@"fixtures\sparse_entries")]
         // [TestCase(@"fixtures\term_parameters")]
         // [TestCase(@"fixtures\variables")]
         // [TestCase(@"fixtures\variant_keys")]
@@ -119,7 +117,8 @@ namespace Linguini.Tests.Parser
 
         [Test]
         [Parallelizable]
-        [TestCase(@"fixtures\member_expressions")]
+        // [TestCase(@"fixtures\select_expressions")]
+        [TestCase(@"test\mvp")]
         public void TestMvp(string file)
         {
             var path = GetFullPathFor(file);

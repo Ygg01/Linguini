@@ -10,7 +10,7 @@ namespace Linguini.Ast
     }
 
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public enum TextElementTermination : sbyte
+    public enum TextElementTermination : byte
     {
         LF,
         CRLF,
@@ -18,7 +18,7 @@ namespace Linguini.Ast
         EndOfFile
     }
 
-    public enum TextElementType : sbyte
+    public enum TextElementType : byte
     {
         Blank,
         NonBlank,

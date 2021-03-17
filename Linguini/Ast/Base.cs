@@ -56,7 +56,7 @@ namespace Linguini.Ast
     {
     }
 
-    public enum CommentLevel : sbyte
+    public enum CommentLevel : byte
     {
         None = 0,
         Comment = 1,

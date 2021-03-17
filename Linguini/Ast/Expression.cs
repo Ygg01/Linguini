@@ -35,6 +35,7 @@ namespace Linguini.Ast
         }
     }
 
+    [JsonConverter(typeof(FunctionReferenceSerializer))]
     public class FunctionReference : IInlineExpression
     {
         public Identifier Id;
@@ -60,6 +61,7 @@ namespace Linguini.Ast
         }
     }
 
+    [JsonConverter(typeof(TermReferenceSerializer))]
     public class TermReference : IInlineExpression
     {
         public Identifier Id;
@@ -73,7 +75,8 @@ namespace Linguini.Ast
             Arguments = arguments;
         }
     }
-
+    
+    [JsonConverter(typeof(VariableReferenceSerializer))]
     public class VariableReference : IInlineExpression
     {
         public Identifier Id;
@@ -95,6 +98,7 @@ namespace Linguini.Ast
         }
     }
 
+    [JsonConverter(typeof(CallArgumentsSerializer))]
     public struct CallArguments
     {
         public List<IInlineExpression> PositionalArgs;
@@ -107,6 +111,7 @@ namespace Linguini.Ast
         }
     }
 
+    [JsonConverter(typeof(NamedArgumentSerializer))]
     public struct NamedArgument
     {
         public Identifier Name;
@@ -119,6 +124,7 @@ namespace Linguini.Ast
         }
     }
 
+    [JsonConverter(typeof(SelectExpressionSerializer))]
     public class SelectExpression : IExpression
     {
         public IInlineExpression Selector;
@@ -131,12 +137,13 @@ namespace Linguini.Ast
         }
     }
 
-    public enum VariantType : sbyte
+    public enum VariantType : byte
     {
         Identifier,
         NumberLiteral,
     }
 
+    [JsonConverter(typeof(VariantSerializer))]
     public class Variant
     {
         public VariantType Type;
