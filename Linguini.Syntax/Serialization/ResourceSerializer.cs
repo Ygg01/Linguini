@@ -27,11 +27,11 @@ namespace Linguini.Syntax.Serialization
                 {
                     JsonSerializer.Serialize(writer, comment, options);
                 }
-                else if (entry.TryConvert(out Message msg))
+                else if (entry.TryConvert(out AstMessage msg))
                 {
                     JsonSerializer.Serialize(writer, msg, options);
                 }
-                else if (entry.TryConvert(out Term term))
+                else if (entry.TryConvert(out AstTerm term))
                 {
                     JsonSerializer.Serialize(writer, term, options);
                 }

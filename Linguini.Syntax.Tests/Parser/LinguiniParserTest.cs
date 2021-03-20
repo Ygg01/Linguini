@@ -74,7 +74,7 @@ namespace Linguini.Syntax.Tests.Parser
             Resource parsed = new LinguiniParser(input).Parse();
             Assert.AreEqual(0, parsed.Errors.Count, "Failed, with errors");
             Assert.AreEqual(1, parsed.Body.Count);
-            if (parsed.Body[0].TryConvert(out Message message)
+            if (parsed.Body[0].TryConvert(out AstMessage message)
                 && message.Value != null)
             {
                 Assert.AreEqual(expName, message.Id.ToString());
@@ -100,7 +100,7 @@ namespace Linguini.Syntax.Tests.Parser
             Assert.AreEqual(expBodySize, parsed.Body.Count);
             if (inMessage)
             {
-                parsed.Body[0].TryConvert(out Message? msg);
+                parsed.Body[0].TryConvert(out AstMessage? msg);
 
                 Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
 #pragma warning disable 8602
@@ -110,7 +110,7 @@ namespace Linguini.Syntax.Tests.Parser
             else
             {
                 parsed.Body[0].TryConvert(out Comment comment);
-                parsed.Body[1].TryConvert(out Message msg);
+                parsed.Body[1].TryConvert(out AstMessage msg);
 
                 Assert.AreEqual(expComment, comment.AsStr());
                 Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
@@ -130,7 +130,7 @@ namespace Linguini.Syntax.Tests.Parser
             Assert.AreEqual(expBodySize, parsed.Body.Count);
             if (inTerm)
             {
-                parsed.Body[0].TryConvert(out Term? term);
+                parsed.Body[0].TryConvert(out AstTerm? term);
 
                 Assert.AreEqual(expTerm, new string(term.Id.Name.ToArray()));
                 Assert.AreEqual(expComment, term.Comment.AsStr());
@@ -138,7 +138,7 @@ namespace Linguini.Syntax.Tests.Parser
             else
             {
                 parsed.Body[0].TryConvert(out Comment? comment);
-                parsed.Body[1].TryConvert(out Term? term);
+                parsed.Body[1].TryConvert(out AstTerm? term);
 
                 Assert.AreEqual(expComment, comment!.AsStr());
                 Assert.AreEqual(expTerm, new string(term!.Id.Name.ToArray()));
@@ -155,8 +155,8 @@ namespace Linguini.Syntax.Tests.Parser
 
             Assert.AreEqual(0, res.Errors.Count);
             Assert.AreEqual(1, res.Body.Count);
-            Assert.IsInstanceOf(typeof(Message), res.Body[0]);
-            if (res.Body[0].TryConvert(out Message message))
+            Assert.IsInstanceOf(typeof(AstMessage), res.Body[0]);
+            if (res.Body[0].TryConvert(out AstMessage message))
             {
                 Assert.AreEqual(1, message.Value.Elements.Count);
                 Assert.IsInstanceOf(typeof(Placeable), message.Value.Elements[0]);

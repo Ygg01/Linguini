@@ -8,10 +8,10 @@ using Linguini.Syntax.Serialization;
 namespace Linguini.Syntax.Ast
 {
     [JsonConverter(typeof(ResourceSerializer))]
-    public class Resource
+    public record Resource
     {
-        public List<IEntry> Body;
-        public List<ParseError> Errors;
+        public readonly List<IEntry> Body;
+        public readonly List<ParseError> Errors;
 
         public Resource(List<IEntry> body, List<ParseError> errors)
         {
@@ -21,36 +21,48 @@ namespace Linguini.Syntax.Ast
     }
 
     [JsonConverter(typeof(MessageSerializer))]
-    public class Message : IEntry
+    public class AstMessage : IEntry
     {
         public Identifier Id;
         public Pattern? Value;
         public List<Attribute> Attributes;
         public Comment? Comment;
 
-        public Message(Identifier id, Pattern? pattern, List<Attribute> attrs, Comment? comment)
+        public AstMessage(Identifier id, Pattern? pattern, List<Attribute> attrs, Comment? comment)
         {
             Id = id;
             Value = pattern;
             Attributes = attrs;
             Comment = comment;
         }
+
+
+        public string GetId()
+        {
+            return Id.ToString();
+        }
     }
 
     [JsonConverter(typeof(TermSerializer))]
-    public class Term : IEntry
+    public class AstTerm : IEntry
     {
         public Identifier Id;
         public Pattern Value;
         public List<Attribute> Attributes;
         public Comment? Comment;
 
-        public Term(Identifier id, Pattern value, List<Attribute> attributes, Comment? comment)
+        public AstTerm(Identifier id, Pattern value, List<Attribute> attributes, Comment? comment)
         {
             Id = id;
             Value = value;
             Attributes = attributes;
             Comment = comment;
+        }
+
+
+        public string GetId()
+        {
+            return Id.ToString();
         }
     }
 
@@ -82,6 +94,11 @@ namespace Linguini.Syntax.Ast
 
             return sb.ToString();
         }
+
+        public string GetId()
+        {
+            return "Comment";
+        }
     }
 
     [JsonConverter(typeof(JunkSerializer))]
@@ -90,6 +107,11 @@ namespace Linguini.Syntax.Ast
         public ReadOnlyMemory<char> Content;
 
         public string AsStr(string lineEnd = "\n")
+        {
+            return new(Content.Span);
+        }
+
+        public string GetId()
         {
             return new(Content.Span);
         }

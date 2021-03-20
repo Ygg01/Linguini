@@ -66,6 +66,7 @@ namespace Linguini.Syntax.Ast
 
     public interface IEntry
     {
+        string GetId();
     }
 
     public interface IInlineExpression : IExpression

@@ -5,14 +5,14 @@ using Linguini.Syntax.Ast;
 
 namespace Linguini.Syntax.Serialization
 {
-    public class TermSerializer : JsonConverter<Term>
+    public class TermSerializer : JsonConverter<AstTerm>
     {
-        public override Term? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override AstTerm? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public override void Write(Utf8JsonWriter writer, Term term, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, AstTerm term, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
             writer.WritePropertyName("type");

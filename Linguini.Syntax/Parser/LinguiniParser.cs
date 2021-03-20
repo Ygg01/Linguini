@@ -24,7 +24,10 @@ namespace Linguini.Syntax.Parser
 
         public LinguiniParser(TextReader input)
         {
-            _reader = new ZeroCopyReader(input.ReadToEnd());
+            using (input)
+            {
+                _reader = new ZeroCopyReader(input.ReadToEnd());
+            }
         }
 
         public Resource Parse()
@@ -43,12 +46,12 @@ namespace Linguini.Syntax.Parser
 
                 if (lastComment != null)
                 {
-                    if (entry.TryConvert<IEntry, Message>(out var message)
+                    if (entry.TryConvert<IEntry, AstMessage>(out var message)
                         && lastBlankCount < 2)
                     {
                         message.Comment = lastComment;
                     }
-                    else if (entry.TryConvert<IEntry, Term>(out var term)
+                    else if (entry.TryConvert<IEntry, AstTerm>(out var term)
                              && lastBlankCount < 2)
                     {
                         term.Comment = lastComment;
@@ -147,7 +150,7 @@ namespace Linguini.Syntax.Parser
 
             if (value != null)
             {
-                entry = new Term(id, value, attribute, null);
+                entry = new AstTerm(id, value, attribute, null);
                 return (entry, error);
             }
             else
@@ -185,7 +188,7 @@ namespace Linguini.Syntax.Parser
                 return (entry, ParseError.ExpectedMessageField(id.Name, entryStart, _reader.Position));
             }
 
-            return (new Message(id, pattern, attrs, null), null);
+            return (new AstMessage(id, pattern, attrs, null), null);
         }
 
 
