@@ -29,8 +29,8 @@ namespace Linguini.Syntax.Tests.Parser
             string expectedContent = "Comment")
         {
             Resource parsed = new LinguiniParser(input).Parse();
-            Assert.That(parsed.Body.Count, Is.EqualTo(1));
-            Assert.True(parsed.Body[0].TryConvert<IEntry, Comment>(out var comment));
+            Assert.That(parsed.Entries.Count, Is.EqualTo(1));
+            Assert.True(parsed.Entries[0].TryConvert<IEntry, AstComment>(out var comment));
             Assert.AreEqual(expectedCommentLevel, comment!.CommentLevel);
             Assert.AreEqual(expectedContent, comment.AsStr());
         }
@@ -73,8 +73,8 @@ namespace Linguini.Syntax.Tests.Parser
         {
             Resource parsed = new LinguiniParser(input).Parse();
             Assert.AreEqual(0, parsed.Errors.Count, "Failed, with errors");
-            Assert.AreEqual(1, parsed.Body.Count);
-            if (parsed.Body[0].TryConvert(out AstMessage message)
+            Assert.AreEqual(1, parsed.Entries.Count);
+            if (parsed.Entries[0].TryConvert(out AstMessage message)
                 && message.Value != null)
             {
                 Assert.AreEqual(expName, message.Id.ToString());
@@ -97,10 +97,10 @@ namespace Linguini.Syntax.Tests.Parser
             var expBodySize = inMessage ? 1 : 2;
             Resource parsed = new LinguiniParser(input).Parse();
             Assert.AreEqual(0, parsed.Errors.Count);
-            Assert.AreEqual(expBodySize, parsed.Body.Count);
+            Assert.AreEqual(expBodySize, parsed.Entries.Count);
             if (inMessage)
             {
-                parsed.Body[0].TryConvert(out AstMessage? msg);
+                parsed.Entries[0].TryConvert(out AstMessage? msg);
 
                 Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
 #pragma warning disable 8602
@@ -109,8 +109,8 @@ namespace Linguini.Syntax.Tests.Parser
             }
             else
             {
-                parsed.Body[0].TryConvert(out Comment comment);
-                parsed.Body[1].TryConvert(out AstMessage msg);
+                parsed.Entries[0].TryConvert(out AstComment comment);
+                parsed.Entries[1].TryConvert(out AstMessage msg);
 
                 Assert.AreEqual(expComment, comment.AsStr());
                 Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
@@ -127,18 +127,18 @@ namespace Linguini.Syntax.Tests.Parser
             var expBodySize = inTerm ? 1 : 2;
             Resource parsed = new LinguiniParser(input).Parse();
             Assert.AreEqual(0, parsed.Errors.Count);
-            Assert.AreEqual(expBodySize, parsed.Body.Count);
+            Assert.AreEqual(expBodySize, parsed.Entries.Count);
             if (inTerm)
             {
-                parsed.Body[0].TryConvert(out AstTerm? term);
+                parsed.Entries[0].TryConvert(out AstTerm? term);
 
                 Assert.AreEqual(expTerm, new string(term.Id.Name.ToArray()));
                 Assert.AreEqual(expComment, term.Comment.AsStr());
             }
             else
             {
-                parsed.Body[0].TryConvert(out Comment? comment);
-                parsed.Body[1].TryConvert(out AstTerm? term);
+                parsed.Entries[0].TryConvert(out AstComment? comment);
+                parsed.Entries[1].TryConvert(out AstTerm? term);
 
                 Assert.AreEqual(expComment, comment!.AsStr());
                 Assert.AreEqual(expTerm, new string(term!.Id.Name.ToArray()));
@@ -154,9 +154,9 @@ namespace Linguini.Syntax.Tests.Parser
             var res = new LinguiniParser(input).Parse();
 
             Assert.AreEqual(0, res.Errors.Count);
-            Assert.AreEqual(1, res.Body.Count);
-            Assert.IsInstanceOf(typeof(AstMessage), res.Body[0]);
-            if (res.Body[0].TryConvert(out AstMessage message))
+            Assert.AreEqual(1, res.Entries.Count);
+            Assert.IsInstanceOf(typeof(AstMessage), res.Entries[0]);
+            if (res.Entries[0].TryConvert(out AstMessage message))
             {
                 Assert.AreEqual(1, message.Value.Elements.Count);
                 Assert.IsInstanceOf(typeof(Placeable), message.Value.Elements[0]);

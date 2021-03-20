@@ -6,14 +6,14 @@ using Linguini.Syntax.Ast;
 
 namespace Linguini.Syntax.Serialization
 {
-    public class CommentSerializer : JsonConverter<Comment>
+    public class CommentSerializer : JsonConverter<AstComment>
     {
-        public override Comment? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override AstComment? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
 
-        public override void Write(Utf8JsonWriter writer, Comment comment, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, AstComment comment, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
             writer.WritePropertyName("type");

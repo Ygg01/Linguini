@@ -36,7 +36,7 @@ namespace Linguini.Syntax.Parser
             var errors = new List<ParseError>();
             _reader.SkipBlankBlock();
 
-            Comment? lastComment = null;
+            AstComment? lastComment = null;
             var lastBlankCount = 0;
 
             while (_reader.IsNotEof)
@@ -73,7 +73,7 @@ namespace Linguini.Syntax.Parser
                     junk.Content = _reader.ReadSlice(entryStart, _reader.Position);
                     body.Add(entry);
                 }
-                else if (entry.TryConvert<IEntry, Comment>(out var comment)
+                else if (entry.TryConvert<IEntry, AstComment>(out var comment)
                          && comment.CommentLevel == CommentLevel.Comment)
                 {
                     lastComment = comment;
@@ -194,7 +194,7 @@ namespace Linguini.Syntax.Parser
 
         #region CommentSyntax
 
-        private bool TryGetComment([NotNullWhen(true)] out Comment? comment, out ParseError? error)
+        private bool TryGetComment([NotNullWhen(true)] out AstComment? comment, out ParseError? error)
         {
             var level = CommentLevel.None;
             var content = new List<ReadOnlyMemory<char>>();
@@ -247,7 +247,7 @@ namespace Linguini.Syntax.Parser
                 _reader.SkipEol();
             }
 
-            comment = new Comment(level, content);
+            comment = new AstComment(level, content);
             error = null;
             return true;
         }

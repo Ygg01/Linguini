@@ -10,12 +10,12 @@ namespace Linguini.Syntax.Ast
     [JsonConverter(typeof(ResourceSerializer))]
     public record Resource
     {
-        public readonly List<IEntry> Body;
+        public readonly List<IEntry> Entries;
         public readonly List<ParseError> Errors;
 
         public Resource(List<IEntry> body, List<ParseError> errors)
         {
-            Body = body;
+            Entries = body;
             Errors = errors;
         }
     }
@@ -26,9 +26,9 @@ namespace Linguini.Syntax.Ast
         public Identifier Id;
         public Pattern? Value;
         public List<Attribute> Attributes;
-        public Comment? Comment;
+        public AstComment? Comment;
 
-        public AstMessage(Identifier id, Pattern? pattern, List<Attribute> attrs, Comment? comment)
+        public AstMessage(Identifier id, Pattern? pattern, List<Attribute> attrs, AstComment? comment)
         {
             Id = id;
             Value = pattern;
@@ -49,9 +49,9 @@ namespace Linguini.Syntax.Ast
         public Identifier Id;
         public Pattern Value;
         public List<Attribute> Attributes;
-        public Comment? Comment;
+        public AstComment? Comment;
 
-        public AstTerm(Identifier id, Pattern value, List<Attribute> attributes, Comment? comment)
+        public AstTerm(Identifier id, Pattern value, List<Attribute> attributes, AstComment? comment)
         {
             Id = id;
             Value = value;
@@ -68,12 +68,12 @@ namespace Linguini.Syntax.Ast
 
 
     [JsonConverter(typeof(CommentSerializer))]
-    public class Comment : IEntry
+    public class AstComment : IEntry
     {
         public CommentLevel CommentLevel;
         public readonly List<ReadOnlyMemory<char>> _content;
 
-        public Comment(CommentLevel commentLevel, List<ReadOnlyMemory<char>> content)
+        public AstComment(CommentLevel commentLevel, List<ReadOnlyMemory<char>> content)
         {
             CommentLevel = commentLevel;
             _content = content;

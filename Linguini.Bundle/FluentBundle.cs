@@ -4,12 +4,10 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Net.Mail;
 using Linguini.Bundle.Entry;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
-using Message = Linguini.Bundle.Entry.Message;
 
 namespace Linguini.Bundle
 {
@@ -80,20 +78,20 @@ namespace Linguini.Bundle
         public void AddResource(Resource res)
         {
             var resPos = Resources.Count;
-            for (var entryPos = 0; entryPos < res.Body.Count; entryPos++)
+            for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
             {
-                var entry = res.Body[entryPos];
+                var entry = res.Entries[entryPos];
                 var id = "";
                 IBundleEntry bundleEntry;
-                if (entry.TryConvert(out Syntax.Ast.AstMessage message))
+                if (entry.TryConvert(out AstMessage message))
                 {
                     id = message.GetId();
-                    bundleEntry = new Entry.Message(resPos, entryPos);
+                    bundleEntry = new Message(resPos, entryPos);
                 }
                 else if (entry.TryConvert(out AstTerm term))
                 {
                     id = term.GetId();
-                    bundleEntry = new Entry.Term(resPos, entryPos);
+                    bundleEntry = new Term(resPos, entryPos);
                 }
                 else
                 {
@@ -109,20 +107,20 @@ namespace Linguini.Bundle
         public void AddResourceOverriding(Resource res)
         {
             var resPos = Resources.Count;
-            for (var entryPos = 0; entryPos < res.Body.Count; entryPos++)
+            for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
             {
-                var entry = res.Body[entryPos];
+                var entry = res.Entries[entryPos];
                 var id = "";
                 IBundleEntry bundleEntry;
-                if (entry.TryConvert(out Syntax.Ast.AstMessage message))
+                if (entry.TryConvert(out AstMessage message))
                 {
                     id = message.GetId();
-                    bundleEntry = new Entry.Message(resPos, entryPos);
+                    bundleEntry = new Message(resPos, entryPos);
                 }
                 else if (entry.TryConvert(out AstTerm term))
                 {
                     id = term.GetId();
-                    bundleEntry = new Entry.Term(resPos, entryPos);
+                    bundleEntry = new Term(resPos, entryPos);
                 }
                 else
                 {
@@ -148,7 +146,7 @@ namespace Linguini.Bundle
                 && value.TryConvert(out Message msg))
             {
                 var res = Resources[msg.ResPos];
-                var entry = res.Body[msg.EntryPos];
+                var entry = res.Entries[msg.EntryPos];
 
                 return entry.TryConvert(out message);
             }
@@ -164,7 +162,7 @@ namespace Linguini.Bundle
                 && value.TryConvert(out Term term))
             {
                 var res = Resources[term.ResPos];
-                var entry = res.Body[term.EntryPos];
+                var entry = res.Entries[term.EntryPos];
 
                 return entry.TryConvert(out astTerm);
             }

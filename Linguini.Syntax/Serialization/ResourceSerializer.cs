@@ -21,9 +21,9 @@ namespace Linguini.Syntax.Serialization
             writer.WriteStringValue("Resource");
             writer.WritePropertyName("body");
             writer.WriteStartArray();
-            foreach (var entry in value.Body)
+            foreach (var entry in value.Entries)
             {
-                if (entry.TryConvert(out Comment comment))
+                if (entry.TryConvert(out AstComment comment))
                 {
                     JsonSerializer.Serialize(writer, comment, options);
                 }
