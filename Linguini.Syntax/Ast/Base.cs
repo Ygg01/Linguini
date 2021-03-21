@@ -8,7 +8,7 @@ using Linguini.Syntax.Serialization;
 namespace Linguini.Syntax.Ast
 {
     [JsonConverter(typeof(AttributeSerializer))]
-    public struct Attribute
+    public class Attribute
     {
         public Identifier Id;
         public Pattern Value;
@@ -47,7 +47,7 @@ namespace Linguini.Syntax.Ast
     }
 
     [JsonConverter(typeof(IdentifierSerializer))]
-    public class Identifier
+    public class Identifier : IEquatable<Identifier>
     {
         public ReadOnlyMemory<char> Name;
 
@@ -59,6 +59,26 @@ namespace Linguini.Syntax.Ast
         public override string ToString()
         {
             return new(Name.Span);
+        }
+
+        public bool Equals(Identifier? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return ToString().Equals(other.ToString());
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Identifier) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
         }
     }
 

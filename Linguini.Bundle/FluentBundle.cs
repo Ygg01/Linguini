@@ -29,6 +29,7 @@ namespace Linguini.Bundle
         public bool UseIsolating { get; set; }
         public Func<string, string>? TransformFunc { get; set; }
         public Func<IFluentType, string>? FormatterFunc { get; set; }
+        public byte MaxPlaceable { get; }
 
         internal FluentBundle()
         {
@@ -38,6 +39,7 @@ namespace Linguini.Bundle
             _entries = new Dictionary<string, IBundleEntry>();
             _funcList = new HashSet<string>();
             UseIsolating = true;
+            MaxPlaceable = 100;
         }
 
         public FluentBundle(string locale, FluentBundleOption option, out List<FluentError> errors) : this()
@@ -48,6 +50,7 @@ namespace Linguini.Bundle
             UseIsolating = option.UseIsolating;
             FormatterFunc = option.FormatterFunc;
             TransformFunc = option.TransformFunc;
+            MaxPlaceable = option.MaxPlaceable;
             AddFunctions(option.Functions, out errors, InsertBehavior.None);
         }
 
@@ -231,7 +234,7 @@ namespace Linguini.Bundle
         public bool TryWritePattern(TextWriter writer, Pattern pattern, FluentArgs? args,
             out IList<FluentError> errors)
         {
-            var scope = new Scope(this, args, out errors);
+            var scope = new Scope(this, args);
             pattern.Write(writer, scope, out errors);
 
             return errors.Count == 0;
@@ -241,9 +244,9 @@ namespace Linguini.Bundle
             out IList<FluentError> errors)
         {
             errors = new List<FluentError>();
-            var scope = new Scope(this, args, out errors);
+            var scope = new Scope(this, args);
             var value = pattern.Resolve(scope);
-            return value;
+            return value.AsString();
         }
     }
 
@@ -260,6 +263,7 @@ namespace Linguini.Bundle
         public IDictionary<string, FluentFunction> Functions { get; set; }
         public Func<IFluentType, string>? FormatterFunc;
         public Func<string, string>? TransformFunc;
+        public byte MaxPlaceable = 100;
     }
 
     public class LinguiniBundler

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
@@ -9,33 +8,60 @@ namespace Linguini.Bundle.Resolver
 {
     public static class ResolverHelpers
     {
-        private static readonly Func<string, string> identityFunc = s => s;
-
-        public static void Write(this Pattern pattern, TextWriter writer, Scope scope,
-            out IList<FluentError> errors)
+        public static IFluentType Resolve(this Pattern self, Scope scope)
         {
-            errors = new List<FluentError>();
-            throw new NotImplementedException();
-            
-            
-        }
-
-        public static FluentString Resolve(this Pattern pattern, Scope scope)
-        {
-            var len = pattern.Elements.Count;
+            var len = self.Elements.Count;
 
             if (len == 1)
             {
-                if (pattern.Elements[0].TryConvert(out TextLiteral textLiteral))
+                if (self.Elements[0].TryConvert(out TextLiteral textLiteral))
                 {
-                    var transformFunc = scope.Bundle.TransformFunc ?? identityFunc;
-                    return transformFunc(textLiteral.ToString());
+                    return GetFluentString(textLiteral.ToString(), scope.Bundle.TransformFunc);
                 }
             }
 
             StringWriter stringWriter = new StringWriter();
-            Write(pattern, stringWriter,scope, out _);
-            return stringWriter.ToString();
+            self.Write(stringWriter, scope, out _);
+            return (FluentString) stringWriter.ToString();
+        }
+
+        public static IFluentType Resolve(this IInlineExpression self, Scope scope)
+        {
+            if (self.TryConvert(out TextLiteral textLiteral))
+            {
+                return (FluentString) textLiteral.Value.Span;
+            }
+
+            if (self.TryConvert(out NumberLiteral numberLiteral))
+            {
+                return FluentNumber.TryNumber(numberLiteral.Value.Span);
+            }
+
+            if (self.TryConvert(out VariableReference varRef))
+            {
+                var args = scope.LocalArgs ?? scope.Args;
+                if (args != null
+                    && args.TryGetValue(varRef.Id.ToString(), out var arg))
+                {
+                    return (IFluentType) arg.Clone();
+                }
+
+                if (scope.LocalArgs == null)
+                {
+                    scope.AddError(ResolverFluentError.UnknownVariable(varRef));
+                }
+
+                return new FluentErrType();
+            }
+
+            var writer = new StringWriter();
+            self.TryWrite(writer, scope, out _);
+            return (FluentString) writer.ToString();
+        }
+
+        private static FluentString GetFluentString(string str, Func<string, string>? transformFunc)
+        {
+            return transformFunc == null ? str : transformFunc(str);
         }
     }
 }

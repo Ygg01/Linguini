@@ -582,7 +582,7 @@ namespace Linguini.Syntax.Parser
 
                 if (TryGetAttribute(out var attr, out _))
                 {
-                    attributes.Add(attr.Value);
+                    attributes.Add(attr);
                 }
                 else
                 {
