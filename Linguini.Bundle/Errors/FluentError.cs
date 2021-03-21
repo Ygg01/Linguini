@@ -3,16 +3,16 @@ using Linguini.Syntax.Parser.Error;
 
 namespace Linguini.Bundle.Errors
 {
-    public abstract record Error
+    public abstract record FluentError
     {
     }
 
-    public record OverrideError : Error
+    public record OverrideFluentError : FluentError
     {
         public readonly string Id;
         public EntryKind Kind;
 
-        public OverrideError(string id, EntryKind kind)
+        public OverrideFluentError(string id, EntryKind kind)
         {
             Id = id;
             Kind = kind;
@@ -24,7 +24,7 @@ namespace Linguini.Bundle.Errors
         }
     }
 
-    public record ResolverError : Error
+    public record ResolverFluentError : FluentError
     {
         public string Description;
 
@@ -34,7 +34,7 @@ namespace Linguini.Bundle.Errors
         }
     }
 
-    public record ParserError : Error
+    public record ParserFluentError : FluentError
     {
         public ParseError Error;
 

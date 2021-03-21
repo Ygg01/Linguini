@@ -7,7 +7,7 @@ namespace Linguini.Bundle
 {
     public class LinguiniException : Exception
     {
-        public LinguiniException(List<Error> errors)
+        public LinguiniException(List<FluentError> errors)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("Following errors weren't handled:\n");

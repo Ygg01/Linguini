@@ -6,12 +6,15 @@ using System.Globalization;
 using System.IO;
 using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
+using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
 
 namespace Linguini.Bundle
 {
+    using FluentArgs = IDictionary<string, IFluentType>;
+    
     public class FluentBundle
     {
         private HashSet<string> _funcList;
@@ -37,7 +40,7 @@ namespace Linguini.Bundle
             UseIsolating = true;
         }
 
-        public FluentBundle(string locale, FluentBundleOption option, out List<Error> errors) : this()
+        public FluentBundle(string locale, FluentBundleOption option, out List<FluentError> errors) : this()
         {
             Locales = new List<string>();
             Locales.Add(locale);
@@ -48,10 +51,10 @@ namespace Linguini.Bundle
             AddFunctions(option.Functions, out errors, InsertBehavior.None);
         }
 
-        public void AddFunctions(IDictionary<string, FluentFunction> functions, out List<Error> errors,
+        public void AddFunctions(IDictionary<string, FluentFunction> functions, out List<FluentError> errors,
             InsertBehavior behavior = InsertBehavior.Throw)
         {
-            errors = new List<Error>();
+            errors = new List<FluentError>();
             foreach (var keyValue in functions)
             {
                 if (!AddFunction(keyValue.Key, keyValue.Value, out var errs, behavior))
@@ -62,7 +65,7 @@ namespace Linguini.Bundle
         }
 
         public bool AddFunction(string funcName, FluentFunction fluentFunction,
-            [NotNullWhen(false)] out IList<Error>? errors,
+            [NotNullWhen(false)] out IList<FluentError>? errors,
             InsertBehavior behavior = InsertBehavior.Throw)
         {
             errors = null;
@@ -71,9 +74,9 @@ namespace Linguini.Bundle
                 case InsertBehavior.None:
                     if (!_entries.TryAdd(funcName, fluentFunction))
                     {
-                        errors = new List<Error>
+                        errors = new List<FluentError>
                         {
-                            new OverrideError(funcName, EntryKind.Function)
+                            new OverrideFluentError(funcName, EntryKind.Function)
                         };
                     }
 
@@ -84,9 +87,9 @@ namespace Linguini.Bundle
                 default:
                     if (_entries.ContainsKey(funcName))
                     {
-                        errors = new List<Error>
+                        errors = new List<FluentError>
                         {
-                            new OverrideError(funcName, EntryKind.Function)
+                            new OverrideFluentError(funcName, EntryKind.Function)
                         };
                     }
 
@@ -98,10 +101,10 @@ namespace Linguini.Bundle
             return errors == null;
         }
 
-        public bool AddResource(Resource res, [NotNullWhen(false)] out List<Error>? errors)
+        public bool AddResource(Resource res, [NotNullWhen(false)] out List<FluentError>? errors)
         {
             var resPos = Resources.Count;
-            var accErrors = new List<Error>();
+            var accErrors = new List<FluentError>();
             for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
             {
                 var entry = res.Entries[entryPos];
@@ -124,7 +127,7 @@ namespace Linguini.Bundle
 
                 if (_entries.ContainsKey(id))
                 {
-                    accErrors.Add(new OverrideError(id, _entries[id].ToKind()));
+                    accErrors.Add(new OverrideFluentError(id, _entries[id].ToKind()));
                 }
                 else
                 {
@@ -224,6 +227,24 @@ namespace Linguini.Bundle
             function = null;
             return false;
         }
+
+        public bool TryWritePattern(TextWriter writer, Pattern pattern, FluentArgs? args,
+            out IList<FluentError> errors)
+        {
+            var scope = new Scope(this, args, out errors);
+            pattern.Write(writer, scope, out errors);
+
+            return errors.Count == 0;
+        }
+
+        public string FormatPattern(Pattern pattern, FluentArgs? args,
+            out IList<FluentError> errors)
+        {
+            errors = new List<FluentError>();
+            var scope = new Scope(this, args, out errors);
+            var value = pattern.Resolve(scope);
+            return value;
+        }
     }
 
     public enum InsertBehavior : byte
@@ -273,7 +294,7 @@ namespace Linguini.Bundle
         {
             FluentBundle UncheckedBuild();
 
-            (FluentBundle, List<Error>) Build();
+            (FluentBundle, List<FluentError>) Build();
         }
 
         public interface IReadyStep : IBuildStep
@@ -323,7 +344,7 @@ namespace Linguini.Bundle
                 return bundle;
             }
 
-            public (FluentBundle, List<Error>) Build()
+            public (FluentBundle, List<FluentError>) Build()
             {
                 var bundle = new FluentBundle()
                 {
@@ -334,7 +355,7 @@ namespace Linguini.Bundle
                     TransformFunc = _transformFunc,
                 };
 
-                var errors = new List<Error>();
+                var errors = new List<FluentError>();
                 if (_functions.Count > 0)
                 {
                     bundle.AddFunctions(_functions, out var funcErr);
