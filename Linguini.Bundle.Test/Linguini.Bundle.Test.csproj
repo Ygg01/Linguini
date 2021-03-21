@@ -16,4 +16,8 @@
       <Folder Include="fixtures" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Linguini.Bundle\Linguini.Bundle.csproj" />
+    </ItemGroup>
+
 </Project>

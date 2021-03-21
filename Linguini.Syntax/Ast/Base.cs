@@ -34,6 +34,16 @@ namespace Linguini.Syntax.Ast
         {
             Elements = new List<IPatternElement>();
         }
+
+        public override string ToString()
+        {
+            if (Elements.Count == 1 && Elements[0] is TextLiteral)
+            {
+                return Elements[0].ToString()!;
+            }
+
+            return "";
+        }
     }
 
     [JsonConverter(typeof(IdentifierSerializer))]

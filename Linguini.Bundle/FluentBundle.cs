@@ -45,7 +45,7 @@ namespace Linguini.Bundle
             UseIsolating = option.UseIsolating;
             FormatterFunc = option.FormatterFunc;
             TransformFunc = option.TransformFunc;
-            AddFunctions(option.Functions, out errors,InsertBehavior.None);
+            AddFunctions(option.Functions, out errors, InsertBehavior.None);
         }
 
         public void AddFunctions(IDictionary<string, FluentFunction> functions, out List<Error> errors,
@@ -76,6 +76,7 @@ namespace Linguini.Bundle
                             new OverrideError(funcName, EntryKind.Function)
                         };
                     }
+
                     break;
                 case InsertBehavior.Overriding:
                     _entries[funcName] = fluentFunction;
@@ -86,7 +87,7 @@ namespace Linguini.Bundle
                         errors = new List<Error>
                         {
                             new OverrideError(funcName, EntryKind.Function)
-                        }; 
+                        };
                     }
 
                     _entries.Add(funcName, fluentFunction);
@@ -97,7 +98,7 @@ namespace Linguini.Bundle
             return errors == null;
         }
 
-        public bool AddResource(Resource res,  [NotNullWhen(false)] out List<Error>? errors)
+        public bool AddResource(Resource res, [NotNullWhen(false)] out List<Error>? errors)
         {
             var resPos = Resources.Count;
             var accErrors = new List<Error>();
@@ -242,15 +243,30 @@ namespace Linguini.Bundle
 
     public class LinguiniBundler
     {
+        public static ILocaleStep New()
+        {
+            return new StepBuilder();
+        }
+
         public interface IStep
         {
         }
 
         public interface ILocaleStep : IStep
         {
-            IReadyStep Locale(string unparsedLocale);
-            IReadyStep Locales(IList<string> unparsedLocales);
-            IReadyStep CultureInfo(CultureInfo culture);
+            IResourceStep Locale(string unparsedLocale);
+            IResourceStep Locales(IList<string> unparsedLocales);
+            IResourceStep CultureInfo(CultureInfo culture);
+        }
+
+        public interface IResourceStep : IStep
+        {
+            IReadyStep AddResource(string unparsedResource);
+            IReadyStep AddResources(IList<string> unparsedResourceList);
+            IReadyStep AddResource(TextReader unparsed);
+            IReadyStep AddResources(IList<TextReader> unparsedStreamList);
+            IReadyStep AddResource(Resource resource);
+            IReadyStep AddResources(IList<Resource> resource);
         }
 
         public interface IBuildStep : IStep
@@ -267,7 +283,7 @@ namespace Linguini.Bundle
             IReadyStep SetFormatterFunc(Func<IFluentType, string> formatterFunc);
         }
 
-        private class StepBuilder : IReadyStep, ILocaleStep
+        private class StepBuilder : IReadyStep, ILocaleStep, IResourceStep
         {
             private CultureInfo _culture;
             private List<string> _locales = new();
@@ -275,8 +291,7 @@ namespace Linguini.Bundle
             private bool _useIsolating = true;
             private Func<IFluentType, string>? _formatterFunc;
             private Func<string, string>? _transformFunc;
-            private Dictionary<string, FluentFunction> _functions;
-            private Dictionary<string, IBundleEntry> _entries;
+            private Dictionary<string, FluentFunction> _functions = new();
 
             public IReadyStep SetUseIsolating(bool isIsolating)
             {
@@ -320,8 +335,11 @@ namespace Linguini.Bundle
                 };
 
                 var errors = new List<Error>();
-                bundle.AddFunctions(_functions, out var funcErr);
-                errors.AddRange(funcErr);
+                if (_functions.Count > 0)
+                {
+                    bundle.AddFunctions(_functions, out var funcErr);
+                    errors.AddRange(funcErr);
+                }
                 foreach (var resource in _resources)
                 {
                     if (!bundle.AddResource(resource, out var resErr))
@@ -333,14 +351,14 @@ namespace Linguini.Bundle
                 return (bundle, errors);
             }
 
-            public IReadyStep Locale(string unparsedLocale)
+            public IResourceStep Locale(string unparsedLocale)
             {
                 _culture = new CultureInfo(unparsedLocale);
                 _locales.Add(unparsedLocale);
                 return this;
             }
 
-            public IReadyStep Locales(IList<string> unparsedLocales)
+            public IResourceStep Locales(IList<string> unparsedLocales)
             {
                 if (unparsedLocales.Count > 0)
                 {
@@ -351,7 +369,7 @@ namespace Linguini.Bundle
                 return this;
             }
 
-            public IReadyStep CultureInfo(CultureInfo culture)
+            public IResourceStep CultureInfo(CultureInfo culture)
             {
                 _culture = culture;
                 _locales.Add(culture.ToString());

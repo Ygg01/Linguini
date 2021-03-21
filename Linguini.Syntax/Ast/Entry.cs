@@ -36,7 +36,6 @@ namespace Linguini.Syntax.Ast
             Comment = comment;
         }
 
-
         public string GetId()
         {
             return Id.ToString();
