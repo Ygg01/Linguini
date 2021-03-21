@@ -273,7 +273,7 @@ namespace Linguini.Bundle
         {
             FluentBundle UncheckedBuild();
 
-            (FluentBundle, List<Error>) CheckedBuild();
+            (FluentBundle, List<Error>) Build();
         }
 
         public interface IReadyStep : IBuildStep
@@ -313,7 +313,7 @@ namespace Linguini.Bundle
 
             public FluentBundle UncheckedBuild()
             {
-                var (bundle, errors) = CheckedBuild();
+                var (bundle, errors) = Build();
 
                 if (errors.Count > 0)
                 {
@@ -323,7 +323,7 @@ namespace Linguini.Bundle
                 return bundle;
             }
 
-            public (FluentBundle, List<Error>) CheckedBuild()
+            public (FluentBundle, List<Error>) Build()
             {
                 var bundle = new FluentBundle()
                 {
