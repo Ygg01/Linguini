@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using Linguini.Bundle.Entry;
+using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
@@ -36,7 +37,7 @@ namespace Linguini.Bundle
             UseIsolating = true;
         }
 
-        public FluentBundle(string locale, FluentBundleOption option) : this()
+        public FluentBundle(string locale, FluentBundleOption option, out List<Error> errors) : this()
         {
             Locales = new List<string>();
             Locales.Add(locale);
@@ -44,40 +45,62 @@ namespace Linguini.Bundle
             UseIsolating = option.UseIsolating;
             FormatterFunc = option.FormatterFunc;
             TransformFunc = option.TransformFunc;
-            AddFunctions(option.Functions, InsertBehavior.None);
+            AddFunctions(option.Functions, out errors,InsertBehavior.None);
         }
 
-        public void AddFunctions(IDictionary<string, FluentFunction> functions,
+        public void AddFunctions(IDictionary<string, FluentFunction> functions, out List<Error> errors,
             InsertBehavior behavior = InsertBehavior.Throw)
         {
+            errors = new List<Error>();
             foreach (var keyValue in functions)
             {
-                AddFunction(keyValue.Key, keyValue.Value, behavior);
+                if (!AddFunction(keyValue.Key, keyValue.Value, out var errs, behavior))
+                {
+                    errors.AddRange(errs);
+                }
             }
         }
 
-        public void AddFunction(string funcName, FluentFunction fluentFunction,
+        public bool AddFunction(string funcName, FluentFunction fluentFunction,
+            [NotNullWhen(false)] out IList<Error>? errors,
             InsertBehavior behavior = InsertBehavior.Throw)
         {
+            errors = null;
             switch (behavior)
             {
                 case InsertBehavior.None:
-                    _entries.TryAdd(funcName, fluentFunction);
+                    if (!_entries.TryAdd(funcName, fluentFunction))
+                    {
+                        errors = new List<Error>
+                        {
+                            new OverrideError(funcName, EntryKind.Function)
+                        };
+                    }
                     break;
                 case InsertBehavior.Overriding:
                     _entries[funcName] = fluentFunction;
                     break;
                 default:
+                    if (_entries.ContainsKey(funcName))
+                    {
+                        errors = new List<Error>
+                        {
+                            new OverrideError(funcName, EntryKind.Function)
+                        }; 
+                    }
+
                     _entries.Add(funcName, fluentFunction);
                     break;
             }
 
             _funcList.Add(funcName);
+            return errors == null;
         }
 
-        public void AddResource(Resource res)
+        public bool AddResource(Resource res,  [NotNullWhen(false)] out List<Error>? errors)
         {
             var resPos = Resources.Count;
+            var accErrors = new List<Error>();
             for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
             {
                 var entry = res.Entries[entryPos];
@@ -98,10 +121,25 @@ namespace Linguini.Bundle
                     continue;
                 }
 
-                _entries.Add(id, bundleEntry);
+                if (_entries.ContainsKey(id))
+                {
+                    accErrors.Add(new OverrideError(id, _entries[id].ToKind()));
+                }
+                else
+                {
+                    _entries.Add(id, bundleEntry);
+                }
             }
 
             Resources.Add(res);
+            if (accErrors.Count == 0)
+            {
+                errors = null;
+                return true;
+            }
+
+            errors = accErrors;
+            return false;
         }
 
         public void AddResourceOverriding(Resource res)
@@ -135,7 +173,7 @@ namespace Linguini.Bundle
 
         public bool HasMessage(string id)
         {
-            return Entries.ContainsKey(id) 
+            return Entries.ContainsKey(id)
                    && Entries[id].TryConvert<IBundleEntry, Message>(out _);
         }
 
@@ -143,6 +181,7 @@ namespace Linguini.Bundle
         {
             if (Entries.ContainsKey(id)
                 && Entries.TryGetValue(id, out var value)
+                && value.ToKind() == EntryKind.Message
                 && value.TryConvert(out Message msg))
             {
                 var res = Resources[msg.ResPos];
@@ -154,11 +193,12 @@ namespace Linguini.Bundle
             message = null;
             return false;
         }
-        
+
         public bool TryGetTerm(string id, [NotNullWhen(true)] out AstTerm? astTerm)
         {
             if (Entries.ContainsKey(id)
                 && Entries.TryGetValue(id, out var value)
+                && value.ToKind() == EntryKind.Term
                 && value.TryConvert(out Term term))
             {
                 var res = Resources[term.ResPos];
@@ -174,9 +214,9 @@ namespace Linguini.Bundle
         public bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
         {
             if (Entries.ContainsKey(funcName)
-                && Entries.TryGetValue(funcName, out var value))
+                && Entries.TryGetValue(funcName, out var value)
+                && value.ToKind() == EntryKind.Function)
             {
-                
                 return value.TryConvert(out function);
             }
 
@@ -215,7 +255,9 @@ namespace Linguini.Bundle
 
         public interface IBuildStep : IStep
         {
-            FluentBundle Build();
+            FluentBundle UncheckedBuild();
+
+            (FluentBundle, List<Error>) CheckedBuild();
         }
 
         public interface IReadyStep : IBuildStep
@@ -254,7 +296,19 @@ namespace Linguini.Bundle
                 return this;
             }
 
-            public FluentBundle Build()
+            public FluentBundle UncheckedBuild()
+            {
+                var (bundle, errors) = CheckedBuild();
+
+                if (errors.Count > 0)
+                {
+                    throw new LinguiniException(errors);
+                }
+
+                return bundle;
+            }
+
+            public (FluentBundle, List<Error>) CheckedBuild()
             {
                 var bundle = new FluentBundle()
                 {
@@ -265,13 +319,18 @@ namespace Linguini.Bundle
                     TransformFunc = _transformFunc,
                 };
 
-                bundle.AddFunctions(_functions);
+                var errors = new List<Error>();
+                bundle.AddFunctions(_functions, out var funcErr);
+                errors.AddRange(funcErr);
                 foreach (var resource in _resources)
                 {
-                    bundle.AddResource(resource);
+                    if (!bundle.AddResource(resource, out var resErr))
+                    {
+                        errors.AddRange(resErr);
+                    }
                 }
 
-                return bundle;
+                return (bundle, errors);
             }
 
             public IReadyStep Locale(string unparsedLocale)

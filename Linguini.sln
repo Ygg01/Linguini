@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linguini.Syntax.Tests", "Li
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linguini.Bundle", "Linguini.Bundle\Linguini.Bundle.csproj", "{A69941C5-1E29-4515-8A67-7F6837BF5FEF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linguini.Bundle.Test", "Linguini.Bundle.Test\Linguini.Bundle.Test.csproj", "{C991AF9F-C501-4A03-BFEB-04622A4EA7E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{A69941C5-1E29-4515-8A67-7F6837BF5FEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A69941C5-1E29-4515-8A67-7F6837BF5FEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A69941C5-1E29-4515-8A67-7F6837BF5FEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C991AF9F-C501-4A03-BFEB-04622A4EA7E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C991AF9F-C501-4A03-BFEB-04622A4EA7E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C991AF9F-C501-4A03-BFEB-04622A4EA7E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C991AF9F-C501-4A03-BFEB-04622A4EA7E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

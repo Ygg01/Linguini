@@ -7,11 +7,11 @@ namespace Linguini.Syntax.Parser.Error
     public class ParseError
     {
         public ErrorType Kind { get; }
-        public string? Message { get; }
+        public string Message { get; }
         public Range Position { get; }
         public Range? Slice { get; set; }
 
-        private ParseError(ErrorType kind, string? message, Range position)
+        private ParseError(ErrorType kind, string message, Range position)
         {
             Kind = kind;
             Message = message;
