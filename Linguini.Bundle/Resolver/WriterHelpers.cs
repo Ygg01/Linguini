@@ -1,7 +1,8 @@
-﻿
+﻿#nullable enable
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
@@ -105,8 +106,25 @@ namespace Linguini.Bundle.Resolver
 
             if (self.TryConvert(out MessageReference msgRef))
             {
-                
                 return ProcessMsgRef(self, writer, scope, msgRef);;
+            }
+
+            if (self.TryConvert(out TermReference termRef))
+            {
+                var res = scope.GetArguments(termRef.Arguments);
+                var retVal = false;
+                scope.SetLocalArgs(res.named);
+                if (scope.Bundle.TryGetTerm(termRef.Id.ToString(), out var term))
+                {
+                    var attr = term.Attributes.Find(a => a.Id.Equals(termRef.Attribute));
+                    if (attr != null)
+                    {
+                        scope.Track(writer, attr.Value, self);
+                        retVal = true;
+                    }
+                }
+                scope.SetLocalArgs(null);
+                return retVal;
             }
 
             // TODO

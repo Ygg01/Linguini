@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+using System.Collections.Generic;
 using System.IO;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
@@ -13,12 +14,13 @@ namespace Linguini.Bundle.Resolver
         private Dictionary<string, IFluentType>? _localArgs;
         private List<Pattern> _travelled;
         private List<FluentError> _errors;
+
         public Scope(FluentBundle fluentBundle, IDictionary<string, IFluentType>? args)
         {
             Placeable = 0;
             Bundle = fluentBundle;
             Dirty = false;
-            
+
             _errors = new List<FluentError>();
             _travelled = new List<Pattern>();
             if (args != null)
@@ -29,6 +31,7 @@ namespace Linguini.Bundle.Resolver
             {
                 _args = null;
             }
+
             _localArgs = null;
             _errors = new List<FluentError>();
         }
@@ -37,7 +40,9 @@ namespace Linguini.Bundle.Resolver
         public short Placeable { get; private set; }
 
         public IList<FluentError> Errors => _errors;
+
         public IReadOnlyDictionary<string, IFluentType>? LocalArgs => _localArgs;
+
         public IReadOnlyDictionary<string, IFluentType>? Args => _args;
 
         public short IncrPlaceable()
@@ -60,7 +65,7 @@ namespace Linguini.Bundle.Resolver
 
             if (!expr.TryWrite(writer, this, out errors))
             {
-                return  false;
+                return false;
             }
 
             if (Dirty)
@@ -85,5 +90,25 @@ namespace Linguini.Bundle.Resolver
             // TODO
             throw new System.NotImplementedException();
         }
+
+        public ResolvedArgs GetArguments(CallArguments? termReferenceArguments)
+        {
+            // TODO
+            throw new System.NotImplementedException();
+        }
+
+        public void SetLocalArgs(IDictionary<string, IFluentType>? resNamed)
+        {
+            if (resNamed != null)
+            {
+                _localArgs = new Dictionary<string, IFluentType>(resNamed);
+            }
+            else
+            {
+                _localArgs = new Dictionary<string, IFluentType>();
+            }
+        }
     }
+
+    public record ResolvedArgs(IList<IFluentType> positional, IDictionary<string, IFluentType> named);
 }
