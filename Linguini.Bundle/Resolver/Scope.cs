@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Linguini.Bundle.Errors;
@@ -79,22 +80,70 @@ namespace Linguini.Bundle.Resolver
             return true;
         }
 
-        public void Track(TextWriter writer, Pattern xValue, IInlineExpression self)
+        public void Track(TextWriter writer, Pattern pattern, IInlineExpression exp)
         {
-            // TODO
-            throw new System.NotImplementedException();
+            if (_travelled.Contains(pattern))
+            {
+                AddError(ResolverFluentError.Cyclic(pattern));
+                writer.Write('{');
+                exp.WriteError(writer);
+                writer.Write('}');
+            }
+            else
+            {
+                _travelled.Add(pattern);
+                pattern.Write(writer, this, out _);
+                PopTraveled();
+                _travelled.RemoveAt(_travelled.Count - 1);
+            }
         }
 
-        public bool WriteRefError(TextWriter writer, IInlineExpression self)
+        private void PopTraveled()
         {
-            // TODO
-            throw new System.NotImplementedException();
+            if (_travelled.Count > 0)
+            {
+                _travelled.RemoveAt(_travelled.Count - 1);
+            }
         }
 
-        public ResolvedArgs GetArguments(CallArguments? termReferenceArguments)
+        public bool WriteRefError(TextWriter writer, IInlineExpression exp)
         {
-            // TODO
-            throw new System.NotImplementedException();
+            AddError(ResolverFluentError.Reference(exp));
+            try
+            {
+                writer.Write('{');
+                exp.WriteError(writer);
+                writer.Write('}');
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        public ResolvedArgs GetArguments(CallArguments? callArguments)
+        {
+            var positionalArgs = new List<IFluentType>();
+            var namedArgs = new Dictionary<string, IFluentType>();
+            if (callArguments != null)
+            {
+                var listPositional = callArguments.Value.PositionalArgs;
+                for (var i = 0; i < listPositional.Count; i++)
+                {
+                    var expr = listPositional[i].Resolve(this);
+                    positionalArgs.Add(expr);
+                }
+
+                var listNamed = callArguments.Value.NamedArgs;
+                for (var i = 0; i < listNamed.Count; i++)
+                {
+                    var arg = listNamed[i];
+                    namedArgs.Add(arg.Name.ToString(), arg.Value.Resolve(this));
+                }
+            }
+
+            return new ResolvedArgs(positionalArgs, namedArgs);
         }
 
         public void SetLocalArgs(IDictionary<string, IFluentType>? resNamed)

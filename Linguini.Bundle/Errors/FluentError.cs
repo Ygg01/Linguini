@@ -93,6 +93,11 @@ namespace Linguini.Bundle.Errors
 
             throw new ArgumentException($"Expected reference got ${self.GetType()}");
         }
+
+        public static ResolverFluentError Cyclic(Pattern pattern)
+        {
+            return new($"Cyclic pattern {pattern.Stringify()} detected!");
+        }
     }
 
     public record ParserFluentError : FluentError
