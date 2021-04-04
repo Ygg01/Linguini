@@ -53,6 +53,46 @@ namespace Linguini.Bundle.Errors
         {
             return new("Too many placeables");
         }
+
+        public static ResolverFluentError Reference(IInlineExpression self)
+        {
+            // TODO only allow references here
+            if (self.TryConvert(out FunctionReference funcRef))
+            {
+                return new($"Unknown function: {funcRef.Id}()");
+            }
+
+            if (self.TryConvert(out MessageReference msgRef))
+            {
+                if (msgRef.Attribute == null)
+                {
+                    return new($"Unknown message: {msgRef.Id}");
+                }
+                else
+                {
+                    return new($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}");
+                }
+            }
+
+            if (self.TryConvert(out TermReference termReference))
+            {
+                if (termReference.Attribute == null)
+                {
+                    return new($"Uknown term: -{termReference.Id}");
+                }
+                else
+                {
+                    return new($"Unknown attribute: -{termReference.Id}.{termReference.Attribute}");
+                }
+            }
+
+            if (self.TryConvert(out VariableReference varRef))
+            {
+                return new($"Unknown variable: ${varRef.Id}");
+            }
+
+            throw new ArgumentException($"Expected reference got ${self.GetType()}");
+        }
     }
 
     public record ParserFluentError : FluentError

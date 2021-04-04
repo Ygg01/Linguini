@@ -3,7 +3,7 @@
 #nullable enable
 namespace Linguini.Bundle.Types
 {
-    public class FluentNumber : IFluentType
+    public class FluentNumber : IFluentType, IEquatable<FluentNumber>
     {
         public readonly double Value;
         public FluentNumberOptions Options;
@@ -13,25 +13,27 @@ namespace Linguini.Bundle.Types
             Value = value;
             Options = options;
         }
+
         public string AsString()
         {
             // TODO
             throw new NotImplementedException();
         }
 
-        
+
         public static FluentNumber FromString(ReadOnlySpan<char> input)
         {
             var parsed = Double.Parse(input);
             var options = new FluentNumberOptions();
-            options.MaximumFractionDigits = input.Length  - input.IndexOf('.') - 1;
+            options.MaximumFractionDigits = input.Length - input.IndexOf('.') - 1;
             return new FluentNumber(parsed, options);
         }
+
         public static FluentNumber FromString(string input)
         {
             var parsed = Double.Parse(input);
             var options = new FluentNumberOptions();
-            options.MaximumFractionDigits = input.Length  - input.IndexOf('.') - 1;
+            options.MaximumFractionDigits = input.Length - input.IndexOf('.') - 1;
             return new FluentNumber(parsed, options);
         }
 
@@ -46,10 +48,34 @@ namespace Linguini.Bundle.Types
                 return new FluentString(valueSpan);
             }
         }
+        
+        public static implicit operator double(FluentNumber fs) => fs.Value;
+        public static implicit operator FluentNumber(double db) => new(db, new FluentNumberOptions());
+        public static implicit operator FluentNumber(float fl) => new(fl, new FluentNumberOptions());
 
         public object Clone()
         {
             return new FluentNumber(Value, Options);
+        }
+
+        public bool Equals(FluentNumber? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Value.Equals(other.Value);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((FluentNumber) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
         }
     }
 
@@ -85,8 +111,9 @@ namespace Linguini.Bundle.Types
         Currency,
         Percent,
     }
-    
-    public enum FluentNumberCurrencyDisplayStyle {
+
+    public enum FluentNumberCurrencyDisplayStyle
+    {
         Symbol,
         Code,
         Name,

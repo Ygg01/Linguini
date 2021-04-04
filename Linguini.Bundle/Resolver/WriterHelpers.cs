@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
@@ -69,44 +68,65 @@ namespace Linguini.Bundle.Resolver
             }
 
             errors = new List<FluentError>();
-            throw new NotImplementedException();
         }
 
         public static bool TryWrite(this IExpression expression, TextWriter writer, Scope scope,
             out IList<FluentError> errors)
         {
+            errors = new List<FluentError>();
             if (expression.TryConvert(out IInlineExpression inlineExpression))
             {
-                inlineExpression.TryWrite(writer, scope, out errors);
+                inlineExpression.Write(writer, scope);
             }
             else if (expression.TryConvert(out SelectExpression selectExpression))
             {
                 var selector = selectExpression.Selector.Resolve(scope);
+                if (selector.TryConvert(out FluentString _)
+                    || selector.TryConvert(out FluentNumber _))
+                {
+                    foreach (var variant in selectExpression.Variants)
+                    {
+                        IFluentType key;
+                        switch (variant.Type)
+                        {
+                            case VariantType.NumberLiteral:
+                                key = FluentNumber.TryNumber(variant.Key.Span);
+                                break;
+                            default:
+                                key = new FluentString(variant.Key.Span);
+                                break;
+                        }
+
+                        if (key.Matches(selector, scope))
+                        {
+                            variant.Value.Write(writer, scope, out errors);
+                        }
+                    }
+                }
             }
 
-            // TODO
-            throw new NotImplementedException();
+            return errors.Count == 0;
         }
 
-        public static bool TryWrite(this IInlineExpression self, TextWriter writer, Scope scope,
-            out IList<FluentError> errors)
+        public static void Write(this IInlineExpression self, TextWriter writer, Scope scope)
         {
-            errors = new List<FluentError>();
             if (self.TryConvert(out TextLiteral textLiteral))
             {
                 writer.Write(textLiteral.Value.Span);
-                return true;
+                return;
             }
 
             if (self.TryConvert(out NumberLiteral numberLiteral))
             {
                 writer.Write(FluentNumber.TryNumber(numberLiteral.Value.Span));
-                return true;
+                return;
             }
 
             if (self.TryConvert(out MessageReference msgRef))
             {
-                return ProcessMsgRef(self, writer, scope, msgRef);;
+                ProcessMsgRef(self, writer, scope, msgRef);
+                return;
+                ;
             }
 
             if (self.TryConvert(out TermReference termRef))
@@ -116,22 +136,92 @@ namespace Linguini.Bundle.Resolver
                 scope.SetLocalArgs(res.named);
                 if (scope.Bundle.TryGetTerm(termRef.Id.ToString(), out var term))
                 {
-                    var attr = term.Attributes.Find(a => a.Id.Equals(termRef.Attribute));
+                    var attrName = termRef.Attribute;
+                    var attr = term
+                        .Attributes
+                        .Find(a => a.Id.Equals(attrName));
                     if (attr != null)
                     {
                         scope.Track(writer, attr.Value, self);
                         retVal = true;
                     }
+                    else
+                    {
+                        scope.Track(writer, term.Value, self);
+                    }
                 }
+                else
+                {
+                    scope.WriteRefError(writer, self);
+                }
+
                 scope.SetLocalArgs(null);
-                return retVal;
+                return;
             }
 
-            // TODO
-            throw new NotImplementedException();
+            if (self.TryConvert(out FunctionReference funcRef))
+            {
+                var (resolvedPosArgs, resolvedNamedArgs) = scope.GetArguments(funcRef.Arguments);
+
+                if (scope.Bundle.TryGetFunction(funcRef.Id, out var func))
+                {
+                    var result = func.Function(resolvedPosArgs, resolvedNamedArgs);
+                    if (result.IsError())
+                    {
+                        self.WriteError(writer);
+                    }
+                    else
+                    {
+                        writer.Write(result.AsString());
+                    }
+                }
+                else
+                {
+                    scope.WriteRefError(writer, self);
+                }
+            }
+
+            if (self.TryConvert(out VariableReference varRef))
+            {
+                var id = varRef.Id;
+                var args = scope.LocalArgs ?? scope.Args;
+
+                if (args != null 
+                    && args.TryGetValue(id.ToString(), out var arg))
+                {
+                    arg.Write(writer, scope);
+                }
+                else
+                {
+                    if (scope.LocalArgs == null)
+                    {
+                        scope.AddError(ResolverFluentError.Reference(self));
+                    }
+
+                    writer.Write('{');
+                    self.WriteError(writer);
+                    writer.Write('}');
+                }
+            }
+
+            if (self.TryConvert(out Placeable placeable))
+            {
+                placeable.Expression.TryWrite(writer, scope, out var _);
+            }
         }
 
-        private static bool ProcessMsgRef(IInlineExpression self, TextWriter writer, Scope scope, MessageReference msgRef)
+        public static void Write(this IFluentType self, TextWriter writer, Scope scope)
+        {
+            if (scope.Bundle.FormatterFunc != null)
+            {
+                writer.Write(scope.Bundle.FormatterFunc(self));
+            }
+
+            writer.Write(self.AsString());
+        }
+
+        private static bool ProcessMsgRef(IInlineExpression self, TextWriter writer, Scope scope,
+            MessageReference msgRef)
         {
             var id = msgRef.Id;
             var attribute = msgRef.Attribute;
@@ -175,14 +265,48 @@ namespace Linguini.Bundle.Resolver
 
         public static void WriteError(this IExpression self, TextWriter writer)
         {
-            // TODO
-            throw new NotImplementedException();
+            if (self.TryConvert(out IInlineExpression expr))
+            {
+                expr.WriteError(writer);
+            }
+
+            throw new ArgumentException("Unexpected select expression!");
         }
-        
+
         public static void WriteError(this IInlineExpression self, TextWriter writer)
         {
-            // TODO
-            throw new NotImplementedException();
+            if (self.TryConvert(out MessageReference? msgRef))
+            {
+                if (msgRef.Attribute == null)
+                {
+                    writer.Write($"{msgRef.Id}");
+                }
+                else
+                {
+                    writer.Write($"{msgRef.Id}.{msgRef.Attribute}");
+                }
+            }
+            else if (self.TryConvert(out TermReference? termRef))
+            {
+                if (termRef.Attribute == null)
+                {
+                    writer.Write($"-{termRef.Id}");
+                }
+                else
+                {
+                    writer.Write($"-{termRef.Id}.{termRef.Attribute}");
+                }
+            }
+            else if (self.TryConvert(out FunctionReference? funcRef))
+            {
+                writer.Write($"{funcRef.Id}()");
+            }
+            else if (self.TryConvert(out VariableReference? varRef))
+            {
+                writer.Write($"{varRef.Id}");
+            }
+            
+            throw new ArgumentException($"Unexpected inline expression `{self.GetType()}`!");
         }
     }
 }

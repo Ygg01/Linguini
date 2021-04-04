@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
+using Linguini.Bundle.PluralRules;
 using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
@@ -218,6 +219,11 @@ namespace Linguini.Bundle
             return false;
         }
 
+        public bool TryGetFunction(Identifier id, [NotNullWhen(true)] out FluentFunction? function)
+        {
+            return TryGetFunction(id.ToString(), out function);
+        }
+
         public bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
         {
             if (Entries.ContainsKey(funcName)
@@ -247,6 +253,12 @@ namespace Linguini.Bundle
             var scope = new Scope(this, args);
             var value = pattern.Resolve(scope);
             return value.AsString();
+        }
+
+        public PluralCategory GetPluralRules(PluralRuleType cardinal, FluentNumber outType)
+        {
+            // TODO
+            throw new NotImplementedException();
         }
     }
 
