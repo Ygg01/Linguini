@@ -1,0 +1,75 @@
+﻿suites:
+  -
+    name: Variables
+    suites:
+      -
+        name: in values
+        resources:
+          -
+            source: |-
+              foo = Foo { $num }
+              bar = { foo }
+              baz =
+                  .attr = Baz Attribute { $num }
+              qux = { "a" ->
+                *[a]     Baz Variant A { $num }
+              }
+        bundles:
+          -
+            functions:
+              - SUM
+              - SUM
+            errors:
+              -
+                type: Overriding
+        tests:
+          -
+            name: can be used in the message value
+            asserts:
+              -
+                id: foo
+                args:
+                  num: 3
+                value: Foo 3
+                errors:
+                  -
+                    type: Reference
+                    desc: "Unknown variable: $arg"
+                  -
+                    type: Reference
+                    desc: "Unknown variable: $arg"
+          -
+            name: can be used in the message value which is referenced
+            asserts:
+              -
+                id: bar
+                args:
+                  num: 3
+                value: Foo 3
+          -
+            name: can be used in an attribute
+            asserts:
+              -
+                id: baz
+                attribute: attr
+                args:
+                  num: 3
+                value: Baz Attribute 3
+          -
+            name: can be used in a variant
+            asserts:
+              -
+                id: qux
+                args:
+                  num: 3
+                value: Baz Variant A 3
+      - name: (Rust) FluentBundle construction
+        resources:
+          - source: |-
+              foo = Foo
+        bundles:
+          - functions:
+              - SUM
+              - SUM
+            errors:
+              - type: Overriding
