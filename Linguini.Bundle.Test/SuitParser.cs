@@ -41,31 +41,27 @@ namespace Linguini.Bundle.Test
         {
             // Your test code here
         }
+
         static IEnumerable<TestCaseData> MyTestCases()
         {
-            var yamlTest = YamlTest();
-
-
-            yield return new TestCaseData(yamlTest);
+            var testSuites = ParseTest("fixtures/test.yaml");
+            foreach (var testCase in testSuites)
+            {
+                TestCaseData testCaseData = new TestCaseData(testCase);
+                testCaseData.SetName(testCase.Name);
+                yield return testCaseData;
+            } 
+                
         }
 
-        private static ResolverTestSuite YamlTest()
+        private static List<ResolverTestSuite> ParseTest(string name)
         {
-            var path = GetFullPathFor(@"fixtures/test.yaml");
+            var path = GetFullPathFor(name);
             using var reader = new StreamReader(path);
-            YamlStream yamlStream = new YamlStream();
+            YamlStream yamlStream = new();
             yamlStream.Load(reader);
             YamlDocument doc = yamlStream.Documents[0];
-            var yamlTest =  ResolverTestSuite.FromDoc(doc);
-          
-        
-            return yamlTest;
+            return doc.ParseResolverTests();
         }
-        
     }
-
-
-
-    
- 
 }

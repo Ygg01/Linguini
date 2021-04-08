@@ -1,75 +1,98 @@
 ﻿suites:
   -
-    name: Variables
+    name: Attributes
     suites:
       -
-        name: in values
+        name: missing
         resources:
           -
             source: |-
-              foo = Foo { $num }
-              bar = { foo }
-              baz =
-                  .attr = Baz Attribute { $num }
-              qux = { "a" ->
-                *[a]     Baz Variant A { $num }
-              }
-        bundles:
-          -
-            functions:
-              - SUM
-              - SUM
-            errors:
-              -
-                type: Overriding
+              foo = Foo
+              bar = Bar
+                  .attr = Bar Attribute
+              baz = { foo } Baz
+              qux = { foo } Qux
+                  .attr = Qux Attribute
+              ref-foo = { foo.missing }
+              ref-bar = { bar.missing }
+              ref-baz = { baz.missing }
+              ref-qux = { qux.missing }
         tests:
           -
-            name: can be used in the message value
+            name: falls back to id.attr for entities with string values and no attributes
             asserts:
               -
-                id: foo
-                args:
-                  num: 3
-                value: Foo 3
+                id: ref-foo
+                value: "{foo.missing}"
                 errors:
                   -
                     type: Reference
-                    desc: "Unknown variable: $arg"
+                    desc: "Unknown attribute: foo.missing"
+          -
+            name: falls back to id.attr for entities with string values and other attributes
+            asserts:
+              -
+                id: ref-bar
+                value: "{bar.missing}"
+                errors:
                   -
                     type: Reference
-                    desc: "Unknown variable: $arg"
+                    desc: "Unknown attribute: bar.missing"
           -
-            name: can be used in the message value which is referenced
+            name: falls back to id.attr for entities with pattern values and no attributes
+            asserts:
+              -
+                id: ref-baz
+                value: "{baz.missing}"
+                errors:
+                  -
+                    type: Reference
+                    desc: "Unknown attribute: baz.missing"
+          -
+            name: falls back to id.attr for entities with pattern values and other attributes
+            asserts:
+              -
+                id: ref-qux
+                value: "{qux.missing}"
+                errors:
+                  -
+                    type: Reference
+                    desc: "Unknown attribute: qux.missing"
+      -
+        name: with string values
+        resources:
+          -
+            source: |-
+              foo = Foo
+                  .attr = Foo Attribute
+              bar = { foo } Bar
+                  .attr = Bar Attribute
+              ref-foo = { foo.attr }
+              ref-bar = { bar.attr }
+        tests:
+          -
+            name: can be referenced for entities with string values
+            asserts:
+              -
+                id: ref-foo
+                value: Foo Attribute
+          -
+            name: can be formatted directly for entities with string values
+            asserts:
+              -
+                id: foo
+                attribute: attr
+                value: Foo Attribute
+          -
+            name: can be referenced for entities with pattern values
+            asserts:
+              -
+                id: ref-bar
+                value: Bar Attribute
+          -
+            name: can be formatted directly for entities with pattern values
             asserts:
               -
                 id: bar
-                args:
-                  num: 3
-                value: Foo 3
-          -
-            name: can be used in an attribute
-            asserts:
-              -
-                id: baz
                 attribute: attr
-                args:
-                  num: 3
-                value: Baz Attribute 3
-          -
-            name: can be used in a variant
-            asserts:
-              -
-                id: qux
-                args:
-                  num: 3
-                value: Baz Variant A 3
-      - name: (Rust) FluentBundle construction
-        resources:
-          - source: |-
-              foo = Foo
-        bundles:
-          - functions:
-              - SUM
-              - SUM
-            errors:
-              - type: Overriding
+                value: Bar Attribute
