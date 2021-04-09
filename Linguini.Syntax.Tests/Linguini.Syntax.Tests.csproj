@@ -19,8 +19,4 @@
       <ProjectReference Include="..\Linguini.Syntax\Linguini.Syntax.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="fixtures" />
-    </ItemGroup>
-
 </Project>

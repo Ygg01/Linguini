@@ -269,9 +269,9 @@ namespace Linguini.Bundle
         public string FormatPattern(Pattern pattern, FluentArgs? args,
             out IList<FluentError> errors)
         {
-            errors = new List<FluentError>();
             var scope = new Scope(this, args);
             var value = pattern.Resolve(scope);
+            errors = scope.Errors;
             return value.AsString();
         }
 

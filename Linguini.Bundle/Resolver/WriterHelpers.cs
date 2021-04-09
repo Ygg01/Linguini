@@ -105,7 +105,7 @@ namespace Linguini.Bundle.Resolver
                 }
             }
 
-            return errors.Count == 0;
+            return scope.Errors.Count == 0;
         }
 
         public static void Write(this IInlineExpression self, TextWriter writer, Scope scope)
@@ -126,7 +126,6 @@ namespace Linguini.Bundle.Resolver
             {
                 ProcessMsgRef(self, writer, scope, msgRef);
                 return;
-                ;
             }
 
             if (self.TryConvert(out TermReference termRef))
