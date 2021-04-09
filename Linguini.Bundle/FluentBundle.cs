@@ -15,7 +15,7 @@ using Linguini.Syntax.Parser;
 namespace Linguini.Bundle
 {
     using FluentArgs = IDictionary<string, IFluentType>;
-    
+
     public class FluentBundle
     {
         private HashSet<string> _funcList;
@@ -183,6 +183,26 @@ namespace Linguini.Bundle
         {
             return Entries.ContainsKey(id)
                    && Entries[id].TryConvert<IBundleEntry, Message>(out _);
+        }
+
+        public string? GetValue(string id, out IList<FluentError> errors)
+        {
+            string? value = null;
+            errors = new List<FluentError>();
+            
+            if (TryGetMessage(id, out var astMessage))
+            {
+                if (astMessage.Value != null)
+                {
+                    value = FormatPattern(astMessage.Value, null, out errors);
+                }
+            }
+            else if (TryGetTerm(id, out var astTerm))
+            {
+                value = FormatPattern(astTerm.Value, null, out errors);
+            }
+            
+            return value;
         }
 
         public bool TryGetMessage(string id, [NotNullWhen(true)] out AstMessage? message)
@@ -377,6 +397,7 @@ namespace Linguini.Bundle
                     bundle.AddFunctions(_functions, out var funcErr);
                     errors.AddRange(funcErr);
                 }
+
                 foreach (var resource in _resources)
                 {
                     if (!bundle.AddResource(resource, out var resErr))

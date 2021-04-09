@@ -280,30 +280,31 @@ namespace Linguini.Bundle.Resolver
                 if (msgRef.Attribute == null)
                 {
                     writer.Write($"{msgRef.Id}");
+                    return;
                 }
-                else
-                {
-                    writer.Write($"{msgRef.Id}.{msgRef.Attribute}");
-                }
+
+                writer.Write($"{msgRef.Id}.{msgRef.Attribute}");
+                return;
             }
             else if (self.TryConvert(out TermReference? termRef))
             {
                 if (termRef.Attribute == null)
                 {
                     writer.Write($"-{termRef.Id}");
+                    return;
                 }
-                else
-                {
-                    writer.Write($"-{termRef.Id}.{termRef.Attribute}");
-                }
+
+                writer.Write($"-{termRef.Id}.{termRef.Attribute}");
             }
             else if (self.TryConvert(out FunctionReference? funcRef))
             {
                 writer.Write($"{funcRef.Id}()");
+                return;
             }
             else if (self.TryConvert(out VariableReference? varRef))
             {
                 writer.Write($"{varRef.Id}");
+                return;
             }
             
             throw new ArgumentException($"Unexpected inline expression `{self.GetType()}`!");

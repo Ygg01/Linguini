@@ -39,19 +39,45 @@ namespace Linguini.Bundle.Test
         [TestCaseSource(nameof(MyTestCases))]
         public void MyTestMethod(ResolverTestSuite parsedTestSuite)
         {
-            // Your test code here
+            var (bundle, errors) = LinguiniBundler.New()
+                .Locale("en-US")
+                .AddResource(parsedTestSuite.Resources)
+                .SetUseIsolating(false)
+                .Build();
+
+            foreach (var test in parsedTestSuite.Tests)
+            {
+                foreach (var assert in test.Asserts)
+                {
+                    var actualValue = bundle.GetValue(assert.Id, out var errs);
+                    Assert.AreEqual(assert.ExpectedValue, actualValue, test.TestName);
+                    Assert.AreEqual(assert.ExpectedErrors.Count, errs.Count, test.TestName);
+                    for (var i = 0; i < assert.ExpectedErrors.Count; i++)
+                    {
+                        var actualError = errs[i];
+                        var expectedError = assert.ExpectedErrors[i];
+
+                        Assert.AreEqual(expectedError.Type, actualError.ErrorKind());
+                        if (expectedError.Description != null)
+                        {
+                            Assert.AreEqual(expectedError.Description, actualError.ToString());
+                        }
+                    }
+                }
+            }
         }
 
         static IEnumerable<TestCaseData> MyTestCases()
         {
-            var testSuites = ParseTest("fixtures/test.yaml");
+            var path = "fixtures/test.yaml";
+            var testSuites = ParseTest(path);
             foreach (var testCase in testSuites)
             {
                 TestCaseData testCaseData = new TestCaseData(testCase);
+                testCaseData.SetCategory(path);
                 testCaseData.SetName(testCase.Name);
                 yield return testCaseData;
-            } 
-                
+            }
         }
 
         private static List<ResolverTestSuite> ParseTest(string name)
