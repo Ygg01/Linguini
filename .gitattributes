@@ -1,0 +1,2 @@
+﻿# Denote all ftl files as binary so Git doesn't change line-endings
+*.ftl binary
