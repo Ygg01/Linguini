@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Linguini.Bundle.Errors;
+using Linguini.Bundle.Types;
 
 namespace Linguini.Bundle.Test.Yaml
 {
@@ -28,7 +29,7 @@ namespace Linguini.Bundle.Test.Yaml
         {
             public string Id = default!;
             public string? Attribute;
-            public Dictionary<string, string> Args = new();
+            public Dictionary<string, IFluentType> Args = new();
             public string ExpectedValue = default!;
             public List<ResolverTestError> ExpectedErrors = new();
             public bool? Missing;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Threading;
+using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
 using YamlDotNet.RepresentationModel;
 
@@ -175,14 +176,23 @@ namespace Linguini.Bundle.Test.Yaml
             return retVal;
         }
 
-        private static Dictionary<string, string> ProcessArgs(YamlMappingNode argsNode)
+        private static Dictionary<string, IFluentType> ProcessArgs(YamlMappingNode argsNode)
         {
-            var processArgs = new Dictionary<string, string>();
+            var processArgs = new Dictionary<string, IFluentType>();
             foreach (var arg in argsNode.Children)
             {
                 var key = (YamlScalarNode) arg.Key;
                 var val = (YamlScalarNode) arg.Value;
-                processArgs.Add(key.Value!, val.Value!);
+                IFluentType fluentVal;
+                if (Double.TryParse(val.AsString(), out var result))
+                {
+                    fluentVal = (FluentNumber) result;
+                }
+                else
+                {
+                    fluentVal = (FluentString) val.AsString();
+                }
+                processArgs.Add(key.Value!, fluentVal);
             }
 
             return processArgs;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 #nullable enable
 namespace Linguini.Bundle.Types
@@ -16,8 +17,8 @@ namespace Linguini.Bundle.Types
 
         public string AsString()
         {
-            // TODO
-            throw new NotImplementedException();
+            // TODO implement proper formatting
+            return Value.ToString(CultureInfo.CurrentCulture);
         }
 
 

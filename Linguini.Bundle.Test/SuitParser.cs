@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Linguini.Bundle.Errors;
 using Linguini.Bundle.Test.Yaml;
+using Linguini.Bundle.Types;
 using NUnit.Framework;
 using YamlDotNet.RepresentationModel;
 
@@ -37,6 +39,7 @@ namespace Linguini.Bundle.Test
         }
 
         [TestCaseSource(nameof(MyTestCases))]
+        [Parallelizable]
         public void MyTestMethod(ResolverTestSuite parsedTestSuite)
         {
             var (bundle, errors) = LinguiniBundler.New()
@@ -49,33 +52,40 @@ namespace Linguini.Bundle.Test
             {
                 foreach (var assert in test.Asserts)
                 {
-                    var actualValue = bundle.GetValue(assert.Id, out var errs);
+                    var actualValue = bundle.GetMsg(assert.Id, assert.Attribute, assert.Args, out var errs);
                     Assert.AreEqual(assert.ExpectedValue, actualValue, test.TestName);
-                    Assert.AreEqual(assert.ExpectedErrors.Count, errs.Count, test.TestName);
-                    for (var i = 0; i < assert.ExpectedErrors.Count; i++)
-                    {
-                        var actualError = errs[i];
-                        var expectedError = assert.ExpectedErrors[i];
+                    AssertErrorCases(assert, errs, test);
+                }
+            }
+        }
 
-                        Assert.AreEqual(expectedError.Type, actualError.ErrorKind());
-                        if (expectedError.Description != null)
-                        {
-                            Assert.AreEqual(expectedError.Description, actualError.ToString());
-                        }
-                    }
+        private static void AssertErrorCases(ResolverTestSuite.ResolverAssert assert,
+            IList<FluentError> errs,
+            ResolverTestSuite.ResolverTest test)
+        {
+            Assert.AreEqual(assert.ExpectedErrors.Count, errs.Count, test.TestName);
+            for (var i = 0; i < assert.ExpectedErrors.Count; i++)
+            {
+                var actualError = errs[i];
+                var expectedError = assert.ExpectedErrors[i];
+
+                Assert.AreEqual(expectedError.Type, actualError.ErrorKind());
+                if (expectedError.Description != null)
+                {
+                    Assert.AreEqual(expectedError.Description, actualError.ToString());
                 }
             }
         }
 
         static IEnumerable<TestCaseData> MyTestCases()
         {
-            var path = "fixtures/test.yaml";
+            var path = "fixtures/arguments.yaml";
             var testSuites = ParseTest(path);
             foreach (var testCase in testSuites)
             {
                 TestCaseData testCaseData = new TestCaseData(testCase);
                 testCaseData.SetCategory(path);
-                testCaseData.SetName(testCase.Name);
+                testCaseData.SetName($"({path}) {testCase.Name}");
                 yield return testCaseData;
             }
         }

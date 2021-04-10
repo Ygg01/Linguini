@@ -185,23 +185,30 @@ namespace Linguini.Bundle
                    && Entries[id].TryConvert<IBundleEntry, Message>(out _);
         }
 
-        public string? GetValue(string id, out IList<FluentError> errors)
+        public string? GetMsg(string id, FluentArgs args, out IList<FluentError> errors)
+        {
+            return GetMsg(id, null, args, out errors);
+        }
+
+
+        public string? GetMsg(string id, string? attribute, FluentArgs args, out IList<FluentError> errors)
         {
             string? value = null;
             errors = new List<FluentError>();
-            
+
             if (TryGetMessage(id, out var astMessage))
             {
-                if (astMessage.Value != null)
+                Pattern? pattern;
+                pattern = attribute != null 
+                    ? astMessage.GetAttribute(attribute)?.Value 
+                    : astMessage.Value;
+
+                if (pattern != null)
                 {
-                    value = FormatPattern(astMessage.Value, null, out errors);
+                    value = FormatPattern(pattern, args, out errors);
                 }
             }
-            else if (TryGetTerm(id, out var astTerm))
-            {
-                value = FormatPattern(astTerm.Value, null, out errors);
-            }
-            
+
             return value;
         }
 
