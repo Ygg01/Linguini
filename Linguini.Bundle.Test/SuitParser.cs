@@ -33,6 +33,32 @@ namespace Linguini.Bundle.Test
             }
         }
 
+        static IEnumerable<TestCaseData> MyTestCases()
+        {
+            var defaultPath = GetFullPathFor("fixtures/defaults.yaml");
+            var defaultBuilder = ParseDefault(defaultPath);
+            
+            string[] files = Directory.GetFiles(GetFullPathFor("fixtures"));
+            // string[] files = new[] {GetFullPathFor("fixtures/mre.yaml")};
+            foreach (var path in files)
+            {
+                if (path.Equals(defaultPath))
+                {
+                    continue;
+                }
+
+                var (testSuites, suiteName) = ParseTest(path);
+                foreach (var testCase in testSuites)
+                {
+                    TestCaseData testCaseData = new(testCase, defaultBuilder);
+                    testCaseData.SetCategory(path);
+                    testCaseData.SetName($"({path}) {suiteName} {testCase.Name}");
+                    yield return testCaseData;
+                }
+            }
+           
+        }
+        
         private static string GetFullPathFor(string file)
         {
             List<string> list = new();
@@ -46,9 +72,7 @@ namespace Linguini.Bundle.Test
         public void MyTestMethod(ResolverTestSuite parsedTestSuite, LinguiniBundler.IReadyStep builder)
         {
             var bundle = builder.UncheckedBuild();
-            
             bundle.AddResource(parsedTestSuite.Resources[0], out var errors);
-            
 
             if (parsedTestSuite.Bundle != null)
             {
@@ -77,6 +101,20 @@ namespace Linguini.Bundle.Test
                     }
                 }
 
+                var transformFunc = parsedTestSuite.Bundle.TransformFunc;
+                if (transformFunc != null)
+                {
+                    switch (transformFunc)
+                    {
+                        case "example":
+                            bundle.TransformFunc = s => s.Replace('a', 'A'); 
+                            break;
+                        default:
+                            throw new ArgumentException($"Unknown method {transformFunc}");
+                    }
+                }
+
+                bundle.UseIsolating = parsedTestSuite.Bundle.UseIsolating;
                 AssertErrorCases(parsedTestSuite.Bundle.Errors, errors, parsedTestSuite.Name);
             }
 
@@ -109,31 +147,7 @@ namespace Linguini.Bundle.Test
             }
         }
 
-        static IEnumerable<TestCaseData> MyTestCases()
-        {
-            var defaultPath = GetFullPathFor("fixtures/defaults.yaml");
-            var defaultBuilder = ParseDefault(defaultPath);
-            
-            string[] files = Directory.GetFiles(GetFullPathFor("fixtures"));
-            // string[] files = new[] {GetFullPathFor("fixtures/errors.yaml")};
-            foreach (var path in files)
-            {
-                if (path.Equals(defaultPath))
-                {
-                    continue;
-                }
-
-                var (testSuites, suiteName) = ParseTest(path);
-                foreach (var testCase in testSuites)
-                {
-                    TestCaseData testCaseData = new(testCase, defaultBuilder);
-                    testCaseData.SetCategory(path);
-                    testCaseData.SetName($"({path}) {suiteName} {testCase.Name}");
-                    yield return testCaseData;
-                }
-            }
-           
-        }
+       
 
         private static (List<ResolverTestSuite>, string) ParseTest(string name)
         {

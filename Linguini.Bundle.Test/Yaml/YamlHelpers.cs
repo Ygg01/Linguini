@@ -6,6 +6,7 @@ using System.Threading;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
 using YamlDotNet.RepresentationModel;
+
 #pragma warning disable 8600
 
 namespace Linguini.Bundle.Test.Yaml
@@ -35,6 +36,7 @@ namespace Linguini.Bundle.Test.Yaml
             OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
             SOFTWARE.
          */
+
         #region ROBUSTLY_STOLEN
 
         // To fetch nodes by key name with YAML, we NEED a YamlScalarNode.
@@ -98,11 +100,12 @@ namespace Linguini.Bundle.Test.Yaml
                 }
 
                 return testSuites;
-            } 
+            }
+
             // Assume it is single test suite
             var single = new ResolverTestSuite();
             ProcessTestSuite(suitesSeq, single);
-            
+
             return new List<ResolverTestSuite>(new[] {single});
         }
 
@@ -229,6 +232,7 @@ namespace Linguini.Bundle.Test.Yaml
                 {
                     fluentVal = (FluentString) val.AsString();
                 }
+
                 processArgs.Add(key.Value!, fluentVal);
             }
 
@@ -252,6 +256,14 @@ namespace Linguini.Bundle.Test.Yaml
                         else if (keyValueNode.Key.ToString().Equals("errors"))
                         {
                             testBundle.Errors = ProcessErrors((YamlSequenceNode) bundleMap["errors"]);
+                        }
+                        else if (keyValueNode.Key.ToString().Equals("transform"))
+                        {
+                            testBundle.TransformFunc = keyValueNode.Value.AsString();
+                        }
+                        else if (keyValueNode.Key.ToString().Equals("useIsolating"))
+                        {
+                            testBundle.UseIsolating = keyValueNode.Value.AsBool();
                         }
                     }
                 }
@@ -318,8 +330,7 @@ namespace Linguini.Bundle.Test.Yaml
 
             return resolverTestErrors;
         }
+
         #endregion
     }
-
-
 }

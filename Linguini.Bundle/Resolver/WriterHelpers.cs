@@ -49,10 +49,7 @@ namespace Linguini.Bundle.Resolver
                     }
 
                     var needsIsolating = scope.Bundle.UseIsolating
-                                         && len > 1
-                                         && !(expr.TryConvert(out IInlineExpression _)
-                                              || expr.TryConvert(out TermReference _)
-                                              || expr.TryConvert(out TextLiteral _));
+                                         && len > 1;
 
                     if (needsIsolating)
                     {

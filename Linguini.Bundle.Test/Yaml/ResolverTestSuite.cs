@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
@@ -16,6 +17,8 @@ namespace Linguini.Bundle.Test.Yaml
         {
             public List<string> Functions = new();
             public List<ResolverTestError> Errors = new();
+            public string? TransformFunc;
+            public bool UseIsolating;
         }
 
         public class ResolverTest
