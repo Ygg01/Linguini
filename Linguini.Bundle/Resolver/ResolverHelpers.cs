@@ -20,7 +20,7 @@ namespace Linguini.Bundle.Resolver
                 }
             }
 
-            StringWriter stringWriter = new StringWriter();
+            var stringWriter = new StringWriter();
             self.Write(stringWriter, scope, out _);
             return (FluentString) stringWriter.ToString();
         }

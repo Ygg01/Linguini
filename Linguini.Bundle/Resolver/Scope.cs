@@ -94,7 +94,6 @@ namespace Linguini.Bundle.Resolver
                 _travelled.Add(pattern);
                 pattern.Write(writer, this, out _);
                 PopTraveled();
-                _travelled.RemoveAt(_travelled.Count - 1);
             }
         }
 
