@@ -91,7 +91,7 @@ namespace Linguini.Bundle.Errors
             {
                 if (termReference.Attribute == null)
                 {
-                    return new($"Uknown term: -{termReference.Id}", ErrorType.Reference);
+                    return new($"Unknown term: -{termReference.Id}", ErrorType.Reference);
                 }
                 else
                 {

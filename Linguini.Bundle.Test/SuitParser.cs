@@ -111,18 +111,28 @@ namespace Linguini.Bundle.Test
 
         static IEnumerable<TestCaseData> MyTestCases()
         {
-            var path = GetFullPathFor("fixtures/arguments.yaml");
             var defaultPath = GetFullPathFor("fixtures/defaults.yaml");
-
             var defaultBuilder = ParseDefault(defaultPath);
-            var (testSuites, suiteName) = ParseTest(path);
-            foreach (var testCase in testSuites)
+            
+            string[] files = Directory.GetFiles(GetFullPathFor("fixtures"));
+            // string[] files = new[] {GetFullPathFor("fixtures/errors.yaml")};
+            foreach (var path in files)
             {
-                TestCaseData testCaseData = new(testCase, defaultBuilder);
-                testCaseData.SetCategory(path);
-                testCaseData.SetName($"({path}) {suiteName} {testCase.Name}");
-                yield return testCaseData;
+                if (path.Equals(defaultPath))
+                {
+                    continue;
+                }
+
+                var (testSuites, suiteName) = ParseTest(path);
+                foreach (var testCase in testSuites)
+                {
+                    TestCaseData testCaseData = new(testCase, defaultBuilder);
+                    testCaseData.SetCategory(path);
+                    testCaseData.SetName($"({path}) {suiteName} {testCase.Name}");
+                    yield return testCaseData;
+                }
             }
+           
         }
 
         private static (List<ResolverTestSuite>, string) ParseTest(string name)

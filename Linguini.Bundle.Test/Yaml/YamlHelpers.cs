@@ -82,38 +82,51 @@ namespace Linguini.Bundle.Test.Yaml
 
         public static List<ResolverTestSuite> ParseResolverTests(this YamlDocument doc)
         {
-            var suites = (YamlSequenceNode) doc.RootNode["suites"][0]["suites"];
-            var testSuites = new List<ResolverTestSuite>(suites.Children.Count);
-            foreach (var suiteProp in suites.Children)
+            var suitesSeq = (YamlMappingNode) doc.RootNode["suites"][0];
+            if (suitesSeq.TryGetNode("suites", out YamlSequenceNode suites))
             {
-                var testSuite = new ResolverTestSuite();
-                if (suiteProp.TryConvert(out YamlMappingNode mapNode))
+                var testSuites = new List<ResolverTestSuite>(suites.Children.Count);
+                foreach (var suiteProp in suites.Children)
                 {
-                    if (mapNode.TryGetNode<YamlScalarNode>("name", out var name))
+                    var testSuite = new ResolverTestSuite();
+                    if (suiteProp.TryConvert(out YamlMappingNode mapNode))
                     {
-                        testSuite.Name = name.Value!;
+                        ProcessTestSuite(mapNode, testSuite);
                     }
 
-                    if (mapNode.TryGetNode<YamlSequenceNode>("resources", out var resources))
-                    {
-                        ProcessResources(resources, testSuite);
-                    }
-
-                    if (mapNode.TryGetNode<YamlSequenceNode>("bundles", out var bundles))
-                    {
-                        ProcessBundles(bundles, out testSuite.Bundle);
-                    }
-
-                    if (mapNode.TryGetNode<YamlSequenceNode>("tests", out var tests))
-                    {
-                        testSuite.Tests = ProcessTests(tests);
-                    }
+                    testSuites.Add(testSuite);
                 }
 
-                testSuites.Add(testSuite);
+                return testSuites;
+            } 
+            // Assume it is single test suite
+            var single = new ResolverTestSuite();
+            ProcessTestSuite(suitesSeq, single);
+            
+            return new List<ResolverTestSuite>(new[] {single});
+        }
+
+        private static void ProcessTestSuite(YamlMappingNode mapNode, ResolverTestSuite? testSuite)
+        {
+            if (mapNode.TryGetNode<YamlScalarNode>("name", out var name))
+            {
+                testSuite.Name = name.Value!;
             }
 
-            return testSuites;
+            if (mapNode.TryGetNode<YamlSequenceNode>("resources", out var resources))
+            {
+                ProcessResources(resources, testSuite);
+            }
+
+            if (mapNode.TryGetNode<YamlSequenceNode>("bundles", out var bundles))
+            {
+                ProcessBundles(bundles, out testSuite.Bundle);
+            }
+
+            if (mapNode.TryGetNode<YamlSequenceNode>("tests", out var tests))
+            {
+                testSuite.Tests = ProcessTests(tests);
+            }
         }
 
         private static List<ResolverTestSuite.ResolverTest> ProcessTests(YamlSequenceNode testsNode)
