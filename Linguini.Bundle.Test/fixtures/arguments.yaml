@@ -101,4 +101,33 @@ suites:
                   -
                     type: Reference
                     desc: "Unknown variable: $arg"
-   lue: 1
+      -
+        name: and strings
+        resources:
+          -
+            source: |-
+              foo = { $arg }
+        tests:
+          -
+            name: can be a string
+            asserts:
+              -
+                id: foo
+                args:
+                  arg: Argument
+                value: Argument
+      -
+        name: and numbers
+        resources:
+          -
+            source: |-
+              foo = { $arg }
+        tests:
+          -
+            name: can be a number
+            asserts:
+              -
+                id: foo
+                args:
+                  arg: 1
+                value: 1
