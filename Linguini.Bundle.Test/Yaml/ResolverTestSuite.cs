@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
+using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle.Test.Yaml
 {
     public class ResolverTestSuite
     {
         public string Name = default!;
-        public string Resources = default!;
+        public List<string> Resources = new();
         public ResolverTestBundle? Bundle;
         public List<ResolverTest> Tests = new();
 

@@ -5,7 +5,7 @@ using System.Text;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
 
-namespace Linguini.Bundle
+namespace Linguini.Bundle.Func
 {
     public static class LinguiniFluentFunctions
     {
@@ -42,8 +42,8 @@ namespace Linguini.Bundle
         {
             try
             {
-                var x = args[0];
-                return x;
+                var id = args[0];
+                return id;
             }
             catch (Exception e)
             {

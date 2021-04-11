@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Linguini.Bundle.Errors;
+using Linguini.Bundle.Func;
 using Linguini.Bundle.Test.Yaml;
+using Linguini.Syntax.Ast;
 using NUnit.Framework;
 using YamlDotNet.RepresentationModel;
 
@@ -41,13 +43,12 @@ namespace Linguini.Bundle.Test
 
         [TestCaseSource(nameof(MyTestCases))]
         [Parallelizable]
-        public void MyTestMethod(ResolverTestSuite parsedTestSuite)
+        public void MyTestMethod(ResolverTestSuite parsedTestSuite, LinguiniBundler.IReadyStep builder)
         {
-            var (bundle, errors) = LinguiniBundler.New()
-                .Locale("en-US")
-                .AddResource(parsedTestSuite.Resources)
-                .SetUseIsolating(false)
-                .Build();
+            var bundle = builder.UncheckedBuild();
+            
+            bundle.AddResource(parsedTestSuite.Resources[0], out var errors);
+            
 
             if (parsedTestSuite.Bundle != null)
             {
@@ -70,11 +71,12 @@ namespace Linguini.Bundle.Test
                         case "IDENTITY":
                             bundle.AddFunction(funcName, LinguiniFluentFunctions.Identity, out _);
                             break;
-                        
+
                         default:
                             throw new ArgumentException($"Method name {funcName} doesn't exist");
                     }
                 }
+
                 AssertErrorCases(parsedTestSuite.Bundle.Errors, errors, parsedTestSuite.Name);
             }
 
@@ -109,25 +111,65 @@ namespace Linguini.Bundle.Test
 
         static IEnumerable<TestCaseData> MyTestCases()
         {
-            var path = "fixtures/arguments.yaml";
-            var testSuites = ParseTest(path);
+            var path = GetFullPathFor("fixtures/arguments.yaml");
+            var defaultPath = GetFullPathFor("fixtures/defaults.yaml");
+
+            var defaultBuilder = ParseDefault(defaultPath);
+            var (testSuites, suiteName) = ParseTest(path);
             foreach (var testCase in testSuites)
             {
-                TestCaseData testCaseData = new TestCaseData(testCase);
+                TestCaseData testCaseData = new(testCase, defaultBuilder);
                 testCaseData.SetCategory(path);
-                testCaseData.SetName($"({path}) {testCase.Name}");
+                testCaseData.SetName($"({path}) {suiteName} {testCase.Name}");
                 yield return testCaseData;
             }
         }
 
-        private static List<ResolverTestSuite> ParseTest(string name)
+        private static (List<ResolverTestSuite>, string) ParseTest(string name)
         {
-            var path = GetFullPathFor(name);
+            var doc = ParseYamlDoc(name);
+            var suiteName =  doc.RootNode["suites"][0]["name"].AsString();
+            return (doc.ParseResolverTests(), suiteName);
+        }
+
+        private static YamlDocument ParseYamlDoc(string path)
+        {
             using var reader = new StreamReader(path);
             YamlStream yamlStream = new();
             yamlStream.Load(reader);
             YamlDocument doc = yamlStream.Documents[0];
-            return doc.ParseResolverTests();
+            return doc;
+        }
+
+        private static LinguiniBundler.IReadyStep ParseDefault(string path)
+        {
+            var yamlBundle = ParseYamlDoc(path)
+                .RootNode["bundle"];
+
+            List<string> locales = new();
+            var isIsolating = false;
+            if (yamlBundle.TryConvert(out YamlMappingNode map))
+            {
+                if (map.TryGetNode("useIsolating", out YamlScalarNode useIsolatingNode))
+                {
+                    isIsolating = useIsolatingNode.AsBool();
+                }
+
+                if (map.TryGetNode("locales", out YamlSequenceNode localesNode))
+                {
+                    foreach (var localeNode in localesNode.Children)
+                    {
+                        locales.Add(localeNode.AsString());
+                    }
+                }
+            }
+
+            var bundler = LinguiniBundler.New()
+                .Locales(locales)
+                .SkipResources()
+                .SetUseIsolating(isIsolating);
+
+            return bundler;
         }
     }
 }

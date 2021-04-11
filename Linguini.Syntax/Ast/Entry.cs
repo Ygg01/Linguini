@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Text.Json.Serialization;
+using Linguini.Syntax.Parser;
 using Linguini.Syntax.Parser.Error;
 using Linguini.Syntax.Serialization;
 
@@ -17,6 +19,16 @@ namespace Linguini.Syntax.Ast
         {
             Entries = body;
             Errors = errors;
+        }
+
+        public static implicit operator Resource(string input)
+        {
+            return new LinguiniParser(input).Parse();
+        }
+        
+        public static implicit operator Resource(TextReader input)
+        {
+            return new LinguiniParser(input).Parse();
         }
     }
 

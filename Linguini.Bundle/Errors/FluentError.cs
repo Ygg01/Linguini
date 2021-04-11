@@ -115,7 +115,17 @@ namespace Linguini.Bundle.Errors
 
     public record ParserFluentError : FluentError
     {
-        public ParseError Error;
+        private ParseError Error;
+
+        private ParserFluentError(ParseError error)
+        {
+            Error = error;
+        }
+        
+        public static ParserFluentError ParseError(ParseError parseError)
+        {
+            return new(parseError);
+        }
 
         public override ErrorType ErrorKind()
         {

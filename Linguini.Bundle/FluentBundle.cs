@@ -10,7 +10,6 @@ using Linguini.Bundle.PluralRules;
 using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
-using Linguini.Syntax.Parser;
 
 namespace Linguini.Bundle
 {
@@ -45,7 +44,7 @@ namespace Linguini.Bundle
 
         public FluentBundle(string locale, FluentBundleOption option, out List<FluentError> errors) : this()
         {
-            Locales = new List<string>();
+            Locales = new List<string>(1);
             Locales.Add(locale);
             Culture = new CultureInfo(locale, false);
             UseIsolating = option.UseIsolating;
@@ -105,10 +104,14 @@ namespace Linguini.Bundle
             return errors == null;
         }
 
-        public bool AddResource(Resource res, [NotNullWhen(false)] out List<FluentError>? errors)
+        public bool AddResource(Resource res, [NotNullWhen(false)] out List<FluentError> errors)
         {
             var resPos = Resources.Count;
-            var accErrors = new List<FluentError>();
+            errors = new List<FluentError>();
+            foreach (var parseError in res.Errors)
+            {
+                errors.Add(ParserFluentError.ParseError(parseError));
+            }
             for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
             {
                 var entry = res.Entries[entryPos];
@@ -131,7 +134,7 @@ namespace Linguini.Bundle
 
                 if (_entries.ContainsKey(id))
                 {
-                    accErrors.Add(new OverrideFluentError(id, _entries[id].ToKind()));
+                    errors.Add(new OverrideFluentError(id, _entries[id].ToKind()));
                 }
                 else
                 {
@@ -140,13 +143,11 @@ namespace Linguini.Bundle
             }
 
             Resources.Add(res);
-            if (accErrors.Count == 0)
+            if (errors.Count == 0)
             {
-                errors = null;
                 return true;
             }
 
-            errors = accErrors;
             return false;
         }
 
@@ -286,208 +287,6 @@ namespace Linguini.Bundle
         {
             // TODO
             throw new NotImplementedException();
-        }
-    }
-
-    public enum InsertBehavior : byte
-    {
-        None,
-        Overriding,
-        Throw,
-    }
-
-    public class FluentBundleOption
-    {
-        public bool UseIsolating = true;
-        public IDictionary<string, ExternalFunction> Functions { get; set; }
-        public Func<IFluentType, string>? FormatterFunc;
-        public Func<string, string>? TransformFunc;
-        public byte MaxPlaceable = 100;
-    }
-
-    public class LinguiniBundler
-    {
-        public static ILocaleStep New()
-        {
-            return new StepBuilder();
-        }
-
-        public interface IStep
-        {
-        }
-
-        public interface ILocaleStep : IStep
-        {
-            IResourceStep Locale(string unparsedLocale);
-            IResourceStep Locales(IList<string> unparsedLocales);
-            IResourceStep CultureInfo(CultureInfo culture);
-        }
-
-        public interface IResourceStep : IStep
-        {
-            IReadyStep AddResource(string unparsedResource);
-            IReadyStep AddResources(IList<string> unparsedResourceList);
-            IReadyStep AddResource(TextReader unparsed);
-            IReadyStep AddResources(IList<TextReader> unparsedStreamList);
-            IReadyStep AddResource(Resource resource);
-            IReadyStep AddResources(IList<Resource> resource);
-        }
-
-        public interface IBuildStep : IStep
-        {
-            FluentBundle UncheckedBuild();
-
-            (FluentBundle, List<FluentError>) Build();
-        }
-
-        public interface IReadyStep : IBuildStep
-        {
-            IReadyStep SetUseIsolating(bool isIsolating);
-            IReadyStep SetTransformFunc(Func<string, string> transformFunc);
-            IReadyStep SetFormatterFunc(Func<IFluentType, string> formatterFunc);
-        }
-
-        private class StepBuilder : IReadyStep, ILocaleStep, IResourceStep
-        {
-            private CultureInfo _culture;
-            private List<string> _locales = new();
-            private List<Resource> _resources = new();
-            private bool _useIsolating = true;
-            private Func<IFluentType, string>? _formatterFunc;
-            private Func<string, string>? _transformFunc;
-            private Dictionary<string, ExternalFunction> _functions = new();
-
-            public IReadyStep SetUseIsolating(bool isIsolating)
-            {
-                _useIsolating = isIsolating;
-                return this;
-            }
-
-            public IReadyStep SetTransformFunc(Func<string, string> transformFunc)
-            {
-                _transformFunc = transformFunc;
-                return this;
-            }
-
-            public IReadyStep SetFormatterFunc(Func<IFluentType, string> formatterFunc)
-            {
-                _formatterFunc = formatterFunc;
-                return this;
-            }
-
-            public FluentBundle UncheckedBuild()
-            {
-                var (bundle, errors) = Build();
-
-                if (errors.Count > 0)
-                {
-                    throw new LinguiniException(errors);
-                }
-
-                return bundle;
-            }
-
-            public (FluentBundle, List<FluentError>) Build()
-            {
-                var bundle = new FluentBundle()
-                {
-                    Culture = _culture,
-                    Locales = _locales,
-                    UseIsolating = _useIsolating,
-                    FormatterFunc = _formatterFunc,
-                    TransformFunc = _transformFunc,
-                };
-
-                var errors = new List<FluentError>();
-                if (_functions.Count > 0)
-                {
-                    bundle.AddFunctions(_functions, out var funcErr);
-                    errors.AddRange(funcErr);
-                }
-
-                foreach (var resource in _resources)
-                {
-                    if (!bundle.AddResource(resource, out var resErr))
-                    {
-                        errors.AddRange(resErr);
-                    }
-                }
-
-                return (bundle, errors);
-            }
-
-            public IResourceStep Locale(string unparsedLocale)
-            {
-                _culture = new CultureInfo(unparsedLocale);
-                _locales.Add(unparsedLocale);
-                return this;
-            }
-
-            public IResourceStep Locales(IList<string> unparsedLocales)
-            {
-                if (unparsedLocales.Count > 0)
-                {
-                    _culture = new CultureInfo(unparsedLocales[0]);
-                    _locales.AddRange(unparsedLocales);
-                }
-
-                return this;
-            }
-
-            public IResourceStep CultureInfo(CultureInfo culture)
-            {
-                _culture = culture;
-                _locales.Add(culture.ToString());
-                return this;
-            }
-
-            public IReadyStep AddResource(string unparsed)
-            {
-                var resource = new LinguiniParser(unparsed).Parse();
-                _resources.Add(resource);
-                return this;
-            }
-
-            public IReadyStep AddResource(TextReader unparsed)
-            {
-                var resource = new LinguiniParser(unparsed).Parse();
-                _resources.Add(resource);
-                return this;
-            }
-
-            public IReadyStep AddResource(Resource parsedResource)
-            {
-                _resources.Add(parsedResource);
-                return this;
-            }
-
-            public IReadyStep AddResources(IList<string> unparsedResources)
-            {
-                foreach (var unparsed in unparsedResources)
-                {
-                    var parsed = new LinguiniParser(unparsed).Parse();
-                    _resources.Add(parsed);
-                }
-
-                return this;
-            }
-
-            public IReadyStep AddResources(IList<TextReader> unparsedStream)
-            {
-                foreach (var unparsed in unparsedStream)
-                {
-                    var parsed = new LinguiniParser(unparsed).Parse();
-                    _resources.Add(parsed);
-                }
-
-                return this;
-            }
-
-            public IReadyStep AddResources(IList<Resource> parsedResource)
-            {
-                _resources.AddRange(parsedResource);
-                return this;
-            }
         }
     }
 }
