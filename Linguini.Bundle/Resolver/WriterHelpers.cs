@@ -97,9 +97,21 @@ namespace Linguini.Bundle.Resolver
                         if (key.Matches(selector, scope))
                         {
                             variant.Value.Write(writer, scope, out errors);
+                            return errors.Count == 0;
                         }
                     }
                 }
+
+                for (var i = 0; i < selectExpression.Variants.Count; i++)
+                {
+                    var variant = selectExpression.Variants[i];
+                    if (variant.IsDefault)
+                    {
+                        variant.Value.Write(writer, scope, out errors);
+                        return errors.Count == 0;
+                    }
+                }
+                errors.Add(ResolverFluentError.MissingDefault());
             }
 
             return scope.Errors.Count == 0;
@@ -115,7 +127,8 @@ namespace Linguini.Bundle.Resolver
 
             if (self.TryConvert(out NumberLiteral numberLiteral))
             {
-                writer.Write(FluentNumber.TryNumber(numberLiteral.Value.Span));
+                var value = FluentNumber.TryNumber(numberLiteral.Value.Span);
+                value.Write(writer, scope);
                 return;
             }
 

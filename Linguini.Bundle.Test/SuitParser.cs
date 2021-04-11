@@ -39,7 +39,7 @@ namespace Linguini.Bundle.Test
             var defaultBuilder = ParseDefault(defaultPath);
             
             string[] files = Directory.GetFiles(GetFullPathFor("fixtures"));
-            // string[] files = new[] {GetFullPathFor("fixtures/isolating.yaml")};
+            // string[] files = {GetFullPathFor("fixtures/mre.yaml")};
             foreach (var path in files)
             {
                 if (path.Equals(defaultPath))

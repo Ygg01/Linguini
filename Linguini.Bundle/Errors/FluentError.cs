@@ -59,7 +59,7 @@ namespace Linguini.Bundle.Errors
 
         public static ResolverFluentError UnknownVariable(VariableReference outType)
         {
-            return new($"Unknown variable: {outType.Id}", ErrorType.UnknownVariable);
+            return new($"Unknown variable: ${outType.Id}", ErrorType.Reference);
         }
 
         public static ResolverFluentError TooManyPlaceables()
@@ -111,6 +111,11 @@ namespace Linguini.Bundle.Errors
         {
             return new($"Cyclic pattern {pattern.Stringify()} detected!", ErrorType.Cyclic);
         }
+
+        public static ResolverFluentError MissingDefault()
+        {
+            return new("No default", ErrorType.MissingDefault);
+        }
     }
 
     public record ParserFluentError : FluentError
@@ -150,9 +155,9 @@ namespace Linguini.Bundle.Errors
         Reference,
         Cyclic,
         NoValue,
-        UnknownVariable,
         TooManyPlaceables,
         Overriding,
-        Syntax
+        Syntax,
+        MissingDefault
     }
 }
