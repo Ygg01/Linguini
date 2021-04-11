@@ -6,5 +6,5 @@ namespace Linguini.Bundle.Types
 
     public delegate IFluentType ExternalFunction(
         IList<IFluentType> positionalArgs,
-        FluentArgs mamedArgs);
+        FluentArgs namedArgs);
 }

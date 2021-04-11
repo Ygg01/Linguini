@@ -65,69 +65,40 @@ suites:
                 args:
                   num: 3
                 value: Foo
-#      -
-#        name: in function calls
-#        resources:
-#          -
-#            source: |-
-#              foo = { NUMBER($num) }
-#        bundles:
-#          -
-#            functions:
-#              - NUMBER
-#        tests:
-#          -
-#            name: can be a positional argument
-#            asserts:
-#              -
-#                id: foo
-#                args:
-#                  num: 3
-#                value: 3
-#      -
-#        name: simple errors
-#        resources:
-#          -
-#            source: |-
-#              foo = { $arg }
-#        tests:
-#          -
-#            name: falls back to argument's name if it's missing
-#            asserts:
-#              -
-#                id: foo
-#                value: "{$arg}"
-#                errors:
-#                  -
-#                    type: Reference
-#                    desc: "Unknown variable: $arg"
-#      -
-#        name: and strings
-#        resources:
-#          -
-#            source: |-
-#              foo = { $arg }
-#        tests:
-#          -
-#            name: can be a string
-#            asserts:
-#              -
-#                id: foo
-#                args:
-#                  arg: Argument
-#                value: Argument
-#      -
-#        name: and numbers
-#        resources:
-#          -
-#            source: |-
-#              foo = { $arg }
-#        tests:
-#          -
-#            name: can be a number
-#            asserts:
-#              -
-#                id: foo
-#                args:
-#                  arg: 1
-#                value: 1
+      -
+        name: in function calls
+        resources:
+          -
+            source: |-
+              foo = { NUMBER($num) }
+        bundles:
+          -
+            functions:
+              - NUMBER
+        tests:
+          -
+            name: can be a positional argument
+            asserts:
+              -
+                id: foo
+                args:
+                  num: 3
+                value: 3
+      -
+        name: simple errors
+        resources:
+          -
+            source: |-
+              foo = { $arg }
+        tests:
+          -
+            name: falls back to argument's name if it's missing
+            asserts:
+              -
+                id: foo
+                value: "{$arg}"
+                errors:
+                  -
+                    type: Reference
+                    desc: "Unknown variable: $arg"
+   lue: 1

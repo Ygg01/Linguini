@@ -9,7 +9,7 @@ namespace Linguini.Bundle.Test.Yaml
         public string Name = default!;
         public string Resources = default!;
         public ResolverTestBundle? Bundle;
-        public List<ResolverTest> Tests = new List<ResolverTest>();
+        public List<ResolverTest> Tests = new();
 
         public class ResolverTestBundle
         {

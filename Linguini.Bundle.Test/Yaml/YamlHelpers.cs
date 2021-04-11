@@ -6,6 +6,7 @@ using System.Threading;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
 using YamlDotNet.RepresentationModel;
+#pragma warning disable 8600
 
 namespace Linguini.Bundle.Test.Yaml
 {

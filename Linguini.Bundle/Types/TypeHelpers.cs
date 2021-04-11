@@ -9,5 +9,15 @@ namespace Linguini.Bundle.Types
             return message.Attributes
                 .Find(attribute => attribute.Id.ToString() == attrName);
         }
+
+        public static FluentNumber? ToFluentNumber(this IFluentType fluentType)
+        {
+            if (fluentType is FluentNumber)
+            {
+                return (FluentNumber) fluentType;
+            }
+
+            return null;
+        }
     }
 }

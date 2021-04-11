@@ -302,7 +302,7 @@ namespace Linguini.Bundle.Resolver
             }
             else if (self.TryConvert(out VariableReference? varRef))
             {
-                writer.Write($"{varRef.Id}");
+                writer.Write($"${varRef.Id}");
                 return;
             }
             

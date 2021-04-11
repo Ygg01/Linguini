@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Test.Yaml;
-using Linguini.Bundle.Types;
 using NUnit.Framework;
 using YamlDotNet.RepresentationModel;
 
@@ -21,7 +20,9 @@ namespace Linguini.Bundle.Test
                 {
                     // We discard the last three folders from WorkDirectory
                     // to get into common test directory
-                    var testDirStrings = TestContext.CurrentContext.WorkDirectory
+                    var testDirStrings = TestContext
+                        .CurrentContext
+                        .WorkDirectory
                         .Split(Path.DirectorySeparatorChar)[new Range(0, Index.FromEnd(3))];
                     _baseTestDir = Path.Combine(testDirStrings);
                 }
@@ -48,26 +49,55 @@ namespace Linguini.Bundle.Test
                 .SetUseIsolating(false)
                 .Build();
 
+            if (parsedTestSuite.Bundle != null)
+            {
+                foreach (var funcName in parsedTestSuite.Bundle.Functions)
+                {
+                    switch (funcName)
+                    {
+                        case "CONCAT":
+                            bundle.AddFunction(funcName, LinguiniFluentFunctions.Concat, out _);
+                            break;
+
+                        case "SUM":
+                            bundle.AddFunction(funcName, LinguiniFluentFunctions.Sum, out _);
+                            break;
+
+                        case "NUMBER":
+                            bundle.AddFunction(funcName, LinguiniFluentFunctions.Number, out _);
+                            break;
+
+                        case "IDENTITY":
+                            bundle.AddFunction(funcName, LinguiniFluentFunctions.Identity, out _);
+                            break;
+                        
+                        default:
+                            throw new ArgumentException($"Method name {funcName} doesn't exist");
+                    }
+                }
+                AssertErrorCases(parsedTestSuite.Bundle.Errors, errors, parsedTestSuite.Name);
+            }
+
             foreach (var test in parsedTestSuite.Tests)
             {
                 foreach (var assert in test.Asserts)
                 {
                     var actualValue = bundle.GetMsg(assert.Id, assert.Attribute, assert.Args, out var errs);
                     Assert.AreEqual(assert.ExpectedValue, actualValue, test.TestName);
-                    AssertErrorCases(assert, errs, test);
+                    AssertErrorCases(assert.ExpectedErrors, errs, test.TestName);
                 }
             }
         }
 
-        private static void AssertErrorCases(ResolverTestSuite.ResolverAssert assert,
+        private static void AssertErrorCases(List<ResolverTestSuite.ResolverTestError> expectedErrors,
             IList<FluentError> errs,
-            ResolverTestSuite.ResolverTest test)
+            String testName)
         {
-            Assert.AreEqual(assert.ExpectedErrors.Count, errs.Count, test.TestName);
-            for (var i = 0; i < assert.ExpectedErrors.Count; i++)
+            Assert.AreEqual(expectedErrors.Count, errs.Count, testName);
+            for (var i = 0; i < expectedErrors.Count; i++)
             {
                 var actualError = errs[i];
-                var expectedError = assert.ExpectedErrors[i];
+                var expectedError = expectedErrors[i];
 
                 Assert.AreEqual(expectedError.Type, actualError.ErrorKind());
                 if (expectedError.Description != null)

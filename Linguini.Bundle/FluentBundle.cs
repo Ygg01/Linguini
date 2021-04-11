@@ -55,7 +55,7 @@ namespace Linguini.Bundle
             AddFunctions(option.Functions, out errors, InsertBehavior.None);
         }
 
-        public void AddFunctions(IDictionary<string, FluentFunction> functions, out List<FluentError> errors,
+        public void AddFunctions(IDictionary<string, ExternalFunction> functions, out List<FluentError> errors,
             InsertBehavior behavior = InsertBehavior.Throw)
         {
             errors = new List<FluentError>();
@@ -68,7 +68,7 @@ namespace Linguini.Bundle
             }
         }
 
-        public bool AddFunction(string funcName, FluentFunction fluentFunction,
+        public bool AddFunction(string funcName, ExternalFunction fluentFunction,
             [NotNullWhen(false)] out IList<FluentError>? errors,
             InsertBehavior behavior = InsertBehavior.Throw)
         {
@@ -76,7 +76,7 @@ namespace Linguini.Bundle
             switch (behavior)
             {
                 case InsertBehavior.None:
-                    if (!_entries.TryAdd(funcName, fluentFunction))
+                    if (!_entries.TryAdd(funcName, (FluentFunction) fluentFunction))
                     {
                         errors = new List<FluentError>
                         {
@@ -86,7 +86,7 @@ namespace Linguini.Bundle
 
                     break;
                 case InsertBehavior.Overriding:
-                    _entries[funcName] = fluentFunction;
+                    _entries[funcName] = (FluentFunction) fluentFunction;
                     break;
                 default:
                     if (_entries.ContainsKey(funcName))
@@ -97,7 +97,7 @@ namespace Linguini.Bundle
                         };
                     }
 
-                    _entries.Add(funcName, fluentFunction);
+                    _entries.Add(funcName, (FluentFunction) fluentFunction);
                     break;
             }
 
@@ -199,8 +199,8 @@ namespace Linguini.Bundle
             if (TryGetMessage(id, out var astMessage))
             {
                 Pattern? pattern;
-                pattern = attribute != null 
-                    ? astMessage.GetAttribute(attribute)?.Value 
+                pattern = attribute != null
+                    ? astMessage.GetAttribute(attribute)?.Value
                     : astMessage.Value;
 
                 if (pattern != null)
@@ -299,7 +299,7 @@ namespace Linguini.Bundle
     public class FluentBundleOption
     {
         public bool UseIsolating = true;
-        public IDictionary<string, FluentFunction> Functions { get; set; }
+        public IDictionary<string, ExternalFunction> Functions { get; set; }
         public Func<IFluentType, string>? FormatterFunc;
         public Func<string, string>? TransformFunc;
         public byte MaxPlaceable = 100;
@@ -355,7 +355,7 @@ namespace Linguini.Bundle
             private bool _useIsolating = true;
             private Func<IFluentType, string>? _formatterFunc;
             private Func<string, string>? _transformFunc;
-            private Dictionary<string, FluentFunction> _functions = new();
+            private Dictionary<string, ExternalFunction> _functions = new();
 
             public IReadyStep SetUseIsolating(bool isIsolating)
             {
