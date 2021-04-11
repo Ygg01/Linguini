@@ -203,11 +203,10 @@ namespace Linguini.Bundle
                 pattern = attribute != null
                     ? astMessage.GetAttribute(attribute)?.Value
                     : astMessage.Value;
-
-                if (pattern != null)
-                {
-                    value = FormatPattern(pattern, args, out errors);
-                }
+                
+                value = FormatPattern(pattern, args, out errors);
+                
+              
             }
 
             return value;
@@ -274,7 +273,7 @@ namespace Linguini.Bundle
             return errors.Count == 0;
         }
 
-        public string FormatPattern(Pattern pattern, FluentArgs? args,
+        public string FormatPattern(Pattern? pattern, FluentArgs? args,
             out IList<FluentError> errors)
         {
             var scope = new Scope(this, args);

@@ -52,15 +52,15 @@ suites:
                 desc: "Unknown variable: $sel"
       -
         name: returns {???} when trying to format a null value
-        skip: true
         asserts:
           -
             id: key5
             value: "{???}"
-            errors:
-              -
-                type: Reference
-                desc: "Unknown variable: $sel"
+# TODO see if we need this part
+#            errors:
+#              -
+#                type: Reference
+#                desc: "Unknown variable: $sel"
       -
         name: allows to pass traits directly to bundle.formatPattern
         asserts:
