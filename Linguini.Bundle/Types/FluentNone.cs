@@ -4,27 +4,33 @@ namespace Linguini.Bundle.Types
 {
     public class FluentNone: IFluentType, IEquatable<FluentNone>
     {
-        private string Desc;
+        private readonly string _desc;
 
+        public static FluentNone None = new();
 
         public FluentNone()
         {
-            Desc = "{???}";
+            _desc = "{???}";
         }
         
         public FluentNone(string desc)
         {
-            Desc = desc;
+            _desc = desc;
         }
 
         public object Clone()
         {
-            return new FluentNone(Desc);
+            return new FluentNone(_desc);
         }
 
         public string AsString()
         {
             return "{???}";
+        }
+
+        public override string ToString()
+        {
+            return AsString();
         }
 
         public bool Equals(FluentNone? other)

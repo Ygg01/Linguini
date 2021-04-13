@@ -4,26 +4,26 @@ namespace Linguini.Bundle.Types
 {
     public class FluentCustom: IFluentType, IEquatable<FluentCustom>
     {
-        public IFluentType Type;
+        public IFluentType Value;
             
         public object Clone()
         {
-            return Type.Clone();
+            return Value.Clone();
         }
 
         public string AsString()
         {
-            return Type.AsString();
+            return Value.AsString();
         }
 
-        public bool Equals(FluentCustom other)
+        public bool Equals(FluentCustom? other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Equals(Type, other.Type);
+            return Equals(Value, other.Value);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
@@ -33,7 +33,7 @@ namespace Linguini.Bundle.Types
 
         public override int GetHashCode()
         {
-            return (Type != null ? Type.GetHashCode() : 0);
+            return (Value != null ? Value.GetHashCode() : 0);
         }
     }
 }

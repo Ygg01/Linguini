@@ -56,11 +56,10 @@ suites:
           -
             id: key5
             value: "{???}"
-# TODO see if we need this part
-#            errors:
-#              -
-#                type: Reference
-#                desc: "Unknown variable: $sel"
+            errors:
+              -
+                type: NoValue
+                desc: "No value: key5"
       -
         name: allows to pass traits directly to bundle.formatPattern
         asserts:

@@ -8,12 +8,8 @@ namespace Linguini.Bundle.Resolver
 {
     public static class ResolverHelpers
     {
-        public static IFluentType Resolve(this Pattern? self, Scope scope)
+        public static IFluentType Resolve(this Pattern self, Scope scope)
         {
-            if (self == null)
-            {
-                return new FluentNone();
-            }
             var len = self.Elements.Count;
 
             if (len == 1)

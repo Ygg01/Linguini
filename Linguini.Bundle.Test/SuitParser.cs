@@ -38,8 +38,8 @@ namespace Linguini.Bundle.Test
             var defaultPath = GetFullPathFor("fixtures/defaults.yaml");
             var defaultBuilder = ParseDefault(defaultPath);
             
-            string[] files = Directory.GetFiles(GetFullPathFor("fixtures"));
-            // string[] files = {GetFullPathFor("fixtures/mre.yaml")};
+            // string[] files = Directory.GetFiles(GetFullPathFor("fixtures"));
+            string[] files = {GetFullPathFor("fixtures/values_format.yaml")};
             foreach (var path in files)
             {
                 if (path.Equals(defaultPath))
@@ -59,14 +59,7 @@ namespace Linguini.Bundle.Test
            
         }
         
-        private static string GetFullPathFor(string file)
-        {
-            List<string> list = new();
-            list.Add(BaseTestDir);
-            list.AddRange(file.Split(@"/"));
-            return Path.Combine(list.ToArray());
-        }
-
+        
         [TestCaseSource(nameof(MyTestCases))]
         [Parallelizable]
         public void MyTestMethod(ResolverTestSuite parsedTestSuite, LinguiniBundler.IReadyStep builder)
@@ -128,6 +121,15 @@ namespace Linguini.Bundle.Test
                 }
             }
         }
+        
+        private static string GetFullPathFor(string file)
+        {
+            List<string> list = new();
+            list.Add(BaseTestDir);
+            list.AddRange(file.Split(@"/"));
+            return Path.Combine(list.ToArray());
+        }
+
 
         private static void AssertErrorCases(List<ResolverTestSuite.ResolverTestError> expectedErrors,
             IList<FluentError> errs,

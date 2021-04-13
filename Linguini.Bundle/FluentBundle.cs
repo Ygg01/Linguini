@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.IO;
 using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.PluralRules;
@@ -17,7 +16,7 @@ namespace Linguini.Bundle
 
     public class FluentBundle
     {
-        private HashSet<string> _funcList;
+        private readonly HashSet<string> _funcList;
         private readonly Dictionary<string, IBundleEntry> _entries;
 
         public CultureInfo Culture { get; internal set; }
@@ -203,10 +202,19 @@ namespace Linguini.Bundle
                 pattern = attribute != null
                     ? astMessage.GetAttribute(attribute)?.Value
                     : astMessage.Value;
+
+                if (pattern == null)
+                {
+                    var message = (attribute == null)
+                        ? id
+                        : $"{id}.{attribute}";
+                    errors.Add(ResolverFluentError.NoValue($"{message}"));
+                    return FluentNone.None.ToString();
+                }
                 
                 value = FormatPattern(pattern, args, out errors);
                 
-              
+               
             }
 
             return value;
@@ -263,17 +271,8 @@ namespace Linguini.Bundle
             function = null;
             return false;
         }
-
-        public bool TryWritePattern(TextWriter writer, Pattern pattern, FluentArgs? args,
-            out IList<FluentError> errors)
-        {
-            var scope = new Scope(this, args);
-            pattern.Write(writer, scope, out errors);
-
-            return errors.Count == 0;
-        }
-
-        public string FormatPattern(Pattern? pattern, FluentArgs? args,
+        
+        public string FormatPattern(Pattern pattern, FluentArgs? args,
             out IList<FluentError> errors)
         {
             var scope = new Scope(this, args);

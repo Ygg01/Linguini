@@ -56,6 +56,11 @@ namespace Linguini.Bundle.Errors
         {
             return new($"No value: {idName.Span.ToString()}", ErrorType.NoValue);
         }
+        
+        public static ResolverFluentError NoValue(string pattern)
+        {
+            return new($"No value: {pattern}", ErrorType.NoValue);
+        }
 
         public static ResolverFluentError UnknownVariable(VariableReference outType)
         {
