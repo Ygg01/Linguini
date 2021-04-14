@@ -127,9 +127,17 @@ namespace Linguini.Bundle.Test
 
                 foreach (var assert in test.Asserts)
                 {
-                    var actualValue = testBundle.GetMsg(assert.Id, assert.Attribute, assert.Args, out var errs);
-                    Assert.AreEqual(assert.ExpectedValue, actualValue, test.TestName);
-                    AssertErrorCases(assert.ExpectedErrors, errs, test.TestName);
+                    if (assert.Missing != null)
+                    {
+                        var notMissing = testBundle.HasMessage(assert.Id);
+                        Assert.AreEqual(!assert.Missing, notMissing);
+                    }
+                    else
+                    {
+                        var actualValue = testBundle.GetMsg(assert.Id, assert.Attribute, assert.Args, out var errs);
+                        Assert.AreEqual(assert.ExpectedValue, actualValue, test.TestName);
+                        AssertErrorCases(assert.ExpectedErrors, errs, test.TestName);
+                    }
                 }
             }
         }

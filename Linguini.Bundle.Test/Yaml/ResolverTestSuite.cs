@@ -24,7 +24,6 @@ namespace Linguini.Bundle.Test.Yaml
         public class ResolverTest
         {
             public string TestName = default!;
-            public bool Skip;
             public List<ResolverAssert> Asserts = new();
             public ResolverTestBundle? Bundle;
             public List<string> Resources = new();
@@ -38,7 +37,7 @@ namespace Linguini.Bundle.Test.Yaml
             public Dictionary<string, IFluentType> Args = new();
             public string ExpectedValue = default!;
             public List<ResolverTestError> ExpectedErrors = new();
-            public bool? Missing;
+            public bool? Missing = null;
         }
 
 

@@ -158,11 +158,6 @@ namespace Linguini.Bundle.Test.Yaml
                 resolverTest.TestName = nameProp.Value!;
             }
 
-            if (test.TryGetNode("skip", out YamlScalarNode skipProp))
-            {
-                resolverTest.Skip = skipProp.AsBool();
-            }
-
             if (test.TryGetNode("asserts", out YamlSequenceNode asserts))
             {
                 resolverTest.Asserts = ProcessAsserts(asserts);
@@ -207,14 +202,14 @@ namespace Linguini.Bundle.Test.Yaml
                         resolverAssert.ExpectedValue = valNode.AsString();
                     }
 
-                    if (assertMap.TryGetNode("missing", out YamlScalarNode missingNode))
-                    {
-                        resolverAssert.Missing = missingNode.AsBool();
-                    }
-
                     if (assertMap.TryGetNode("args", out YamlMappingNode argsNode))
                     {
                         resolverAssert.Args = ProcessArgs(argsNode);
+                    }
+
+                    if (assertMap.TryGetNode("missing", out YamlScalarNode args))
+                    {
+                        resolverAssert.Missing = args.AsBool();
                     }
 
                     if (assertMap.TryGetNode("errors", out YamlSequenceNode errorsNode))
