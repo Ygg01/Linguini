@@ -16,14 +16,13 @@ namespace Linguini.Bundle
 
     public class FluentBundle
     {
-        private readonly HashSet<string> _funcList;
-        private readonly Dictionary<string, IBundleEntry> _entries;
+        private HashSet<string> _funcList;
+        private Dictionary<string, IBundleEntry> _entries;
 
         public CultureInfo Culture { get; internal set; }
         public List<string> Locales { get; internal set; }
-        public List<Resource> Resources { get; }
+        private List<Resource> Resources { get; init; }
 
-        public IReadOnlyDictionary<string, IBundleEntry> Entries => _entries;
 
         public bool UseIsolating { get; set; }
         public Func<string, string>? TransformFunc { get; set; }
@@ -181,8 +180,8 @@ namespace Linguini.Bundle
 
         public bool HasMessage(string id)
         {
-            return Entries.ContainsKey(id)
-                   && Entries[id].TryConvert<IBundleEntry, Message>(out _);
+            return _entries.ContainsKey(id)
+                   && _entries[id].TryConvert<IBundleEntry, Message>(out _);
         }
 
         public string? GetMsg(string id, FluentArgs args, out IList<FluentError> errors)
@@ -222,8 +221,8 @@ namespace Linguini.Bundle
 
         public bool TryGetMessage(string id, [NotNullWhen(true)] out AstMessage? message)
         {
-            if (Entries.ContainsKey(id)
-                && Entries.TryGetValue(id, out var value)
+            if (_entries.ContainsKey(id)
+                && _entries.TryGetValue(id, out var value)
                 && value.ToKind() == EntryKind.Message
                 && value.TryConvert(out Message msg))
             {
@@ -239,8 +238,8 @@ namespace Linguini.Bundle
 
         public bool TryGetTerm(string id, [NotNullWhen(true)] out AstTerm? astTerm)
         {
-            if (Entries.ContainsKey(id)
-                && Entries.TryGetValue(id, out var value)
+            if (_entries.ContainsKey(id)
+                && _entries.TryGetValue(id, out var value)
                 && value.ToKind() == EntryKind.Term
                 && value.TryConvert(out Term term))
             {
@@ -261,8 +260,8 @@ namespace Linguini.Bundle
 
         public bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
         {
-            if (Entries.ContainsKey(funcName)
-                && Entries.TryGetValue(funcName, out var value)
+            if (_entries.ContainsKey(funcName)
+                && _entries.TryGetValue(funcName, out var value)
                 && value.ToKind() == EntryKind.Function)
             {
                 return value.TryConvert(out function);
@@ -285,6 +284,21 @@ namespace Linguini.Bundle
         {
             // TODO
             throw new NotImplementedException();
+        }
+
+        public FluentBundle DeepClone()
+        {
+            return new()
+            {
+                Culture = (CultureInfo) Culture.Clone(),
+                Resources = new List<Resource>(Resources),
+                FormatterFunc = FormatterFunc,
+                Locales = new List<string>(Locales),
+                _entries = new(_entries),
+                _funcList = new HashSet<string>(_funcList),
+                TransformFunc = TransformFunc,
+                UseIsolating = UseIsolating,
+            };
         }
     }
 }

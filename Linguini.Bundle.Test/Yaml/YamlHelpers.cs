@@ -84,10 +84,17 @@ namespace Linguini.Bundle.Test.Yaml
 
         public static List<ResolverTestSuite> ParseResolverTests(this YamlDocument doc)
         {
-            var suitesSeq = (YamlMappingNode) doc.RootNode["suites"][0];
-            if (suitesSeq.TryGetNode("suites", out YamlSequenceNode suites))
+            var suiteMapNode = (YamlMappingNode) doc.RootNode["suites"][0];
+            var testSuites = new List<ResolverTestSuite>();
+            if (suiteMapNode.TryGetNode<YamlSequenceNode>("tests", out _))
             {
-                var testSuites = new List<ResolverTestSuite>(suites.Children.Count);
+                var topLevel = new ResolverTestSuite();
+                ProcessTestSuite(suiteMapNode, topLevel);
+                testSuites.Add(topLevel);
+            }
+            if (suiteMapNode.TryGetNode("suites", out YamlSequenceNode suites))
+            {
+                
                 foreach (var suiteProp in suites.Children)
                 {
                     var testSuite = new ResolverTestSuite();
@@ -98,18 +105,12 @@ namespace Linguini.Bundle.Test.Yaml
 
                     testSuites.Add(testSuite);
                 }
-
-                return testSuites;
+                
             }
-
-            // Assume it is single test suite
-            var single = new ResolverTestSuite();
-            ProcessTestSuite(suitesSeq, single);
-
-            return new List<ResolverTestSuite>(new[] {single});
+            return testSuites;
         }
 
-        private static void ProcessTestSuite(YamlMappingNode mapNode, ResolverTestSuite? testSuite)
+        private static void ProcessTestSuite(YamlMappingNode mapNode, ResolverTestSuite testSuite)
         {
             if (mapNode.TryGetNode<YamlScalarNode>("name", out var name))
             {
@@ -118,7 +119,13 @@ namespace Linguini.Bundle.Test.Yaml
 
             if (mapNode.TryGetNode<YamlSequenceNode>("resources", out var resources))
             {
-                ProcessResources(resources, testSuite);
+                var (res, errs) = ProcessResources(resources);
+                testSuite.Resources.AddRange(res);
+                if (testSuite.Bundle == null)
+                {
+                    testSuite.Bundle = new();
+                }
+                testSuite.Bundle.Errors.AddRange(errs);
             }
 
             if (mapNode.TryGetNode<YamlSequenceNode>("bundles", out var bundles))
@@ -164,6 +171,13 @@ namespace Linguini.Bundle.Test.Yaml
             if (test.TryGetNode("bundles", out YamlSequenceNode bundleNodes))
             {
                 ProcessBundles(bundleNodes, out resolverTest.Bundle);
+            }
+
+            if (test.TryGetNode("resources", out YamlSequenceNode resourceNode))
+            {
+                var (res, errors) = ProcessResources(resourceNode);
+                resolverTest.Resources.AddRange(res);
+                resolverTest.ExpectedErrors.AddRange(errors);
             }
 
             return resolverTest;
@@ -282,28 +296,28 @@ namespace Linguini.Bundle.Test.Yaml
             }
         }
 
-        private static void ProcessResources(YamlSequenceNode returnNode, ResolverTestSuite testSuite)
+        private static (List<string>,  List<ResolverTestSuite.ResolverTestError>) 
+            ProcessResources(YamlSequenceNode returnNode)
         {
+            List<string> resource = new();
+            List<ResolverTestSuite.ResolverTestError> errors = new();
             foreach (var resNode in returnNode.Children)
             {
                 if (resNode.TryConvert(out YamlMappingNode map))
                 {
                     if (map.TryGetNode("source", out YamlScalarNode sourceValue))
                     {
-                        testSuite.Resources.Add(sourceValue.Value!);
+                        resource.Add(sourceValue.Value!);
                     }
 
                     if (map.TryGetNode("errors", out YamlSequenceNode errorNode))
                     {
-                        if (testSuite.Bundle == null)
-                        {
-                            testSuite.Bundle = new ResolverTestSuite.ResolverTestBundle();
-                        }
-
-                        testSuite.Bundle.Errors = ProcessErrors(errorNode);
+                        errors = ProcessErrors(errorNode);
                     }
                 }
             }
+
+            return (resource, errors);
         }
 
         private static List<ResolverTestSuite.ResolverTestError> ProcessErrors(YamlSequenceNode errorNode)

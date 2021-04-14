@@ -27,6 +27,8 @@ namespace Linguini.Bundle.Test.Yaml
             public bool Skip;
             public List<ResolverAssert> Asserts = new();
             public ResolverTestBundle? Bundle;
+            public List<string> Resources = new();
+            public List<ResolverTestError> ExpectedErrors = new();
         }
 
         public class ResolverAssert

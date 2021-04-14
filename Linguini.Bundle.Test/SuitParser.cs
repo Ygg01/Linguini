@@ -38,8 +38,8 @@ namespace Linguini.Bundle.Test
             var defaultPath = GetFullPathFor("fixtures/defaults.yaml");
             var defaultBuilder = ParseDefault(defaultPath);
             
-            // string[] files = Directory.GetFiles(GetFullPathFor("fixtures"));
-            string[] files = {GetFullPathFor("fixtures/values_format.yaml")};
+            string[] files = Directory.GetFiles(GetFullPathFor("fixtures"));
+            // string[] files = {GetFullPathFor("fixtures/mre.yaml")};
             foreach (var path in files)
             {
                 if (path.Equals(defaultPath))
@@ -65,7 +65,12 @@ namespace Linguini.Bundle.Test
         public void MyTestMethod(ResolverTestSuite parsedTestSuite, LinguiniBundler.IReadyStep builder)
         {
             var bundle = builder.UncheckedBuild();
-            bundle.AddResource(parsedTestSuite.Resources[0], out var errors);
+            var errors = new List<FluentError>();
+            foreach (var res in parsedTestSuite.Resources)
+            {
+                bundle.AddResource(res, out var err);
+                errors.AddRange(err);
+            }
 
             if (parsedTestSuite.Bundle != null)
             {
@@ -113,9 +118,19 @@ namespace Linguini.Bundle.Test
 
             foreach (var test in parsedTestSuite.Tests)
             {
+                var testBundle = bundle;
+                if (test.Resources.Count > 0)
+                {
+                    testBundle = bundle.DeepClone();
+                    foreach (var res in test.Resources)
+                    {
+                        testBundle.AddResource(res, out var errs);
+                        errors.AddRange(errs);
+                    }
+                }
                 foreach (var assert in test.Asserts)
                 {
-                    var actualValue = bundle.GetMsg(assert.Id, assert.Attribute, assert.Args, out var errs);
+                    var actualValue = testBundle.GetMsg(assert.Id, assert.Attribute, assert.Args, out var errs);
                     Assert.AreEqual(assert.ExpectedValue, actualValue, test.TestName);
                     AssertErrorCases(assert.ExpectedErrors, errs, test.TestName);
                 }
