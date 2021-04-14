@@ -41,7 +41,8 @@ suites:
                 value: Foo
           -
             name: addResource allowOverrides is true
-            skip: true
+            bundles:
+              - override: true
             resources:
               -
                 source: key = Bar

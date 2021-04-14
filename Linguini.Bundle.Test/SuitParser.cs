@@ -40,7 +40,7 @@ namespace Linguini.Bundle.Test
             var defaultBuilder = ParseDefault(defaultPath);
 
             string[] files = Directory.GetFiles(GetFullPathFor("fixtures"));
-            // string[] files = {GetFullPathFor("fixtures/mre.yaml")};
+            // string[] files = {GetFullPathFor("fixtures/context.yaml")};
             foreach (var path in files)
             {
                 if (path.Equals(defaultPath))
@@ -115,13 +115,21 @@ namespace Linguini.Bundle.Test
             foreach (var test in parsedTestSuite.Tests)
             {
                 var testBundle = bundle;
+                var replace = test.Bundle?.Override ?? false;
                 if (test.Resources.Count > 0)
                 {
                     testBundle = bundle.DeepClone();
                     foreach (var res in test.Resources)
                     {
-                        testBundle.AddResource(res, out var errs);
-                        errors.AddRange(errs);
+                        if (replace)
+                        {
+                            testBundle.AddResourceOverriding(res);
+                        }
+                        else
+                        {
+                            testBundle.AddResource(res, out var errs);
+                            errors.AddRange(errs);
+                        }
                     }
                 }
 

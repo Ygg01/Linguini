@@ -274,6 +274,10 @@ namespace Linguini.Bundle.Test.Yaml
                         {
                             testBundle.UseIsolating = keyValueNode.Value.AsBool();
                         }
+                        else if (keyValueNode.Key.ToString().Equals("override"))
+                        {
+                            testBundle.Override = keyValueNode.Value.AsBool();
+                        }
                     }
                 }
             }
