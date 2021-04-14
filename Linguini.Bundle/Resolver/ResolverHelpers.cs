@@ -21,7 +21,7 @@ namespace Linguini.Bundle.Resolver
             }
 
             var stringWriter = new StringWriter();
-            self.Write(stringWriter, scope, out _);
+            self.Write(stringWriter, scope);
             return (FluentString) stringWriter.ToString();
         }
 
@@ -55,7 +55,7 @@ namespace Linguini.Bundle.Resolver
             }
 
             var writer = new StringWriter();
-            self.TryWrite(writer, scope, out _);
+            self.TryWrite(writer, scope);
             return (FluentString) writer.ToString();
         }
 

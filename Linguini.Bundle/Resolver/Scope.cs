@@ -14,7 +14,7 @@ namespace Linguini.Bundle.Resolver
         private Dictionary<string, IFluentType>? _args;
         private Dictionary<string, IFluentType>? _localArgs;
         private List<Pattern> _travelled;
-        private List<FluentError> _errors;
+        internal List<FluentError> _errors;
 
         public Scope(FluentBundle fluentBundle, IDictionary<string, IFluentType>? args)
         {
@@ -57,17 +57,14 @@ namespace Linguini.Bundle.Resolver
             _errors.Add(resolverFluentError);
         }
 
-        public bool MaybeTrack(TextWriter writer, Pattern pattern, IExpression expr, out IList<FluentError> errors)
+        public void MaybeTrack(TextWriter writer, Pattern pattern, IExpression expr)
         {
             if (_travelled.Count == 0)
             {
                 _travelled.Add(pattern);
             }
 
-            if (!expr.TryWrite(writer, this, out errors))
-            {
-                return false;
-            }
+            expr.TryWrite(writer, this);
 
             if (Dirty)
             {
@@ -75,9 +72,6 @@ namespace Linguini.Bundle.Resolver
                 expr.WriteError(writer);
                 writer.Write('}');
             }
-
-            errors = null;
-            return true;
         }
 
         public void Track(TextWriter writer, Pattern pattern, IInlineExpression exp)
@@ -92,7 +86,7 @@ namespace Linguini.Bundle.Resolver
             else
             {
                 _travelled.Add(pattern);
-                pattern.Write(writer, this, out _);
+                pattern.Write(writer, this);
                 PopTraveled();
             }
         }

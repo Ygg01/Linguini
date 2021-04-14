@@ -10,8 +10,7 @@ namespace Linguini.Bundle.Resolver
 {
     public static class WriterHelpers
     {
-        public static void Write(this Pattern pattern, TextWriter writer, Scope scope,
-            out IList<FluentError> errors)
+        public static void Write(this Pattern pattern, TextWriter writer, Scope scope)
         {
             var len = pattern.Elements.Count;
             var transformFunc = scope.Bundle.TransformFunc;
@@ -20,7 +19,6 @@ namespace Linguini.Bundle.Resolver
             {
                 if (scope.Dirty)
                 {
-                    errors = null;
                     return;
                 }
 
@@ -44,7 +42,6 @@ namespace Linguini.Bundle.Resolver
                     {
                         scope.Dirty = true;
                         scope.AddError(ResolverFluentError.TooManyPlaceables());
-                        errors = scope.Errors;
                         return;
                     }
 
@@ -56,21 +53,19 @@ namespace Linguini.Bundle.Resolver
                         writer.Write('\u2068');
                     }
 
-                    scope.MaybeTrack(writer, pattern, expr, out errors);
+                    scope.MaybeTrack(writer, pattern, expr);
+
                     if (needsIsolating)
                     {
                         writer.Write('\u2069');
                     }
                 }
             }
-
-            errors = new List<FluentError>();
         }
 
-        public static bool TryWrite(this IExpression expression, TextWriter writer, Scope scope,
-            out IList<FluentError> errors)
+        public static bool TryWrite(this IExpression expression, TextWriter writer, Scope scope)
         {
-            errors = new List<FluentError>();
+            var errors = new List<FluentError>();
             if (expression.TryConvert(out IInlineExpression inlineExpression))
             {
                 inlineExpression.Write(writer, scope);
@@ -96,8 +91,8 @@ namespace Linguini.Bundle.Resolver
 
                         if (key.Matches(selector, scope))
                         {
-                            variant.Value.Write(writer, scope, out errors);
-                            return errors.Count == 0;
+                            variant.Value.Write(writer, scope);
+                            return scope._errors.Count == 0;
                         }
                     }
                 }
@@ -107,10 +102,11 @@ namespace Linguini.Bundle.Resolver
                     var variant = selectExpression.Variants[i];
                     if (variant.IsDefault)
                     {
-                        variant.Value.Write(writer, scope, out errors);
+                        variant.Value.Write(writer, scope);
                         return errors.Count == 0;
                     }
                 }
+
                 errors.Add(ResolverFluentError.MissingDefault());
             }
 
@@ -195,7 +191,7 @@ namespace Linguini.Bundle.Resolver
                 var id = varRef.Id;
                 var args = scope.LocalArgs ?? scope.Args;
 
-                if (args != null 
+                if (args != null
                     && args.TryGetValue(id.ToString(), out var arg))
                 {
                     arg.Write(writer, scope);
@@ -215,7 +211,7 @@ namespace Linguini.Bundle.Resolver
 
             if (self.TryConvert(out Placeable placeable))
             {
-                placeable.Expression.TryWrite(writer, scope, out var _);
+                placeable.Expression.TryWrite(writer, scope);
             }
         }
 
@@ -278,8 +274,10 @@ namespace Linguini.Bundle.Resolver
             {
                 expr.WriteError(writer);
             }
-
-            throw new ArgumentException("Unexpected select expression!");
+            else if (self.TryConvert(out SelectExpression _))
+            {
+                throw new ArgumentException("Unexpected select expression!");
+            }
         }
 
         public static void WriteError(this IInlineExpression self, TextWriter writer)
@@ -315,7 +313,7 @@ namespace Linguini.Bundle.Resolver
                 writer.Write($"${varRef.Id}");
                 return;
             }
-            
+
             throw new ArgumentException($"Unexpected inline expression `{self.GetType()}`!");
         }
     }
