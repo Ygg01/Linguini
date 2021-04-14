@@ -139,7 +139,7 @@ namespace Linguini.Bundle.Errors
 
         public override ErrorType ErrorKind()
         {
-            return ErrorType.Syntax;
+            return ErrorType.Parser;
         }
 
         public override string ToString()
@@ -157,12 +157,12 @@ namespace Linguini.Bundle.Errors
 
     public enum ErrorType : byte
     {
+        Parser,
         Reference,
         Cyclic,
         NoValue,
         TooManyPlaceables,
         Overriding,
-        Syntax,
         MissingDefault
     }
 }
