@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Linguini.Bundle.Entry;
@@ -69,7 +70,7 @@ namespace Linguini.Bundle
             [NotNullWhen(false)] out IList<FluentError>? errors,
             InsertBehavior behavior = InsertBehavior.Throw)
         {
-            errors = null;
+            errors = new List<FluentError>();
             switch (behavior)
             {
                 case InsertBehavior.None:
@@ -88,10 +89,8 @@ namespace Linguini.Bundle
                 default:
                     if (_entries.ContainsKey(funcName))
                     {
-                        errors = new List<FluentError>
-                        {
-                            new OverrideFluentError(funcName, EntryKind.Function)
-                        };
+                        errors.Add(new OverrideFluentError(funcName, EntryKind.Function));
+                        return false;
                     }
 
                     _entries.Add(funcName, (FluentFunction) fluentFunction);
@@ -99,7 +98,7 @@ namespace Linguini.Bundle
             }
 
             _funcList.Add(funcName);
-            return errors == null;
+            return true;
         }
 
         public bool AddResource(Resource res, [NotNullWhen(false)] out List<FluentError> errors)

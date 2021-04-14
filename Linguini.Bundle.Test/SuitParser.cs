@@ -4,6 +4,7 @@ using System.IO;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Func;
 using Linguini.Bundle.Test.Yaml;
+using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
 using NUnit.Framework;
 using YamlDotNet.RepresentationModel;
@@ -37,7 +38,7 @@ namespace Linguini.Bundle.Test
         {
             var defaultPath = GetFullPathFor("fixtures/defaults.yaml");
             var defaultBuilder = ParseDefault(defaultPath);
-            
+
             string[] files = Directory.GetFiles(GetFullPathFor("fixtures"));
             // string[] files = {GetFullPathFor("fixtures/mre.yaml")};
             foreach (var path in files)
@@ -56,10 +57,9 @@ namespace Linguini.Bundle.Test
                     yield return testCaseData;
                 }
             }
-           
         }
-        
-        
+
+
         [TestCaseSource(nameof(MyTestCases))]
         [Parallelizable]
         public void MyTestMethod(ResolverTestSuite parsedTestSuite, LinguiniBundler.IReadyStep builder)
@@ -79,21 +79,17 @@ namespace Linguini.Bundle.Test
                     switch (funcName)
                     {
                         case "CONCAT":
-                            bundle.AddFunction(funcName, LinguiniFluentFunctions.Concat, out _);
+                            AddFunc(bundle, funcName, LinguiniFluentFunctions.Concat, errors);
                             break;
-
                         case "SUM":
-                            bundle.AddFunction(funcName, LinguiniFluentFunctions.Sum, out _);
+                            AddFunc(bundle, funcName, LinguiniFluentFunctions.Sum, errors);
                             break;
-
                         case "NUMBER":
-                            bundle.AddFunction(funcName, LinguiniFluentFunctions.Number, out _);
+                            AddFunc(bundle, funcName, LinguiniFluentFunctions.Number, errors);
                             break;
-
                         case "IDENTITY":
-                            bundle.AddFunction(funcName, LinguiniFluentFunctions.Identity, out _);
+                            AddFunc(bundle, funcName, LinguiniFluentFunctions.Identity, errors);
                             break;
-
                         default:
                             throw new ArgumentException($"Method name {funcName} doesn't exist");
                     }
@@ -105,7 +101,7 @@ namespace Linguini.Bundle.Test
                     switch (transformFunc)
                     {
                         case "example":
-                            bundle.TransformFunc = s => s.Replace('a', 'A'); 
+                            bundle.TransformFunc = s => s.Replace('a', 'A');
                             break;
                         default:
                             throw new ArgumentException($"Unknown method {transformFunc}");
@@ -128,6 +124,7 @@ namespace Linguini.Bundle.Test
                         errors.AddRange(errs);
                     }
                 }
+
                 foreach (var assert in test.Asserts)
                 {
                     var actualValue = testBundle.GetMsg(assert.Id, assert.Attribute, assert.Args, out var errs);
@@ -136,7 +133,17 @@ namespace Linguini.Bundle.Test
                 }
             }
         }
-        
+
+        private static void AddFunc(FluentBundle bundle, string funcName, ExternalFunction externalFunction,
+            List<FluentError> errors)
+        {
+            bundle.AddFunction(funcName, externalFunction, out var errs);
+            if (errs is {Count: > 0})
+            {
+                errors.AddRange(errs);
+            }
+        }
+
         private static string GetFullPathFor(string file)
         {
             List<string> list = new();
@@ -164,12 +171,11 @@ namespace Linguini.Bundle.Test
             }
         }
 
-       
 
         private static (List<ResolverTestSuite>, string) ParseTest(string name)
         {
             var doc = ParseYamlDoc(name);
-            var suiteName =  doc.RootNode["suites"][0]["name"].AsString();
+            var suiteName = doc.RootNode["suites"][0]["name"].AsString();
             return (doc.ParseResolverTests(), suiteName);
         }
 
