@@ -71,13 +71,13 @@ suites:
                   .attr = Foo Attr
               bar = { foo } Bar
         tests:
-          -
-            name: returns the null value
-            skip: true
+          - name: returns the null value
             asserts:
-              -
-                id: foo
-                value: Foo
+              - id: foo
+                value: "{???}"
+                errors:
+                  - type: NoValue
+                    desc: "No value: foo"
           -
             name: formats the attribute
             asserts:
