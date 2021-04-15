@@ -5,7 +5,12 @@ namespace Linguini.Bundle.Types
     public class FluentCustom: IFluentType, IEquatable<FluentCustom>
     {
         public IFluentType Value;
-            
+
+        public FluentCustom(IFluentType value)
+        {
+            Value = value;
+        }
+
         public object Clone()
         {
             return Value.Clone();

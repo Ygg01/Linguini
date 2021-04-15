@@ -75,12 +75,12 @@ namespace Linguini.Bundle.Errors
         public static ResolverFluentError Reference(IInlineExpression self)
         {
             // TODO only allow references here
-            if (self.TryConvert(out FunctionReference funcRef))
+            if (self.TryConvert(out FunctionReference? funcRef))
             {
                 return new($"Unknown function: {funcRef.Id}()", ErrorType.Reference);
             }
 
-            if (self.TryConvert(out MessageReference msgRef))
+            if (self.TryConvert(out MessageReference? msgRef))
             {
                 if (msgRef.Attribute == null)
                 {
@@ -92,7 +92,7 @@ namespace Linguini.Bundle.Errors
                 }
             }
 
-            if (self.TryConvert(out TermReference termReference))
+            if (self.TryConvert(out TermReference? termReference))
             {
                 if (termReference.Attribute == null)
                 {
@@ -104,7 +104,7 @@ namespace Linguini.Bundle.Errors
                 }
             }
 
-            if (self.TryConvert(out VariableReference varRef))
+            if (self.TryConvert(out VariableReference? varRef))
             {
                 return new($"Unknown variable: ${varRef.Id}", ErrorType.Reference);
             }

@@ -44,7 +44,7 @@ namespace Linguini.Bundle.Types
             {
                 return FromString(valueSpan);
             }
-            catch (Exception _)
+            catch (Exception)
             {
                 return new FluentString(valueSpan);
             }

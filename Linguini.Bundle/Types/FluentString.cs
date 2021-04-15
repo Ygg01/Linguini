@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using Linguini.Bundle.PluralRules;
+using PluralRules.Types;
+
 
 namespace Linguini.Bundle.Types
 {
@@ -35,14 +36,14 @@ namespace Linguini.Bundle.Types
             return new FluentString(_content);
         }
 
-        public bool Equals(FluentString other)
+        public bool Equals(FluentString? other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return _content == other._content;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;

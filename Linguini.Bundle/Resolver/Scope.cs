@@ -109,7 +109,7 @@ namespace Linguini.Bundle.Resolver
                 writer.Write('}');
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }

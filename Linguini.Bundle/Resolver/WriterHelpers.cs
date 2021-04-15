@@ -24,7 +24,7 @@ namespace Linguini.Bundle.Resolver
 
                 var elem = pattern.Elements[i];
 
-                if (elem.TryConvert(out TextLiteral textLiteral))
+                if (elem.TryConvert(out TextLiteral? textLiteral))
                 {
                     if (transformFunc != null)
                     {
@@ -35,7 +35,7 @@ namespace Linguini.Bundle.Resolver
                         writer.Write(textLiteral.Value.Span);
                     }
                 }
-                else if (elem.TryConvert(out Placeable placeable))
+                else if (elem.TryConvert(out Placeable? placeable))
                 {
                     var expr = placeable.Expression;
                     if (scope.IncrPlaceable() > scope.Bundle.MaxPlaceable)
@@ -66,11 +66,11 @@ namespace Linguini.Bundle.Resolver
         public static bool TryWrite(this IExpression expression, TextWriter writer, Scope scope)
         {
             var errors = new List<FluentError>();
-            if (expression.TryConvert(out IInlineExpression inlineExpression))
+            if (expression.TryConvert(out IInlineExpression? inlineExpression))
             {
                 inlineExpression.Write(writer, scope);
             }
-            else if (expression.TryConvert(out SelectExpression selectExpression))
+            else if (expression.TryConvert(out SelectExpression? selectExpression))
             {
                 var selector = selectExpression.Selector.Resolve(scope);
                 if (selector.TryConvert(out FluentString _)
@@ -115,29 +115,28 @@ namespace Linguini.Bundle.Resolver
 
         public static void Write(this IInlineExpression self, TextWriter writer, Scope scope)
         {
-            if (self.TryConvert(out TextLiteral textLiteral))
+            if (self.TryConvert(out TextLiteral? textLiteral))
             {
                 writer.Write(textLiteral.Value.Span);
                 return;
             }
 
-            if (self.TryConvert(out NumberLiteral numberLiteral))
+            if (self.TryConvert(out NumberLiteral? numberLiteral))
             {
                 var value = FluentNumber.TryNumber(numberLiteral.Value.Span);
                 value.Write(writer, scope);
                 return;
             }
 
-            if (self.TryConvert(out MessageReference msgRef))
+            if (self.TryConvert(out MessageReference? msgRef))
             {
                 ProcessMsgRef(self, writer, scope, msgRef);
                 return;
             }
 
-            if (self.TryConvert(out TermReference termRef))
+            if (self.TryConvert(out TermReference? termRef))
             {
                 var res = scope.GetArguments(termRef.Arguments);
-                var retVal = false;
                 scope.SetLocalArgs(res.named);
                 if (scope.Bundle.TryGetTerm(termRef.Id.ToString(), out var term))
                 {
@@ -148,7 +147,6 @@ namespace Linguini.Bundle.Resolver
                     if (attr != null)
                     {
                         scope.Track(writer, attr.Value, self);
-                        retVal = true;
                     }
                     else
                     {
@@ -164,7 +162,7 @@ namespace Linguini.Bundle.Resolver
                 return;
             }
 
-            if (self.TryConvert(out FunctionReference funcRef))
+            if (self.TryConvert(out FunctionReference? funcRef))
             {
                 var (resolvedPosArgs, resolvedNamedArgs) = scope.GetArguments(funcRef.Arguments);
 
@@ -186,7 +184,7 @@ namespace Linguini.Bundle.Resolver
                 }
             }
 
-            if (self.TryConvert(out VariableReference varRef))
+            if (self.TryConvert(out VariableReference? varRef))
             {
                 var id = varRef.Id;
                 var args = scope.LocalArgs ?? scope.Args;
@@ -209,7 +207,7 @@ namespace Linguini.Bundle.Resolver
                 }
             }
 
-            if (self.TryConvert(out Placeable placeable))
+            if (self.TryConvert(out Placeable? placeable))
             {
                 placeable.Expression.TryWrite(writer, scope);
             }
@@ -270,7 +268,7 @@ namespace Linguini.Bundle.Resolver
 
         public static void WriteError(this IExpression self, TextWriter writer)
         {
-            if (self.TryConvert(out IInlineExpression expr))
+            if (self.TryConvert(out IInlineExpression? expr))
             {
                 expr.WriteError(writer);
             }

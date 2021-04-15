@@ -113,12 +113,12 @@ namespace Linguini.Bundle
                 var entry = res.Entries[entryPos];
                 var id = "";
                 IBundleEntry bundleEntry;
-                if (entry.TryConvert(out AstMessage message))
+                if (entry.TryConvert(out AstMessage? message))
                 {
                     id = message.GetId();
                     bundleEntry = new Message(resPos, entryPos);
                 }
-                else if (entry.TryConvert(out AstTerm term))
+                else if (entry.TryConvert(out AstTerm? term))
                 {
                     id = $"-{term.GetId()}";
                     bundleEntry = new Term(resPos, entryPos);
@@ -155,12 +155,12 @@ namespace Linguini.Bundle
                 var entry = res.Entries[entryPos];
                 var id = "";
                 IBundleEntry bundleEntry;
-                if (entry.TryConvert(out AstMessage message))
+                if (entry.TryConvert(out AstMessage? message))
                 {
                     id = message.GetId();
                     bundleEntry = new Message(resPos, entryPos);
                 }
-                else if (entry.TryConvert(out AstTerm term))
+                else if (entry.TryConvert(out AstTerm? term))
                 {
                     id = term.GetId();
                     bundleEntry = new Term(resPos, entryPos);
@@ -222,7 +222,7 @@ namespace Linguini.Bundle
             if (_entries.ContainsKey(id)
                 && _entries.TryGetValue(id, out var value)
                 && value.ToKind() == EntryKind.Message
-                && value.TryConvert(out Message msg))
+                && value.TryConvert(out Message? msg))
             {
                 var res = Resources[msg.ResPos];
                 var entry = res.Entries[msg.EntryPos];
@@ -240,7 +240,7 @@ namespace Linguini.Bundle
             if (_entries.ContainsKey(termId)
                 && _entries.TryGetValue(termId, out var value)
                 && value.ToKind() == EntryKind.Term
-                && value.TryConvert(out Term term))
+                && value.TryConvert(out Term? term))
             {
                 var res = Resources[term.ResPos];
                 var entry = res.Entries[term.EntryPos];
@@ -279,7 +279,7 @@ namespace Linguini.Bundle
             return value.AsString();
         }
 
-        public PluralCategory GetPluralRules(PluralRuleType cardinal, FluentNumber outType)
+        public PluralCategory GetPluralRules(RuleType cardinal, FluentNumber outType)
         {
             // TODO
             throw new NotImplementedException();

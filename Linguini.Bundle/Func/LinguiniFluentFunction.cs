@@ -45,7 +45,7 @@ namespace Linguini.Bundle.Func
                 var id = args[0];
                 return id;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return new FluentErrType();
             }
@@ -57,11 +57,11 @@ namespace Linguini.Bundle.Func
             for (var i = 0; i < args.Count; i++)
             {
                 var str = args[i];
-                if (str.TryConvert(out FluentString fs))
+                if (str.TryConvert(out FluentString? fs))
                 {
                     stringConcat.Append(fs);
                 }
-                else if (str.TryConvert(out FluentNumber fn))
+                else if (str.TryConvert(out FluentNumber? fn))
                 {
                     stringConcat.Append(fn);
                 }

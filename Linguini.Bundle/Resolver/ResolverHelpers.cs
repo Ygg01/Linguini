@@ -14,7 +14,7 @@ namespace Linguini.Bundle.Resolver
 
             if (len == 1)
             {
-                if (self.Elements[0].TryConvert(out TextLiteral textLiteral))
+                if (self.Elements[0].TryConvert(out TextLiteral? textLiteral))
                 {
                     return GetFluentString(textLiteral.ToString(), scope.Bundle.TransformFunc);
                 }
@@ -27,17 +27,17 @@ namespace Linguini.Bundle.Resolver
 
         public static IFluentType Resolve(this IInlineExpression self, Scope scope)
         {
-            if (self.TryConvert(out TextLiteral textLiteral))
+            if (self.TryConvert(out TextLiteral? textLiteral))
             {
                 return (FluentString) textLiteral.Value.Span;
             }
 
-            if (self.TryConvert(out NumberLiteral numberLiteral))
+            if (self.TryConvert(out NumberLiteral? numberLiteral))
             {
                 return FluentNumber.TryNumber(numberLiteral.Value.Span);
             }
 
-            if (self.TryConvert(out VariableReference varRef))
+            if (self.TryConvert(out VariableReference? varRef))
             {
                 var args = scope.LocalArgs ?? scope.Args;
                 if (args != null

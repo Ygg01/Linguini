@@ -7,7 +7,7 @@ using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
 
-namespace Linguini.Bundle
+namespace Linguini.Bundle.Bundler
 {
     public class LinguiniBundler
     {
@@ -59,6 +59,11 @@ namespace Linguini.Bundle
             private Func<IFluentType, string>? _formatterFunc;
             private Func<string, string>? _transformFunc;
             private Dictionary<string, ExternalFunction> _functions = new();
+
+            internal StepBuilder()
+            {
+                _culture = System.Globalization.CultureInfo.CurrentCulture;
+            }
 
             public IReadyStep SetUseIsolating(bool isIsolating)
             {

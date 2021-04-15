@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Linguini.Bundle.Bundler;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Func;
 using Linguini.Bundle.Test.Yaml;
@@ -210,14 +211,14 @@ namespace Linguini.Bundle.Test
 
             List<string> locales = new();
             var isIsolating = false;
-            if (yamlBundle.TryConvert(out YamlMappingNode map))
+            if (yamlBundle.TryConvert(out YamlMappingNode? map))
             {
-                if (map.TryGetNode("useIsolating", out YamlScalarNode useIsolatingNode))
+                if (map.TryGetNode("useIsolating", out YamlScalarNode? useIsolatingNode))
                 {
                     isIsolating = useIsolatingNode.AsBool();
                 }
 
-                if (map.TryGetNode("locales", out YamlSequenceNode localesNode))
+                if (map.TryGetNode("locales", out YamlSequenceNode? localesNode))
                 {
                     foreach (var localeNode in localesNode.Children)
                     {
