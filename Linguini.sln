@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linguini.Bundle.Test", "Lin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluralRules", "PluralRules\PluralRules.csproj", "{C71B1CD3-2C73-44C5-8D28-5F723E15FEF2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluralRule.Test", "PluralRule.Test\PluralRule.Test.csproj", "{8190288A-074B-45A4-A478-14FC7C1B787C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{C71B1CD3-2C73-44C5-8D28-5F723E15FEF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C71B1CD3-2C73-44C5-8D28-5F723E15FEF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C71B1CD3-2C73-44C5-8D28-5F723E15FEF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8190288A-074B-45A4-A478-14FC7C1B787C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8190288A-074B-45A4-A478-14FC7C1B787C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8190288A-074B-45A4-A478-14FC7C1B787C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8190288A-074B-45A4-A478-14FC7C1B787C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

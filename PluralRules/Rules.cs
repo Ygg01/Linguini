@@ -2,7 +2,7 @@
 
 namespace PluralRules
 {
-    public class Class1
+    public class Rules
     {
     }
 }
