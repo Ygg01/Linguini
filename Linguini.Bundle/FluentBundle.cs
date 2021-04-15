@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Linguini.Bundle.Entry;
@@ -121,7 +120,7 @@ namespace Linguini.Bundle
                 }
                 else if (entry.TryConvert(out AstTerm term))
                 {
-                    id = term.GetId();
+                    id = $"-{term.GetId()}";
                     bundleEntry = new Term(resPos, entryPos);
                 }
                 else
@@ -237,8 +236,9 @@ namespace Linguini.Bundle
 
         public bool TryGetTerm(string id, [NotNullWhen(true)] out AstTerm? astTerm)
         {
-            if (_entries.ContainsKey(id)
-                && _entries.TryGetValue(id, out var value)
+            var termId = $"-{id}";
+            if (_entries.ContainsKey(termId)
+                && _entries.TryGetValue(termId, out var value)
                 && value.ToKind() == EntryKind.Term
                 && value.TryConvert(out Term term))
             {
