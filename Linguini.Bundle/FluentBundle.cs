@@ -5,10 +5,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
-using Linguini.Bundle.PluralRules;
 using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
 using Linguini.Syntax.Ast;
+using PluralRules.Types;
 
 namespace Linguini.Bundle
 {

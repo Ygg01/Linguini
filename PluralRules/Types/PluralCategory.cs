@@ -1,4 +1,4 @@
-﻿namespace Linguini.Bundle.PluralRules
+﻿namespace PluralRules.Types
 {
     public enum PluralCategory : byte
     {
