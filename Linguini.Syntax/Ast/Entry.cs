@@ -117,7 +117,7 @@ namespace Linguini.Syntax.Ast
     {
         public ReadOnlyMemory<char> Content;
 
-        public string AsStr(string lineEnd = "\n")
+        public string AsStr()
         {
             return new(Content.Span);
         }
