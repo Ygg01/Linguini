@@ -10,16 +10,20 @@ namespace PluralRule.CldrParser
     {
         static void Main(string[] args)
         {
-
-            var cardinalPath = Path.Combine( CurrDir("cldr_pluralrules_cardinals.json").ToArray());
+            var cardinalPath = Path.Combine(CurrDir("cldr_pluralrules_cardinals.json").ToArray());
             var ordinalPath = Path.Combine(CurrDir("cldr_pluralrules_ordinals.json").ToArray());
             var rulesRaw = new PluralRulesRaw();
-            using(File.OpenRead(ordinalPath))
+            using (File.OpenRead(ordinalPath))
             using (File.OpenRead(cardinalPath))
             {
-                
-                rulesRaw.CardinalRules = JsonParser.GetElements(File.OpenRead(cardinalPath), RuleType.Cardinal);
-                rulesRaw.OrdinalRules = JsonParser.GetElements(File.OpenRead(ordinalPath), RuleType.Ordinal);
+                rulesRaw.CardinalRules = JsonParser.GetElements(
+                    File.OpenRead(cardinalPath),
+                    RuleType.Cardinal
+                );
+                rulesRaw.OrdinalRules = JsonParser.GetElements(
+                    File.OpenRead(ordinalPath),
+                    RuleType.Ordinal
+                );
             }
 
             Console.WriteLine(rulesRaw.OrdinalRules.Count);

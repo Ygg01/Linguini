@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 
+
 namespace PluralRule.CldrParser.Parser
 {
     public class PluralRulesRaw

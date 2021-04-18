@@ -180,6 +180,18 @@ namespace Linguini.Syntax.IO
             return x == c1 || x == c2 || x == c3 || x == c4;
         }
 
+        public static bool IsUnicodeWhiteSpace(this ReadOnlySpan<char> charSpan)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var x = MemoryMarshal.GetReference(charSpan);
+            return IsInside(x, '\x09', '\x0D') 
+                   || x is ' ' or '\u0085' or '\u200E' or '\u200F' or '\u2028' or '\u2029';
+        }
+
         private static bool IsInside(char c, char min, char max) => (uint) (c - min) <= (uint) (max - min);
     }
 }
