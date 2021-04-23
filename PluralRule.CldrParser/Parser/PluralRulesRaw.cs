@@ -5,7 +5,7 @@ namespace PluralRule.CldrParser.Parser
 {
     public class PluralRulesRaw
     {
-        public List<PluralRuleRaw> OrdinalRules { get; set; }
-        public List<PluralRuleRaw> CardinalRules { get; set; }
+        public List<PluralRuleRaw> OrdinalRules = new();
+        public List<PluralRuleRaw> CardinalRules = new();
     }
 }
