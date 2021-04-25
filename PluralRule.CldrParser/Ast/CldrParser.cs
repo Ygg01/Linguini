@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Linguini.Syntax.IO;
 
 namespace PluralRule.CldrParser.Ast
@@ -16,7 +17,7 @@ namespace PluralRule.CldrParser.Ast
             _pos = 0;
         }
 
-        public Rule? ParseRule()
+        public Rule ParseRule()
         {
             var condition = ParseCondition();
             TryParseSamples(out Samples samples);
@@ -39,7 +40,6 @@ namespace PluralRule.CldrParser.Ast
                 SkipWhitespace();
                 samples.DecimalSample = TryParseSampleList();
             }
-            
         }
 
         private List<SampleRange> TryParseSampleList()
@@ -51,21 +51,116 @@ namespace PluralRule.CldrParser.Ast
                 SkipWhitespace();
                 if (listSample.Count > 0)
                 {
-                    if (!TryConsume(","))
+                    if (!TryConsume(','))
                     {
                         break;
                     }
 
                     SkipWhitespace();
                 }
+
+                if (sampleRange == null)
+                {
+                    return listSample;
+                }
+
                 listSample.Add(sampleRange);
             }
+
+            TryConsume(',');
+            // We ignore the ellipsis in generation
+            TryConsume("...");
+            TryConsume('…');
+
             return listSample;
         }
 
-        private bool TryParseSampleRange(out SampleRange o)
+        private bool TryParseSampleRange(out SampleRange? o)
         {
-            throw new NotImplementedException();
+            if (!TrySampleValue(out var endValue))
+            {
+                o = null;
+                return false;
+            }
+
+            SkipWhitespace();
+            if (!TryConsume('~'))
+            {
+                o = new SampleRange(endValue, null);
+                return true;
+            }
+
+            SkipWhitespace();
+            if (!TrySampleValue(out var upperVal))
+            {
+                o = null;
+                return false;
+            }
+
+            o = new SampleRange(endValue, upperVal);
+            return true;
+        }
+
+        private bool TrySampleValue([NotNullWhen(true)] out DecimalValue? value)
+        {
+            var x = new StringBuilder();
+            if (!TryParseValueAsStr(out var preDot))
+            {
+                value = null;
+                return false;
+            }
+
+            x.Append(preDot);
+            if (TryConsume('.'))
+            {
+                if (!TryParseValueAsStr(out var postDot))
+                {
+                    value = null;
+                    return false;
+                }
+
+                x.Append('.');
+                x.Append(postDot);
+            }
+
+            if (_input.AsMemory().Span.IsOneOf('c', 'e'))
+            {
+                _pos += 1;
+                x.Append('e');
+
+                if (TryParseDigitExp(out var digit))
+                {
+                    x.Append(digit);
+                }
+                else
+                {
+                    value = null;
+                    return false;
+                }
+            }
+
+            value = new DecimalValue(x.ToString());
+            return true;
+        }
+
+        private bool TryParseDigitExp(out string val)
+        {
+            var startPos = _pos;
+            if (TryPeekCharSpan(out var startDigit)
+                && startDigit.IsDigitPos())
+            {
+                while (TryPeekCharSpan(out var span)
+                       && span.IsAsciiDigit())
+                {
+                    _pos += 1;
+                }
+
+                val = _input[new Range(startPos, _pos)];
+                return true;
+            }
+
+            val = "";
+            return false;
         }
 
         private Condition ParseCondition()
@@ -125,7 +220,6 @@ namespace PluralRule.CldrParser.Ast
                 return false;
             }
 
-            var op = Operator.Equal;
             var list = new List<IRangeListItem>();
             RelationType type = RelationType.Equal;
             var negation = false;
@@ -148,7 +242,7 @@ namespace PluralRule.CldrParser.Ast
             {
                 type = RelationType.In;
             }
-            else if (TryConsume("="))
+            else if (TryConsume('='))
             {
                 type = RelationType.Equal;
             }
@@ -157,15 +251,17 @@ namespace PluralRule.CldrParser.Ast
                 negation = !negation;
                 type = RelationType.Equal;
             }
+
             SkipWhitespace();
 
             if (type == RelationType.Is)
             {
-                if(!TryParseValue(out var x ))
+                if (!TryParseValue(out var x))
                 {
                     relation = null;
                     return false;
                 }
+
                 list.Add(x);
             }
             else
@@ -193,8 +289,10 @@ namespace PluralRule.CldrParser.Ast
                     {
                         return false;
                     }
+
                     SkipWhitespace();
                 }
+
                 list.Add(x);
             }
 
@@ -209,6 +307,7 @@ namespace PluralRule.CldrParser.Ast
                 item = null;
                 return false;
             }
+
             SkipWhitespace();
             if (TryConsume(".."))
             {
@@ -248,7 +347,7 @@ namespace PluralRule.CldrParser.Ast
 
         private DecimalValue? ParseModulus()
         {
-            if (TryConsume("mod") || TryConsume("%"))
+            if (TryConsume("mod") || TryConsume('%'))
             {
                 SkipWhitespace();
                 if (TryParseValue(out var val))
@@ -270,6 +369,19 @@ namespace PluralRule.CldrParser.Ast
             }
 
             val = new DecimalValue(_input[new Range(startPos, _pos)]);
+            return startPos != _pos;
+        }
+
+        private bool TryParseValueAsStr(out string val)
+        {
+            var startPos = _pos;
+            while (TryPeekCharSpan(out var span)
+                   && span.IsAsciiDigit())
+            {
+                _pos += 1;
+            }
+
+            val = _input[new Range(startPos, _pos)];
             return startPos != _pos;
         }
 
@@ -305,6 +417,23 @@ namespace PluralRule.CldrParser.Ast
             if (areEqual)
             {
                 _pos += consume.Length;
+            }
+
+            return areEqual;
+        }
+
+        private bool TryConsume(char consume)
+        {
+            if (_pos + 1 > _input.Length)
+            {
+                return false;
+            }
+
+            var span = _input.AsMemory(_pos, 1).Span;
+            var areEqual = span.IsEqual(consume);
+            if (areEqual)
+            {
+                _pos += 1;
             }
 
             return areEqual;

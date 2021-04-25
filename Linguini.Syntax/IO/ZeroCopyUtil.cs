@@ -48,7 +48,7 @@ namespace Linguini.Syntax.IO
             return EqualsSpans((char) lhs, chrSpan);
         }
 
-        private static bool IsEqual(this ReadOnlySpan<char> charSpan, char c1)
+        public static bool IsEqual(this ReadOnlySpan<char> charSpan, char c1)
         {
             if (charSpan.Length != CharLength)
             {
@@ -103,6 +103,17 @@ namespace Linguini.Syntax.IO
 
             var c = MemoryMarshal.GetReference(charSpan);
             return IsInside(c, '0', '9');
+        }
+
+        public static bool IsDigitPos(this ReadOnlySpan<char> charSpan)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var c = MemoryMarshal.GetReference(charSpan);
+            return IsInside(c, '1', '9');
         }
 
         public static bool IsNumberStart(this ReadOnlySpan<char> charSpan)
