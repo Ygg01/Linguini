@@ -11,10 +11,10 @@ namespace Linguini.Bundle.Resolver
     public class Scope
     {
         public readonly FluentBundle Bundle;
-        private Dictionary<string, IFluentType>? _args;
+        private readonly Dictionary<string, IFluentType>? _args;
         private Dictionary<string, IFluentType>? _localArgs;
-        private List<Pattern> _travelled;
-        internal List<FluentError> _errors;
+        private readonly List<Pattern> _travelled;
+        private readonly List<FluentError> _errors;
 
         public Scope(FluentBundle fluentBundle, IDictionary<string, IFluentType>? args)
         {

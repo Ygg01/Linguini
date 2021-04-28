@@ -92,7 +92,7 @@ namespace Linguini.Bundle.Resolver
                         if (key.Matches(selector, scope))
                         {
                             variant.Value.Write(writer, scope);
-                            return scope._errors.Count == 0;
+                            return scope.Errors.Count == 0;
                         }
                     }
                 }
