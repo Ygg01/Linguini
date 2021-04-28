@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Linguini.Syntax.IO;
+using PluralRule.CldrParser.Ast;
 
-namespace PluralRule.CldrParser.Ast
+namespace PluralRule.CldrParser
 {
-    public class CldrParser
+    public class ParserPlural
     {
         private readonly string _input;
         private int _pos;
 
-        public CldrParser(string input)
+        public ParserPlural(string input)
         {
             _input = input;
             _pos = 0;
@@ -20,45 +21,46 @@ namespace PluralRule.CldrParser.Ast
         public Rule ParseRule()
         {
             var condition = ParseCondition();
-            TryParseSamples(out Samples samples);
+            var samples = TryParseSamples();
 
             return new Rule(condition, samples);
         }
 
-        private void TryParseSamples(out Samples samples)
+        private Samples? TryParseSamples()
         {
-            samples = new Samples();
+            var integerSample = new List<SampleRange>();
+            var decimalSample = new List<SampleRange>();
             SkipWhitespace();
             if (TryConsume("@integer"))
             {
                 SkipWhitespace();
-                samples.IntegerSamples = TryParseSampleList();
+                integerSample = TryParseSampleList();
             }
 
             if (TryConsume("@decimal"))
             {
                 SkipWhitespace();
-                samples.DecimalSample = TryParseSampleList();
+                decimalSample = TryParseSampleList();
             }
+
+            if (decimalSample.Count == 0 && integerSample.Count == 0)
+            {
+                return null;
+            }
+
+            return new Samples()
+            {
+                DecimalSample = decimalSample,
+                IntegerSamples = integerSample
+            };
         }
 
         private List<SampleRange> TryParseSampleList()
         {
             var listSample = new List<SampleRange>();
 
-            while (TryParseSampleRange(out var sampleRange))
+            while (TryParseSampleRange(out var sampleRange, listSample.Count > 0))
             {
-                SkipWhitespace();
-                if (listSample.Count > 0)
-                {
-                    if (!TryConsume(','))
-                    {
-                        break;
-                    }
-
-                    SkipWhitespace();
-                }
-
                 if (sampleRange == null)
                 {
                     return listSample;
@@ -75,8 +77,19 @@ namespace PluralRule.CldrParser.Ast
             return listSample;
         }
 
-        private bool TryParseSampleRange(out SampleRange? o)
+        private bool TryParseSampleRange([NotNullWhen(true)]out SampleRange? o, bool isNotFirst)
         {
+            SkipWhitespace();
+            if (isNotFirst)
+            {
+                if (!TryConsume(','))
+                {
+                    o = null;
+                    return false;
+                }
+
+                SkipWhitespace();
+            }
             if (!TrySampleValue(out var endValue))
             {
                 o = null;
@@ -207,8 +220,8 @@ namespace PluralRule.CldrParser.Ast
                 relations.Add(relation!);
             }
 
-            conditions = new AndCondition(relations);
-            return true;
+            conditions = relations.Count > 0 ? new AndCondition(relations) : null;
+            return conditions != null;
         }
 
         private bool ParseRelation([NotNullWhen(true)] out Relation? relation)
@@ -221,11 +234,14 @@ namespace PluralRule.CldrParser.Ast
             }
 
             var list = new List<IRangeListItem>();
-            RelationType type = RelationType.Equal;
+            RelationType? type = null;
             var negation = false;
+
+            SkipWhitespace();
             if (TryConsume("is"))
             {
                 type = RelationType.Is;
+                SkipWhitespace();
             }
 
             if (TryConsume("not"))
@@ -280,28 +296,28 @@ namespace PluralRule.CldrParser.Ast
         private bool TryParseRangeList(out List<IRangeListItem> list)
         {
             list = new List<IRangeListItem>();
-            while (TryParseRangeItem(out var x))
+            while (TryParseRangeItem(out var x, list.Count > 0))
             {
-                SkipWhitespace();
-                if (list.Count > 1)
-                {
-                    if (!TryConsume(","))
-                    {
-                        return false;
-                    }
-
-                    SkipWhitespace();
-                }
-
                 list.Add(x);
             }
 
             return true;
         }
 
-        private bool TryParseRangeItem([NotNullWhen(true)] out IRangeListItem? item)
+        private bool TryParseRangeItem([NotNullWhen(true)] out IRangeListItem? item, bool isNotFirst)
         {
             SkipWhitespace();
+            if (isNotFirst)
+            {
+                if (!TryConsume(","))
+                {
+                    item = null;
+                    return false;
+                }
+
+                SkipWhitespace();
+            }
+
             if (!TryParseValue(out var start))
             {
                 item = null;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace PluralRule.CldrParser.Ast
 {
@@ -14,24 +13,12 @@ namespace PluralRule.CldrParser.Ast
             Condition = condition;
             Samples = samples;
         }
-
-        public Rule(Condition condition)
-        {
-            Condition = condition;
-            Samples = null;
-        }
     }
 
     public class Samples
     {
         public List<SampleRange> IntegerSamples;
         public List<SampleRange> DecimalSample;
-
-        public Samples()
-        {
-            IntegerSamples = new List<SampleRange>();
-            DecimalSample = new List<SampleRange>();
-        }
     }
 
     public class SampleRange
@@ -44,15 +31,50 @@ namespace PluralRule.CldrParser.Ast
             Lower = lower;
             Upper = upper;
         }
+
+        public override string ToString()
+        {
+            if (Upper != null)
+            {
+                return $"{Lower}~{Upper}";
+            }
+
+            return $"{Lower}";
+        }
     }
 
-    public class DecimalValue : IRangeListItem
+    public class DecimalValue : IRangeListItem, IEquatable<DecimalValue>
     {
         public string Value { get; }
 
         public DecimalValue(string value)
         {
             Value = value;
+        }
+
+        public bool Equals(DecimalValue? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Value == other.Value;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((DecimalValue) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"{Value}";
         }
     }
 
@@ -74,7 +96,7 @@ namespace PluralRule.CldrParser.Ast
         public Operator Op;
         public List<IRangeListItem> RangeListItems;
 
-        public Relation(Expr expr, Operator op,  List<IRangeListItem> rangeList)
+        public Relation(Expr expr, Operator op, List<IRangeListItem> rangeList)
         {
             Expr = expr;
             Op = op;
@@ -161,6 +183,11 @@ namespace PluralRule.CldrParser.Ast
             LowerVal = lowerVal;
             UpperVal = upperVal;
         }
+
+        public override string ToString()
+        {
+            return $"{LowerVal}..{UpperVal}";
+        }
     }
 
     public enum Operator : byte
@@ -185,8 +212,13 @@ namespace PluralRule.CldrParser.Ast
 
     public static class RelationTypeExtensions
     {
-        public static Operator GetOperator(this RelationType rt, bool negated)
+        public static Operator GetOperator(this RelationType? rt, bool negated)
         {
+            if (rt == null)
+            {
+                throw new ArgumentException("Relation should not be null");
+            }
+
             switch (rt)
             {
                 case RelationType.Is:
