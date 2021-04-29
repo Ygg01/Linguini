@@ -11,4 +11,11 @@
       <ProjectReference Include="..\PluralRules\PluralRules.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="templates\Rules.tt">
+        <Generator>TextTemplatingFileGenerator</Generator>
+        <LastGenOutput>Rules.cs</LastGenOutput>
+      </None>
+    </ItemGroup>
+
 </Project>

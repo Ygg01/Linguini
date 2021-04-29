@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Linq;
+using System.Xml.XPath;
 using PluralRule.CldrParser.Parser;
 using PluralRules.Types;
 
@@ -10,20 +12,18 @@ namespace PluralRule.CldrParser
     {
         static void Main(string[] args)
         {
-            var cardinalPath = Path.Combine(CurrDir("cldr_pluralrules_cardinals.json").ToArray());
-            var ordinalPath = Path.Combine(CurrDir("cldr_pluralrules_ordinals.json").ToArray());
+            var cardinalPath = Path.Combine(CurrDir("plurals.xml").ToArray());
+            var ordinalPath = Path.Combine(CurrDir("ordinals.xml").ToArray());
             var rulesRaw = new PluralRulesRaw();
-            using (File.OpenRead(ordinalPath))
-            using (File.OpenRead(cardinalPath))
+            using (var ordinalFileStream = File.OpenRead(ordinalPath))
+            using (var cardinalFileStream = File.OpenRead(cardinalPath))
             {
-                rulesRaw.CardinalRules = JsonParser.GetElements(
-                    File.OpenRead(cardinalPath),
-                    RuleType.Cardinal
-                );
-                rulesRaw.OrdinalRules = JsonParser.GetElements(
-                    File.OpenRead(ordinalPath),
-                    RuleType.Ordinal
-                );
+                var ordinals = XDocument.Load(ordinalFileStream)
+                    .XPathSelectElements("//supplementalData/plurals/*");
+                var cardinals = XDocument.Load(cardinalFileStream)
+                    .XPathSelectElements("//supplementalData/plurals/*");
+                rulesRaw.OrdinalRules = XmlConverter.convert(ordinals);
+               rulesRaw.CardinalRules = XmlConverter.convert(cardinals);
             }
 
             Console.WriteLine(rulesRaw.OrdinalRules.Count);

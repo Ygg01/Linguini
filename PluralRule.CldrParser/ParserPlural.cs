@@ -12,9 +12,9 @@ namespace PluralRule.CldrParser
         private readonly string _input;
         private int _pos;
 
-        public ParserPlural(string input)
+        public ParserPlural(string? input)
         {
-            _input = input;
+            _input = input ?? "";
             _pos = 0;
         }
 
