@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using PluralRule.CldrParser.Ast;
 using PluralRules.Types;
 
 namespace PluralRule.CldrParser.Parser
@@ -25,7 +24,7 @@ namespace PluralRule.CldrParser.Parser
                         continue;
                     }
 
-                    var rule = new CldrParser.ParserPlural(element.FirstNode.ToString()).ParseRule();
+                    var rule = new ParserPlural(element.FirstNode.ToString()).ParseRule();
                     rules.Add(new RuleMap(category.GetValueOrDefault(PluralCategory.Other), rule));
                 }
 

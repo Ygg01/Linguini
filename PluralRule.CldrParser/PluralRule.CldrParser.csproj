@@ -12,10 +12,27 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="templates\Rules.tt">
-        <Generator>TextTemplatingFileGenerator</Generator>
-        <LastGenOutput>Rules.cs</LastGenOutput>
+      <None Update="templates\PluralRules.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>PluralRules.cs</LastGenOutput>
       </None>
+      <None Update="generator\PluralRules.tt">
+        <Generator>TextTemplatingFilePreprocessor</Generator>
+        <LastGenOutput>PluralRules.cs</LastGenOutput>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="templates\PluralRules.cs">
+        <AutoGen>True</AutoGen>
+        <DesignTime>True</DesignTime>
+        <DependentUpon>PluralRules.tt</DependentUpon>
+      </Compile>
+      <Compile Update="generator\PluralRules.cs">
+        <AutoGen>True</AutoGen>
+        <DesignTime>True</DesignTime>
+        <DependentUpon>PluralRules.tt</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
