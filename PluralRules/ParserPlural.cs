@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Linguini.Shared.IO;
 using PluralRule.Ast;
@@ -109,7 +110,7 @@ namespace PluralRules
             return true;
         }
 
-        private bool TrySampleValue(out DecimalValue? value)
+        private bool TrySampleValue([NotNullWhen(true)] out DecimalValue? value)
         {
             var x = new StringBuilder();
             if (!TryParseValueAsStr(out var preDot))
@@ -175,7 +176,7 @@ namespace PluralRules
         {
             var andConditions = new List<AndCondition>();
             SkipWhitespace();
-            while (ParseAndCondition(out var andCondition))
+            while (TryParseAndCondition(out var andCondition))
             {
                 SkipWhitespace();
                 if (andConditions.Count > 0)
@@ -194,7 +195,7 @@ namespace PluralRules
             return new Condition(andConditions);
         }
 
-        private bool ParseAndCondition(out AndCondition? conditions)
+        private bool TryParseAndCondition([NotNullWhen(true)] out AndCondition? conditions)
         {
             var relations = new List<Relation>();
             SkipWhitespace();
@@ -299,7 +300,7 @@ namespace PluralRules
             return true;
         }
 
-        private bool TryParseRangeItem(out IRangeListItem? item, bool isNotFirst)
+        private bool TryParseRangeItem([NotNullWhen(true)] out IRangeListItem? item, bool isNotFirst)
         {
             SkipWhitespace();
             if (isNotFirst)
@@ -337,7 +338,7 @@ namespace PluralRules
             return true;
         }
 
-        private bool TryParseExpr(out Expr? expr)
+        private bool TryParseExpr([NotNullWhen(true)] out Expr? expr)
         {
             SkipWhitespace();
             if (TryOperand(out var operand))
@@ -402,7 +403,7 @@ namespace PluralRules
             return _input.AsMemory().TryReadCharSpan(_pos, out span);
         }
 
-        private bool TryOperand(out Operand? operand)
+        private bool TryOperand([NotNullWhen(true)] out Operand? operand)
         {
             if (_pos < _input.Length)
             {

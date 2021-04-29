@@ -11,7 +11,7 @@ namespace PluralRules.Generator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
-            throw new System.NotImplementedException();
+            //
         }
 
         public void Execute(GeneratorExecutionContext context)

@@ -15,7 +15,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PluralRules\PluralRules.csproj" />
+      <ProjectReference Include="..\PluralRules\PluralRules.csproj" OutputItemType="Analyzer"
+                        ReferenceOutputAssembly="true" />
     </ItemGroup>
 
 </Project>
