@@ -1,4 +1,5 @@
 ﻿using System;
+using Linguini.Shared.IO;
 
 namespace Linguini.Syntax.IO
 {

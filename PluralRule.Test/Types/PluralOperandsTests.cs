@@ -1,6 +1,6 @@
 using System;
+using Linguini.Shared.Types;
 using NUnit.Framework;
-using PluralRules.Types;
 
 namespace PluralRule.Test.Types
 {

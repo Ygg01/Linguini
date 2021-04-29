@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using Linguini.Syntax.IO;
-using PluralRule.CldrParser.Ast;
+using Linguini.Shared.IO;
+using PluralRule.Ast;
 
-namespace PluralRule.CldrParser
+namespace PluralRules
 {
     public class ParserPlural
     {
@@ -48,11 +47,7 @@ namespace PluralRule.CldrParser
                 return null;
             }
 
-            return new Samples()
-            {
-                DecimalSample = decimalSample,
-                IntegerSamples = integerSample
-            };
+            return new Samples(integerSample, decimalSample);
         }
 
         private List<SampleRange> TryParseSampleList()
@@ -77,7 +72,7 @@ namespace PluralRule.CldrParser
             return listSample;
         }
 
-        private bool TryParseSampleRange([NotNullWhen(true)]out SampleRange? o, bool isNotFirst)
+        private bool TryParseSampleRange(out SampleRange? o, bool isNotFirst)
         {
             SkipWhitespace();
             if (isNotFirst)
@@ -114,7 +109,7 @@ namespace PluralRule.CldrParser
             return true;
         }
 
-        private bool TrySampleValue([NotNullWhen(true)] out DecimalValue? value)
+        private bool TrySampleValue(out DecimalValue? value)
         {
             var x = new StringBuilder();
             if (!TryParseValueAsStr(out var preDot))
@@ -199,7 +194,7 @@ namespace PluralRule.CldrParser
             return new Condition(andConditions);
         }
 
-        private bool ParseAndCondition([NotNullWhen(true)] out AndCondition? conditions)
+        private bool ParseAndCondition(out AndCondition? conditions)
         {
             var relations = new List<Relation>();
             SkipWhitespace();
@@ -224,7 +219,7 @@ namespace PluralRule.CldrParser
             return conditions != null;
         }
 
-        private bool ParseRelation([NotNullWhen(true)] out Relation? relation)
+        private bool ParseRelation(out Relation? relation)
         {
             SkipWhitespace();
             if (!TryParseExpr(out var expr))
@@ -304,7 +299,7 @@ namespace PluralRule.CldrParser
             return true;
         }
 
-        private bool TryParseRangeItem([NotNullWhen(true)] out IRangeListItem? item, bool isNotFirst)
+        private bool TryParseRangeItem(out IRangeListItem? item, bool isNotFirst)
         {
             SkipWhitespace();
             if (isNotFirst)
@@ -342,7 +337,7 @@ namespace PluralRule.CldrParser
             return true;
         }
 
-        private bool TryParseExpr([NotNullWhen(true)] out Expr? expr)
+        private bool TryParseExpr(out Expr? expr)
         {
             SkipWhitespace();
             if (TryOperand(out var operand))
@@ -407,7 +402,7 @@ namespace PluralRule.CldrParser
             return _input.AsMemory().TryReadCharSpan(_pos, out span);
         }
 
-        private bool TryOperand([NotNullWhen(true)] out Operand? operand)
+        private bool TryOperand(out Operand? operand)
         {
             if (_pos < _input.Length)
             {

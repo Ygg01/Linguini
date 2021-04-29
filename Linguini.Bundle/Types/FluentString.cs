@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using PluralRules.Types;
-
+using Linguini.Shared.Types;
 
 namespace Linguini.Bundle.Types
 {
-
     public class FluentString : IFluentType, IEquatable<FluentString>
     {
-        
         private readonly string _content;
 
         private FluentString(string content)
@@ -53,37 +50,12 @@ namespace Linguini.Bundle.Types
 
         public override int GetHashCode()
         {
-            return (_content != null ? _content.GetHashCode() : 0);
+            return _content.GetHashCode();
         }
 
-        public bool TryGetPluralCategory([NotNullWhen(true)]out PluralCategory? category)
+        public bool TryGetPluralCategory([NotNullWhen(true)] out PluralCategory? category)
         {
-            switch (_content)
-            {
-                case "zero":
-                    category = PluralCategory.Zero;
-                    break;
-                case "one":
-                    category = PluralCategory.One;
-                    break;
-                case "two":
-                    category = PluralCategory.Two;
-                    break;
-                case "few":
-                    category = PluralCategory.Few;
-                    break;
-                case "many":
-                    category = PluralCategory.Many;
-                    break;
-                case "other":
-                    category = PluralCategory.Other;
-                    break;
-                default:
-                    category = null;
-                    return false;
-            }
-            
-            return true;
+            return PluralCategoryHelper.TryFromString(_content, out category);
         }
     }
 }

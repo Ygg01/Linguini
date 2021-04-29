@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using Linguini.Shared.IO;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.IO;
 using Linguini.Syntax.Parser.Error;

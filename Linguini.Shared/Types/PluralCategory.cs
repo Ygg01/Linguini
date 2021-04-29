@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PluralRules.Types
+namespace Linguini.Shared.Types
 {
     public enum PluralCategory : byte
     {

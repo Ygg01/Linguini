@@ -1,8 +1,9 @@
 #nullable enable
 using NUnit.Framework;
-using PluralRule.CldrParser.Ast;
+using PluralRule.Ast;
+using PluralRules;
 
-namespace PluralRule.CldrParser.Test
+namespace PluralRule.Test
 {
     [TestFixture]
     [Parallelizable]
@@ -21,7 +22,7 @@ namespace PluralRule.CldrParser.Test
         [TestCase("n not != 3, 6..9", Operand.N, null, Operator.Equal, new[] {"3", "6..9"})]
         [TestCase("n = 1", Operand.N, null, Operator.Equal, new[] {"1"})]
         [TestCase("n % 10 in 131..15", Operand.N, "10", Operator.In, new[] {"131..15"})]
-        public void BasicParseRule(string input, Operand expOperand, string? modulus, Operator expOperator, 
+        public void BasicParseRule(string input, Operand expOperand, string? modulus, Operator expOperator,
             string[] expRangeList)
         {
             var rule = new ParserPlural(input).ParseRule();
@@ -56,9 +57,10 @@ namespace PluralRule.CldrParser.Test
 
         [Test]
         [Parallelizable]
-        [TestCase("n is 12 @integer 0, 5, 7~20", new[]{"0", "5", "7~20"}, new string[]{})]
-        [TestCase("n is 12 @integer 0, 5, 7~20 @decimal 1, 3~6,...", new[]{"0", "5", "7~20"}, new string[]{"1", "3~6"})]
-        [TestCase("@integer 0, 11~25, 100, 1000,  …", new string[]{"0", "11~25", "100", "1000"}, new string[]{})]
+        [TestCase("n is 12 @integer 0, 5, 7~20", new[] {"0", "5", "7~20"}, new string[] { })]
+        [TestCase("n is 12 @integer 0, 5, 7~20 @decimal 1, 3~6,...", new[] {"0", "5", "7~20"},
+            new string[] {"1", "3~6"})]
+        [TestCase("@integer 0, 11~25, 100, 1000,  …", new string[] {"0", "11~25", "100", "1000"}, new string[] { })]
         public void ParseSamples(string input, string[] expIntRangeList, string[] expDecRangeList)
         {
             var rule = new ParserPlural(input).ParseRule();
@@ -67,9 +69,10 @@ namespace PluralRule.CldrParser.Test
             {
                 Assert.AreEqual(expIntRangeList[i], rule.Samples?.IntegerSamples[i].ToString());
             }
+
             for (var i = 0; i < expDecRangeList.Length; i++)
             {
-                Assert.AreEqual(expDecRangeList[i], rule.Samples?.DecimalSample[i].ToString());
+                Assert.AreEqual(expDecRangeList[i], rule.Samples?.DecimalSamples[i].ToString());
             }
         }
     }

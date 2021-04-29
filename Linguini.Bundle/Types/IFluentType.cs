@@ -1,7 +1,7 @@
 ﻿using System;
 using Linguini.Bundle.Resolver;
+using Linguini.Shared.Types;
 using Linguini.Syntax.Ast;
-using PluralRules.Types;
 
 namespace Linguini.Bundle.Types
 {

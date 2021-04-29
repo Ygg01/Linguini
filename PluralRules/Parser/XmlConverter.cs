@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using PluralRules.Types;
+using Linguini.Shared.Types;
 
-namespace PluralRule.CldrParser.Parser
+namespace PluralRules.Parser
 {
     public class XmlConverter
     {

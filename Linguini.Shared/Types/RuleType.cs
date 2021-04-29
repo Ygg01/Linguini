@@ -1,4 +1,4 @@
-﻿namespace PluralRules.Types
+﻿namespace Linguini.Shared.Types
 {
     public enum RuleType : byte
     {

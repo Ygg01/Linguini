@@ -7,8 +7,8 @@ using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
+using Linguini.Shared.Types;
 using Linguini.Syntax.Ast;
-using PluralRules.Types;
 
 namespace Linguini.Bundle
 {
@@ -108,6 +108,7 @@ namespace Linguini.Bundle
             {
                 errors.Add(ParserFluentError.ParseError(parseError));
             }
+
             for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
             {
                 var entry = res.Entries[entryPos];
@@ -208,10 +209,8 @@ namespace Linguini.Bundle
                     errors.Add(ResolverFluentError.NoValue($"{message}"));
                     return FluentNone.None.ToString();
                 }
-                
+
                 value = FormatPattern(pattern, args, out errors);
-                
-               
             }
 
             return value;
@@ -269,7 +268,7 @@ namespace Linguini.Bundle
             function = null;
             return false;
         }
-        
+
         public string FormatPattern(Pattern pattern, FluentArgs? args,
             out IList<FluentError> errors)
         {

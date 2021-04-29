@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace PluralRules.Types
+namespace Linguini.Shared.Types
 {
     public class PluralOperands
     {
@@ -49,9 +49,9 @@ namespace PluralRules.Types
 
     public static class PluralOperandsHelpers
     {
-        public static bool TryParse(this string input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryParse(this string input, out PluralOperands? operands)
         {
-            var absStr = input.StartsWith('-')
+            var absStr = input.StartsWith("-")
                 ? input.AsSpan()[1..]
                 : input.AsSpan();
 
@@ -116,7 +116,7 @@ namespace PluralRules.Types
 
         #region SIGNED_INTS
 
-        public static bool TryParse(this sbyte input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryParse(this sbyte input, out PluralOperands? operands)
         {
             return Convert.ToInt64(input).TryParse(out operands);
         }

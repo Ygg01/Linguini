@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PluralRule.CldrParser.Ast
+namespace PluralRule.Ast
 {
     public class Rule
     {
@@ -18,7 +18,13 @@ namespace PluralRule.CldrParser.Ast
     public class Samples
     {
         public List<SampleRange> IntegerSamples;
-        public List<SampleRange> DecimalSample;
+        public List<SampleRange> DecimalSamples;
+
+        public Samples(List<SampleRange> integerSamples, List<SampleRange> decimalSamples)
+        {
+            IntegerSamples = integerSamples;
+            DecimalSamples = decimalSamples;
+        }
     }
 
     public class SampleRange
@@ -78,16 +84,28 @@ namespace PluralRule.CldrParser.Ast
         }
     }
 
-    public record Condition(List<AndCondition> Conditions)
+    public record Condition 
     {
+        public List<AndCondition> Conditions;
+
+        public Condition(List<AndCondition> conditions)
+        {
+            Conditions = conditions;
+        }
         public bool IsAny()
         {
             return Conditions.Count == 0;
         }
     }
 
-    public record AndCondition(List<Relation> Relations)
+    public class AndCondition
     {
+        public List<Relation> Relations;
+
+        public AndCondition(List<Relation> relations)
+        {
+            Relations = relations;
+        }
     }
 
     public class Relation

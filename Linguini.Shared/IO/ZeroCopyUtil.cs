@@ -1,9 +1,7 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Linguini.Syntax.IO
+namespace Linguini.Shared.IO
 {
     public static class ZeroCopyUtil
     {
