@@ -1,7 +1,7 @@
 #nullable enable
 using NUnit.Framework;
-using PluralRule.Ast;
-using PluralRules;
+using PluralRules.Generator;
+using PluralRules.Generator.Types;
 
 namespace PluralRule.Test
 {
@@ -25,7 +25,7 @@ namespace PluralRule.Test
         public void BasicParseRule(string input, Operand expOperand, string? modulus, Operator expOperator,
             string[] expRangeList)
         {
-            var rule = new ParserPlural(input).ParseRule();
+            var rule = new CldrParser(input).ParseRule();
             Assert.IsNotNull(rule);
             var relation = rule.Condition.Conditions[0].Relations[0];
             Assert.AreEqual(expOperand, relation.Expr.Operand);
@@ -49,7 +49,7 @@ namespace PluralRule.Test
         [Test]
         public void ParseEmpty()
         {
-            var rule = new ParserPlural("").ParseRule();
+            var rule = new CldrParser("").ParseRule();
             Assert.IsNotNull(rule);
             Assert.IsEmpty(rule.Condition.Conditions);
             Assert.IsNull(rule.Samples);
@@ -63,7 +63,7 @@ namespace PluralRule.Test
         [TestCase("@integer 0, 11~25, 100, 1000,  …", new string[] {"0", "11~25", "100", "1000"}, new string[] { })]
         public void ParseSamples(string input, string[] expIntRangeList, string[] expDecRangeList)
         {
-            var rule = new ParserPlural(input).ParseRule();
+            var rule = new CldrParser(input).ParseRule();
             Assert.IsNotNull(rule.Samples);
             for (var i = 0; i < expIntRangeList.Length; i++)
             {

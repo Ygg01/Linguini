@@ -7,7 +7,7 @@ namespace PluralRule.Test
         [Test]
         public void TestGenerator()
         {
-            HelloWorldGenerated.HelloWorld.SayHello();
+            PluralRulesGenerated.RuleTable.SayHello3();
         }
     }
 }

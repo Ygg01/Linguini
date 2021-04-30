@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Linguini.Shared.IO;
-using PluralRule.Ast;
+using PluralRules.Generator.Types;
 
-namespace PluralRules
+namespace PluralRules.Generator
 {
-    public class ParserPlural
+    public class CldrParser
     {
         private readonly string _input;
         private int _pos;
 
-        public ParserPlural(string? input)
+        public CldrParser(string? input)
         {
             _input = input ?? "";
             _pos = 0;

@@ -1,8 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
+using Linguini.Shared.Types;
 
-namespace PluralRule.Ast
+namespace PluralRules.Generator.Types
 {
+    
+    public class CldrRule
+    {
+        public List<string> LangIds;
+        public List<RuleMap> Rules;
+
+        public CldrRule(List<string> langIds, List<RuleMap> ruleList)
+        {
+            LangIds = langIds;
+            Rules = ruleList;
+        }
+    }
+    
+    public class RuleMap
+    {
+        private PluralCategory Category;
+        private Rule Rule;
+
+        public RuleMap(PluralCategory category, Rule rule)
+        {
+            Category = category;
+            Rule = rule;
+        }
+    }
     public class Rule
     {
         public Condition Condition;

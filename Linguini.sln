@@ -8,11 +8,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linguini.Bundle", "Linguini
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linguini.Bundle.Test", "Linguini.Bundle.Test\Linguini.Bundle.Test.csproj", "{C991AF9F-C501-4A03-BFEB-04622A4EA7E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluralRules", "PluralRules\PluralRules.csproj", "{C71B1CD3-2C73-44C5-8D28-5F723E15FEF2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluralRule.Test", "PluralRule.Test\PluralRule.Test.csproj", "{8190288A-074B-45A4-A478-14FC7C1B787C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluralRules.Test", "PluralRules.Test\PluralRules.Test.csproj", "{8190288A-074B-45A4-A478-14FC7C1B787C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linguini.Shared", "Linguini.Shared\Linguini.Shared.csproj", "{A769794B-3BEC-4CAB-B6DC-AED188590381}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluralRules.Generator", "PluralRules.Generator\PluralRules.Generator.csproj", "{88ECD23C-D6D7-4A3E-8554-74B217298D1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,10 +36,6 @@ Global
 		{C991AF9F-C501-4A03-BFEB-04622A4EA7E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C991AF9F-C501-4A03-BFEB-04622A4EA7E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C991AF9F-C501-4A03-BFEB-04622A4EA7E2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C71B1CD3-2C73-44C5-8D28-5F723E15FEF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C71B1CD3-2C73-44C5-8D28-5F723E15FEF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C71B1CD3-2C73-44C5-8D28-5F723E15FEF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C71B1CD3-2C73-44C5-8D28-5F723E15FEF2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8190288A-074B-45A4-A478-14FC7C1B787C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8190288A-074B-45A4-A478-14FC7C1B787C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8190288A-074B-45A4-A478-14FC7C1B787C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -48,5 +44,9 @@ Global
 		{A769794B-3BEC-4CAB-B6DC-AED188590381}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A769794B-3BEC-4CAB-B6DC-AED188590381}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A769794B-3BEC-4CAB-B6DC-AED188590381}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88ECD23C-D6D7-4A3E-8554-74B217298D1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88ECD23C-D6D7-4A3E-8554-74B217298D1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88ECD23C-D6D7-4A3E-8554-74B217298D1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88ECD23C-D6D7-4A3E-8554-74B217298D1E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
