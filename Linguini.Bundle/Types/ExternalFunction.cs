@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Linguini.Shared.Types.Bundle;
 
 namespace Linguini.Bundle.Types
 {

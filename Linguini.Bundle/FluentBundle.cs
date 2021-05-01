@@ -7,14 +7,17 @@ using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
+using Linguini.Shared;
 using Linguini.Shared.Types;
+using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
+using PluralRules;
 
 namespace Linguini.Bundle
 {
     using FluentArgs = IDictionary<string, IFluentType>;
 
-    public class FluentBundle
+    public class FluentBundle 
     {
         private HashSet<string> _funcList;
         private Dictionary<string, IBundleEntry> _entries;
@@ -276,12 +279,6 @@ namespace Linguini.Bundle
             var value = pattern.Resolve(scope);
             errors = scope.Errors;
             return value.AsString();
-        }
-
-        public PluralCategory GetPluralRules(RuleType cardinal, FluentNumber outType)
-        {
-            // TODO
-            throw new NotImplementedException();
         }
 
         public FluentBundle DeepClone()

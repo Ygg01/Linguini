@@ -3,7 +3,7 @@ using NUnit.Framework;
 using PluralRules.Generator;
 using PluralRules.Generator.Types;
 
-namespace PluralRule.Test
+namespace PluralRules.Test
 {
     [TestFixture]
     [Parallelizable]

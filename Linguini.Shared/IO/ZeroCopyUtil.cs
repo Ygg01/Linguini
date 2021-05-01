@@ -103,16 +103,7 @@ namespace Linguini.Shared.IO
             return IsInside(c, '0', '9');
         }
 
-        public static bool IsDigitPos(this ReadOnlySpan<char> charSpan)
-        {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var c = MemoryMarshal.GetReference(charSpan);
-            return IsInside(c, '1', '9');
-        }
+        
 
         public static bool IsNumberStart(this ReadOnlySpan<char> charSpan)
         {
@@ -187,18 +178,6 @@ namespace Linguini.Shared.IO
 
             var x = MemoryMarshal.GetReference(charSpan);
             return x == c1 || x == c2 || x == c3 || x == c4;
-        }
-
-        public static bool IsUnicodeWhiteSpace(this ReadOnlySpan<char> charSpan)
-        {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var x = MemoryMarshal.GetReference(charSpan);
-            return IsInside(x, '\x09', '\x0D') 
-                   || x is ' ' or '\u0085' or '\u200E' or '\u200F' or '\u2028' or '\u2029';
         }
 
         private static bool IsInside(char c, char min, char max) => (uint) (c - min) <= (uint) (max - min);

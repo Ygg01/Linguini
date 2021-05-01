@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Text;
-using Linguini.Shared.IO;
 using PluralRules.Generator.Types;
 
 namespace PluralRules.Generator
@@ -86,6 +86,7 @@ namespace PluralRules.Generator
 
                 SkipWhitespace();
             }
+
             if (!TrySampleValue(out var endValue))
             {
                 o = null;
@@ -459,5 +460,81 @@ namespace PluralRules.Generator
                 _pos += 1;
             }
         }
+    }
+
+    static class SpanUtil
+    {
+        private static int CharLength = 1;
+        public static readonly ReadOnlyMemory<char> Eof = ReadOnlyMemory<char>.Empty;
+
+        public static bool TryReadCharSpan(this ReadOnlyMemory<char> memory, int pos, out ReadOnlySpan<char> span)
+        {
+            span = Eof.Span;
+            if (pos + CharLength > memory.Length)
+            {
+                return false;
+            }
+
+            span = memory.Slice(pos, CharLength).Span;
+            return true;
+        }
+
+        public static bool IsUnicodeWhiteSpace(this ReadOnlySpan<char> charSpan)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var x = MemoryMarshal.GetReference(charSpan);
+            return IsInside(x, '\x09', '\x0D')
+                   || x is ' ' or '\u0085' or '\u200E' or '\u200F' or '\u2028' or '\u2029';
+        }
+
+        public static bool IsEqual(this ReadOnlySpan<char> charSpan, char c1)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            return MemoryMarshal.GetReference(charSpan) == c1;
+        }
+        
+        public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var x = MemoryMarshal.GetReference(charSpan);
+            return x == c1 || x == c2;
+        }
+
+
+        public static bool IsDigitPos(this ReadOnlySpan<char> charSpan)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var c = MemoryMarshal.GetReference(charSpan);
+            return IsInside(c, '1', '9');
+        }
+
+        public static bool IsAsciiDigit(this ReadOnlySpan<char> charSpan)
+        {
+            if (charSpan.Length != CharLength)
+            {
+                return false;
+            }
+
+            var c = MemoryMarshal.GetReference(charSpan);
+            return IsInside(c, '0', '9');
+        }
+
+        private static bool IsInside(char c, char min, char max) => (uint) (c - min) <= (uint) (max - min);
     }
 }

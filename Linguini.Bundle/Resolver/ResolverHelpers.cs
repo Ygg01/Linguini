@@ -2,6 +2,8 @@
 using System.IO;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
+using Linguini.Shared;
+using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle.Resolver

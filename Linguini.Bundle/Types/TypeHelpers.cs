@@ -1,4 +1,5 @@
-﻿using Linguini.Syntax.Ast;
+﻿using Linguini.Shared.Types.Bundle;
+using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle.Types
 {

@@ -1,9 +1,8 @@
 ﻿using System;
-using Linguini.Bundle.Resolver;
-using Linguini.Shared.Types;
-using Linguini.Syntax.Ast;
+using System.Globalization;
+using Linguini.Bundle.Types;
 
-namespace Linguini.Bundle.Types
+namespace Linguini.Shared.Types.Bundle
 {
     public interface IFluentType : ICloneable
     {
@@ -15,7 +14,7 @@ namespace Linguini.Bundle.Types
         }
 
 
-        bool Matches(IFluentType other, Scope scope)
+        bool Matches(IFluentType other, IScope scope)
         {
             if (this.TryConvert(out FluentString? s1)
                 && other.TryConvert(out FluentString? s2))
@@ -35,7 +34,6 @@ namespace Linguini.Bundle.Types
                 if (fs1.TryGetPluralCategory(out var strCategory))
                 {
                     var numCategory = scope
-                        .Bundle
                         .GetPluralRules(RuleType.Cardinal, fn2);
 
                     return numCategory == strCategory;
@@ -48,6 +46,10 @@ namespace Linguini.Bundle.Types
         }
     }
 
+    public interface IScope
+    {
+        PluralCategory GetPluralRules(RuleType type, FluentNumber number);
+    }
 
     public class FluentErrType : IFluentType
     {

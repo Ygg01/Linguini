@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Linguini.Shared.Types;
 
 namespace PluralRules.Generator.Types
 {
@@ -19,10 +18,10 @@ namespace PluralRules.Generator.Types
     
     public class RuleMap
     {
-        private PluralCategory Category;
+        private string Category;
         private Rule Rule;
 
-        public RuleMap(PluralCategory category, Rule rule)
+        public RuleMap(string category, Rule rule)
         {
             Category = category;
             Rule = rule;

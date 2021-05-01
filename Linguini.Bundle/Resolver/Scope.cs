@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.IO;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
+using Linguini.Shared.Types;
+using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle.Resolver
 {
-    public class Scope
+    public class Scope : IScope
     {
         public readonly FluentBundle Bundle;
         private readonly Dictionary<string, IFluentType>? _args;
@@ -16,6 +18,8 @@ namespace Linguini.Bundle.Resolver
         private readonly List<Pattern> _travelled;
         private readonly List<FluentError> _errors;
 
+        
+        
         public Scope(FluentBundle fluentBundle, IDictionary<string, IFluentType>? args)
         {
             Placeable = 0;
@@ -149,6 +153,11 @@ namespace Linguini.Bundle.Resolver
             {
                 _localArgs = new Dictionary<string, IFluentType>();
             }
+        }
+
+        public PluralCategory GetPluralRules(RuleType type, FluentNumber number)
+        {
+            return PluralRules.Rules.GetPluralCategory(Bundle.Culture, type, number);
         }
     }
 

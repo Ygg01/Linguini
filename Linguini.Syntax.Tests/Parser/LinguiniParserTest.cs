@@ -1,4 +1,5 @@
 ﻿using System;
+using Linguini.Shared;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
 using Linguini.Syntax.Parser.Error;

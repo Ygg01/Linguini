@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Linguini.Shared;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Syntax.Serialization
@@ -24,18 +25,19 @@ namespace Linguini.Syntax.Serialization
             StringBuilder? textLiteralBuffer = null;
             foreach (var patternElement in pattern.Elements)
             {
-                if (patternElement.TryConvert(out TextLiteral textLiteral))
+                if (patternElement.TryConvert(out TextLiteral? textLiteral))
                 {
                     textLiteralBuffer ??= new StringBuilder();
                     textLiteralBuffer.Append(textLiteral.Value);
                 }
-                else if (patternElement.TryConvert(out Placeable placeable))
+                else if (patternElement.TryConvert(out Placeable? placeable))
                 {
                     WriteMergedText(writer, textLiteralBuffer);
                     textLiteralBuffer = null;
                     JsonSerializer.Serialize(writer, placeable, options);
                 }
             }
+
             WriteMergedText(writer, textLiteralBuffer);
 
             writer.WriteEndArray();

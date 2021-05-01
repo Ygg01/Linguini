@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using Linguini.Shared.Types;
 
-namespace Linguini.Bundle.Types
+namespace Linguini.Shared.Types.Bundle
 {
     public class FluentString : IFluentType, IEquatable<FluentString>
     {

@@ -4,16 +4,13 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <LangVersion>preview</LangVersion>
         <Nullable>enable</Nullable>
+<!--        <GeneratePackageOnBuild>true</GeneratePackageOnBuild> &lt;!&ndash; Generates a package at build &ndash;&gt;-->
+<!--        <IncludeBuildOutput>true</IncludeBuildOutput> &lt;!&ndash; Do not include the generator as a lib dependency &ndash;&gt;-->
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0-3.final" PrivateAssets="all" />
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.0.0" PrivateAssets="all" />
     </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Linguini.Shared\Linguini.Shared.csproj" />
-    </ItemGroup>
-
 
 </Project>

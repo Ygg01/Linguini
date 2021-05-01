@@ -1,6 +1,7 @@
 ﻿using System;
+using Linguini.Bundle.Types;
 
-namespace Linguini.Bundle.Types
+namespace Linguini.Shared.Types.Bundle
 {
     public class FluentNone: IFluentType, IEquatable<FluentNone>
     {
