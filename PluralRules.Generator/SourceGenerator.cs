@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,42 +15,292 @@ namespace PluralRules.Generator
     {
         private List<CldrRule> ordinalRules = new();
         private List<CldrRule> cardinalRules = new();
+
         public void Initialize(GeneratorInitializationContext context)
         {
-            //
+            // Not needed
         }
 
         public void Execute(GeneratorExecutionContext context)
         {
-            var excp = "";
-            try
+            var myFiles = context.AdditionalFiles.Select(a => a.Path)
+                .Where(path => path.EndsWith(".xml"));
+
+            foreach (var path in myFiles)
             {
-                cardinalRules = ProcessXmlPath(
-                    "C:\\BACKUP\\projects\\Linguini\\PluralRules.Generator\\cldr_data\\plurals.xml");
-            }
-            catch (Exception e)
-            {
-                excp = e.Message;
+                if (path.EndsWith("plurals.xml"))
+                {
+                    cardinalRules = ProcessXmlPath(path);
+                }
+                else if (path.EndsWith("ordinals.xml"))
+                {
+                    ordinalRules = ProcessXmlPath(path);
+                }
             }
 
             // begin creating the source we'll inject into the users compilation
             var sourceBuilder = new StringBuilder($@"
 using System;
+using Linguini.Shared;
 using Linguini.Shared.Types;
 
 namespace PluralRulesGenerated
 {{
     public static class RuleTable
     {{
-        public static void SayHello3() 
-        {{
-            Console.WriteLine(""Hello from generated {cardinalRules.Count} code!!"");
-            Console.WriteLine(""{excp}"");
+        private static Func<PluralOperands, PluralCategory>[] cardinalMap = 
+        {{");
+            WriteRules(sourceBuilder, cardinalRules);
+            sourceBuilder.Append($@"
+        }};
+
+        private static Func<PluralOperands, PluralCategory>[] ordinalMap = 
+        {{");
+            WriteRules(sourceBuilder, ordinalRules);
+            sourceBuilder.Append($@"
+        }};
+        
+        private static int GetCardinalIndex(string culture)
+        {{");
+            WriteRulesIndex(sourceBuilder, cardinalRules);
+            sourceBuilder.Append($@"
         }}
+
+        private static int GetOrdinalIndex(string culture)
+        {{");
+            WriteRulesIndex(sourceBuilder, ordinalRules);
+            sourceBuilder.Append($@"
+        }}
+
+        public static Func<PluralOperands, PluralCategory> GetPluralFunc(string culture, RuleType type)
+        {{
+            switch (type)
+            {{
+                case RuleType.Cardinal:
+                    return cardinalMap[GetCardinalIndex(culture)];
+                case RuleType.Ordinal:
+                    return ordinalMap[GetOrdinalIndex(culture)];
+            }}
+
+            return _ => PluralCategory.Other;
+        }}
+
     }}
 }}
 ");
-            context.AddSource("helloWorldGenerated",  SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+            context.AddSource("PluralRule", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+        }
+
+        private void WriteRules(StringBuilder stringBuilder, List<CldrRule> rules)
+        {
+            foreach (var rule in rules)
+            {
+                if (rule.Rules.Count == 1)
+                {
+                    var category = rule.Rules[0].Category.FirstCharToUpper();
+                    stringBuilder.Append(@$"
+            _ => PluralCategory.{category},");
+                }
+                else
+                {
+                    WriteRuleMaps(stringBuilder, rule.Rules);
+                }
+            }
+        }
+
+        private void WriteRuleMaps(StringBuilder stringBuilder, List<RuleMap> ruleMaps)
+        {
+            stringBuilder.Append(@"
+            po =>
+            {");
+            foreach (var ruleMap in ruleMaps)
+            {
+                WriteRuleMap(stringBuilder, ruleMap);
+            }
+            stringBuilder.Append(@"
+            },");
+        }
+
+        private void WriteRuleMap(StringBuilder stringBuilder, RuleMap ruleMap)
+        {
+            stringBuilder.Append(@"
+                ");
+            if (ruleMap.Rule.Condition.IsAny())
+            {
+                stringBuilder.Append($"return PluralCategory.{ruleMap.Category.FirstCharToUpper()};");
+            }
+            else
+            {
+                stringBuilder.Append("if (");
+                WriteCondition(stringBuilder, ruleMap.Rule.Condition);
+                stringBuilder.Append(")");
+                stringBuilder.Append($@"
+                {{
+                    return PluralCategory.{ruleMap.Category.FirstCharToUpper()};
+                }}");
+            }
+        }
+
+        private void WriteCondition(StringBuilder stringBuilder, Condition ruleCondition)
+        {
+            if (ruleCondition.Conditions.Count < 1)
+            {
+                stringBuilder.Append("true");
+                return;
+            }
+
+            for (var i = 0; i < ruleCondition.Conditions.Count; i++)
+            {
+                if (i != 0)
+                {
+                    stringBuilder.Append(" || ");
+                }
+
+                var andCondition = ruleCondition.Conditions[i]!;
+                if (andCondition.Relations.Count == 1)
+                {
+                    WriteRelation(stringBuilder, andCondition.Relations[0]);
+                }
+                else
+                {
+                    for (var j = 0; j < andCondition.Relations.Count; j++)
+                    {
+                        if (j != 0)
+                        {
+                            stringBuilder.Append(" && ");
+                        }
+
+                        WriteRelation(stringBuilder, andCondition.Relations[j]);
+                    }
+                    
+                }
+            }
+        }
+
+        private void WriteRelation(StringBuilder stringBuilder, Relation relation)
+        {
+            var operand = relation.Expr.Operand.ToUpperChar();
+            if (operand == "E")
+            {
+                operand = "Exp()";
+            }
+            var brackets = relation.RangeListItems.Count > 1;
+            if (relation.Expr.Modulus != null)
+            {
+                var sb = new StringBuilder();
+                if (operand == "N")
+                {
+                    // Mod over double is rather pointless
+                    operand = "I";
+                } 
+
+                sb.Append("po.").Append(operand).Append(" % ")
+                    .Append(relation.Expr.Modulus.Value);
+                if (relation.Op.IsNegated())
+                {
+                    stringBuilder.Append('!');
+                    if (relation.RangeListItems[0] is not RangeElem)
+                    {
+                        // Have to bracket negation of plain mod
+                        // e.g. instead of !po.N % 10 == 0
+                        //                 !(po.N % 10 == 0)
+                        brackets = true;
+                    }
+                }
+
+                if (brackets)
+                {
+                    stringBuilder.Append("(");
+                }
+                
+                for (var i = 0; i < relation.RangeListItems.Count; i++)
+                {
+                    if (i != 0)
+                    {
+                        stringBuilder.AppendLine().Append("                    || ");
+                    }
+
+                    var rel = relation.RangeListItems[i]!;
+                    if (rel is DecimalValue value)
+                    {
+                        stringBuilder.Append(sb).Append(" == ").Append(value);
+                    }
+                    else if (rel is RangeElem rangeElem)
+                    {
+                        stringBuilder.Append($"({sb}).InRange({rangeElem.LowerVal}, {rangeElem.UpperVal})");
+                    }
+                }
+                
+                if (brackets)
+                {
+                    stringBuilder.Append(") ");
+                }
+            }
+            else
+            {
+                var sb = new StringBuilder();
+                sb.Append("po.").Append(operand);
+
+                string op = relation.Op.IsNegated() ? " != " : " == ";
+
+                if (brackets)
+                {
+                    stringBuilder.Append("( ");
+                }
+                for (var i = 0; i < relation.RangeListItems.Count; i++)
+                {
+                    if (i != 0)
+                    {
+                        stringBuilder.Append(" || ").AppendLine().Append("                    ");
+                    }
+
+                    var rel = relation.RangeListItems[i]!;
+                    if (rel is DecimalValue value)
+                    {
+                        stringBuilder.Append(sb).Append(op).Append(value);
+                    }
+                    else if (rel is RangeElem rangeElem)
+                    {
+                        stringBuilder.Append($"{sb}.InRange({rangeElem.LowerVal}, {rangeElem.UpperVal}) ");
+                    }
+                }
+                if (brackets)
+                {
+                    stringBuilder.Append(" )");
+                }
+            }
+        }
+
+        private void WriteRulesIndex(StringBuilder stringBuilder, List<CldrRule> rules)
+        {
+            stringBuilder.Append(@"
+            switch (culture)
+            {");
+            for (int i = 0; i < rules.Count; i++)
+            {
+                WriteRuleIndex(stringBuilder, rules[i], i);
+            }
+            stringBuilder.Append(@"
+            }
+            return 0;");
+        }
+
+        private void WriteRuleIndex(StringBuilder stringBuilder,CldrRule rule, int i)
+        {
+            foreach (var langId in rule.LangIds)
+            {
+                stringBuilder.Append($@"
+                case ""{langId}"":");
+            }
+
+            stringBuilder.Append($@"
+                    return {i};");
+        }
+
+        private void WriteOrdinalIndex(StringBuilder stringBuilder)
+        {
+            stringBuilder.Append(@"
+            return 0;");
         }
 
         public static List<CldrRule> ProcessXmlPath(string? path)
@@ -87,7 +336,7 @@ namespace PluralRulesGenerated
                     var countTag = element.Attribute("count")?.Value;
 
                     var rule = new CldrParser(element.FirstNode.ToString()).ParseRule();
-                    rules.Add(new RuleMap( countTag!, rule));
+                    rules.Add(new RuleMap(countTag!, rule));
                 }
 
                 retVal.Add(new CldrRule(langs, rules));

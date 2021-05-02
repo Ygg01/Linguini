@@ -11,18 +11,19 @@ namespace PluralRules.Test
     {
         [Test]
         [Parallelizable]
-        [TestCase("n is 123", Operand.N, null, Operator.Is, new[] {"123"})]
-        [TestCase("n is not 456", Operand.N, null, Operator.IsNot, new[] {"456"})]
-        [TestCase("i% 10 not in 11..15", Operand.I, "10", Operator.NotIn, new[] {"11..15"})]
-        [TestCase("i % 10 in 131..15", Operand.I, "10", Operator.In, new[] {"131..15"})]
-        [TestCase("f% 3 = 1", Operand.F, "3", Operator.Equal, new[] {"1"})]
-        [TestCase("t != 5, 6", Operand.T, null, Operator.NotEqual, new[] {"5", "6"})]
-        [TestCase("w within 5, 6", Operand.W, null, Operator.Within, new[] {"5", "6"})]
-        [TestCase("v not within 3, 6..9", Operand.V, null, Operator.NotWithin, new[] {"3", "6..9"})]
-        [TestCase("n not != 3, 6..9", Operand.N, null, Operator.Equal, new[] {"3", "6..9"})]
-        [TestCase("n = 1", Operand.N, null, Operator.Equal, new[] {"1"})]
-        [TestCase("n % 10 in 131..15", Operand.N, "10", Operator.In, new[] {"131..15"})]
-        public void BasicParseRule(string input, Operand expOperand, string? modulus, Operator expOperator,
+        [TestCase("n is 123", Operand.N, null, Op.Is, new[] {"123"})]
+        [TestCase("n is not 456", Operand.N, null, Op.IsNot, new[] {"456"})]
+        [TestCase("i% 10 not in 11..15", Operand.I, "10", Op.NotIn, new[] {"11..15"})]
+        [TestCase("i % 10 in 131..15", Operand.I, "10", Op.In, new[] {"131..15"})]
+        [TestCase("f% 3 = 1", Operand.F, "3", Op.Equal, new[] {"1"})]
+        [TestCase("t != 5, 6", Operand.T, null, Op.NotEqual, new[] {"5", "6"})]
+        [TestCase("w within 5, 6", Operand.W, null, Op.Within, new[] {"5", "6"})]
+        [TestCase("v not within 3, 6..9", Operand.V, null, Op.NotWithin, new[] {"3", "6..9"})]
+        [TestCase("n not != 3, 6..9", Operand.N, null, Op.Equal, new[] {"3", "6..9"})]
+        [TestCase("n = 1", Operand.N, null, Op.Equal, new[] {"1"})]
+        [TestCase("n % 10 in 131..15", Operand.N, "10", Op.In, new[] {"131..15"})]
+        [TestCase("e != 0..6", Operand.E, null, Op.NotEqual, new[] {"0..6"})]
+        public void BasicParseRule(string input, Operand expOperand, string? modulus, Op expOp,
             string[] expRangeList)
         {
             var rule = new CldrParser(input).ParseRule();
@@ -39,7 +40,7 @@ namespace PluralRules.Test
                 Assert.IsNull(relation.Expr.Modulus);
             }
 
-            Assert.AreEqual(expOperator, relation.Op);
+            Assert.AreEqual(expOp, relation.Op);
             for (var i = 0; i < expRangeList.Length; i++)
             {
                 Assert.AreEqual(expRangeList[i], relation.RangeListItems[i].ToString());
@@ -74,6 +75,16 @@ namespace PluralRules.Test
             {
                 Assert.AreEqual(expDecRangeList[i], rule.Samples?.DecimalSamples[i].ToString());
             }
+        }
+
+        [Test]
+        public void ParseCondition()
+        {
+            var rule = new CldrParser("i = 0 or n = 1 and f = 0 ").ParseRule();
+            Assert.IsNotNull(rule.Condition);
+            Assert.AreEqual(2, rule.Condition.Conditions.Count);
+            Assert.AreEqual(1, rule.Condition.Conditions[0].Relations.Count);
+            Assert.AreEqual(2, rule.Condition.Conditions[1].Relations.Count);
         }
     }
 }

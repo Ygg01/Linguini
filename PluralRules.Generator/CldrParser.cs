@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using PluralRules.Generator.Types;
@@ -179,18 +180,14 @@ namespace PluralRules.Generator
             SkipWhitespace();
             while (TryParseAndCondition(out var andCondition))
             {
+                andConditions.Add(andCondition);
                 SkipWhitespace();
-                if (andConditions.Count > 0)
+                if (!TryConsume("or"))
                 {
-                    if (!TryConsume("or"))
-                    {
-                        return new Condition(andConditions);
-                    }
-
-                    SkipWhitespace();
+                    return new Condition(andConditions);
                 }
 
-                andConditions.Add(andCondition);
+                SkipWhitespace();
             }
 
             return new Condition(andConditions);
@@ -202,19 +199,13 @@ namespace PluralRules.Generator
             SkipWhitespace();
             while (ParseRelation(out var relation))
             {
-                SkipWhitespace();
-                if (relations.Count > 0)
-                {
-                    if (!TryConsume("and"))
-                    {
-                        conditions = null;
-                        return false;
-                    }
-
-                    SkipWhitespace();
-                }
-
                 relations.Add(relation!);
+                SkipWhitespace();
+                if (!TryConsume("and"))
+                {
+                    break;
+                }
+                SkipWhitespace();
             }
 
             conditions = relations.Count > 0 ? new AndCondition(relations) : null;
@@ -500,7 +491,7 @@ namespace PluralRules.Generator
 
             return MemoryMarshal.GetReference(charSpan) == c1;
         }
-        
+
         public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2)
         {
             if (charSpan.Length != CharLength)
@@ -536,5 +527,16 @@ namespace PluralRules.Generator
         }
 
         private static bool IsInside(char c, char min, char max) => (uint) (c - min) <= (uint) (max - min);
+    }
+
+    public static class StringExtensions
+    {
+        public static string FirstCharToUpper(this string input) =>
+            input switch
+            {
+                null => throw new ArgumentNullException(nameof(input)),
+                "" => "",
+                _ => input.First().ToString().ToUpper() + input.Substring(1)
+            };
     }
 }

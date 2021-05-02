@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using Linguini.Shared.Types.Bundle;
 
 #nullable enable
-namespace Linguini.Bundle.Types
+namespace Linguini.Shared.Types.Bundle
 {
     public class FluentNumber : IFluentType, IEquatable<FluentNumber>
     {

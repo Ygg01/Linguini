@@ -45,6 +45,15 @@ namespace Linguini.Shared.Types
             F = f;
             T = t;
         }
+        public static int operator% (PluralOperands operand, uint modulus)
+        {
+            return Convert.ToInt32(operand.I % modulus);
+        }
+
+        public int Exp()
+        {
+            return (int) Math.Floor(Math.Log10(9999));
+        }
     }
 
     public static class PluralOperandsHelpers
@@ -145,8 +154,7 @@ namespace Linguini.Shared.Types
         }
 
         #endregion
-
-
+        
         #region UNSIGNED_INTS
 
         public static bool TryParse(this byte input, [NotNullWhen(true)] out PluralOperands? operands)

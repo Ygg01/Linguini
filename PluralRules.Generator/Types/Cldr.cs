@@ -18,8 +18,8 @@ namespace PluralRules.Generator.Types
     
     public class RuleMap
     {
-        private string Category;
-        private Rule Rule;
+        public string Category;
+        public Rule Rule;
 
         public RuleMap(string category, Rule rule)
         {
@@ -135,10 +135,10 @@ namespace PluralRules.Generator.Types
     public class Relation
     {
         public Expr Expr;
-        public Operator Op;
+        public Op Op;
         public List<IRangeListItem> RangeListItems;
 
-        public Relation(Expr expr, Operator op, List<IRangeListItem> rangeList)
+        public Relation(Expr expr, Op op, List<IRangeListItem> rangeList)
         {
             Expr = expr;
             Op = op;
@@ -182,7 +182,12 @@ namespace PluralRules.Generator.Types
         /// <summary>
         /// Visible fraction digits without trailing zeros
         /// </summary>
-        T
+        T,
+        
+        /// <summary>
+        /// Exponent used in some rules
+        /// </summary>
+        E,
     }
 
     public static class OperandExtension
@@ -203,8 +208,33 @@ namespace PluralRules.Generator.Types
                     return Operand.V;
                 case 'w':
                     return Operand.W;
+                case 'e':
+                    return Operand.E;
                 default:
                     return null;
+            }
+        }
+
+        public static string ToUpperChar(this Operand operand)
+        {
+            switch (operand)
+            {
+                case Operand.N:
+                    return "N";
+                case Operand.I:
+                    return "I";
+                case Operand.F:
+                    return "F";
+                case Operand.T:
+                    return "T";
+                case Operand.V:
+                    return "V";
+                case Operand.W:
+                    return "W";
+                case Operand.E:
+                    return "E";
+                default:
+                    throw new ArgumentException($"Unknown operand {operand}"); 
             }
         }
     }
@@ -232,7 +262,7 @@ namespace PluralRules.Generator.Types
         }
     }
 
-    public enum Operator : byte
+    public enum Op : byte
     {
         In,
         NotIn,
@@ -242,6 +272,20 @@ namespace PluralRules.Generator.Types
         IsNot,
         Equal,
         NotEqual,
+    }
+
+    public static class OpHelper
+    {
+        public static bool IsNegated(this Op op)
+        {
+            switch (op)
+            {
+                case Op.NotEqual: case Op.NotWithin: case Op.IsNot: case Op.NotIn:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 
     public enum RelationType : byte
@@ -254,7 +298,7 @@ namespace PluralRules.Generator.Types
 
     public static class RelationTypeExtensions
     {
-        public static Operator GetOperator(this RelationType? rt, bool negated)
+        public static Op GetOperator(this RelationType? rt, bool negated)
         {
             if (rt == null)
             {
@@ -264,13 +308,13 @@ namespace PluralRules.Generator.Types
             switch (rt)
             {
                 case RelationType.Is:
-                    return negated ? Operator.IsNot : Operator.Is;
+                    return negated ? Op.IsNot : Op.Is;
                 case RelationType.Within:
-                    return negated ? Operator.NotWithin : Operator.Within;
+                    return negated ? Op.NotWithin : Op.Within;
                 case RelationType.In:
-                    return negated ? Operator.NotIn : Operator.In;
+                    return negated ? Op.NotIn : Op.In;
                 case RelationType.Equal:
-                    return negated ? Operator.NotEqual : Operator.Equal;
+                    return negated ? Op.NotEqual : Op.Equal;
                 default:
                     throw new ArgumentException("Unknown Operator");
             }

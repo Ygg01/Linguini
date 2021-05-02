@@ -1,5 +1,4 @@
 ﻿using System;
-using Linguini.Bundle.Types;
 
 namespace Linguini.Shared.Types.Bundle
 {

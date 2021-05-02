@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
-using Linguini.Bundle.Types;
 using Linguini.Shared.Types;
+using Linguini.Shared.Types.Bundle;
+using PluralRulesGenerated;
 
 namespace PluralRules
 {
@@ -8,8 +9,13 @@ namespace PluralRules
     {
         public static PluralCategory GetPluralCategory(CultureInfo info, RuleType ruleType, FluentNumber number)
         {
-            PluralRulesGenerated.RuleTable.SayHello3();
-            return PluralCategory.Other;
+            var func = RuleTable.GetPluralFunc(info.TwoLetterISOLanguageName, ruleType);
+            if (PluralOperandsHelpers.TryParse(number.Value, out var op))
+            {
+                return func(op);
+            }
+
+            return PluralCategory.One;
         }
     }
 }
