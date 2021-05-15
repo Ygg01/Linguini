@@ -54,7 +54,7 @@ namespace Linguini.Shared.Types.Bundle
 
         public bool TryGetPluralCategory([NotNullWhen(true)] out PluralCategory? category)
         {
-            return PluralCategoryHelper.TryFromString(_content, out category);
+            return _content.TryPluralCategory(out category);
         }
     }
 }

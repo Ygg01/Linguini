@@ -15,7 +15,7 @@ namespace Linguini.Shared.Types
 
     public static class PluralCategoryHelper
     {
-        public static bool TryFromString(string? input, [NotNullWhen(true)]  out PluralCategory? pluralCategory)
+        public static bool TryPluralCategory(this string? input, [NotNullWhen(true)] out PluralCategory? pluralCategory)
         {
             if (input == null)
             {
@@ -45,7 +45,7 @@ namespace Linguini.Shared.Types
                     pluralCategory = PluralCategory.Other;
                     return true;
                 default:
-                    throw new AggregateException($"Unexpected PluralCategory `{input}`");
+                    throw new ArgumentException($"Unexpected PluralCategory `{input}`");
             }
         }
     }

@@ -55,7 +55,7 @@ namespace Linguini.Shared.Types
 
     public static class PluralOperandsHelpers
     {
-        public static bool TryParse(this string input, out PluralOperands? operands)
+        public static bool TryPluralOperands(this string input, out PluralOperands? operands)
         {
             var absStr = input.StartsWith("-")
                 ? input.AsSpan()[1..]
@@ -122,22 +122,22 @@ namespace Linguini.Shared.Types
 
         #region SIGNED_INTS
 
-        public static bool TryParse(this sbyte input, out PluralOperands? operands)
+        public static bool TryPluralOperands(this sbyte input, out PluralOperands? operands)
         {
-            return Convert.ToInt64(input).TryParse(out operands);
+            return Convert.ToInt64(input).TryPluralOperands(out operands);
         }
 
-        public static bool TryParse(this short input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryPluralOperands(this short input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            return Convert.ToInt64(input).TryParse(out operands);
+            return Convert.ToInt64(input).TryPluralOperands(out operands);
         }
 
-        public static bool TryParse(this int input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryPluralOperands(this int input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            return Convert.ToInt64(input).TryParse(out operands);
+            return Convert.ToInt64(input).TryPluralOperands(out operands);
         }
 
-        public static bool TryParse(this long input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryPluralOperands(this long input, [NotNullWhen(true)] out PluralOperands? operands)
         {
             operands = new(
                 Convert.ToDouble(Math.Abs(input)),
@@ -154,7 +154,7 @@ namespace Linguini.Shared.Types
         
         #region UNSIGNED_INTS
 
-        public static bool TryParse(this byte input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryPluralOperands(this byte input, [NotNullWhen(true)] out PluralOperands? operands)
         {
             operands = new(
                 Convert.ToDouble(input),
@@ -167,7 +167,7 @@ namespace Linguini.Shared.Types
             return true;
         }
 
-        public static bool TryParse(this ushort input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryPluralOperands(this ushort input, [NotNullWhen(true)] out PluralOperands? operands)
         {
             operands = new(
                 Convert.ToDouble(input),
@@ -180,7 +180,7 @@ namespace Linguini.Shared.Types
             return true;
         }
 
-        public static bool TryParse(this uint input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryPluralOperands(this uint input, [NotNullWhen(true)] out PluralOperands? operands)
         {
             operands = new(
                 Convert.ToDouble(input),
@@ -193,7 +193,7 @@ namespace Linguini.Shared.Types
             return true;
         }
 
-        public static bool TryParse(this ulong input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryPluralOperands(this ulong input, [NotNullWhen(true)] out PluralOperands? operands)
         {
             operands = new(
                 Convert.ToDouble(input),
@@ -210,19 +210,19 @@ namespace Linguini.Shared.Types
 
         #region FLOATS
 
-        public static bool TryParse(this float input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryPluralOperands(this float input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            return input.ToString(CultureInfo.InvariantCulture).TryParse(out operands);
+            return input.ToString(CultureInfo.InvariantCulture).TryPluralOperands(out operands);
         }
 
-        public static bool TryParse(this double input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryPluralOperands(this double input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            return input.ToString(CultureInfo.InvariantCulture).TryParse(out operands);
+            return input.ToString(CultureInfo.InvariantCulture).TryPluralOperands(out operands);
         }
 
-        public static bool TryParse(this FluentNumber input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryPluralOperands(this FluentNumber input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            return input.AsString().TryParse(out operands);
+            return input.AsString().TryPluralOperands(out operands);
         }
 
         #endregion

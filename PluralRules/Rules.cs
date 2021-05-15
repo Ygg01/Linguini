@@ -12,7 +12,7 @@ namespace PluralRules
             var specialCase = RuleTable.UseFourLetter(info.Name, ruleType);
             var langStr = GetPluralRuleLang(info, specialCase);
             var func = RuleTable.GetPluralFunc(langStr, ruleType);
-            if (PluralOperandsHelpers.TryParse(number, out var op))
+            if (PluralOperandsHelpers.TryPluralOperands(number, out var op))
             {
                 return func(op);
             }

@@ -24,7 +24,7 @@ namespace PluralRule.Test.Types
         [TestCase(1234.567, 1234, 4, 3, 5670, 567, "-1234.5670")]
         public void TestOperandsFromStr(double n, long I, int v, int w, long f, long t, string input)
         {
-            var x = input.TryParse(out var operands);
+            var x = input.TryPluralOperands(out var operands);
             Assert.True(x, $"Parsing operand failed for {input}");
             Assert.AreEqual(n, operands!.N);
             Assert.AreEqual(I, operands!.I);
@@ -48,26 +48,26 @@ namespace PluralRule.Test.Types
             if (input >= SByte.MinValue && input <= SByte.MaxValue)
             {
                 sbyte byteInput = Convert.ToSByte(input);
-                var x = byteInput.TryParse(out var operands);
+                var x = byteInput.TryPluralOperands(out var operands);
                 CheckInput(n, I, v, w, f, t, x, operands);
             }
 
             if (input >= Int16.MinValue && input <= Int16.MaxValue)
             {
                 short shortInput = Convert.ToInt16(input);
-                var x = shortInput.TryParse(out var operands);
+                var x = shortInput.TryPluralOperands(out var operands);
                 CheckInput(n, I, v, w, f, t, x, operands);
             }
 
             if (input >= Int32.MinValue && input <= Int32.MaxValue)
             {
                 int intInput = Convert.ToInt32(input);
-                var x = intInput.TryParse(out var operands);
+                var x = intInput.TryPluralOperands(out var operands);
                 CheckInput(n, I, v, w, f, t, x, operands);
             }
 
             {
-                var r = input.TryParse(out var operands);
+                var r = input.TryPluralOperands(out var operands);
                 CheckInput(n, I, v, w, f, t, r, operands);
             }
         }
@@ -87,26 +87,26 @@ namespace PluralRule.Test.Types
             if (input <= Byte.MaxValue)
             {
                 byte byteInput = Convert.ToByte(input);
-                var x = byteInput.TryParse(out var operands);
+                var x = byteInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
 
             if (input <= UInt16.MaxValue)
             {
                 ushort shortInput = Convert.ToUInt16(input);
-                var x = shortInput.TryParse(out var operands);
+                var x = shortInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
 
             if (input <= UInt32.MaxValue)
             {
                 uint intInput = Convert.ToUInt32(input);
-                var x = intInput.TryParse(out var operands);
+                var x = intInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
 
             {
-                var r = input.TryParse(out var operands);
+                var r = input.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, r, operands);
             }
         }
@@ -123,12 +123,12 @@ namespace PluralRule.Test.Types
             if (input >= float.MinValue && input <= float.MaxValue)
             {
                 float floatInput = Convert.ToSingle(input);
-                var x = floatInput.TryParse(out var operands);
+                var x = floatInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
 
             {
-                var x = input.TryParse(out var operands);
+                var x = input.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
         }
@@ -136,7 +136,7 @@ namespace PluralRule.Test.Types
         [Test]
         public void TestIncorrectOperand()
         {
-            Assert.IsFalse("foo".TryParse(out _));
+            Assert.IsFalse("foo".TryPluralOperands(out _));
         }
         
         private static void CheckInput(double n, long I, int v, int w, long f, long t, bool x,

@@ -8,10 +8,8 @@ using Linguini.Bundle.Errors;
 using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
 using Linguini.Shared;
-using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
-using PluralRules;
 
 namespace Linguini.Bundle
 {
@@ -157,7 +155,7 @@ namespace Linguini.Bundle
             for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
             {
                 var entry = res.Entries[entryPos];
-                var id = "";
+                string id;
                 IBundleEntry bundleEntry;
                 if (entry.TryConvert(out AstMessage? message))
                 {
