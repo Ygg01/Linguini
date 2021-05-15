@@ -157,7 +157,7 @@ namespace Linguini.Bundle.Resolver
 
         public PluralCategory GetPluralRules(RuleType type, FluentNumber number)
         {
-            return PluralRules.Rules.GetPluralCategory(Bundle.Culture, type, number);
+            return ResolverHelpers.PluralRules.GetPluralCategory(Bundle.Culture, type, number);
         }
     }
 

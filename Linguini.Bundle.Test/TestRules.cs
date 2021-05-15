@@ -22,7 +22,7 @@ namespace PluralRules
         {
             TestData(cultureStr, type, isDecimal, lower, upper, expected);
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(_ordinalTestData))]
@@ -38,7 +38,7 @@ namespace PluralRules
         public void TestIndividual(string cultureStr, RuleType type, bool isDecimal, string lower, string? upper,
             PluralCategory expected)
         {
-            TestData(cultureStr, type, isDecimal, lower, upper,  expected);
+            TestData(cultureStr, type, isDecimal, lower, upper, expected);
         }
 
 
@@ -64,7 +64,7 @@ namespace PluralRules
                 FluentNumber mid = isDecimal
                     ? midDouble
                     : Convert.ToInt32(Math.Floor(midDouble));
-                
+
                 var actualStart = Rules.GetPluralCategory(info, type, start);
                 Assert.AreEqual(expected, actualStart, $"Failed on start of range: {start}");
                 var actualEnd = Rules.GetPluralCategory(info, type, end);
@@ -79,7 +79,6 @@ namespace PluralRules
 
                 Assert.AreEqual(expected, actual);
             }
-
         }
     }
 }

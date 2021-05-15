@@ -8,6 +8,7 @@ namespace PluralRules.Test
 {
     [TestFixture]
     [Parallelizable]
+    [TestOf(typeof(CldrParser))]
     public class Tests
     {
         [Test]
@@ -79,7 +80,7 @@ namespace PluralRules.Test
         }
 
         [Test]
-        [Parallelizable]
+        [Parallelizable] 
         [TestCase("v= 0 @integer 1c1, 1c2, 1c3, 1c4, 1c6", new[] {10, 100, 1000, 10000, 1000000}, null)]
         [TestCase("v= 0 @decimal 2c2, 2c3, 2c4, 2c6", null, new[] {200.0, 2000.0, 20000.0, 2000000.0})]
         [TestCase(" @integer 1c1, 1c2, 1c3, 1c4, 1c6 @decimal 3c2, 3c3, 3c4",
