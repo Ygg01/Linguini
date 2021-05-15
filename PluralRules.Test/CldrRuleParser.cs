@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using NUnit.Framework;
 using PluralRules.Generator;
 using PluralRules.Generator.Types;
@@ -74,6 +75,40 @@ namespace PluralRules.Test
             for (var i = 0; i < expDecRangeList.Length; i++)
             {
                 Assert.AreEqual(expDecRangeList[i], rule.Samples?.DecimalSamples[i].ToString());
+            }
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCase("v= 0 @integer 1c1, 1c2, 1c3, 1c4, 1c6", new[] {10, 100, 1000, 10000, 1000000}, null)]
+        [TestCase("v= 0 @decimal 2c2, 2c3, 2c4, 2c6", null, new[] {200.0, 2000.0, 20000.0, 2000000.0})]
+        [TestCase(" @integer 1c1, 1c2, 1c3, 1c4, 1c6 @decimal 3c2, 3c3, 3c4",
+            new[] {10, 100, 1000, 10000, 1000000}, new[] {300.0, 3000.0, 30000.0})]
+        public void TestParseExponent(string input, int[]? integerRanges, double[]? decimalRanges)
+        {
+            var rule = new CldrParser(input).ParseRule();
+            Assert.IsNotNull(rule);
+            Assert.IsNotNull(rule.Samples);
+            if (integerRanges != null)
+            {
+                for (var index = 0; index < integerRanges.Length; index++)
+                {
+                    var expected = integerRanges[index];
+                    var ruleStr = rule.Samples?.IntegerSamples[index].Lower.Value;
+                    var dec = Double.Parse(ruleStr!);
+                    Assert.AreEqual(expected, Convert.ToInt32(dec));
+                }
+            }
+
+            if (decimalRanges != null)
+            {
+                for (var index = 0; index < decimalRanges.Length; index++)
+                {
+                    var expected = decimalRanges[index];
+                    var ruleStr = rule.Samples?.DecimalSamples[index].Lower.Value;
+                    var actual = Double.Parse(ruleStr!);
+                    Assert.AreEqual(expected, actual);
+                }
             }
         }
 

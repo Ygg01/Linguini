@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Linguini.Shared.Types.Bundle;
 
 namespace Linguini.Shared.Types
 {
@@ -52,7 +53,7 @@ namespace Linguini.Shared.Types
 
         public int Exp()
         {
-            return (int) Math.Floor(Math.Log10(9999));
+            return (int) Math.Floor(Math.Log10(N));
         }
     }
 
@@ -221,6 +222,11 @@ namespace Linguini.Shared.Types
         public static bool TryParse(this double input, [NotNullWhen(true)] out PluralOperands? operands)
         {
             return input.ToString(CultureInfo.InvariantCulture).TryParse(out operands);
+        }
+
+        public static bool TryParse(this FluentNumber input, [NotNullWhen(true)] out PluralOperands? operands)
+        {
+            return input.AsString().TryParse(out operands);
         }
 
         #endregion

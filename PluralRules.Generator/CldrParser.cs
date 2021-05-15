@@ -134,23 +134,42 @@ namespace PluralRules.Generator
                 x.Append(postDot);
             }
 
-            if (_input.AsMemory().Span.IsOneOf('c', 'e'))
+            if (!TryConsumeExp(x))
             {
-                _pos += 1;
-                x.Append('e');
+                value = null;
+                return false;
+            }
 
-                if (TryParseDigitExp(out var digit))
+            var number = x.ToString();
+            if (number.Contains('e'))
+            {
+                number = Double.Parse(number).ToString();
+            }
+            value = new DecimalValue(number);
+            return true;
+        }
+
+        private bool TryConsumeExp(StringBuilder x)
+        {
+         
+            if (_pos + 1 <= _input.Length)
+            {
+                if (_input.AsMemory(_pos, 1).Span.IsOneOf('c', 'e'))
                 {
-                    x.Append(digit);
-                }
-                else
-                {
-                    value = null;
-                    return false;
+                    _pos += 1;
+                    x.Append('e');
+
+                    if (TryParseDigitExp(out var digit))
+                    {
+                        x.Append(digit);
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
 
-            value = new DecimalValue(x.ToString());
             return true;
         }
 
@@ -205,6 +224,7 @@ namespace PluralRules.Generator
                 {
                     break;
                 }
+
                 SkipWhitespace();
             }
 

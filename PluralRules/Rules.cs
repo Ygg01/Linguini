@@ -9,13 +9,29 @@ namespace PluralRules
     {
         public static PluralCategory GetPluralCategory(CultureInfo info, RuleType ruleType, FluentNumber number)
         {
-            var func = RuleTable.GetPluralFunc(info.TwoLetterISOLanguageName, ruleType);
-            if (PluralOperandsHelpers.TryParse(number.Value, out var op))
+            var specialCase = RuleTable.UseFourLetter(info.Name, ruleType);
+            var langStr = GetPluralRuleLang(info, specialCase);
+            var func = RuleTable.GetPluralFunc(langStr, ruleType);
+            if (PluralOperandsHelpers.TryParse(number, out var op))
             {
                 return func(op);
             }
 
             return PluralCategory.One;
+        }
+
+        private static string GetPluralRuleLang(CultureInfo info, bool specialCase)
+        {
+            if (CultureInfo.InvariantCulture.Equals(info))
+            {
+                // When culture info is uncertain we default to common 
+                // language behavior
+                return "root";
+            }
+            var langStr = specialCase
+                ? info.Name.Replace('-', '_')
+                : info.TwoLetterISOLanguageName;
+            return langStr;
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Linguini.Shared
 
         public static bool InRange(this double value, int start, int end)
         {
-            for (var x = Convert.ToDouble(start); x < end; x++)
+            for (var x = Convert.ToDouble(start); x <= end; x++)
             {
                 if (value.Equals(x))
                 {

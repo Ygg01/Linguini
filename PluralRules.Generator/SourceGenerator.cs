@@ -84,11 +84,127 @@ namespace PluralRulesGenerated
 
             return _ => PluralCategory.Other;
         }}
-
-    }}
-}}
+        
+        public static bool UseFourLetter(string culture, RuleType type)
+        {{
+            switch (type)
+            {{
+                case RuleType.Cardinal:");
+            WriteSpecialCase(sourceBuilder, cardinalRules);
+            sourceBuilder.Append(@"
+                case RuleType.Ordinal:");
+            WriteSpecialCase(sourceBuilder, ordinalRules);
+            sourceBuilder.Append(@"            }
+            
+            return false;
+        }
+    }
+}
 ");
+            var testBuilder = new StringBuilder($@"
+using System;
+using Linguini.Shared.Types;
+
+namespace PluralRulesGenerated.Test
+{{
+    public static class RuleTableTest
+    {{
+        public static readonly object?[][] CardinalTestData = 
+        {{
+");
+            foreach (var cardinalRule in cardinalRules)
+            {
+                WriteRuleTest(testBuilder, cardinalRule, true);
+            }
+
+            testBuilder.Append($@"
+        }};
+
+        public static readonly object?[][] OrdinalTestData = 
+        {{
+");
+            foreach (var ordinalRule in ordinalRules)
+            {
+                WriteRuleTest(testBuilder, ordinalRule, false);
+            }
+
+            testBuilder.Append($@"
+        }};
+    }}
+}}");
+
             context.AddSource("PluralRule", SourceText.From(sourceBuilder.ToString(), Encoding.UTF8));
+            context.AddSource("PluralRuleTestTable", SourceText.From(testBuilder.ToString(), Encoding.UTF8));
+        }
+
+        private void WriteSpecialCase(StringBuilder sourceBuilder, List<CldrRule> cldrRules)
+        {
+            List<string> specialCases = new();
+            foreach (var cldr in cldrRules)
+            {
+                foreach (var langId in cldr.LangIds)
+                {
+                    if (langId.Length > 4)
+                    {
+                        var specCase = langId.Replace('_', '-');
+                        specialCases.Add(specCase);
+                    }
+                }
+            }
+
+            if (specialCases.Count == 0)
+            {
+                sourceBuilder.Append(@"
+                    return false;
+");
+            }
+            else
+            {
+                sourceBuilder.Append(@"
+                    switch (culture)
+                    {");
+                foreach (var langId in specialCases)
+                {
+                    sourceBuilder.Append($@"
+                        case ""{langId}"":");
+                }
+                sourceBuilder.Append(@"
+                            return true;
+                        default: return false;
+                    }");
+            }
+        }
+
+        private void WriteRuleTest(StringBuilder testBuilder, CldrRule rule, bool isCardinal)
+        {
+            string ruleType = isCardinal ? "RuleType.Cardinal" : "RuleType.Ordinal";
+            foreach (var ruleLangId in rule.LangIds)
+            {
+                foreach (var ruleMap in rule.Rules)
+                {
+                    if (ruleMap.Rule.Samples != null)
+                    {
+                        string category = $"PluralCategory.{ruleMap.Category.FirstCharToUpper()}";
+                        foreach (var integerSample in ruleMap.Rule.Samples.IntegerSamples)
+                        {
+                            var upper = integerSample.Upper == null 
+                                ? "null" 
+                                : $"\"{integerSample.Upper.Value}\"";
+                            testBuilder.Append($@"
+            new object?[] {{""{ruleLangId}"", {ruleType}, false, ""{integerSample.Lower.Value}"", {upper}, {category}}},");
+                        }
+
+                        foreach (var decimalSample in ruleMap.Rule.Samples.DecimalSamples)
+                        {
+                            var upper = decimalSample.Upper == null 
+                                ? "null" 
+                                : $"\"{decimalSample.Upper.Value}\"";
+                            testBuilder.Append($@"
+            new object?[] {{""{ruleLangId}"", {ruleType}, true, ""{decimalSample.Lower.Value}"", {upper}, {category}}},");
+                        }
+                    }
+                }
+            }
         }
 
         private void WriteRules(StringBuilder stringBuilder, List<CldrRule> rules)
@@ -117,6 +233,7 @@ namespace PluralRulesGenerated
             {
                 WriteRuleMap(stringBuilder, ruleMap);
             }
+
             stringBuilder.Append(@"
             },");
         }
@@ -172,7 +289,6 @@ namespace PluralRulesGenerated
 
                         WriteRelation(stringBuilder, andCondition.Relations[j]);
                     }
-                    
                 }
             }
         }
@@ -184,15 +300,11 @@ namespace PluralRulesGenerated
             {
                 operand = "Exp()";
             }
+
             var brackets = relation.RangeListItems.Count > 1;
             if (relation.Expr.Modulus != null)
             {
                 var sb = new StringBuilder();
-                if (operand == "N")
-                {
-                    // Mod over double is rather pointless
-                    operand = "I";
-                } 
 
                 sb.Append("po.").Append(operand).Append(" % ")
                     .Append(relation.Expr.Modulus.Value);
@@ -212,7 +324,7 @@ namespace PluralRulesGenerated
                 {
                     stringBuilder.Append("(");
                 }
-                
+
                 for (var i = 0; i < relation.RangeListItems.Count; i++)
                 {
                     if (i != 0)
@@ -230,7 +342,7 @@ namespace PluralRulesGenerated
                         stringBuilder.Append($"({sb}).InRange({rangeElem.LowerVal}, {rangeElem.UpperVal})");
                     }
                 }
-                
+
                 if (brackets)
                 {
                     stringBuilder.Append(") ");
@@ -247,6 +359,7 @@ namespace PluralRulesGenerated
                 {
                     stringBuilder.Append("( ");
                 }
+
                 for (var i = 0; i < relation.RangeListItems.Count; i++)
                 {
                     if (i != 0)
@@ -261,9 +374,11 @@ namespace PluralRulesGenerated
                     }
                     else if (rel is RangeElem rangeElem)
                     {
-                        stringBuilder.Append($"{sb}.InRange({rangeElem.LowerVal}, {rangeElem.UpperVal}) ");
+                        var negate = relation.Op.IsNegated() ? "!" : "";
+                        stringBuilder.Append($"{negate}{sb}.InRange({rangeElem.LowerVal}, {rangeElem.UpperVal}) ");
                     }
                 }
+
                 if (brackets)
                 {
                     stringBuilder.Append(" )");
@@ -280,12 +395,13 @@ namespace PluralRulesGenerated
             {
                 WriteRuleIndex(stringBuilder, rules[i], i);
             }
+
             stringBuilder.Append(@"
             }
-            return 0;");
+            return -1;");
         }
 
-        private void WriteRuleIndex(StringBuilder stringBuilder,CldrRule rule, int i)
+        private void WriteRuleIndex(StringBuilder stringBuilder, CldrRule rule, int i)
         {
             foreach (var langId in rule.LangIds)
             {
@@ -297,13 +413,7 @@ namespace PluralRulesGenerated
                     return {i};");
         }
 
-        private void WriteOrdinalIndex(StringBuilder stringBuilder)
-        {
-            stringBuilder.Append(@"
-            return 0;");
-        }
-
-        public static List<CldrRule> ProcessXmlPath(string? path)
+        private static List<CldrRule> ProcessXmlPath(string? path)
         {
             var rules = new List<CldrRule>();
 

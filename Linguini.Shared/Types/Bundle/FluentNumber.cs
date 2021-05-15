@@ -7,7 +7,7 @@ namespace Linguini.Shared.Types.Bundle
     public class FluentNumber : IFluentType, IEquatable<FluentNumber>
     {
         public readonly double Value;
-        public FluentNumberOptions Options;
+        public readonly FluentNumberOptions Options;
 
         public FluentNumber(double value, FluentNumberOptions options)
         {
@@ -17,25 +17,43 @@ namespace Linguini.Shared.Types.Bundle
 
         public string AsString()
         {
-            // TODO implement proper formatting
-            return Value.ToString(CultureInfo.CurrentCulture);
-        }
+            var stringVal = Value.ToString(CultureInfo.InvariantCulture);
+            if (Options.MinimumFractionDigits != null)
+            {
+                var minfd = Options.MinimumFractionDigits.Value;
+                var pos = stringVal.IndexOf('.');
+                if (pos != -1)
+                {
+                    var fracNum = stringVal.Length - pos - 1;
+                    var missing = fracNum > minfd
+                        ? 0
+                        : minfd - fracNum;
+                    var pattern = new String('0', missing);
+                    stringVal = $"{stringVal}{pattern}";
+                }
+                else
+                {
+                    stringVal = $"{stringVal}.{new String('0', minfd)}";
+                }
+            }
 
+            return stringVal;
+        }
 
         public static FluentNumber FromString(ReadOnlySpan<char> input)
         {
             var parsed = Double.Parse(input);
             var options = new FluentNumberOptions();
-            options.MaximumFractionDigits = input.Length - input.IndexOf('.') - 1;
+            if (input.IndexOf('.') != -1)
+            {
+                options.MinimumFractionDigits = input.Length - input.IndexOf('.') - 1;
+            }
             return new FluentNumber(parsed, options);
         }
 
         public static FluentNumber FromString(string input)
         {
-            var parsed = Double.Parse(input);
-            var options = new FluentNumberOptions();
-            options.MaximumFractionDigits = input.Length - input.IndexOf('.') - 1;
-            return new FluentNumber(parsed, options);
+            return FromString(input.AsSpan());
         }
 
         public static IFluentType TryNumber(ReadOnlySpan<char> valueSpan)
@@ -49,7 +67,7 @@ namespace Linguini.Shared.Types.Bundle
                 return new FluentString(valueSpan);
             }
         }
-        
+
         public static implicit operator double(FluentNumber fs) => fs.Value;
         public static implicit operator FluentNumber(double db) => new(db, new FluentNumberOptions());
         public static implicit operator FluentNumber(float fl) => new(fl, new FluentNumberOptions());
@@ -77,6 +95,11 @@ namespace Linguini.Shared.Types.Bundle
         public override int GetHashCode()
         {
             return Value.GetHashCode();
+        }
+
+        public int AsInt()
+        {
+            return Convert.ToInt32(Value);
         }
     }
 
