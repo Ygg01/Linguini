@@ -31,6 +31,6 @@ namespace Linguini.Bundle.Entry
             return EntryKind.Function;
         }
         
-        public static implicit operator FluentFunction(ExternalFunction ef) => new FluentFunction(ef);
+        public static implicit operator FluentFunction(ExternalFunction ef) => new(ef);
     }
 }

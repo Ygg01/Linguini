@@ -41,6 +41,7 @@ namespace Linguini.Shared.Types
                     pluralCategory = PluralCategory.Many;
                     return true;
                 case "other":
+                case "default":
                     pluralCategory = PluralCategory.Other;
                     return true;
                 default:

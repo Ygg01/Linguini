@@ -104,9 +104,7 @@ namespace Linguini.Syntax.Tests.Parser
                 parsed.Entries[0].TryConvert(out AstMessage? msg);
 
                 Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
-#pragma warning disable 8602
                 Assert.AreEqual(expComment, msg.Comment.AsStr());
-#pragma warning restore 8602
             }
             else
             {

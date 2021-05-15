@@ -17,7 +17,7 @@ namespace PluralRules
                 return func(op);
             }
 
-            return PluralCategory.One;
+            return PluralCategory.Other;
         }
 
         private static string GetPluralRuleLang(CultureInfo info, bool specialCase)

@@ -49,7 +49,7 @@ namespace Linguini.Syntax.Ast
     [JsonConverter(typeof(IdentifierSerializer))]
     public class Identifier : IEquatable<Identifier>
     {
-        public ReadOnlyMemory<char> Name;
+        public readonly ReadOnlyMemory<char> Name;
 
         public Identifier(ReadOnlyMemory<char> name)
         {
@@ -66,14 +66,6 @@ namespace Linguini.Syntax.Ast
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return ToString().Equals(other.ToString());
-        }
-
-        public override bool Equals(object? obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((Identifier) obj);
         }
 
         public override int GetHashCode()

@@ -96,11 +96,6 @@ namespace Linguini.Shared.Types.Bundle
         {
             return Value.GetHashCode();
         }
-
-        public int AsInt()
-        {
-            return Convert.ToInt32(Value);
-        }
     }
 
     public record FluentNumberOptions

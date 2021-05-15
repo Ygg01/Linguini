@@ -46,10 +46,6 @@ namespace Linguini.Shared.Types
             F = f;
             T = t;
         }
-        public static int operator% (PluralOperands operand, uint modulus)
-        {
-            return Convert.ToInt32(operand.I % modulus);
-        }
 
         public int Exp()
         {
