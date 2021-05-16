@@ -7,7 +7,7 @@ namespace Linguini.Syntax.Serialization
 {
     public class VariableReferenceSerializer : JsonConverter<VariableReference>
     {
-        public override VariableReference? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override VariableReference Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }

@@ -8,7 +8,7 @@ namespace Linguini.Syntax.Serialization
 {
     public class CommentSerializer : JsonConverter<AstComment>
     {
-        public override AstComment? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override AstComment Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }

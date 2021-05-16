@@ -1,18 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Linguini.Bundle.Bundler;
+using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Func;
-using Linguini.Bundle.Test.Yaml;
 using Linguini.Bundle.Types;
-using Linguini.Shared;
+using Linguini.Shared.Util;
 using NUnit.Framework;
 using YamlDotNet.RepresentationModel;
 
-namespace Linguini.Bundle.Test
+namespace Linguini.Bundle.Test.Yaml
 {
-    public class SuitParser
+    public class YamlSuiteParser
     {
         private static string _baseTestDir = "";
 
@@ -62,7 +61,7 @@ namespace Linguini.Bundle.Test
 
         [TestCaseSource(nameof(MyTestCases))]
         [Parallelizable]
-        public void MyTestMethod(ResolverTestSuite parsedTestSuite, LinguiniBundler.IReadyStep builder)
+        public void MyTestMethod(ResolverTestSuite parsedTestSuite, LinguiniBuilder.IReadyStep builder)
         {
             var bundle = builder.UncheckedBuild();
             var errors = new List<FluentError>();
@@ -142,7 +141,9 @@ namespace Linguini.Bundle.Test
                     }
                     else
                     {
-                        var actualValue = testBundle.GetMsg(assert.Id, assert.Attribute, assert.Args, out var errs);
+                        testBundle.TryGetMsg(assert.Id, assert.Attribute, assert.Args,
+                            out var errs,
+                            out var actualValue);
                         Assert.AreEqual(assert.ExpectedValue, actualValue, test.TestName);
                         AssertErrorCases(assert.ExpectedErrors, errs, test.TestName);
                     }
@@ -204,7 +205,7 @@ namespace Linguini.Bundle.Test
             return doc;
         }
 
-        private static LinguiniBundler.IReadyStep ParseDefault(string path)
+        private static LinguiniBuilder.IReadyStep ParseDefault(string path)
         {
             var yamlBundle = ParseYamlDoc(path)
                 .RootNode["bundle"];
@@ -227,7 +228,7 @@ namespace Linguini.Bundle.Test
                 }
             }
 
-            var bundler = LinguiniBundler.New()
+            var bundler = LinguiniBuilder.Builder()
                 .Locales(locales)
                 .SkipResources()
                 .SetUseIsolating(isIsolating);

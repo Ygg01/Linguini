@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 
-namespace Linguini.Bundle
+namespace Linguini.Bundle.Builder
 {
     public class FluentBundleOption
     {
@@ -13,7 +13,7 @@ namespace Linguini.Bundle
         public IDictionary<string, ExternalFunction> Functions { get; init; } =
             new Dictionary<string, ExternalFunction>();
 
-        public Func<IFluentType, string>? FormatterFunc { get; init; } = null;
-        public Func<string, string>? TransformFunc { get; init; } = null;
+        public Func<IFluentType, string>? FormatterFunc { get; init; }
+        public Func<string, string>? TransformFunc { get; init; }
     }
 }

@@ -7,7 +7,7 @@ namespace Linguini.Syntax.Serialization
 {
     public class JunkSerializer : JsonConverter<Junk>
     {
-        public override Junk? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override Junk Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }

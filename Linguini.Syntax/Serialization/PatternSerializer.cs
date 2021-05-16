@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Linguini.Shared;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Syntax.Serialization
@@ -10,7 +10,7 @@ namespace Linguini.Syntax.Serialization
     public class PatternSerializer : JsonConverter<Pattern>
 
     {
-        public override Pattern? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override Pattern Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }

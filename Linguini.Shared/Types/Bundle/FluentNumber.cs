@@ -7,20 +7,20 @@ namespace Linguini.Shared.Types.Bundle
     public class FluentNumber : IFluentType, IEquatable<FluentNumber>
     {
         public readonly double Value;
-        public readonly FluentNumberOptions Options;
+        private readonly FluentNumberOptions _options;
 
-        public FluentNumber(double value, FluentNumberOptions options)
+        private FluentNumber(double value, FluentNumberOptions options)
         {
             Value = value;
-            Options = options;
+            _options = options;
         }
 
         public string AsString()
         {
             var stringVal = Value.ToString(CultureInfo.InvariantCulture);
-            if (Options.MinimumFractionDigits != null)
+            if (_options.MinimumFractionDigits != null)
             {
-                var minfd = Options.MinimumFractionDigits.Value;
+                var minfd = _options.MinimumFractionDigits.Value;
                 var pos = stringVal.IndexOf('.');
                 if (pos != -1)
                 {
@@ -74,7 +74,7 @@ namespace Linguini.Shared.Types.Bundle
 
         public object Clone()
         {
-            return new FluentNumber(Value, Options);
+            return new FluentNumber(Value, _options);
         }
 
         public bool Equals(FluentNumber? other)

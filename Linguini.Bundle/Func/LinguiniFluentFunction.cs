@@ -3,9 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Linguini.Bundle.Types;
-using Linguini.Shared;
 using Linguini.Shared.Types.Bundle;
-using Linguini.Syntax.Ast;
+using Linguini.Shared.Util;
 
 namespace Linguini.Bundle.Func
 {

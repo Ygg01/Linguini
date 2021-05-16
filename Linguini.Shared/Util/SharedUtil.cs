@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Linguini.Shared
+namespace Linguini.Shared.Util
 {
-    public static class Util
+    public static class SharedUtil
     {
         public static bool TryConvert<TIn, TOut>(this TIn entry, [NotNullWhen(true)] out TOut? outType)
             where TOut : TIn

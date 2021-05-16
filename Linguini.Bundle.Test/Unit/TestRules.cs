@@ -4,8 +4,9 @@ using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using NUnit.Framework;
 using PluralRulesGenerated.Test;
+using static Linguini.Bundle.Resolver.ResolverHelpers.PluralRules;
 
-namespace PluralRules
+namespace Linguini.Bundle.Test.Unit
 {
     [TestFixture]
     [Parallelizable]
@@ -65,17 +66,17 @@ namespace PluralRules
                     ? midDouble
                     : Convert.ToInt32(Math.Floor(midDouble));
 
-                var actualStart = Rules.GetPluralCategory(info, type, start);
+                var actualStart = GetPluralCategory(info, type, start);
                 Assert.AreEqual(expected, actualStart, $"Failed on start of range: {start}");
-                var actualEnd = Rules.GetPluralCategory(info, type, end);
+                var actualEnd = GetPluralCategory(info, type, end);
                 Assert.AreEqual(expected, actualEnd, $"Failed on end of range: {end}");
-                var actualMid = Rules.GetPluralCategory(info, type, mid);
+                var actualMid = GetPluralCategory(info, type, mid);
                 Assert.AreEqual(expected, actualMid, $"Failed on middle of range: {mid}");
             }
             else
             {
                 var value = FluentNumber.FromString(lower);
-                var actual = Rules.GetPluralCategory(info, type, value);
+                var actual = GetPluralCategory(info, type, value);
 
                 Assert.AreEqual(expected, actual);
             }

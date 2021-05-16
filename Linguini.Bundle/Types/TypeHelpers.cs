@@ -13,9 +13,9 @@ namespace Linguini.Bundle.Types
 
         public static FluentNumber? ToFluentNumber(this IFluentType fluentType)
         {
-            if (fluentType is FluentNumber)
+            if (fluentType is FluentNumber type)
             {
-                return (FluentNumber) fluentType;
+                return type;
             }
 
             return null;

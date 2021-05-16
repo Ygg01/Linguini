@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Linguini.Shared.IO
+namespace Linguini.Shared.Util
 {
     public static class ZeroCopyUtil
     {

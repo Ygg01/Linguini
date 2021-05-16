@@ -7,7 +7,7 @@ namespace Linguini.Syntax.Serialization
 {
     public class SelectExpressionSerializer : JsonConverter<SelectExpression>
     {
-        public override SelectExpression? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override SelectExpression Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }

@@ -2,7 +2,7 @@
 using System;
 using NUnit.Framework;
 using PluralRules.Generator;
-using PluralRules.Generator.Types;
+using PluralRules.Generator.Cldr;
 
 namespace PluralRules.Test
 {

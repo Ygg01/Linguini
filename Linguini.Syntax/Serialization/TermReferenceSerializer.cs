@@ -7,7 +7,7 @@ namespace Linguini.Syntax.Serialization
 {
     public class TermReferenceSerializer : JsonConverter<TermReference>
     {
-        public override TermReference? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override TermReference Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }

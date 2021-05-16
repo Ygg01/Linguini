@@ -6,15 +6,15 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using PluralRules.Generator.Types;
+using PluralRules.Generator.Cldr;
 
-namespace PluralRules.Generator
+namespace PluralRules.Generator.SourceGenerator
 {
     [Generator]
     public class SourceGenerator : ISourceGenerator
     {
-        private List<CldrRule> ordinalRules = new();
-        private List<CldrRule> cardinalRules = new();
+        private List<CldrRule> _ordinalRules = new();
+        private List<CldrRule> _cardinalRules = new();
 
         public void Initialize(GeneratorInitializationContext context)
         {
@@ -30,18 +30,18 @@ namespace PluralRules.Generator
             {
                 if (path.EndsWith("plurals.xml"))
                 {
-                    cardinalRules = ProcessXmlPath(path);
+                    _cardinalRules = ProcessXmlPath(path);
                 }
                 else if (path.EndsWith("ordinals.xml"))
                 {
-                    ordinalRules = ProcessXmlPath(path);
+                    _ordinalRules = ProcessXmlPath(path);
                 }
             }
 
             // begin creating the source we'll inject into the users compilation
             var sourceBuilder = new StringBuilder($@"
 using System;
-using Linguini.Shared;
+using Linguini.Shared.Util;
 using Linguini.Shared.Types;
 
 namespace PluralRulesGenerated
@@ -50,25 +50,25 @@ namespace PluralRulesGenerated
     {{
         private static Func<PluralOperands, PluralCategory>[] cardinalMap = 
         {{");
-            WriteRules(sourceBuilder, cardinalRules);
+            WriteRules(sourceBuilder, _cardinalRules);
             sourceBuilder.Append($@"
         }};
 
         private static Func<PluralOperands, PluralCategory>[] ordinalMap = 
         {{");
-            WriteRules(sourceBuilder, ordinalRules);
+            WriteRules(sourceBuilder, _ordinalRules);
             sourceBuilder.Append($@"
         }};
         
         private static int GetCardinalIndex(string culture)
         {{");
-            WriteRulesIndex(sourceBuilder, cardinalRules);
+            WriteRulesIndex(sourceBuilder, _cardinalRules);
             sourceBuilder.Append($@"
         }}
 
         private static int GetOrdinalIndex(string culture)
         {{");
-            WriteRulesIndex(sourceBuilder, ordinalRules);
+            WriteRulesIndex(sourceBuilder, _ordinalRules);
             sourceBuilder.Append($@"
         }}
 
@@ -90,10 +90,10 @@ namespace PluralRulesGenerated
             switch (type)
             {{
                 case RuleType.Cardinal:");
-            WriteSpecialCase(sourceBuilder, cardinalRules);
+            WriteSpecialCase(sourceBuilder, _cardinalRules);
             sourceBuilder.Append(@"
                 case RuleType.Ordinal:");
-            WriteSpecialCase(sourceBuilder, ordinalRules);
+            WriteSpecialCase(sourceBuilder, _ordinalRules);
             sourceBuilder.Append(@"            }
             
             return false;
@@ -112,7 +112,7 @@ namespace PluralRulesGenerated.Test
         public static readonly object?[][] CardinalTestData = 
         {{
 ");
-            foreach (var cardinalRule in cardinalRules)
+            foreach (var cardinalRule in _cardinalRules)
             {
                 WriteRuleTest(testBuilder, cardinalRule, true);
             }
@@ -123,7 +123,7 @@ namespace PluralRulesGenerated.Test
         public static readonly object?[][] OrdinalTestData = 
         {{
 ");
-            foreach (var ordinalRule in ordinalRules)
+            foreach (var ordinalRule in _ordinalRules)
             {
                 WriteRuleTest(testBuilder, ordinalRule, false);
             }
@@ -422,12 +422,10 @@ namespace PluralRulesGenerated.Test
                 return rules;
             }
 
-            using (var cardinalFileStream = File.OpenRead(path))
-            {
-                var xmlElems = XDocument.Load(cardinalFileStream)
-                    .XPathSelectElements("//supplementalData/plurals/*");
-                rules = Convert(xmlElems);
-            }
+            using var cardinalFileStream = File.OpenRead(path);
+            var xmlElems = XDocument.Load(cardinalFileStream)
+                .XPathSelectElements("//supplementalData/plurals/*");
+            rules = Convert(xmlElems);
 
             return rules;
         }
@@ -437,7 +435,7 @@ namespace PluralRulesGenerated.Test
             var retVal = new List<CldrRule>(40);
             foreach (var pluralRule in plurals)
             {
-                var langs = pluralRule.Attribute("locales")!
+                var langIds = pluralRule.Attribute("locales")!
                     .Value.Split(" ")
                     .ToList();
                 var rules = new List<RuleMap>();
@@ -449,7 +447,7 @@ namespace PluralRulesGenerated.Test
                     rules.Add(new RuleMap(countTag!, rule));
                 }
 
-                retVal.Add(new CldrRule(langs, rules));
+                retVal.Add(new CldrRule(langIds, rules));
             }
 
             return retVal;

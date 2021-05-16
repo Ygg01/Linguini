@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Serialization;
@@ -33,16 +32,6 @@ namespace Linguini.Syntax.Ast
         public Pattern()
         {
             Elements = new List<IPatternElement>();
-        }
-
-        public override string ToString()
-        {
-            if (Elements.Count == 1 && Elements[0] is TextLiteral)
-            {
-                return Elements[0].ToString()!;
-            }
-
-            return "";
         }
     }
 

@@ -2,9 +2,9 @@
 using System.Globalization;
 using System.IO;
 using Linguini.Bundle.Errors;
-using Linguini.Shared;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using PluralRulesGenerated;
 
@@ -67,7 +67,7 @@ namespace Linguini.Bundle.Resolver
         {
             return transformFunc == null ? str : transformFunc(str);
         }
-        
+
         public static class PluralRules
         {
             public static PluralCategory GetPluralCategory(CultureInfo info, RuleType ruleType, FluentNumber number)
@@ -75,7 +75,7 @@ namespace Linguini.Bundle.Resolver
                 var specialCase = RuleTable.UseFourLetter(info.Name, ruleType);
                 var langStr = GetPluralRuleLang(info, specialCase);
                 var func = RuleTable.GetPluralFunc(langStr, ruleType);
-                if (PluralOperandsHelpers.TryPluralOperands(number, out var op))
+                if (number.TryPluralOperands(out var op))
                 {
                     return func(op);
                 }
@@ -91,6 +91,7 @@ namespace Linguini.Bundle.Resolver
                     // language behavior
                     return "root";
                 }
+
                 var langStr = specialCase
                     ? info.Name.Replace('-', '_')
                     : info.TwoLetterISOLanguageName;

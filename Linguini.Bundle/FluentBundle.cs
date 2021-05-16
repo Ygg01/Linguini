@@ -3,12 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Linguini.Bundle.Builder;
 using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
-using Linguini.Shared;
 using Linguini.Shared.Types.Bundle;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle
@@ -20,14 +21,14 @@ namespace Linguini.Bundle
         private HashSet<string> _funcList;
         private Dictionary<string, IBundleEntry> _entries;
 
-        public CultureInfo Culture { get; internal set; }
-        public List<string> Locales { get; internal set; }
+        public CultureInfo Culture { get; internal init; }
+        public List<string> Locales { get; internal init; }
         private List<Resource> Resources { get; init; }
 
 
         public bool UseIsolating { get; set; }
         public Func<string, string>? TransformFunc { get; set; }
-        public Func<IFluentType, string>? FormatterFunc { get; set; }
+        public Func<IFluentType, string>? FormatterFunc { get; init; }
         public byte MaxPlaceable { get; }
 
         internal FluentBundle()
@@ -43,8 +44,7 @@ namespace Linguini.Bundle
 
         public FluentBundle(string locale, FluentBundleOption option, out List<FluentError> errors) : this()
         {
-            Locales = new List<string>(1);
-            Locales.Add(locale);
+            Locales = new List<string>(1) {locale};
             Culture = new CultureInfo(locale, false);
             UseIsolating = option.UseIsolating;
             FormatterFunc = option.FormatterFunc;
@@ -113,7 +113,7 @@ namespace Linguini.Bundle
             for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
             {
                 var entry = res.Entries[entryPos];
-                var id = "";
+                string id;
                 IBundleEntry bundleEntry;
                 if (entry.TryConvert(out AstMessage? message))
                 {
@@ -184,40 +184,54 @@ namespace Linguini.Bundle
                    && _entries[id].TryConvert<IBundleEntry, Message>(out _);
         }
 
-        public string? GetMsg(string id, FluentArgs args, out IList<FluentError> errors)
+        public bool TryGetAttrMsg(string msgWithAttr, FluentArgs? args, 
+            out IList<FluentError> errors, out string? message)
         {
-            return GetMsg(id, null, args, out errors);
+            if (msgWithAttr.Contains('.'))
+            {
+                var split = msgWithAttr.Split('.');
+                return TryGetMsg(split[0], split[1], args, out errors, out message);
+            }
+
+            return TryGetMsg(msgWithAttr, args, out errors, out message);
         }
-
-
-        public string? GetMsg(string id, string? attribute, FluentArgs args, out IList<FluentError> errors)
+        
+        public bool TryGetMsg(string id, FluentArgs? args, 
+            out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
+        {
+            return TryGetMsg(id, null, args, out errors, out message);
+        }
+        
+        public bool TryGetMsg(string id, string? attribute, FluentArgs? args, 
+            out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
         {
             string? value = null;
             errors = new List<FluentError>();
 
-            if (TryGetMessage(id, out var astMessage))
+            if (TryGetAstMessage(id, out var astMessage))
             {
-                Pattern? pattern;
-                pattern = attribute != null
+                var pattern = attribute != null
                     ? astMessage.GetAttribute(attribute)?.Value
                     : astMessage.Value;
 
                 if (pattern == null)
                 {
-                    var message = (attribute == null)
+                    var msg = (attribute == null)
                         ? id
                         : $"{id}.{attribute}";
-                    errors.Add(ResolverFluentError.NoValue($"{message}"));
-                    return FluentNone.None.ToString();
+                    errors.Add(ResolverFluentError.NoValue($"{msg}"));
+                    message = FluentNone.None.ToString();
+                    return false;
                 }
 
                 value = FormatPattern(pattern, args, out errors);
             }
 
-            return value;
+            message = value;
+            return message != null;
         }
 
-        public bool TryGetMessage(string id, [NotNullWhen(true)] out AstMessage? message)
+        public bool TryGetAstMessage(string id, [NotNullWhen(true)] out AstMessage? message)
         {
             if (_entries.ContainsKey(id)
                 && _entries.TryGetValue(id, out var value)
@@ -234,7 +248,7 @@ namespace Linguini.Bundle
             return false;
         }
 
-        public bool TryGetTerm(string id, [NotNullWhen(true)] out AstTerm? astTerm)
+        public bool TryGetAstTerm(string id, [NotNullWhen(true)] out AstTerm? astTerm)
         {
             var termId = $"-{id}";
             if (_entries.ContainsKey(termId)
@@ -270,7 +284,7 @@ namespace Linguini.Bundle
             return false;
         }
 
-        public string FormatPattern(Pattern pattern, FluentArgs? args,
+        private string FormatPattern(Pattern pattern, FluentArgs? args,
             out IList<FluentError> errors)
         {
             var scope = new Scope(this, args);

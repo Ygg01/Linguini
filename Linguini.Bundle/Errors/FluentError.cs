@@ -1,5 +1,5 @@
 ﻿using System;
-using Linguini.Shared;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser.Error;
 
@@ -12,13 +12,13 @@ namespace Linguini.Bundle.Errors
 
     public record OverrideFluentError : FluentError
     {
-        public readonly string Id;
-        public EntryKind Kind;
+        private readonly string _id;
+        private readonly EntryKind _kind;
     
         public OverrideFluentError(string id, EntryKind kind)
         {
-            Id = id;
-            Kind = kind;
+            _id = id;
+            _kind = kind;
         }
 
         public override ErrorType ErrorKind()
@@ -28,13 +28,13 @@ namespace Linguini.Bundle.Errors
 
         public override string ToString()
         {
-            return $"For id:{Id} already exist entry of type: {Kind.ToString()}";
+            return $"For id:{_id} already exist entry of type: {_kind.ToString()}";
         }
     }
 
     public record ResolverFluentError : FluentError
     {
-        public string Description;
+        private string Description;
         private ErrorType Kind;
 
         private ResolverFluentError(string desc, ErrorType kind)
@@ -126,11 +126,11 @@ namespace Linguini.Bundle.Errors
 
     public record ParserFluentError : FluentError
     {
-        private ParseError Error;
+        private readonly ParseError _error;
 
         private ParserFluentError(ParseError error)
         {
-            Error = error;
+            _error = error;
         }
         
         public static ParserFluentError ParseError(ParseError parseError)
@@ -145,7 +145,7 @@ namespace Linguini.Bundle.Errors
 
         public override string ToString()
         {
-            return Error.Message;
+            return _error.Message;
         }
     }
 

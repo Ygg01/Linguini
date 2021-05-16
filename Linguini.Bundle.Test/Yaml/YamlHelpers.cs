@@ -6,6 +6,7 @@ using System.Threading;
 using Linguini.Bundle.Types;
 using Linguini.Shared;
 using Linguini.Shared.Types.Bundle;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using YamlDotNet.RepresentationModel;
 

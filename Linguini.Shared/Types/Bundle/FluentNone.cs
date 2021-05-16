@@ -2,25 +2,17 @@
 
 namespace Linguini.Shared.Types.Bundle
 {
-    public class FluentNone: IFluentType, IEquatable<FluentNone>
+    public class FluentNone : IFluentType, IEquatable<FluentNone>
     {
-        private readonly string _desc;
+        public static readonly FluentNone None = new();
 
-        public static FluentNone None = new();
-
-        public FluentNone()
+        private FluentNone()
         {
-            _desc = "{???}";
-        }
-        
-        public FluentNone(string desc)
-        {
-            _desc = desc;
         }
 
         public object Clone()
         {
-            return new FluentNone(_desc);
+            return None;
         }
 
         public string AsString()

@@ -1,5 +1,5 @@
 ﻿using System;
-using Linguini.Shared.IO;
+using Linguini.Shared.Util;
 using Linguini.Syntax.IO;
 using NUnit.Framework;
 

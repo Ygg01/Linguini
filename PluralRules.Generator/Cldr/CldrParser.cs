@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using PluralRules.Generator.Types;
 
-namespace PluralRules.Generator
+namespace PluralRules.Generator.Cldr
 {
     public class CldrParser
     {
@@ -143,7 +143,7 @@ namespace PluralRules.Generator
             var number = x.ToString();
             if (number.Contains('e'))
             {
-                number = Double.Parse(number).ToString();
+                number = Double.Parse(number).ToString(CultureInfo.InvariantCulture);
             }
             value = new DecimalValue(number);
             return true;
@@ -476,7 +476,7 @@ namespace PluralRules.Generator
     static class SpanUtil
     {
         private static int CharLength = 1;
-        public static readonly ReadOnlyMemory<char> Eof = ReadOnlyMemory<char>.Empty;
+        private static readonly ReadOnlyMemory<char> Eof = ReadOnlyMemory<char>.Empty;
 
         public static bool TryReadCharSpan(this ReadOnlyMemory<char> memory, int pos, out ReadOnlySpan<char> span)
         {

@@ -7,7 +7,7 @@ namespace Linguini.Syntax.Serialization
 {
     public class IdentifierSerializer : JsonConverter<Identifier>
     {
-        public override Identifier? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override Identifier Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }

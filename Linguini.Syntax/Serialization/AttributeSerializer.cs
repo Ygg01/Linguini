@@ -5,7 +5,7 @@ using Attribute = Linguini.Syntax.Ast.Attribute;
 
 namespace Linguini.Syntax.Serialization
 {
-    public class AttributeSerializer : JsonConverter<Ast.Attribute>
+    public class AttributeSerializer : JsonConverter<Attribute>
     {
         public override Attribute Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

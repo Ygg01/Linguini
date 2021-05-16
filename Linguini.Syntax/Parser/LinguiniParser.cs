@@ -4,8 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using Linguini.Shared;
-using Linguini.Shared.IO;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.IO;
 using Linguini.Syntax.Parser.Error;
@@ -445,10 +444,9 @@ namespace Linguini.Syntax.Parser
 
                 for (int i = 0; i < lastNonBlank + 1; i++)
                 {
-                    IPatternElementPlaceholder? elem = null;
                     if (i < elements.Count)
                     {
-                        elem = elements[i];
+                        var elem = elements[i];
                         if (elem.TryConvert(out Placeable placeable))
                         {
                             patterns.Add(placeable);

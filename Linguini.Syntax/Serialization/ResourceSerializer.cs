@@ -3,14 +3,14 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Linguini.Shared;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Syntax.Serialization
 {
     public class ResourceSerializer : JsonConverter<Resource>
     {
-        public override Resource? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override Resource Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
@@ -24,19 +24,19 @@ namespace Linguini.Syntax.Serialization
             writer.WriteStartArray();
             foreach (var entry in value.Entries)
             {
-                if (entry.TryConvert(out AstComment comment))
+                if (entry.TryConvert(out AstComment? comment))
                 {
                     JsonSerializer.Serialize(writer, comment, options);
                 }
-                else if (entry.TryConvert(out AstMessage msg))
+                else if (entry.TryConvert(out AstMessage? msg))
                 {
                     JsonSerializer.Serialize(writer, msg, options);
                 }
-                else if (entry.TryConvert(out AstTerm term))
+                else if (entry.TryConvert(out AstTerm? term))
                 {
                     JsonSerializer.Serialize(writer, term, options);
                 }
-                else if (entry.TryConvert(out Junk junk))
+                else if (entry.TryConvert(out Junk? junk))
                 {
                     JsonSerializer.Serialize(writer, junk, options);
                 }
@@ -49,7 +49,7 @@ namespace Linguini.Syntax.Serialization
         public static void WriteInlineExpression(Utf8JsonWriter writer, IInlineExpression value,
             JsonSerializerOptions options)
         {
-            if (value.TryConvert(out TextLiteral textLiteral))
+            if (value.TryConvert(out TextLiteral? textLiteral))
             {
                 writer.WriteStartObject();
                 writer.WritePropertyName("value");
@@ -58,7 +58,7 @@ namespace Linguini.Syntax.Serialization
                 writer.WriteStringValue("StringLiteral");
                 writer.WriteEndObject();
             }
-            else if (value.TryConvert(out NumberLiteral numberLiteral))
+            else if (value.TryConvert(out NumberLiteral? numberLiteral))
             {
                 writer.WriteStartObject();
                 writer.WritePropertyName("value");
@@ -67,23 +67,23 @@ namespace Linguini.Syntax.Serialization
                 writer.WriteStringValue("NumberLiteral");
                 writer.WriteEndObject();
             }
-            else if (value.TryConvert(out MessageReference msgRef))
+            else if (value.TryConvert(out MessageReference? msgRef))
             {
                 JsonSerializer.Serialize(writer, msgRef, options);
             }
-            else if (value.TryConvert(out FunctionReference funcRef))
+            else if (value.TryConvert(out FunctionReference? funcRef))
             {
                 JsonSerializer.Serialize(writer, funcRef, options);
             }
-            else if (value.TryConvert(out Placeable placeable))
+            else if (value.TryConvert(out Placeable? placeable))
             {
                 JsonSerializer.Serialize(writer, placeable, options);
             }
-            else if (value.TryConvert(out TermReference termReference))
+            else if (value.TryConvert(out TermReference? termReference))
             {
                 JsonSerializer.Serialize(writer, termReference, options);
             }
-            else if (value.TryConvert(out VariableReference variableReference))
+            else if (value.TryConvert(out VariableReference? variableReference))
             {
                 JsonSerializer.Serialize(writer, variableReference, options);
             }

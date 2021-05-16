@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PluralRules.Generator.Types
+namespace PluralRules.Generator.Cldr
 {
     
     public class CldrRule

@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
 
-namespace Linguini.Bundle.Bundler
+namespace Linguini.Bundle.Builder
 {
-    public class LinguiniBundler
+    public static class LinguiniBuilder
     {
-        public static ILocaleStep New()
+        public static ILocaleStep Builder()
         {
             return new StepBuilder();
         }
@@ -25,15 +26,38 @@ namespace Linguini.Bundle.Bundler
         {
             IResourceStep Locale(string unparsedLocale);
             IResourceStep Locales(IEnumerable<string> unparsedLocales);
+
+            IResourceStep Locales(params string[] unparsedLocales)
+            {
+                return Locales(unparsedLocales.AsEnumerable());
+            }
+
             IResourceStep CultureInfo(CultureInfo culture);
         }
 
         public interface IResourceStep : IStep
         {
-            IReadyStep AddResources(IList<string> unparsedResourceList);
-            IReadyStep AddResources(IList<TextReader> unparsedStreamList);
+            IReadyStep AddResources(IEnumerable<string> unparsedResourceList);
+
+            IReadyStep AddResources(params string[] unparsedResourceList)
+            {
+                return AddResources(unparsedResourceList.AsEnumerable());
+            }
+
+            IReadyStep AddResources(IEnumerable<TextReader> unparsedStreamList);
+
+            IReadyStep AddResources(params TextReader[] unparsedStreamList)
+            {
+                return AddResources(unparsedStreamList.AsEnumerable());
+            }
+
             IReadyStep AddResource(Resource resource);
-            IReadyStep AddResources(IList<Resource> resource);
+            IReadyStep AddResources(IEnumerable<Resource> resources);
+
+            IReadyStep AddResources(params Resource[] resources)
+            {
+                return AddResources(resources.AsEnumerable());
+            }
             IReadyStep SkipResources();
         }
 
@@ -49,17 +73,18 @@ namespace Linguini.Bundle.Bundler
             IReadyStep SetUseIsolating(bool isIsolating);
             IReadyStep SetTransformFunc(Func<string, string> transformFunc);
             IReadyStep SetFormatterFunc(Func<IFluentType, string> formatterFunc);
+            IReadyStep AddFunction(string name, ExternalFunction externalFunction);
         }
 
         private class StepBuilder : IReadyStep, ILocaleStep, IResourceStep
         {
             private CultureInfo _culture;
-            private List<string> _locales = new();
-            private List<Resource> _resources = new();
+            private readonly List<string> _locales = new();
+            private readonly List<Resource> _resources = new();
             private bool _useIsolating = true;
             private Func<IFluentType, string>? _formatterFunc;
             private Func<string, string>? _transformFunc;
-            private Dictionary<string, ExternalFunction> _functions = new();
+            private readonly Dictionary<string, ExternalFunction> _functions = new();
 
             internal StepBuilder()
             {
@@ -81,6 +106,12 @@ namespace Linguini.Bundle.Bundler
             public IReadyStep SetFormatterFunc(Func<IFluentType, string> formatterFunc)
             {
                 _formatterFunc = formatterFunc;
+                return this;
+            }
+
+            public IReadyStep AddFunction(string name, ExternalFunction externalFunction)
+            {
+                _functions[name] = externalFunction;
                 return this;
             }
 
@@ -175,7 +206,7 @@ namespace Linguini.Bundle.Bundler
                 return this;
             }
 
-            public IReadyStep AddResources(IList<string> unparsedResources)
+            public IReadyStep AddResources(IEnumerable<string> unparsedResources)
             {
                 foreach (var unparsed in unparsedResources)
                 {
@@ -186,7 +217,7 @@ namespace Linguini.Bundle.Bundler
                 return this;
             }
 
-            public IReadyStep AddResources(IList<TextReader> unparsedStream)
+            public IReadyStep AddResources(IEnumerable<TextReader> unparsedStream)
             {
                 foreach (var unparsed in unparsedStream)
                 {
@@ -197,7 +228,7 @@ namespace Linguini.Bundle.Bundler
                 return this;
             }
 
-            public IReadyStep AddResources(IList<Resource> parsedResource)
+            public IReadyStep AddResources(IEnumerable<Resource> parsedResource)
             {
                 _resources.AddRange(parsedResource);
                 return this;

@@ -6,6 +6,7 @@ using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Shared;
 using Linguini.Shared.Types.Bundle;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle.Resolver
@@ -115,7 +116,7 @@ namespace Linguini.Bundle.Resolver
             return scope.Errors.Count == 0;
         }
 
-        public static void Write(this IInlineExpression self, TextWriter writer, Scope scope)
+        private static void Write(this IInlineExpression self, TextWriter writer, Scope scope)
         {
             if (self.TryConvert(out TextLiteral? textLiteral))
             {
@@ -139,21 +140,15 @@ namespace Linguini.Bundle.Resolver
             if (self.TryConvert(out TermReference? termRef))
             {
                 var res = scope.GetArguments(termRef.Arguments);
-                scope.SetLocalArgs(res.named);
-                if (scope.Bundle.TryGetTerm(termRef.Id.ToString(), out var term))
+                scope.SetLocalArgs(res.Named);
+                if (scope.Bundle.TryGetAstTerm(termRef.Id.ToString(), out var term))
                 {
                     var attrName = termRef.Attribute;
                     var attr = term
                         .Attributes
                         .Find(a => a.Id.Equals(attrName));
-                    if (attr != null)
-                    {
-                        scope.Track(writer, attr.Value, self);
-                    }
-                    else
-                    {
-                        scope.Track(writer, term.Value, self);
-                    }
+                    
+                    scope.Track(writer, attr != null ? attr.Value : term.Value, self);
                 }
                 else
                 {
@@ -215,7 +210,7 @@ namespace Linguini.Bundle.Resolver
             }
         }
 
-        public static void Write(this IFluentType self, TextWriter writer, Scope scope)
+        private static void Write(this IFluentType self, TextWriter writer, Scope scope)
         {
             if (scope.Bundle.FormatterFunc != null)
             {
@@ -225,13 +220,13 @@ namespace Linguini.Bundle.Resolver
             writer.Write(self.AsString());
         }
 
-        private static bool ProcessMsgRef(IInlineExpression self, TextWriter writer, Scope scope,
+        private static void ProcessMsgRef(IInlineExpression self, TextWriter writer, Scope scope,
             MessageReference msgRef)
         {
             var id = msgRef.Id;
             var attribute = msgRef.Attribute;
 
-            if (scope.Bundle.TryGetMessage(id.Name.ToString(), out var msg))
+            if (scope.Bundle.TryGetAstMessage(id.Name.ToString(), out var msg))
             {
                 if (attribute != null)
                 {
@@ -242,7 +237,8 @@ namespace Linguini.Bundle.Resolver
                     }
                     else
                     {
-                        return scope.WriteRefError(writer, self);
+                        scope.WriteRefError(writer, self);
+                        return;
                     }
                 }
                 else
@@ -262,10 +258,8 @@ namespace Linguini.Bundle.Resolver
             }
             else
             {
-                return scope.WriteRefError(writer, self);
+                scope.WriteRefError(writer, self);
             }
-
-            return true;
         }
 
         public static void WriteError(this IExpression self, TextWriter writer)
