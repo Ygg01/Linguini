@@ -35,6 +35,15 @@ term = term
 term1 = val1
 term2 = val2
     .attr = 6";
+        
+        private static string _replace1 = @"
+term1 = val1
+term2 = val2";
+        
+        private static string _replace2 = @"
+term1 = xxx
+new1  = new
+    .attr = 6";
 
         [Test]
         public void TestDefaultBundleOptions()
@@ -81,20 +90,21 @@ term2 = val2
         {
             var bundler = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
-                .AddResource(_res1)
+                .AddResource(_replace1)
                 .SetUseIsolating(false);
 
             var bundle = bundler.UncheckedBuild();
-            Assert.IsTrue(bundle.TryGetAttrMsg("term", null, out _, out var termMsg));
-            Assert.AreEqual("term", termMsg);
-            Assert.IsTrue(bundle.TryGetAttrMsg("term.attr", null, out _, out var msg));
-            Assert.AreEqual("3", msg);
+            Assert.IsTrue(bundle.TryGetAttrMsg("term1", null, out _, out var termMsg));
+            Assert.AreEqual("val1", termMsg);
+            Assert.IsTrue(bundle.TryGetAttrMsg("term2", null, out _, out var termMsg2));
+            Assert.AreEqual("val2", termMsg2);
 
-            bundle.AddResourceOverriding(_res2);
-            Assert.IsTrue(bundle.TryGetAttrMsg("term", null, out _, out termMsg));
-            Assert.AreEqual("term", termMsg);
-            Assert.IsTrue(bundle.TryGetAttrMsg("term.attr", null, out _, out msg));
-            Assert.AreEqual("6", msg);
+            bundle.AddResourceOverriding(_replace1);
+            Assert.IsTrue(bundle.TryGetAttrMsg("term2", null, out _, out _));
+            Assert.IsTrue(bundle.TryGetAttrMsg("term1", null, out _, out termMsg));
+            Assert.AreEqual("xxx", termMsg);
+            Assert.IsTrue(bundle.TryGetAttrMsg("new1.attr", null, out _, out var newMsg));
+            Assert.AreEqual("6", newMsg);
         }
 
         [Test]
