@@ -24,13 +24,8 @@ namespace Linguini.Bundle.Entry
         }
     }
 
-    public record FluentFunction(ExternalFunction Function) : IBundleEntry
+    public record FluentFunction(ExternalFunction Function)
     {
-        public EntryKind ToKind()
-        {
-            return EntryKind.Function;
-        }
-        
         public static implicit operator FluentFunction(ExternalFunction ef) => new(ef);
     }
 }

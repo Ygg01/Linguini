@@ -87,10 +87,8 @@ namespace Linguini.Bundle.Errors
                 {
                     return new($"Unknown message: {msgRef.Id}", ErrorType.Reference);
                 }
-                else
-                {
-                    return new($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}", ErrorType.Reference);
-                }
+
+                return new($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}", ErrorType.Reference);
             }
 
             if (self.TryConvert(out TermReference? termReference))
@@ -99,10 +97,8 @@ namespace Linguini.Bundle.Errors
                 {
                     return new($"Unknown term: -{termReference.Id}", ErrorType.Reference);
                 }
-                else
-                {
-                    return new($"Unknown attribute: -{termReference.Id}.{termReference.Attribute}", ErrorType.Reference);
-                }
+
+                return new($"Unknown attribute: -{termReference.Id}.{termReference.Attribute}", ErrorType.Reference);
             }
 
             if (self.TryConvert(out VariableReference? varRef))
@@ -153,7 +149,20 @@ namespace Linguini.Bundle.Errors
     {
         Message,
         Term,
-        Function,
+        Unknown,
+    }
+
+    public static class EntryHelper
+    {
+        public static EntryKind ToKind(this IEntry self)
+        {
+            if (self is AstTerm)
+            {
+                return EntryKind.Term;
+            }
+
+            return self is AstMessage ? EntryKind.Message : EntryKind.Unknown;
+        }
     }
 
     public enum ErrorType : byte

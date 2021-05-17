@@ -24,10 +24,6 @@ namespace Linguini.Bundle.Test.Unit
 term = term
     .attr = 3";
 
-        private static string _res2 = @"
-term = term
-    .attr = 6";
-
         private static string _wrong = @"
     term = 1";
         
@@ -99,7 +95,7 @@ new1  = new
             Assert.IsTrue(bundle.TryGetAttrMsg("term2", null, out _, out var termMsg2));
             Assert.AreEqual("val2", termMsg2);
 
-            bundle.AddResourceOverriding(_replace1);
+            bundle.AddResourceOverriding(_replace2);
             Assert.IsTrue(bundle.TryGetAttrMsg("term2", null, out _, out _));
             Assert.IsTrue(bundle.TryGetAttrMsg("term1", null, out _, out termMsg));
             Assert.AreEqual("xxx", termMsg);
@@ -132,9 +128,9 @@ new1  = new
                 .AddFunction("zero", _zeroFunc)
                 .UncheckedBuild();
             var messages = bundler.GetMessageEnumerable().ToArray();
-            var funcs = bundler.GetFuncEnumerable().ToArray();
+            var functions = bundler.GetFuncEnumerable().ToArray();
             CollectionAssert.AreEquivalent(new[] {"term1", "term2"}, messages);
-            CollectionAssert.AreEquivalent(new[] {"id", "zero"}, funcs);
+            CollectionAssert.AreEquivalent(new[] {"id", "zero"}, functions);
         }
     }
 }

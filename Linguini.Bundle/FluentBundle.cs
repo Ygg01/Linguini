@@ -1,10 +1,8 @@
 ﻿#nullable enable
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
@@ -18,14 +16,12 @@ namespace Linguini.Bundle
 {
     using FluentArgs = IDictionary<string, IFluentType>;
 
-    public class FluentBundle 
+    public class FluentBundle
     {
-        private HashSet<string> _funcList;
-        private Dictionary<string, IBundleEntry> _entries;
-
+        private Dictionary<string, FluentFunction> _funcList;
+        private Dictionary<(string, EntryKind), IEntry> _entries;
         public CultureInfo Culture { get; internal init; }
         public List<string> Locales { get; internal init; }
-        private List<Resource> Resources { get; init; }
 
 
         public bool UseIsolating { get; set; }
@@ -37,9 +33,8 @@ namespace Linguini.Bundle
         {
             Culture = CultureInfo.CurrentCulture;
             Locales = new List<string>();
-            Resources = new List<Resource>();
-            _entries = new Dictionary<string, IBundleEntry>();
-            _funcList = new HashSet<string>();
+            _entries = new Dictionary<(string, EntryKind), IEntry>();
+            _funcList = new Dictionary<string, FluentFunction>();
             UseIsolating = true;
             MaxPlaceable = 100;
         }
@@ -73,39 +68,38 @@ namespace Linguini.Bundle
             InsertBehavior behavior = InsertBehavior.Throw)
         {
             errors = new List<FluentError>();
+            var key = funcName;
             switch (behavior)
             {
                 case InsertBehavior.None:
-                    if (!_entries.TryAdd(funcName, (FluentFunction) fluentFunction))
+                    if (!_funcList.TryAdd(key, fluentFunction))
                     {
                         errors = new List<FluentError>
                         {
-                            new OverrideFluentError(funcName, EntryKind.Function)
+                            new OverrideFluentError(funcName, EntryKind.Unknown)
                         };
                     }
 
                     break;
                 case InsertBehavior.Overriding:
-                    _entries[funcName] = (FluentFunction) fluentFunction;
+                    _funcList[key] = fluentFunction;
                     break;
                 default:
-                    if (_entries.ContainsKey(funcName))
+                    if (_funcList.ContainsKey(key))
                     {
-                        errors.Add(new OverrideFluentError(funcName, EntryKind.Function));
+                        errors.Add(new OverrideFluentError(funcName, EntryKind.Unknown));
                         return false;
                     }
 
-                    _entries.Add(funcName, (FluentFunction) fluentFunction);
+                    _funcList.Add(key, fluentFunction);
                     break;
             }
 
-            _funcList.Add(funcName);
             return true;
         }
 
         public bool AddResource(Resource res, [NotNullWhen(false)] out List<FluentError> errors)
         {
-            var resPos = Resources.Count;
             errors = new List<FluentError>();
             foreach (var parseError in res.Errors)
             {
@@ -115,34 +109,17 @@ namespace Linguini.Bundle
             for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
             {
                 var entry = res.Entries[entryPos];
-                string id;
-                IBundleEntry bundleEntry;
-                if (entry.TryConvert(out AstMessage? message))
+                switch (entry)
                 {
-                    id = message.GetId();
-                    bundleEntry = new Message(resPos, entryPos);
-                }
-                else if (entry.TryConvert(out AstTerm? term))
-                {
-                    id = $"-{term.GetId()}";
-                    bundleEntry = new Term(resPos, entryPos);
-                }
-                else
-                {
-                    continue;
-                }
-
-                if (_entries.ContainsKey(id))
-                {
-                    errors.Add(new OverrideFluentError(id, _entries[id].ToKind()));
-                }
-                else
-                {
-                    _entries.Add(id, bundleEntry);
+                    case AstMessage message:
+                        AddEntry(errors, message);
+                        break;
+                    case AstTerm term:
+                        AddEntry(errors, term);
+                        break;
                 }
             }
 
-            Resources.Add(res);
             if (errors.Count == 0)
             {
                 return true;
@@ -151,42 +128,40 @@ namespace Linguini.Bundle
             return false;
         }
 
+        private void AddEntry(List<FluentError> errors, IEntry term, bool overwrite = false)
+        {
+            var id = (term.GetId(), term.ToKind());
+            if (_entries.ContainsKey(id) && !overwrite)
+            {
+                errors.Add(new OverrideFluentError(id.Item1, id.Item2));
+            }
+            else
+            {
+                _entries[id] = term;
+            }
+        }
+
         public void AddResourceOverriding(Resource res)
         {
-            var resPos = Resources.Count;
             for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
             {
                 var entry = res.Entries[entryPos];
-                string id;
-                IBundleEntry bundleEntry;
-                if (entry.TryConvert(out AstMessage? message))
-                {
-                    id = message.GetId();
-                    bundleEntry = new Message(resPos, entryPos);
-                }
-                else if (entry.TryConvert(out AstTerm? term))
-                {
-                    id = term.GetId();
-                    bundleEntry = new Term(resPos, entryPos);
-                }
-                else
-                {
-                    continue;
-                }
 
-                _entries[id] = bundleEntry;
+                if (entry is AstTerm or AstMessage)
+                {
+                    AddEntry(new List<FluentError>(), entry, true);
+                }
             }
-
-            Resources.Add(res);
         }
 
-        public bool HasMessage(string id)
+        public bool HasMessage(string identifier)
         {
+            var id = (identifier, EntryKind.Message);
             return _entries.ContainsKey(id)
-                   && _entries[id].TryConvert<IBundleEntry, Message>(out _);
+                   && _entries[id] is AstMessage;
         }
 
-        public bool TryGetAttrMsg(string msgWithAttr, FluentArgs? args, 
+        public bool TryGetAttrMsg(string msgWithAttr, FluentArgs? args,
             out IList<FluentError> errors, out string? message)
         {
             if (msgWithAttr.Contains('.'))
@@ -197,14 +172,14 @@ namespace Linguini.Bundle
 
             return TryGetMsg(msgWithAttr, args, out errors, out message);
         }
-        
-        public bool TryGetMsg(string id, FluentArgs? args, 
+
+        public bool TryGetMsg(string id, FluentArgs? args,
             out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
         {
             return TryGetMsg(id, null, args, out errors, out message);
         }
-        
-        public bool TryGetMsg(string id, string? attribute, FluentArgs? args, 
+
+        public bool TryGetMsg(string id, string? attribute, FluentArgs? args,
             out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
         {
             string? value = null;
@@ -233,35 +208,28 @@ namespace Linguini.Bundle
             return message != null;
         }
 
-        public bool TryGetAstMessage(string id, [NotNullWhen(true)] out AstMessage? message)
+        public bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message)
         {
+            var id = (ident, EntryKind.Message);
             if (_entries.ContainsKey(id)
                 && _entries.TryGetValue(id, out var value)
-                && value.ToKind() == EntryKind.Message
-                && value.TryConvert(out Message? msg))
+                && value.ToKind() == EntryKind.Message)
             {
-                var res = Resources[msg.ResPos];
-                var entry = res.Entries[msg.EntryPos];
-
-                return entry.TryConvert(out message);
+                return _entries[id].TryConvert(out message);
             }
 
             message = null;
             return false;
         }
 
-        public bool TryGetAstTerm(string id, [NotNullWhen(true)] out AstTerm? astTerm)
+        public bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? astTerm)
         {
-            var termId = $"-{id}";
+            var termId = (ident, EntryKind.Term);
             if (_entries.ContainsKey(termId)
                 && _entries.TryGetValue(termId, out var value)
-                && value.ToKind() == EntryKind.Term
-                && value.TryConvert(out Term? term))
+                && value.ToKind() == EntryKind.Term)
             {
-                var res = Resources[term.ResPos];
-                var entry = res.Entries[term.EntryPos];
-
-                return entry.TryConvert(out astTerm);
+                return _entries[termId].TryConvert(out astTerm);
             }
 
             astTerm = null;
@@ -275,11 +243,9 @@ namespace Linguini.Bundle
 
         public bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
         {
-            if (_entries.ContainsKey(funcName)
-                && _entries.TryGetValue(funcName, out var value)
-                && value.ToKind() == EntryKind.Function)
+            if (_funcList.ContainsKey(funcName))
             {
-                return value.TryConvert(out function);
+                return _funcList.TryGetValue(funcName, out function);
             }
 
             function = null;
@@ -297,19 +263,18 @@ namespace Linguini.Bundle
 
         public IEnumerable<string> GetMessageEnumerable()
         {
-            foreach (var pair in _entries)
+            foreach (var keyValue in _entries)
             {
-                if (pair.Value.ToKind() == EntryKind.Message) 
-                    yield return pair.Key;
+                if (keyValue.Value.ToKind() == EntryKind.Message)
+                    yield return keyValue.Key.Item1;
             }
         }
-        
+
         public IEnumerable<string> GetFuncEnumerable()
         {
-            foreach (var pair in _entries)
+            foreach (var keyValue in _funcList)
             {
-                if (pair.Value.ToKind() == EntryKind.Function) 
-                    yield return pair.Key;
+                yield return keyValue.Key;
             }
         }
 
@@ -318,11 +283,10 @@ namespace Linguini.Bundle
             return new()
             {
                 Culture = (CultureInfo) Culture.Clone(),
-                Resources = new List<Resource>(Resources),
                 FormatterFunc = FormatterFunc,
                 Locales = new List<string>(Locales),
                 _entries = new(_entries),
-                _funcList = new HashSet<string>(_funcList),
+                _funcList = new (_funcList),
                 TransformFunc = TransformFunc,
                 UseIsolating = UseIsolating,
             };
