@@ -17,6 +17,12 @@ namespace Linguini.Syntax.Ast
             Id = id;
             Value = value;
         }
+
+        public void Deconstruct(out Identifier id, out Pattern value)
+        {
+            id = Id;
+            value = Value;
+        }
     }
 
     [JsonConverter(typeof(PatternSerializer))]
