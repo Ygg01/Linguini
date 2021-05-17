@@ -12,12 +12,12 @@ namespace Linguini.Bundle.Test.Unit
     [Parallelizable]
     public class TestRules
     {
-        public static readonly object?[][] _ordinalTestData = RuleTableTest.OrdinalTestData;
-        public static readonly object?[][] _cardinalTestData = RuleTableTest.CardinalTestData;
+        public static readonly object?[][] OrdinalTestData = RuleTableTest.OrdinalTestData;
+        public static readonly object?[][] CardinalTestData = RuleTableTest.CardinalTestData;
 
         [Test]
         [Parallelizable]
-        [TestCaseSource(nameof(_cardinalTestData))]
+        [TestCaseSource(nameof(CardinalTestData))]
         public void TestCardinal(string cultureStr, RuleType type, bool isDecimal, string lower, string? upper,
             PluralCategory expected)
         {
@@ -26,7 +26,7 @@ namespace Linguini.Bundle.Test.Unit
 
         [Test]
         [Parallelizable]
-        [TestCaseSource(nameof(_ordinalTestData))]
+        [TestCaseSource(nameof(OrdinalTestData))]
         public void TestOrdinal(string cultureStr, RuleType type, bool isDecimal, string lower, string? upper,
             PluralCategory expected)
         {

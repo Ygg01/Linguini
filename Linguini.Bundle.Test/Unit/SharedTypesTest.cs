@@ -2,7 +2,7 @@
 using Linguini.Shared.Types;
 using NUnit.Framework;
 
-namespace Linguini.Bundle.Test
+namespace Linguini.Bundle.Test.Unit
 {
     [TestFixture]
     [Parallelizable]

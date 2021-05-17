@@ -4,7 +4,7 @@ using System.Globalization;
 #nullable enable
 namespace Linguini.Shared.Types.Bundle
 {
-    public class FluentNumber : IFluentType, IEquatable<FluentNumber>
+    public record FluentNumber : IFluentType
     {
         public readonly double Value;
         private readonly FluentNumberOptions _options;
@@ -72,24 +72,9 @@ namespace Linguini.Shared.Types.Bundle
         public static implicit operator FluentNumber(double db) => new(db, new FluentNumberOptions());
         public static implicit operator FluentNumber(float fl) => new(fl, new FluentNumberOptions());
 
-        public object Clone()
+        public IFluentType Copy()
         {
             return new FluentNumber(Value, _options);
-        }
-
-        public bool Equals(FluentNumber? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Value.Equals(other.Value);
-        }
-
-        public override bool Equals(object? obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((FluentNumber) obj);
         }
 
         public override int GetHashCode()

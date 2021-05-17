@@ -1,9 +1,8 @@
-﻿using System;
-using Linguini.Shared.Util;
+﻿using Linguini.Shared.Util;
 
 namespace Linguini.Shared.Types.Bundle
 {
-    public interface IFluentType : ICloneable
+    public interface IFluentType
     {
         string AsString();
 
@@ -11,7 +10,6 @@ namespace Linguini.Shared.Types.Bundle
         {
             return false;
         }
-
 
         bool Matches(IFluentType other, IScope scope)
         {
@@ -43,6 +41,8 @@ namespace Linguini.Shared.Types.Bundle
 
             return false;
         }
+
+        IFluentType Copy();
     }
 
     public interface IScope
@@ -50,9 +50,9 @@ namespace Linguini.Shared.Types.Bundle
         PluralCategory GetPluralRules(RuleType type, FluentNumber number);
     }
 
-    public class FluentErrType : IFluentType
+    public record FluentErrType : IFluentType
     {
-        public object Clone()
+        public IFluentType Copy()
         {
             return this;
         }

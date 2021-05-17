@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Linguini.Shared.Types.Bundle
 {
-    public class FluentString : IFluentType, IEquatable<FluentString>
+    public record FluentString : IFluentType
     {
         private readonly string _content;
 
@@ -27,24 +27,9 @@ namespace Linguini.Shared.Types.Bundle
         public static implicit operator FluentString(string s) => new(s);
         public static implicit operator FluentString(ReadOnlySpan<char> s) => new(new string(s));
 
-        public object Clone()
+        public IFluentType Copy()
         {
             return new FluentString(_content);
-        }
-
-        public bool Equals(FluentString? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return _content == other._content;
-        }
-
-        public override bool Equals(object? obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((FluentString) obj);
         }
 
         public override int GetHashCode()

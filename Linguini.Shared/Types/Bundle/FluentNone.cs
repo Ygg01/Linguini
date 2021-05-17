@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Linguini.Shared.Types.Bundle
+﻿namespace Linguini.Shared.Types.Bundle
 {
-    public class FluentNone : IFluentType, IEquatable<FluentNone>
+    public record FluentNone : IFluentType
     {
         public static readonly FluentNone None = new();
 
@@ -10,7 +8,7 @@ namespace Linguini.Shared.Types.Bundle
         {
         }
 
-        public object Clone()
+        public IFluentType Copy()
         {
             return None;
         }
@@ -23,13 +21,6 @@ namespace Linguini.Shared.Types.Bundle
         public override string ToString()
         {
             return AsString();
-        }
-
-        public bool Equals(FluentNone? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return true;
         }
     }
 }

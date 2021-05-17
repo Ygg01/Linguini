@@ -47,7 +47,7 @@ namespace Linguini.Bundle.Resolver
                 if (args != null
                     && args.TryGetValue(varRef.Id.ToString(), out var arg))
                 {
-                    return (IFluentType) arg.Clone();
+                    return (IFluentType) arg.Copy();
                 }
 
                 if (scope.LocalArgs == null)

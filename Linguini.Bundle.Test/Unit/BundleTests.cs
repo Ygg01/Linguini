@@ -97,7 +97,7 @@ term = term
         {
             var bundler = LinguiniBuilder.Builder()
                 .Locales("en-US", "sr-RS")
-                .AddResources(_res1, _res2)
+                .AddResources(_wrong, _res1)
                 .SetUseIsolating(false)
                 .SetFormatterFunc(_formatter)
                 .SetTransformFunc(_transform)
