@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Net.Mail;
 using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.IO;
@@ -31,7 +32,74 @@ namespace Linguini.Syntax.Parser
             }
         }
 
+        #region FastParse
         public Resource Parse()
+        {
+            var body = new List<IEntry>(6);
+            var errors = new List<ParseError>();
+
+            _reader.SkipBlankBlock();
+
+            while (_reader.IsNotEof)
+            {
+                var entryStart = _reader.Position;
+                (var entry, ParseError? error) = GetEntryRuntime(entryStart);
+                if (entry is { } and not Junk)
+                {
+                    body.Add(entry);
+                }
+                if (error != null)
+                {
+                    AddError(error, entryStart, errors, body);
+                }
+
+                _reader.SkipBlankBlock();
+            }
+
+            return new Resource(body, errors);
+        }
+        
+        private void SkipComment()
+        {
+            while (_reader.IsNotEof)
+            {
+                while (_reader.IsNotEof
+                       && !_reader.SkipEol())
+                {
+                    _reader.Position += 1;
+                }
+
+                if (_reader.PeekCharSpan().IsEqual('#'))
+                {
+                    _reader.Position += 1;
+                }
+                else
+                {
+                    return;
+                }
+            }
+        }
+
+        private (IEntry?, ParseError?) GetEntryRuntime(int entryStart)
+        {
+            var chrSpan = _reader.PeekCharSpan();
+            if (chrSpan.IsEqual('#'))
+            {
+                SkipComment();
+                return (null, null);
+            }
+            if (chrSpan.IsEqual('-'))
+            {
+                return GetTerm(entryStart);
+            }
+
+            return GetMessage(entryStart);
+        }
+
+        #endregion
+
+
+        public Resource ParseWithComments()
         {
             var body = new List<IEntry>();
             var errors = new List<ParseError>();
@@ -67,12 +135,7 @@ namespace Linguini.Syntax.Parser
 
                 if (error != null)
                 {
-                    _reader.SkipToNextEntry();
-                    error.Slice = new Range(entryStart, _reader.Position);
-                    errors.Add(error);
-                    Junk junk = (Junk) entry;
-                    junk.Content = _reader.ReadSlice(entryStart, _reader.Position);
-                    body.Add(entry);
+                    AddError(error, entryStart, errors, body);
                 }
                 else if (entry.TryConvert<IEntry, AstComment>(out var comment)
                          && comment.CommentLevel == CommentLevel.Comment)
@@ -94,6 +157,16 @@ namespace Linguini.Syntax.Parser
 
 
             return new Resource(body, errors);
+        }
+
+        private void AddError(ParseError error, int entryStart, List<ParseError> errors, List<IEntry> body)
+        {
+            _reader.SkipToNextEntry();
+            error.Slice = new Range(entryStart, _reader.Position);
+            errors.Add(error);
+            Junk junk = new();
+            junk.Content = _reader.ReadSlice(entryStart, _reader.Position);
+            body.Add(junk);
         }
 
         private (IEntry, ParseError?) GetEntry(int entryStart)
@@ -1103,6 +1176,7 @@ namespace Linguini.Syntax.Parser
                         error = ParseError.PositionalArgumentFollowsNamed(_reader.Position);
                         return false;
                     }
+
                     positional.Add(expr);
                 }
 

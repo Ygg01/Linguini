@@ -30,7 +30,7 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestCommentParse(string input, CommentLevel expectedCommentLevel = CommentLevel.Comment,
             string expectedContent = "Comment")
         {
-            Resource parsed = new LinguiniParser(input).Parse();
+            Resource parsed = new LinguiniParser(input).ParseWithComments();
             Assert.That(parsed.Entries.Count, Is.EqualTo(1));
             Assert.True(parsed.Entries[0].TryConvert<IEntry, AstComment>(out var comment));
             Assert.AreEqual(expectedCommentLevel, comment!.CommentLevel);
@@ -48,7 +48,7 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestErrorCommentParse(string input, ErrorType expErrType, string expMsg, int start, int end,
             int sliceStart, int sliceEnd)
         {
-            Resource parsed = new LinguiniParser(input).Parse();
+            Resource parsed = new LinguiniParser(input).ParseWithComments();
             Assert.That(parsed.Errors.Count, Is.EqualTo(1));
             Assert.AreEqual(expErrType, parsed.Errors[0].Kind);
             Assert.AreEqual(expMsg, parsed.Errors[0].Message);
@@ -73,7 +73,7 @@ namespace Linguini.Syntax.Tests.Parser
         [TestCase("a=\n\n  bar\n  baz", "a", "bar\nbaz")]
         public void TestMessageParse(string input, string expName, string expValue)
         {
-            Resource parsed = new LinguiniParser(input).Parse();
+            Resource parsed = new LinguiniParser(input).ParseWithComments();
             Assert.AreEqual(0, parsed.Errors.Count, "Failed, with errors");
             Assert.AreEqual(1, parsed.Entries.Count);
             if (parsed.Entries[0].TryConvert(out AstMessage message)
@@ -97,7 +97,7 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestMessageComment(string input, bool inMessage, string expMsg, string expComment)
         {
             var expBodySize = inMessage ? 1 : 2;
-            Resource parsed = new LinguiniParser(input).Parse();
+            Resource parsed = new LinguiniParser(input).ParseWithComments();
             Assert.AreEqual(0, parsed.Errors.Count);
             Assert.AreEqual(expBodySize, parsed.Entries.Count);
             if (inMessage)
@@ -125,7 +125,7 @@ namespace Linguini.Syntax.Tests.Parser
 
         {
             var expBodySize = inTerm ? 1 : 2;
-            Resource parsed = new LinguiniParser(input).Parse();
+            Resource parsed = new LinguiniParser(input).ParseWithComments();
             Assert.AreEqual(0, parsed.Errors.Count);
             Assert.AreEqual(expBodySize, parsed.Entries.Count);
             if (inTerm)
