@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
@@ -29,6 +30,11 @@ term = term
 
         private static string _wrong = @"
     term = 1";
+        
+        private static string _multi = @"
+term1 = val1
+term2 = val2
+    .attr = 6";
 
         [Test]
         public void TestDefaultBundleOptions()
@@ -105,6 +111,20 @@ term = term
                 .AddFunction("zero", _zeroFunc);
 
             Assert.Throws(typeof(LinguiniException), () => bundler.UncheckedBuild());
+        }
+        [Test]
+        public void TestEnumeration()
+        {
+            var bundler = LinguiniBuilder.Builder()
+                .Locale("en-US")
+                .AddResource(_multi)
+                .AddFunction("id", _idFunc)
+                .AddFunction("zero", _zeroFunc)
+                .UncheckedBuild();
+            var messages = bundler.GetMessageEnumerable().ToArray();
+            var funcs = bundler.GetFuncEnumerable().ToArray();
+            CollectionAssert.AreEquivalent(new[] {"term1", "term2"}, messages);
+            CollectionAssert.AreEquivalent(new[] {"id", "zero"}, funcs);
         }
     }
 }

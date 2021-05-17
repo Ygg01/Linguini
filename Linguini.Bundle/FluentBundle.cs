@@ -1,8 +1,10 @@
 ﻿#nullable enable
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
@@ -284,13 +286,31 @@ namespace Linguini.Bundle
             return false;
         }
 
-        private string FormatPattern(Pattern pattern, FluentArgs? args,
+        public string FormatPattern(Pattern pattern, FluentArgs? args,
             out IList<FluentError> errors)
         {
             var scope = new Scope(this, args);
             var value = pattern.Resolve(scope);
             errors = scope.Errors;
             return value.AsString();
+        }
+
+        public IEnumerable<string> GetMessageEnumerable()
+        {
+            foreach (var pair in _entries)
+            {
+                if (pair.Value.ToKind() == EntryKind.Message) 
+                    yield return pair.Key;
+            }
+        }
+        
+        public IEnumerable<string> GetFuncEnumerable()
+        {
+            foreach (var pair in _entries)
+            {
+                if (pair.Value.ToKind() == EntryKind.Function) 
+                    yield return pair.Key;
+            }
         }
 
         public FluentBundle DeepClone()
