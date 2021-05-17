@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Linguini.Bundle.Builder;
-using Linguini.Bundle.Entry;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
