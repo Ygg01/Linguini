@@ -16,7 +16,6 @@
     <ItemGroup>
         <ProjectReference Include="..\Linguini.Bundle\Linguini.Bundle.csproj" />
         <ProjectReference Include="..\PluralRules.Generator\PluralRules.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="..\PluralRules\PluralRules.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -7,8 +7,11 @@ namespace Linguini.Bundle.Builder
 {
     public class FluentBundleOption
     {
+        public bool UseConcurrent { get; init; }
         public bool UseIsolating { get; init; } = true;
         public byte MaxPlaceable { get; init; } = 100;
+
+        public IList<string> Locales { get; init; } = new List<string>();
 
         public IDictionary<string, ExternalFunction> Functions { get; init; } =
             new Dictionary<string, ExternalFunction>();

@@ -58,6 +58,7 @@ namespace Linguini.Bundle.Builder
             {
                 return AddResources(resources.AsEnumerable());
             }
+
             IReadyStep SkipResources();
         }
 
@@ -74,6 +75,7 @@ namespace Linguini.Bundle.Builder
             IReadyStep SetTransformFunc(Func<string, string> transformFunc);
             IReadyStep SetFormatterFunc(Func<IFluentType, string> formatterFunc);
             IReadyStep AddFunction(string name, ExternalFunction externalFunction);
+            IReadyStep UseConcurrent();
         }
 
         private class StepBuilder : IReadyStep, ILocaleStep, IResourceStep
@@ -85,6 +87,7 @@ namespace Linguini.Bundle.Builder
             private Func<IFluentType, string>? _formatterFunc;
             private Func<string, string>? _transformFunc;
             private readonly Dictionary<string, ExternalFunction> _functions = new();
+            private bool _concurrent = false;
 
             internal StepBuilder()
             {
@@ -115,6 +118,12 @@ namespace Linguini.Bundle.Builder
                 return this;
             }
 
+            public IReadyStep UseConcurrent()
+            {
+                _concurrent = true;
+                return this;
+            }
+
             public FluentBundle UncheckedBuild()
             {
                 var (bundle, errors) = Build();
@@ -129,14 +138,11 @@ namespace Linguini.Bundle.Builder
 
             public (FluentBundle, List<FluentError>) Build()
             {
-                var bundle = new FluentBundle()
+                var concurrent = new FluentBundleOption
                 {
-                    Culture = (CultureInfo) _culture.Clone(),
-                    Locales = _locales,
-                    UseIsolating = _useIsolating,
-                    FormatterFunc = _formatterFunc,
-                    TransformFunc = _transformFunc,
+                    UseConcurrent = _concurrent
                 };
+                var bundle = FluentBundle.MakeUnchecked(concurrent);
 
                 var errors = new List<FluentError>();
                 if (_functions.Count > 0)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
@@ -45,8 +46,8 @@ new1  = new
         public void TestDefaultBundleOptions()
         {
             var defaultBundleOpt = new FluentBundleOption();
-            var bundle = new FluentBundle("en", defaultBundleOpt, out _);
-            Assert.AreEqual(new CultureInfo("en"), bundle.Culture);
+            var bundle = FluentBundle.MakeUnchecked(defaultBundleOpt);
+            Assert.AreEqual(CultureInfo.CurrentCulture, bundle.Culture);
             Assert.IsNull(bundle.FormatterFunc);
             Assert.IsNull(bundle.TransformFunc);
             Assert.IsTrue(bundle.UseIsolating);
@@ -58,6 +59,7 @@ new1  = new
         {
             var defaultBundleOpt = new FluentBundleOption()
             {
+                Locales = {"en"},
                 MaxPlaceable = 123,
                 UseIsolating = false,
                 TransformFunc = _transform,
@@ -68,7 +70,7 @@ new1  = new
                     ["id"] = _idFunc,
                 }
             };
-            var bundle = new FluentBundle("en", defaultBundleOpt, out _);
+            var bundle = FluentBundle.MakeUnchecked(defaultBundleOpt);
             Assert.AreEqual(new CultureInfo("en"), bundle.Culture);
             Assert.AreEqual(defaultBundleOpt.FormatterFunc, bundle.FormatterFunc);
             Assert.AreEqual(defaultBundleOpt.TransformFunc, bundle.TransformFunc);
@@ -131,6 +133,39 @@ new1  = new
             var functions = bundler.GetFuncEnumerable().ToArray();
             CollectionAssert.AreEquivalent(new[] {"term1", "term2"}, messages);
             CollectionAssert.AreEquivalent(new[] {"id", "zero"}, functions);
+        }
+        
+        [Test]
+        public void TestConcurrencyBundler()
+        {
+            var bundler = LinguiniBuilder.Builder()
+                .CultureInfo(new CultureInfo("en-US"))
+                .SkipResources()
+                .UseConcurrent()
+                .UncheckedBuild();
+            
+            Parallel.For(0, 10, i => bundler.AddResource($"term-1 = {i}", out _));
+            Parallel.For(0, 10, i => bundler.AddResource($"term-2= {i}", out _));
+            Parallel.For(0, 10, i => bundler.TryGetAttrMsg("term-1", null, out _, out _));
+            Parallel.For(0, 10, i => bundler.AddResourceOverriding($"term-2= {i+1}"));
+            Assert.True(bundler.HasMessage("term-1"));
+        }
+
+
+        [Test]
+        public void TestConcurrencyOption()
+        {
+            var bundleOpt = new FluentBundleOption()
+            {
+                Locales = {"en-US"},
+                UseConcurrent = true,
+            };
+            var optBundle = FluentBundle.MakeUnchecked(bundleOpt);
+            Parallel.For(0, 10, i => optBundle.AddResource($"term-1 = {i}", out _));
+            Parallel.For(0, 10, i => optBundle.AddResource($"term-2= {i}", out _));
+            Parallel.For(0, 10, i => optBundle.TryGetAttrMsg("term-1", null, out _, out _));
+            Parallel.For(0, 10, i => optBundle.AddResourceOverriding($"term-2= {i+1}"));
+            Assert.True(optBundle.HasMessage("term-1"));
         }
     }
 }

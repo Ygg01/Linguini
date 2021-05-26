@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -17,36 +18,63 @@ namespace Linguini.Bundle
 
     public class FluentBundle
     {
-        private Dictionary<string, FluentFunction> _funcList;
-        private Dictionary<(string, EntryKind), IEntry> _entries;
-        public CultureInfo Culture { get; internal init; }
+        private IDictionary<string, FluentFunction> _funcList;
+        private IDictionary<(string, EntryKind), IEntry> _entries;
+        public CultureInfo Culture { get; private init; }
         public List<string> Locales { get; internal init; }
-
-
         public bool UseIsolating { get; set; }
         public Func<string, string>? TransformFunc { get; set; }
         public Func<IFluentType, string>? FormatterFunc { get; init; }
-        public byte MaxPlaceable { get; }
+        public byte MaxPlaceable { get; private init; }
 
-        internal FluentBundle()
+        private FluentBundle()
         {
-            Culture = CultureInfo.CurrentCulture;
-            Locales = new List<string>();
             _entries = new Dictionary<(string, EntryKind), IEntry>();
             _funcList = new Dictionary<string, FluentFunction>();
+            Culture = CultureInfo.CurrentCulture;
+            Locales = new List<string>();
             UseIsolating = true;
             MaxPlaceable = 100;
         }
 
-        public FluentBundle(string locale, FluentBundleOption option, out List<FluentError> errors) : this()
+        public static FluentBundle MakeUnchecked(FluentBundleOption option)
         {
-            Locales = new List<string>(1) {locale};
-            Culture = new CultureInfo(locale, false);
-            UseIsolating = option.UseIsolating;
-            FormatterFunc = option.FormatterFunc;
-            TransformFunc = option.TransformFunc;
-            MaxPlaceable = option.MaxPlaceable;
-            AddFunctions(option.Functions, out errors, InsertBehavior.None);
+            var bundle = ConstructBundle(option);
+            bundle.AddFunctions(option.Functions, out _);
+            return bundle;
+        }
+
+        private static FluentBundle ConstructBundle(FluentBundleOption option)
+        {
+            var primaryLocale = option.Locales.Count > 0
+                ? option.Locales[0]
+                : CultureInfo.CurrentCulture.Name;
+            var cultureInfo = new CultureInfo(primaryLocale, false);
+            var locales = new List<string> {primaryLocale};
+            IDictionary<(string, EntryKind), IEntry> entries;
+            IDictionary<string, FluentFunction> functions;
+            if (option.UseConcurrent)
+            {
+                entries = new ConcurrentDictionary<(string, EntryKind), IEntry>();
+                functions = new ConcurrentDictionary<string, FluentFunction>();
+            }
+            else
+            {
+                entries = new Dictionary<(string, EntryKind), IEntry>();
+                functions = new Dictionary<string, FluentFunction>();
+            }
+
+            return new FluentBundle
+            {
+                Culture = cultureInfo,
+                Locales = locales,
+                _entries = entries,
+                _funcList = functions,
+                TransformFunc = option.TransformFunc,
+                FormatterFunc = option.FormatterFunc,
+                UseIsolating = option.UseIsolating,
+                MaxPlaceable = option.MaxPlaceable,
+            };
         }
 
         public void AddFunctions(IDictionary<string, ExternalFunction> functions, out List<FluentError> errors,
@@ -284,8 +312,8 @@ namespace Linguini.Bundle
                 Culture = (CultureInfo) Culture.Clone(),
                 FormatterFunc = FormatterFunc,
                 Locales = new List<string>(Locales),
-                _entries = new(_entries),
-                _funcList = new (_funcList),
+                _entries = new Dictionary<(string, EntryKind), IEntry>(_entries),
+                _funcList = new Dictionary<string, FluentFunction>(_funcList),
                 TransformFunc = TransformFunc,
                 UseIsolating = UseIsolating,
             };
