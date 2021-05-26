@@ -20,8 +20,8 @@ namespace Linguini.Bundle
     {
         private IDictionary<string, FluentFunction> _funcList;
         private IDictionary<(string, EntryKind), IEntry> _entries;
-        public CultureInfo Culture { get; private init; }
-        public List<string> Locales { get; internal init; }
+        public CultureInfo Culture { get; internal set; }
+        public List<string> Locales { get; internal set; }
         public bool UseIsolating { get; set; }
         public Func<string, string>? TransformFunc { get; set; }
         public Func<IFluentType, string>? FormatterFunc { get; init; }

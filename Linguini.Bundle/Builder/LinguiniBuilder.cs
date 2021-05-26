@@ -87,7 +87,7 @@ namespace Linguini.Bundle.Builder
             private Func<IFluentType, string>? _formatterFunc;
             private Func<string, string>? _transformFunc;
             private readonly Dictionary<string, ExternalFunction> _functions = new();
-            private bool _concurrent = false;
+            private bool _concurrent;
 
             internal StepBuilder()
             {
@@ -140,9 +140,14 @@ namespace Linguini.Bundle.Builder
             {
                 var concurrent = new FluentBundleOption
                 {
+                    FormatterFunc = _formatterFunc,
+                    TransformFunc = _transformFunc,
+                    Locales = _locales,
+                    UseIsolating = _useIsolating,
                     UseConcurrent = _concurrent
                 };
                 var bundle = FluentBundle.MakeUnchecked(concurrent);
+                bundle.Culture = _culture;
 
                 var errors = new List<FluentError>();
                 if (_functions.Count > 0)
