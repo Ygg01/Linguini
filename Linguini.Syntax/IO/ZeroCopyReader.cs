@@ -7,6 +7,7 @@ namespace Linguini.Syntax.IO
     {
         private readonly ReadOnlyMemory<char> _unconsumedData;
         private int _position;
+        private int _row;
 
         public ZeroCopyReader(string text) : this(text.AsMemory())
         {
@@ -16,6 +17,7 @@ namespace Linguini.Syntax.IO
         {
             _unconsumedData = memory;
             _position = 0;
+            _row = 1;
         }
 
         public int Position
@@ -24,12 +26,22 @@ namespace Linguini.Syntax.IO
             set => _position = value;
         }
 
+        public int Row
+        {
+            get => _row;
+        }
+
         public bool IsNotEof => _position < _unconsumedData.Length;
         public bool IsEof => !IsNotEof;
 
         public ReadOnlySpan<char> PeekCharSpan(int offset = 0)
         {
             return _unconsumedData.PeakCharAt(_position + offset);
+        }
+
+        public bool IsCurrentChar(char c)
+        {
+            return c.EqualsSpans(_unconsumedData.PeakCharAt(_position));
         }
 
         public ReadOnlySpan<char> PeekCharSpanAt(int pos)
@@ -68,6 +80,7 @@ namespace Linguini.Syntax.IO
         {
             if ('\n'.EqualsSpans(PeekCharSpan()))
             {
+                _row += 1;
                 _position += 1;
                 return true;
             }
@@ -75,6 +88,7 @@ namespace Linguini.Syntax.IO
             if ('\r'.EqualsSpans(PeekCharSpan())
                 && '\n'.EqualsSpans(PeekCharSpan(1)))
             {
+                _row += 1;
                 _position += 2;
                 return true;
             }
@@ -97,6 +111,11 @@ namespace Linguini.Syntax.IO
         {
             if (c.EqualsSpans(PeekCharSpan()))
             {
+                if (c == '\n')
+                {
+                    _row += 1;
+                }
+
                 _position += 1;
                 return true;
             }
@@ -149,6 +168,7 @@ namespace Linguini.Syntax.IO
 
                 if (newline && (span.IsAsciiAlphabetic() || span.IsOneOf('#', '-')))
                 {
+                    _row += 1;
                     break;
                 }
 
@@ -165,13 +185,19 @@ namespace Linguini.Syntax.IO
         {
             while (TryPeekCharSpan(out var span))
             {
-                if (' '.EqualsSpans(span) || '\n'.EqualsSpans(span))
+                if (' '.EqualsSpans(span))
                 {
                     _position += 1;
+                }
+                else if ('\n'.EqualsSpans(span))
+                {
+                    _position += 1;
+                    _row += 1;
                 }
                 else if ('\r'.EqualsSpans(span) && '\n'.EqualsSpans(PeekCharSpan(1)))
                 {
                     _position += 2;
+                    _row += 1;
                 }
                 else
                 {

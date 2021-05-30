@@ -1,9 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using FluentAssertions.Json;
@@ -11,7 +9,6 @@ using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Linguini.Syntax.Tests.Parser
 {

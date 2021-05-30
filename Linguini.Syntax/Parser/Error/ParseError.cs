@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using Linguini.Syntax.Ast;
+using Linguini.Syntax.IO;
 
 namespace Linguini.Syntax.Parser.Error
 {
@@ -8,6 +9,7 @@ namespace Linguini.Syntax.Parser.Error
     {
         public ErrorType Kind { get; }
         public string Message { get; }
+        public int Row { get; set; }
         public Range Position { get; }
         public Range? Slice { get; set; }
 
@@ -17,6 +19,7 @@ namespace Linguini.Syntax.Parser.Error
             Message = message;
             Position = position;
             Slice = null;
+            Row = 0;
         }
 
         public static ParseError ExpectedToken(char chr, int pos)

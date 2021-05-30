@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Net.Mail;
+using System.Text;
 using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.IO;
@@ -159,13 +159,15 @@ namespace Linguini.Syntax.Parser
             return new Resource(body, errors);
         }
 
-        private void AddError(ParseError error, int entryStart, List<ParseError> errors, List<IEntry> body)
+        private void AddError(ParseError error, int entryStart,  List<ParseError> errors, List<IEntry> body)
         {
+            error.Row = _reader.Row;
             _reader.SkipToNextEntry();
             error.Slice = new Range(entryStart, _reader.Position);
             errors.Add(error);
             Junk junk = new();
-            junk.Content = _reader.ReadSlice(entryStart, _reader.Position);
+            var contentSpan = _reader.ReadSlice(entryStart, _reader.Position);
+            junk.Content = contentSpan;
             body.Add(junk);
         }
 
@@ -1119,7 +1121,7 @@ namespace Linguini.Syntax.Parser
 
             while (_reader.IsNotEof)
             {
-                if (IsCurrentByte(')'))
+                if (_reader.IsCurrentChar(')'))
                 {
                     break;
                 }
@@ -1135,7 +1137,7 @@ namespace Linguini.Syntax.Parser
                 {
                     var id = msgRef.Id;
                     _reader.SkipBlank();
-                    if (IsCurrentByte(':'))
+                    if (_reader.IsCurrentChar(':'))
                     {
                         if (argNames.Contains(id))
                         {
@@ -1193,11 +1195,6 @@ namespace Linguini.Syntax.Parser
 
             args = new CallArguments(positional, nameArgs);
             return true;
-        }
-
-        private bool IsCurrentByte(char c)
-        {
-            return c.EqualsSpans(_reader.PeekCharSpan());
         }
 
         private bool TryGetAttributeAccessor(out Identifier? id, out ParseError? error)

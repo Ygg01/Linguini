@@ -27,16 +27,16 @@ term = term
 
         private static string _wrong = @"
     term = 1";
-        
+
         private static string _multi = @"
 term1 = val1
 term2 = val2
     .attr = 6";
-        
+
         private static string _replace1 = @"
 term1 = val1
 term2 = val2";
-        
+
         private static string _replace2 = @"
 term1 = xxx
 new1  = new
@@ -120,6 +120,7 @@ new1  = new
 
             Assert.Throws(typeof(LinguiniException), () => bundler.UncheckedBuild());
         }
+
         [Test]
         public void TestEnumeration()
         {
@@ -134,7 +135,7 @@ new1  = new
             CollectionAssert.AreEquivalent(new[] {"term1", "term2"}, messages);
             CollectionAssert.AreEquivalent(new[] {"id", "zero"}, functions);
         }
-        
+
         [Test]
         public void TestConcurrencyBundler()
         {
@@ -143,11 +144,11 @@ new1  = new
                 .SkipResources()
                 .UseConcurrent()
                 .UncheckedBuild();
-            
+
             Parallel.For(0, 10, i => bundler.AddResource($"term-1 = {i}", out _));
             Parallel.For(0, 10, i => bundler.AddResource($"term-2= {i}", out _));
             Parallel.For(0, 10, i => bundler.TryGetAttrMsg("term-1", null, out _, out _));
-            Parallel.For(0, 10, i => bundler.AddResourceOverriding($"term-2= {i+1}"));
+            Parallel.For(0, 10, i => bundler.AddResourceOverriding($"term-2= {i + 1}"));
             Assert.True(bundler.HasMessage("term-1"));
         }
 
@@ -164,8 +165,30 @@ new1  = new
             Parallel.For(0, 10, i => optBundle.AddResource($"term-1 = {i}", out _));
             Parallel.For(0, 10, i => optBundle.AddResource($"term-2= {i}", out _));
             Parallel.For(0, 10, i => optBundle.TryGetAttrMsg("term-1", null, out _, out _));
-            Parallel.For(0, 10, i => optBundle.AddResourceOverriding($"term-2= {i+1}"));
+            Parallel.For(0, 10, i => optBundle.AddResourceOverriding($"term-2= {i + 1}"));
             Assert.True(optBundle.HasMessage("term-1"));
+        }
+
+        public static IEnumerable<TestCaseData> TestBundleErrors
+        {
+            get
+            {
+                yield return new TestCaseData("### Comment\r\nterm1")
+                    .Returns(new List<ErrorSpan?>
+                    {
+                        new ErrorSpan(2, 13, 18, 18, 19)
+                    });
+            }
+        }
+
+        [Test]
+        [TestCaseSource(nameof(TestBundleErrors))]
+        public List<ErrorSpan?> TestBundleErrorsSpan(string input)
+        {
+            var (_, error) = LinguiniBuilder.Builder().Locale("en-US")
+                .AddResource(input)
+                .Build();
+            return error.Select(e => e.GetSpan()).ToList();
         }
     }
 }

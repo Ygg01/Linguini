@@ -6,7 +6,7 @@ namespace Linguini.Shared.Util
     public static class ZeroCopyUtil
     {
         private const int CharLength = 1;
-        public static readonly ReadOnlyMemory<char> Eof = ReadOnlyMemory<char>.Empty;
+        private static readonly ReadOnlyMemory<char> Eof = ReadOnlyMemory<char>.Empty;
 
         public static ReadOnlySpan<char> PeakCharAt(this ReadOnlyMemory<char> memory, int pos)
         {
