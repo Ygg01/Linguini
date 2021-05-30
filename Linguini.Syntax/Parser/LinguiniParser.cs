@@ -32,6 +32,8 @@ namespace Linguini.Syntax.Parser
             }
         }
 
+        public ReadOnlyMemory<char> GetReadonlyData => _reader.GetData;
+
         #region FastParse
         public Resource Parse()
         {
@@ -58,7 +60,7 @@ namespace Linguini.Syntax.Parser
 
             return new Resource(body, errors);
         }
-        
+
         private void SkipComment()
         {
             while (_reader.IsNotEof)
@@ -592,7 +594,7 @@ namespace Linguini.Syntax.Parser
                          && '\n'.EqualsSpans(_reader.PeekCharSpan(1)))
                 {
                     _reader.Position += 1;
-                    // This takes one less element because it converts CRLF endings 
+                    // This takes one less element because it converts CRLF endings
                     // to LF endings
                     textElement = new TextSlice(
                         startPos,

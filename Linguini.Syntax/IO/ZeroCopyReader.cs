@@ -33,6 +33,7 @@ namespace Linguini.Syntax.IO
 
         public bool IsNotEof => _position < _unconsumedData.Length;
         public bool IsEof => !IsNotEof;
+        internal ReadOnlyMemory<char> GetData => _unconsumedData;
 
         public ReadOnlySpan<char> PeekCharSpan(int offset = 0)
         {
