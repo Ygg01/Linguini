@@ -96,7 +96,7 @@ namespace PluralRules.Generator.Cldr
             SkipWhitespace();
             if (!TryConsume('~'))
             {
-                o = new SampleRange(endValue, null);
+                o = new SampleRange(endValue!, null);
                 return true;
             }
 
@@ -107,7 +107,7 @@ namespace PluralRules.Generator.Cldr
                 return false;
             }
 
-            o = new SampleRange(endValue, upperVal);
+            o = new SampleRange(endValue!, upperVal);
             return true;
         }
 
@@ -144,13 +144,13 @@ namespace PluralRules.Generator.Cldr
             {
                 number = Double.Parse(number).ToString(CultureInfo.InvariantCulture);
             }
+
             value = new DecimalValue(number);
             return true;
         }
 
         private bool TryConsumeExp(StringBuilder x)
         {
-         
             if (_pos + 1 <= _input.Length)
             {
                 if (_input.AsMemory(_pos, 1).Span.IsOneOf('c', 'e'))
@@ -183,6 +183,7 @@ namespace PluralRules.Generator.Cldr
                 {
                     _pos += 1;
                 }
+
                 val = _input.Range(startPos, _pos);
                 return true;
             }
@@ -197,7 +198,7 @@ namespace PluralRules.Generator.Cldr
             SkipWhitespace();
             while (TryParseAndCondition(out var andCondition))
             {
-                andConditions.Add(andCondition);
+                andConditions.Add(andCondition!);
                 SkipWhitespace();
                 if (!TryConsume("or"))
                 {
@@ -295,7 +296,7 @@ namespace PluralRules.Generator.Cldr
                 }
             }
 
-            relation = new Relation(expr, type.GetOperator(negation), list);
+            relation = new Relation(expr!, type.GetOperator(negation), list);
             return true;
         }
 
@@ -304,7 +305,7 @@ namespace PluralRules.Generator.Cldr
             list = new List<IRangeListItem>();
             while (TryParseRangeItem(out var x, list.Count > 0))
             {
-                list.Add(x);
+                list.Add(x!);
             }
 
             return true;
@@ -354,7 +355,7 @@ namespace PluralRules.Generator.Cldr
             if (TryOperand(out var operand))
             {
                 _pos += 1;
-                expr = new Expr {Operand = operand.Value};
+                expr = new Expr { Operand = operand!.Value };
 
                 SkipWhitespace();
 
@@ -544,7 +545,7 @@ namespace PluralRules.Generator.Cldr
             return IsInside(c, '0', '9');
         }
 
-        private static bool IsInside(char c, char min, char max) => (uint) (c - min) <= (uint) (max - min);
+        private static bool IsInside(char c, char min, char max) => (uint)(c - min) <= (uint)(max - min);
     }
 
     public static class StringExtensions
@@ -553,6 +554,7 @@ namespace PluralRules.Generator.Cldr
         {
             return input.Substring(start, end - start);
         }
+
         public static string FirstCharToUpper(this string input) =>
             input switch
             {
