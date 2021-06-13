@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -112,7 +111,7 @@ namespace PluralRules.Generator.Cldr
             return true;
         }
 
-        private bool TrySampleValue([NotNullWhen(true)] out DecimalValue? value)
+        private bool TrySampleValue(out DecimalValue? value)
         {
             var x = new StringBuilder();
             if (!TryParseValueAsStr(out var preDot))
@@ -184,8 +183,7 @@ namespace PluralRules.Generator.Cldr
                 {
                     _pos += 1;
                 }
-
-                val = _input[new Range(startPos, _pos)];
+                val = _input.Range(startPos, _pos);
                 return true;
             }
 
@@ -212,7 +210,7 @@ namespace PluralRules.Generator.Cldr
             return new Condition(andConditions);
         }
 
-        private bool TryParseAndCondition([NotNullWhen(true)] out AndCondition? conditions)
+        private bool TryParseAndCondition(out AndCondition? conditions)
         {
             var relations = new List<Relation>();
             SkipWhitespace();
@@ -312,7 +310,7 @@ namespace PluralRules.Generator.Cldr
             return true;
         }
 
-        private bool TryParseRangeItem([NotNullWhen(true)] out IRangeListItem? item, bool isNotFirst)
+        private bool TryParseRangeItem(out IRangeListItem? item, bool isNotFirst)
         {
             SkipWhitespace();
             if (isNotFirst)
@@ -350,7 +348,7 @@ namespace PluralRules.Generator.Cldr
             return true;
         }
 
-        private bool TryParseExpr([NotNullWhen(true)] out Expr? expr)
+        private bool TryParseExpr(out Expr? expr)
         {
             SkipWhitespace();
             if (TryOperand(out var operand))
@@ -392,7 +390,7 @@ namespace PluralRules.Generator.Cldr
                 _pos += 1;
             }
 
-            val = new DecimalValue(_input[new Range(startPos, _pos)]);
+            val = new DecimalValue(_input.Range(startPos, _pos));
             return startPos != _pos;
         }
 
@@ -405,7 +403,7 @@ namespace PluralRules.Generator.Cldr
                 _pos += 1;
             }
 
-            val = _input[new Range(startPos, _pos)];
+            val = _input.Range(startPos, _pos);
             return startPos != _pos;
         }
 
@@ -415,7 +413,7 @@ namespace PluralRules.Generator.Cldr
             return _input.AsMemory().TryReadCharSpan(_pos, out span);
         }
 
-        private bool TryOperand([NotNullWhen(true)] out Operand? operand)
+        private bool TryOperand(out Operand? operand)
         {
             if (_pos < _input.Length)
             {
@@ -436,7 +434,7 @@ namespace PluralRules.Generator.Cldr
             }
 
             var span = _input.AsMemory(_pos, consume.Length).Span;
-            var areEqual = span.Equals(consume, StringComparison.InvariantCulture);
+            var areEqual = consume.Equals(span.ToString(), StringComparison.InvariantCulture);
 
             if (areEqual)
             {
@@ -551,6 +549,10 @@ namespace PluralRules.Generator.Cldr
 
     public static class StringExtensions
     {
+        public static string Range(this string input, int start, int end)
+        {
+            return input.Substring(start, end - start);
+        }
         public static string FirstCharToUpper(this string input) =>
             input switch
             {

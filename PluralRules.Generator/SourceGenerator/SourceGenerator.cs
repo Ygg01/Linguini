@@ -436,7 +436,7 @@ namespace PluralRulesGenerated.Test
             foreach (var pluralRule in plurals)
             {
                 var langIds = pluralRule.Attribute("locales")!
-                    .Value.Split(" ")
+                    .Value.Split(' ')
                     .ToList();
                 var rules = new List<RuleMap>();
                 foreach (var element in pluralRule.Elements())
