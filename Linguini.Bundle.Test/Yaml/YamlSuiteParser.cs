@@ -5,7 +5,6 @@ using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Func;
 using Linguini.Bundle.Types;
-using Linguini.Shared.Util;
 using NUnit.Framework;
 using YamlDotNet.RepresentationModel;
 
@@ -155,7 +154,7 @@ namespace Linguini.Bundle.Test.Yaml
             List<FluentError> errors)
         {
             bundle.AddFunction(funcName, externalFunction, out var errs);
-            if (errs is {Count: > 0})
+            if (errs is { Count: > 0 })
             {
                 errors.AddRange(errs);
             }
@@ -212,7 +211,7 @@ namespace Linguini.Bundle.Test.Yaml
 
             List<string> locales = new();
             var isIsolating = false;
-            if (yamlBundle.TryConvert(out YamlMappingNode? map))
+            if (yamlBundle is YamlMappingNode map)
             {
                 if (map.TryGetNode("useIsolating", out YamlScalarNode? useIsolatingNode))
                 {

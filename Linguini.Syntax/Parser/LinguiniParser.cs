@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Text;
 using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.IO;
@@ -35,6 +34,7 @@ namespace Linguini.Syntax.Parser
         public ReadOnlyMemory<char> GetReadonlyData => _reader.GetData;
 
         #region FastParse
+
         public Resource Parse()
         {
             var body = new List<IEntry>(6);
@@ -50,6 +50,7 @@ namespace Linguini.Syntax.Parser
                 {
                     body.Add(entry);
                 }
+
                 if (error != null)
                 {
                     AddError(error, entryStart, errors, body);
@@ -90,6 +91,7 @@ namespace Linguini.Syntax.Parser
                 SkipComment();
                 return (null, null);
             }
+
             if (chrSpan.IsEqual('-'))
             {
                 return GetTerm(entryStart);
@@ -117,12 +119,12 @@ namespace Linguini.Syntax.Parser
 
                 if (lastComment != null)
                 {
-                    if (entry.TryConvert<IEntry, AstMessage>(out var message)
+                    if (entry is AstMessage message
                         && lastBlankCount < 2)
                     {
                         message.Comment = lastComment;
                     }
-                    else if (entry.TryConvert<IEntry, AstTerm>(out var term)
+                    else if (entry is AstTerm term
                              && lastBlankCount < 2)
                     {
                         term.Comment = lastComment;
@@ -139,8 +141,7 @@ namespace Linguini.Syntax.Parser
                 {
                     AddError(error, entryStart, errors, body);
                 }
-                else if (entry.TryConvert<IEntry, AstComment>(out var comment)
-                         && comment.CommentLevel == CommentLevel.Comment)
+                else if (entry is AstComment { CommentLevel: CommentLevel.Comment } comment)
                 {
                     lastComment = comment;
                 }
@@ -161,7 +162,7 @@ namespace Linguini.Syntax.Parser
             return new Resource(body, errors);
         }
 
-        private void AddError(ParseError error, int entryStart,  List<ParseError> errors, List<IEntry> body)
+        private void AddError(ParseError error, int entryStart, List<ParseError> errors, List<IEntry> body)
         {
             error.Row = _reader.Row;
             _reader.SkipToNextEntry();
@@ -288,7 +289,7 @@ namespace Linguini.Syntax.Parser
 
                 if (level != CommentLevel.None && lineLevel != level)
                 {
-                    _reader.Position -= (int) lineLevel;
+                    _reader.Position -= (int)lineLevel;
                     break;
                 }
 
@@ -315,7 +316,7 @@ namespace Linguini.Syntax.Parser
                             return false;
                         }
 
-                        _reader.Position -= (int) lineLevel;
+                        _reader.Position -= (int)lineLevel;
                         break;
                     }
 
@@ -524,11 +525,11 @@ namespace Linguini.Syntax.Parser
                     if (i < elements.Count)
                     {
                         var elem = elements[i];
-                        if (elem.TryConvert(out Placeable placeable))
+                        if (elem is Placeable placeable)
                         {
                             patterns.Add(placeable);
                         }
-                        else if (elem.TryConvert(out TextElementPlaceholder textLiteral))
+                        else if (elem is TextElementPlaceholder textLiteral)
                         {
                             int start = textLiteral.Start;
                             int indent = textLiteral.Indent;
@@ -720,7 +721,7 @@ namespace Linguini.Syntax.Parser
                 return false;
             }
 
-            if (expr.TryConvert(out TermReference termReference) && termReference.Attribute != null)
+            if (expr is TermReference { Attribute: { } })
             {
                 expr = null;
                 error = ParseError.TermAttributeAsPlaceable(_reader.Position);
@@ -743,8 +744,7 @@ namespace Linguini.Syntax.Parser
             if (!'-'.EqualsSpans(_reader.PeekCharSpan())
                 || !'>'.EqualsSpans(_reader.PeekCharSpan(1)))
             {
-                if (inlineExpression.TryConvert(out TermReference termReference)
-                    && termReference.Attribute != null)
+                if (inlineExpression is TermReference { Attribute: { } })
                 {
                     error = ParseError.TermAttributeAsPlaceable(_reader.Position);
                     retVal = null;
@@ -755,7 +755,7 @@ namespace Linguini.Syntax.Parser
                 return true;
             }
 
-            if (inlineExpression.TryConvert(out MessageReference msgRef))
+            if (inlineExpression is MessageReference msgRef)
             {
                 if (msgRef.Attribute == null)
                 {
@@ -769,12 +769,12 @@ namespace Linguini.Syntax.Parser
                 return false;
             }
 
-            if (!inlineExpression.TryConvert(out TermReference termRef))
+            if (inlineExpression is not TermReference termRef)
             {
-                if (!inlineExpression.TryConvert<IInlineExpression, TextLiteral>(out _) &&
-                    !inlineExpression.TryConvert<IInlineExpression, NumberLiteral>(out _) &&
-                    !inlineExpression.TryConvert<IInlineExpression, VariableReference>(out _) &&
-                    !inlineExpression.TryConvert<IInlineExpression, FunctionReference>(out _))
+                if (inlineExpression is not TextLiteral
+                    && inlineExpression is not NumberLiteral
+                    && inlineExpression is not VariableReference
+                    && inlineExpression is not FunctionReference)
                 {
                     retVal = null;
                     error = ParseError.ExpectedSimpleExpressionAsSelector(_reader.Position);
@@ -951,7 +951,7 @@ namespace Linguini.Syntax.Parser
                         }
                         else
                         {
-                            var seq = c == null ? ' ' : c[0];
+                            var seq = c[0];
                             error = ParseError.UnknownEscapeSequence(seq, _reader.Position);
                             expr = null;
                             return false;
@@ -1134,8 +1134,7 @@ namespace Linguini.Syntax.Parser
                     return false;
                 }
 
-                if (expr.TryConvert(out MessageReference msgRef)
-                    && msgRef.Attribute == null)
+                if (expr is MessageReference { Attribute: null } msgRef)
                 {
                     var id = msgRef.Id;
                     _reader.SkipBlank();
@@ -1216,7 +1215,7 @@ namespace Linguini.Syntax.Parser
             return true;
         }
 
-        private bool TryGetNumberLiteral([NotNullWhen(true)] out ReadOnlyMemory<char> num, out ParseError? error)
+        private bool TryGetNumberLiteral(out ReadOnlyMemory<char> num, out ParseError? error)
         {
             var start = _reader.Position;
             _reader.ReadCharIf('-');

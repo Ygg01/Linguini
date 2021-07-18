@@ -4,7 +4,6 @@ using System.IO;
 using Linguini.Bundle.Errors;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
-using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using PluralRulesGenerated;
 
@@ -18,7 +17,7 @@ namespace Linguini.Bundle.Resolver
 
             if (len == 1)
             {
-                if (self.Elements[0].TryConvert(out TextLiteral? textLiteral))
+                if (self.Elements[0] is TextLiteral textLiteral)
                 {
                     return GetFluentString(textLiteral.ToString(), scope.Bundle.TransformFunc);
                 }
@@ -26,28 +25,28 @@ namespace Linguini.Bundle.Resolver
 
             var stringWriter = new StringWriter();
             self.Write(stringWriter, scope);
-            return (FluentString) stringWriter.ToString();
+            return (FluentString)stringWriter.ToString();
         }
 
         public static IFluentType Resolve(this IInlineExpression self, Scope scope)
         {
-            if (self.TryConvert(out TextLiteral? textLiteral))
+            if (self is TextLiteral textLiteral)
             {
-                return (FluentString) textLiteral.Value.Span;
+                return (FluentString)textLiteral.Value.Span;
             }
 
-            if (self.TryConvert(out NumberLiteral? numberLiteral))
+            if (self is NumberLiteral numberLiteral)
             {
                 return FluentNumber.TryNumber(numberLiteral.Value.Span);
             }
 
-            if (self.TryConvert(out VariableReference? varRef))
+            if (self is VariableReference varRef)
             {
                 var args = scope.LocalArgs ?? scope.Args;
                 if (args != null
                     && args.TryGetValue(varRef.Id.ToString(), out var arg))
                 {
-                    return (IFluentType) arg.Copy();
+                    return arg.Copy();
                 }
 
                 if (scope.LocalArgs == null)
@@ -60,7 +59,7 @@ namespace Linguini.Bundle.Resolver
 
             var writer = new StringWriter();
             self.TryWrite(writer, scope);
-            return (FluentString) writer.ToString();
+            return (FluentString)writer.ToString();
         }
 
         private static FluentString GetFluentString(string str, Func<string, string>? transformFunc)

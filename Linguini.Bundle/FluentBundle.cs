@@ -9,7 +9,6 @@ using Linguini.Bundle.Errors;
 using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
-using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle
@@ -50,7 +49,7 @@ namespace Linguini.Bundle
                 ? option.Locales[0]
                 : CultureInfo.CurrentCulture.Name;
             var cultureInfo = new CultureInfo(primaryLocale, false);
-            var locales = new List<string> {primaryLocale};
+            var locales = new List<string> { primaryLocale };
             IDictionary<(string, EntryKind), IEntry> entries;
             IDictionary<string, FluentFunction> functions;
             if (option.UseConcurrent)
@@ -240,26 +239,30 @@ namespace Linguini.Bundle
             var id = (ident, EntryKind.Message);
             if (_entries.ContainsKey(id)
                 && _entries.TryGetValue(id, out var value)
-                && value.ToKind() == EntryKind.Message)
+                && value.ToKind() == EntryKind.Message
+                && _entries[id] is AstMessage astMessage)
             {
-                return _entries[id].TryConvert(out message);
+                message = astMessage;
+                return true;
             }
 
             message = null;
             return false;
         }
 
-        public bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? astTerm)
+        public bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? term)
         {
             var termId = (ident, EntryKind.Term);
             if (_entries.ContainsKey(termId)
                 && _entries.TryGetValue(termId, out var value)
-                && value.ToKind() == EntryKind.Term)
+                && value.ToKind() == EntryKind.Term
+                && _entries[termId] is AstTerm astTerm)
             {
-                return _entries[termId].TryConvert(out astTerm);
+                term = astTerm;
+                return true;
             }
 
-            astTerm = null;
+            term = null;
             return false;
         }
 
@@ -309,7 +312,7 @@ namespace Linguini.Bundle
         {
             return new()
             {
-                Culture = (CultureInfo) Culture.Clone(),
+                Culture = (CultureInfo)Culture.Clone(),
                 FormatterFunc = FormatterFunc,
                 Locales = new List<string>(Locales),
                 _entries = new Dictionary<(string, EntryKind), IEntry>(_entries),

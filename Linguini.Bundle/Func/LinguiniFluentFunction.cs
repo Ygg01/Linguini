@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Text;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
-using Linguini.Shared.Util;
 
 namespace Linguini.Bundle.Func
 {
@@ -36,7 +35,7 @@ namespace Linguini.Bundle.Func
                 sum += fluentType.Value;
             }
 
-            return (FluentNumber) sum;
+            return (FluentNumber)sum;
         }
 
         public static IFluentType Identity(IList<IFluentType> args, IDictionary<string, IFluentType> namedArgs)
@@ -58,17 +57,17 @@ namespace Linguini.Bundle.Func
             for (var i = 0; i < args.Count; i++)
             {
                 var str = args[i];
-                if (str.TryConvert(out FluentString? fs))
+                if (str is FluentString fs)
                 {
                     stringConcat.Append(fs);
                 }
-                else if (str.TryConvert(out FluentNumber? fn))
+                else if (str is FluentNumber fn)
                 {
                     stringConcat.Append(fn);
                 }
             }
 
-            return (FluentString) stringConcat.ToString();
+            return (FluentString)stringConcat.ToString();
         }
     }
 }

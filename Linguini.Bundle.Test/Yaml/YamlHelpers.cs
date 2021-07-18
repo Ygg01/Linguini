@@ -3,11 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Threading;
-using Linguini.Bundle.Types;
-using Linguini.Shared;
 using Linguini.Shared.Types.Bundle;
-using Linguini.Shared.Util;
-using Linguini.Syntax.Ast;
 using YamlDotNet.RepresentationModel;
 
 #pragma warning disable 8600
@@ -54,7 +50,7 @@ namespace Linguini.Bundle.Test.Yaml
         {
             if (mapping.Children.TryGetValue(_getFetchNode(key), out var node))
             {
-                returnNode = (T) node;
+                returnNode = (T)node;
                 return true;
             }
 
@@ -78,7 +74,7 @@ namespace Linguini.Bundle.Test.Yaml
         [Pure]
         public static string AsString(this YamlNode node)
         {
-            return ((YamlScalarNode) node).Value ?? "";
+            return ((YamlScalarNode)node).Value ?? "";
         }
 
         #endregion
@@ -87,7 +83,7 @@ namespace Linguini.Bundle.Test.Yaml
 
         public static List<ResolverTestSuite> ParseResolverTests(this YamlDocument doc)
         {
-            var suiteMapNode = (YamlMappingNode) doc.RootNode["suites"][0];
+            var suiteMapNode = (YamlMappingNode)doc.RootNode["suites"][0];
             var testSuites = new List<ResolverTestSuite>();
             if (suiteMapNode.TryGetNode<YamlSequenceNode>("tests", out _))
             {
@@ -95,21 +91,21 @@ namespace Linguini.Bundle.Test.Yaml
                 ProcessTestSuite(suiteMapNode, topLevel);
                 testSuites.Add(topLevel);
             }
+
             if (suiteMapNode.TryGetNode("suites", out YamlSequenceNode suites))
             {
-                
                 foreach (var suiteProp in suites.Children)
                 {
                     var testSuite = new ResolverTestSuite();
-                    if (suiteProp.TryConvert(out YamlMappingNode mapNode))
+                    if (suiteProp is YamlMappingNode mapNode)
                     {
                         ProcessTestSuite(mapNode, testSuite);
                     }
 
                     testSuites.Add(testSuite);
                 }
-                
             }
+
             return testSuites;
         }
 
@@ -128,6 +124,7 @@ namespace Linguini.Bundle.Test.Yaml
                 {
                     testSuite.Bundle = new();
                 }
+
                 testSuite.Bundle.Errors.AddRange(errs);
             }
 
@@ -147,7 +144,7 @@ namespace Linguini.Bundle.Test.Yaml
             var testCollection = new List<ResolverTestSuite.ResolverTest>();
             foreach (var test in testsNode.Children)
             {
-                testCollection.Add(ProcessTest((YamlMappingNode) test));
+                testCollection.Add(ProcessTest((YamlMappingNode)test));
             }
 
             return testCollection;
@@ -186,7 +183,7 @@ namespace Linguini.Bundle.Test.Yaml
             var retVal = new List<ResolverTestSuite.ResolverAssert>();
             foreach (var assertNode in assertsNodes.Children)
             {
-                if (assertNode.TryConvert(out YamlMappingNode assertMap))
+                if (assertNode is YamlMappingNode assertMap)
                 {
                     var resolverAssert = new ResolverTestSuite.ResolverAssert();
 
@@ -233,16 +230,16 @@ namespace Linguini.Bundle.Test.Yaml
             var processArgs = new Dictionary<string, IFluentType>();
             foreach (var arg in argsNode.Children)
             {
-                var key = (YamlScalarNode) arg.Key;
-                var val = (YamlScalarNode) arg.Value;
+                var key = (YamlScalarNode)arg.Key;
+                var val = (YamlScalarNode)arg.Value;
                 IFluentType fluentVal;
                 if (Double.TryParse(val.AsString(), out var result))
                 {
-                    fluentVal = (FluentNumber) result;
+                    fluentVal = (FluentNumber)result;
                 }
                 else
                 {
-                    fluentVal = (FluentString) val.AsString();
+                    fluentVal = (FluentString)val.AsString();
                 }
 
                 processArgs.Add(key.Value!, fluentVal);
@@ -257,17 +254,17 @@ namespace Linguini.Bundle.Test.Yaml
             testBundle = new ResolverTestSuite.ResolverTestBundle();
             foreach (var bundleNode in bundles.Children)
             {
-                if (bundleNode.TryConvert(out YamlMappingNode bundleMap))
+                if (bundleNode is YamlMappingNode bundleMap)
                 {
                     foreach (var keyValueNode in bundleMap.Children)
                     {
                         if (keyValueNode.Key.ToString().Equals("functions"))
                         {
-                            ProcessFunctions((YamlSequenceNode) keyValueNode.Value, out testBundle.Functions);
+                            ProcessFunctions((YamlSequenceNode)keyValueNode.Value, out testBundle.Functions);
                         }
                         else if (keyValueNode.Key.ToString().Equals("errors"))
                         {
-                            testBundle.Errors = ProcessErrors((YamlSequenceNode) bundleMap["errors"]);
+                            testBundle.Errors = ProcessErrors((YamlSequenceNode)bundleMap["errors"]);
                         }
                         else if (keyValueNode.Key.ToString().Equals("transform"))
                         {
@@ -291,21 +288,21 @@ namespace Linguini.Bundle.Test.Yaml
             bundle = new List<string>(functionsNode.Children.Count);
             foreach (var function in functionsNode)
             {
-                if (function.TryConvert(out YamlScalarNode funcName))
+                if (function is YamlScalarNode funcName)
                 {
                     bundle.Add(funcName.Value!);
                 }
             }
         }
 
-        private static (List<string>,  List<ResolverTestSuite.ResolverTestError>) 
+        private static (List<string>, List<ResolverTestSuite.ResolverTestError>)
             ProcessResources(YamlSequenceNode returnNode)
         {
             List<string> resource = new();
             List<ResolverTestSuite.ResolverTestError> errors = new();
             foreach (var resNode in returnNode.Children)
             {
-                if (resNode.TryConvert(out YamlMappingNode map))
+                if (resNode is YamlMappingNode map)
                 {
                     if (map.TryGetNode("source", out YamlScalarNode sourceValue))
                     {
@@ -327,7 +324,7 @@ namespace Linguini.Bundle.Test.Yaml
             List<ResolverTestSuite.ResolverTestError> resolverTestErrors = new();
             foreach (var error in errorNode.Children)
             {
-                if (error.TryConvert(out YamlMappingNode errMap))
+                if (error is YamlMappingNode errMap)
                 {
                     var err = new ResolverTestSuite.ResolverTestError();
                     if (errMap.TryGetNode("type", out YamlScalarNode errType))

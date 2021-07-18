@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Syntax.Serialization
@@ -19,13 +18,15 @@ namespace Linguini.Syntax.Serialization
             writer.WritePropertyName("type");
             writer.WriteStringValue("Placeable");
             writer.WritePropertyName("expression");
-            if (value.Expression.TryConvert(out IInlineExpression? expr))
+
+            switch (value.Expression)
             {
-                ResourceSerializer.WriteInlineExpression(writer, expr, options);
-            }
-            else if (value.Expression.TryConvert(out SelectExpression? selectExpr))
-            {
-                JsonSerializer.Serialize(writer, selectExpr, options);
+                case IInlineExpression inlineExpression:
+                    ResourceSerializer.WriteInlineExpression(writer, inlineExpression, options);
+                    break;
+                case SelectExpression selectExpression:
+                    JsonSerializer.Serialize(writer, selectExpression, options);
+                    break;
             }
 
             writer.WriteEndObject();

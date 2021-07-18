@@ -3,10 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Linguini.Bundle.Errors;
-using Linguini.Bundle.Types;
-using Linguini.Shared;
 using Linguini.Shared.Types.Bundle;
-using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle.Resolver
@@ -27,7 +24,7 @@ namespace Linguini.Bundle.Resolver
 
                 var elem = pattern.Elements[i];
 
-                if (elem.TryConvert(out TextLiteral? textLiteral))
+                if (elem is TextLiteral textLiteral)
                 {
                     if (transformFunc != null)
                     {
@@ -38,7 +35,7 @@ namespace Linguini.Bundle.Resolver
                         writer.Write(textLiteral.Value.Span);
                     }
                 }
-                else if (elem.TryConvert(out Placeable? placeable))
+                else if (elem is Placeable placeable)
                 {
                     var expr = placeable.Expression;
                     if (scope.IncrPlaceable() > scope.Bundle.MaxPlaceable)
@@ -69,15 +66,14 @@ namespace Linguini.Bundle.Resolver
         public static bool TryWrite(this IExpression expression, TextWriter writer, Scope scope)
         {
             var errors = new List<FluentError>();
-            if (expression.TryConvert(out IInlineExpression? inlineExpression))
+            if (expression is IInlineExpression inlineExpression)
             {
                 inlineExpression.Write(writer, scope);
             }
-            else if (expression.TryConvert(out SelectExpression? selectExpression))
+            else if (expression is SelectExpression selectExpression)
             {
                 var selector = selectExpression.Selector.Resolve(scope);
-                if (selector.TryConvert(out FluentString _)
-                    || selector.TryConvert(out FluentNumber _))
+                if (selector is FluentString or FluentNumber)
                 {
                     foreach (var variant in selectExpression.Variants)
                     {
@@ -118,26 +114,26 @@ namespace Linguini.Bundle.Resolver
 
         private static void Write(this IInlineExpression self, TextWriter writer, Scope scope)
         {
-            if (self.TryConvert(out TextLiteral? textLiteral))
+            if (self is TextLiteral textLiteral)
             {
                 writer.Write(textLiteral.Value.Span);
                 return;
             }
 
-            if (self.TryConvert(out NumberLiteral? numberLiteral))
+            if (self is NumberLiteral numberLiteral)
             {
                 var value = FluentNumber.TryNumber(numberLiteral.Value.Span);
                 value.Write(writer, scope);
                 return;
             }
 
-            if (self.TryConvert(out MessageReference? msgRef))
+            if (self is MessageReference msgRef)
             {
                 ProcessMsgRef(self, writer, scope, msgRef);
                 return;
             }
 
-            if (self.TryConvert(out TermReference? termRef))
+            if (self is TermReference termRef)
             {
                 var res = scope.GetArguments(termRef.Arguments);
                 scope.SetLocalArgs(res.Named);
@@ -147,7 +143,7 @@ namespace Linguini.Bundle.Resolver
                     var attr = term
                         .Attributes
                         .Find(a => a.Id.Equals(attrName));
-                    
+
                     scope.Track(writer, attr != null ? attr.Value : term.Value, self);
                 }
                 else
@@ -159,7 +155,7 @@ namespace Linguini.Bundle.Resolver
                 return;
             }
 
-            if (self.TryConvert(out FunctionReference? funcRef))
+            if (self is FunctionReference funcRef)
             {
                 var (resolvedPosArgs, resolvedNamedArgs) = scope.GetArguments(funcRef.Arguments);
 
@@ -181,7 +177,7 @@ namespace Linguini.Bundle.Resolver
                 }
             }
 
-            if (self.TryConvert(out VariableReference? varRef))
+            if (self is VariableReference varRef)
             {
                 var id = varRef.Id;
                 var args = scope.LocalArgs ?? scope.Args;
@@ -204,7 +200,7 @@ namespace Linguini.Bundle.Resolver
                 }
             }
 
-            if (self.TryConvert(out Placeable? placeable))
+            if (self is Placeable placeable)
             {
                 placeable.Expression.TryWrite(writer, scope);
             }
@@ -264,11 +260,11 @@ namespace Linguini.Bundle.Resolver
 
         public static void WriteError(this IExpression self, TextWriter writer)
         {
-            if (self.TryConvert(out IInlineExpression? expr))
+            if (self is IInlineExpression expr)
             {
                 expr.WriteError(writer);
             }
-            else if (self.TryConvert(out SelectExpression _))
+            else if (self is SelectExpression)
             {
                 throw new ArgumentException("Unexpected select expression!");
             }
@@ -276,7 +272,7 @@ namespace Linguini.Bundle.Resolver
 
         public static void WriteError(this IInlineExpression self, TextWriter writer)
         {
-            if (self.TryConvert(out MessageReference? msgRef))
+            if (self is MessageReference msgRef)
             {
                 if (msgRef.Attribute == null)
                 {
@@ -287,7 +283,8 @@ namespace Linguini.Bundle.Resolver
                 writer.Write($"{msgRef.Id}.{msgRef.Attribute}");
                 return;
             }
-            else if (self.TryConvert(out TermReference? termRef))
+
+            if (self is TermReference termRef)
             {
                 if (termRef.Attribute == null)
                 {
@@ -297,12 +294,12 @@ namespace Linguini.Bundle.Resolver
 
                 writer.Write($"-{termRef.Id}.{termRef.Attribute}");
             }
-            else if (self.TryConvert(out FunctionReference? funcRef))
+            else if (self is FunctionReference funcRef)
             {
                 writer.Write($"{funcRef.Id}()");
                 return;
             }
-            else if (self.TryConvert(out VariableReference? varRef))
+            else if (self is VariableReference varRef)
             {
                 writer.Write($"${varRef.Id}");
                 return;

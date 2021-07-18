@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices.ComTypes;
 using Linguini.Shared;
 using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
@@ -32,9 +33,15 @@ namespace Linguini.Syntax.Tests.Parser
         {
             Resource parsed = new LinguiniParser(input).ParseWithComments();
             Assert.That(parsed.Entries.Count, Is.EqualTo(1));
-            Assert.True(parsed.Entries[0].TryConvert<IEntry, AstComment>(out var comment));
-            Assert.AreEqual(expectedCommentLevel, comment!.CommentLevel);
-            Assert.AreEqual(expectedContent, comment.AsStr());
+            if (parsed.Entries[0] is AstComment comment)
+            {
+                Assert.AreEqual(expectedCommentLevel, comment.CommentLevel);
+                Assert.AreEqual(expectedContent, comment.AsStr());
+            }
+            else
+            {
+                Assert.Fail("Comment was not found");
+            }
         }
 
         [Test]
@@ -76,8 +83,7 @@ namespace Linguini.Syntax.Tests.Parser
             Resource parsed = new LinguiniParser(input).ParseWithComments();
             Assert.AreEqual(0, parsed.Errors.Count, "Failed, with errors");
             Assert.AreEqual(1, parsed.Entries.Count);
-            if (parsed.Entries[0].TryConvert(out AstMessage message)
-                && message.Value != null)
+            if (parsed.Entries[0] is AstMessage { Value: { } } message)
             {
                 Assert.AreEqual(expName, message.Id.ToString());
                 Assert.AreEqual(expValue, message.Value.Stringify());
@@ -102,18 +108,28 @@ namespace Linguini.Syntax.Tests.Parser
             Assert.AreEqual(expBodySize, parsed.Entries.Count);
             if (inMessage)
             {
-                parsed.Entries[0].TryConvert(out AstMessage? msg);
-
-                Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
-                Assert.AreEqual(expComment, msg.Comment.AsStr());
+                if (parsed.Entries[0] is AstMessage msg)
+                {
+                    Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
+                    Assert.AreEqual(expComment, msg.Comment.AsStr());
+                }
+                else
+                {
+                    Assert.Fail("No AstMessage found");
+                }
             }
             else
             {
-                parsed.Entries[0].TryConvert(out AstComment comment);
-                parsed.Entries[1].TryConvert(out AstMessage msg);
-
-                Assert.AreEqual(expComment, comment.AsStr());
-                Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
+                if (parsed.Entries[0] is AstComment comment
+                    && parsed.Entries[1] is AstMessage message)
+                {
+                    Assert.AreEqual(expComment, comment.AsStr());
+                    Assert.AreEqual(expMsg, new string(message.Id.Name.ToArray()));
+                }
+                else
+                {
+                    Assert.Fail($"Unexpected values ${parsed.Entries[0]} and ${parsed.Entries[1]}");
+                }
             }
         }
 
@@ -130,18 +146,28 @@ namespace Linguini.Syntax.Tests.Parser
             Assert.AreEqual(expBodySize, parsed.Entries.Count);
             if (inTerm)
             {
-                parsed.Entries[0].TryConvert(out AstTerm? term);
-
-                Assert.AreEqual(expTerm, new string(term.Id.Name.ToArray()));
-                Assert.AreEqual(expComment, term.Comment.AsStr());
+                if (parsed.Entries[0] is AstTerm term)
+                {
+                    Assert.AreEqual(expTerm, new string(term.Id.Name.ToArray()));
+                    Assert.AreEqual(expComment, term.Comment.AsStr());
+                }
+                else
+                {
+                    Assert.Fail($"Expected term, found {parsed.Entries[0]}");
+                }
             }
             else
             {
-                parsed.Entries[0].TryConvert(out AstComment? comment);
-                parsed.Entries[1].TryConvert(out AstTerm? term);
-
-                Assert.AreEqual(expComment, comment!.AsStr());
-                Assert.AreEqual(expTerm, new string(term!.Id.Name.ToArray()));
+                if (parsed.Entries[0] is AstComment comment
+                    && parsed.Entries[1] is AstTerm term)
+                {
+                    Assert.AreEqual(expComment, comment!.AsStr());
+                    Assert.AreEqual(expTerm, new string(term!.Id.Name.ToArray()));
+                }
+                else
+                {
+                    Assert.Fail($"Expected term, found {parsed.Entries[0]}");
+                }
             }
         }
 
@@ -156,14 +182,14 @@ namespace Linguini.Syntax.Tests.Parser
             Assert.AreEqual(0, res.Errors.Count);
             Assert.AreEqual(1, res.Entries.Count);
             Assert.IsInstanceOf(typeof(AstMessage), res.Entries[0]);
-            if (res.Entries[0].TryConvert(out AstMessage message))
+            if (res.Entries[0] is AstMessage message
+                && message.Value.Elements[0] is Placeable placeable
+                && placeable.Expression is NumberLiteral numberLiteral)
             {
                 Assert.AreEqual(1, message.Value.Elements.Count);
                 Assert.IsInstanceOf(typeof(Placeable), message.Value.Elements[0]);
-                message.Value.Elements[0].TryConvert(out Placeable placeable);
                 Assert.NotNull(placeable);
                 Assert.IsInstanceOf(typeof(NumberLiteral), placeable.Expression);
-                placeable.Expression.TryConvert(out NumberLiteral numberLiteral);
                 Assert.NotNull(numberLiteral);
                 Assert.AreEqual(identifier, message.Id.ToString());
                 Assert.AreEqual(value, numberLiteral!.ToString());

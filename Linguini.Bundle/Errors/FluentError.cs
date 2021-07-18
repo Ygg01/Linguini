@@ -31,7 +31,7 @@ namespace Linguini.Bundle.Errors
     {
         private readonly string _id;
         private readonly EntryKind _kind;
-    
+
         public OverrideFluentError(string id, EntryKind kind)
         {
             _id = id;
@@ -42,7 +42,7 @@ namespace Linguini.Bundle.Errors
         {
             return ErrorType.Overriding;
         }
-        
+
         public override string ToString()
         {
             return $"For id:{_id} already exist entry of type: {_kind.ToString()}";
@@ -64,6 +64,7 @@ namespace Linguini.Bundle.Errors
         {
             return Kind;
         }
+
         public override string ToString()
         {
             return Description;
@@ -73,7 +74,7 @@ namespace Linguini.Bundle.Errors
         {
             return new($"No value: {idName.Span.ToString()}", ErrorType.NoValue);
         }
-        
+
         public static ResolverFluentError NoValue(string pattern)
         {
             return new($"No value: {pattern}", ErrorType.NoValue);
@@ -92,12 +93,12 @@ namespace Linguini.Bundle.Errors
         public static ResolverFluentError Reference(IInlineExpression self)
         {
             // TODO only allow references here
-            if (self.TryConvert(out FunctionReference? funcRef))
+            if (self is FunctionReference funcRef)
             {
                 return new($"Unknown function: {funcRef.Id}()", ErrorType.Reference);
             }
 
-            if (self.TryConvert(out MessageReference? msgRef))
+            if (self is MessageReference msgRef)
             {
                 if (msgRef.Attribute == null)
                 {
@@ -107,7 +108,7 @@ namespace Linguini.Bundle.Errors
                 return new($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}", ErrorType.Reference);
             }
 
-            if (self.TryConvert(out TermReference? termReference))
+            if (self is TermReference termReference)
             {
                 if (termReference.Attribute == null)
                 {
@@ -117,7 +118,7 @@ namespace Linguini.Bundle.Errors
                 return new($"Unknown attribute: -{termReference.Id}.{termReference.Attribute}", ErrorType.Reference);
             }
 
-            if (self.TryConvert(out VariableReference? varRef))
+            if (self is VariableReference varRef)
             {
                 return new($"Unknown variable: ${varRef.Id}", ErrorType.Reference);
             }
@@ -144,7 +145,7 @@ namespace Linguini.Bundle.Errors
         {
             _error = error;
         }
-        
+
         public static ParserFluentError ParseError(ParseError parseError)
         {
             return new(parseError);
@@ -154,7 +155,7 @@ namespace Linguini.Bundle.Errors
         {
             return ErrorType.Parser;
         }
-        
+
         public override string ToString()
         {
             return _error.Message;
@@ -164,7 +165,7 @@ namespace Linguini.Bundle.Errors
         {
             if (_error.Slice == null)
                 return null;
-            
+
             return new(_error.Row, _error.Slice.Value.Start.Value, _error.Slice.Value.End.Value,
                 _error.Position.Start.Value, _error.Position.End.Value);
         }

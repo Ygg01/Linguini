@@ -1,6 +1,4 @@
-﻿using Linguini.Shared.Util;
-
-namespace Linguini.Shared.Types.Bundle
+﻿namespace Linguini.Shared.Types.Bundle
 {
     public interface IFluentType
     {
@@ -13,33 +11,21 @@ namespace Linguini.Shared.Types.Bundle
 
         bool Matches(IFluentType other, IScope scope)
         {
-            if (this.TryConvert(out FluentString? s1)
-                && other.TryConvert(out FluentString? s2))
+            return (this, other) switch
             {
-                return s1.Equals(s2);
-            }
+                (FluentString fs1, FluentString fs2) => fs1.Equals(fs2),
+                (FluentNumber fn1, FluentNumber fn2) => fn1.Equals(fn2),
+                (FluentString fs1, FluentNumber fn2) => MatchByPluralCategory(scope, fs1, fn2),
+                _ => false,
+            };
+        }
 
-            if (this.TryConvert(out FluentNumber? n1)
-                && other.TryConvert(out FluentNumber? n2))
-            {
-                return n1.Equals(n2);
-            }
+        bool MatchByPluralCategory(IScope scope, FluentString fs1, FluentNumber fn2)
+        {
+            if (!fs1.TryGetPluralCategory(out var strCategory)) return false;
+            var numCategory = scope.GetPluralRules(RuleType.Cardinal, fn2);
 
-            if (this.TryConvert(out FluentString? fs1)
-                && other.TryConvert(out FluentNumber? fn2))
-            {
-                if (fs1.TryGetPluralCategory(out var strCategory))
-                {
-                    var numCategory = scope
-                        .GetPluralRules(RuleType.Cardinal, fn2);
-
-                    return numCategory == strCategory;
-                }
-
-                return false;
-            }
-
-            return false;
+            return numCategory == strCategory;
         }
 
         IFluentType Copy();
