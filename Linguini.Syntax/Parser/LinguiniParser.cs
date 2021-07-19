@@ -14,15 +14,26 @@ using Attribute = Linguini.Syntax.Ast.Attribute;
 
 namespace Linguini.Syntax.Parser
 {
+    /// <summary>
+    /// Zero copy parser for Fluent system.
+    /// </summary>
     public class LinguiniParser
     {
         private readonly ZeroCopyReader _reader;
 
+        /// <summary>
+        /// Set input to <c>string</c>
+        /// </summary>
+        /// <param name="input">Input to be parsed</param>
         public LinguiniParser(string input)
         {
             _reader = new ZeroCopyReader(input);
         }
 
+        /// <summary>
+        /// Set input to <c>TextReader</c>
+        /// </summary>
+        /// <param name="input">TextReader to be parsed to Fluent AST.</param>
         public LinguiniParser(TextReader input)
         {
             using (input)
@@ -35,6 +46,10 @@ namespace Linguini.Syntax.Parser
 
         #region FastParse
 
+        /// <summary>
+        /// Convert the previously set input to Fluent AST. 
+        /// </summary>
+        /// <returns>Fluent AST resource.</returns>
         public Resource Parse()
         {
             var body = new List<IEntry>(6);
@@ -103,6 +118,10 @@ namespace Linguini.Syntax.Parser
         #endregion
 
 
+        /// <summary>
+        /// Convert the previously set input to Fluent AST, ignoring comments.
+        /// </summary>
+        /// <returns>Fluent AST resource.</returns>
         public Resource ParseWithComments()
         {
             var body = new List<IEntry>();

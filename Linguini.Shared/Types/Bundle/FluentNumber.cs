@@ -4,6 +4,9 @@ using System.Globalization;
 #nullable enable
 namespace Linguini.Shared.Types.Bundle
 {
+    /// <summary>
+    /// Fluent representation of a number in double precision
+    /// </summary>
     public record FluentNumber : IFluentType
     {
         public readonly double Value;

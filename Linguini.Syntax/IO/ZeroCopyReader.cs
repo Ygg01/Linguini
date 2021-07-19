@@ -3,6 +3,9 @@ using Linguini.Shared.Util;
 
 namespace Linguini.Syntax.IO
 {
+    /// <summary>
+    /// Zero copy reader used to parse Fluent resources
+    /// </summary>
     public class ZeroCopyReader
     {
         private readonly ReadOnlyMemory<char> _unconsumedData;

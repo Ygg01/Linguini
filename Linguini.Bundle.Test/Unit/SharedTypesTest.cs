@@ -1,5 +1,4 @@
-﻿using System;
-using Linguini.Shared.Types;
+﻿using Linguini.Shared.Types;
 using NUnit.Framework;
 
 namespace Linguini.Bundle.Test.Unit
@@ -18,16 +17,11 @@ namespace Linguini.Bundle.Test.Unit
         [TestCase("many", PluralCategory.Many)]
         [TestCase("other", PluralCategory.Other)]
         [TestCase("default", PluralCategory.Other)]
+        [TestCase("err", null)]
         public void TestPluralCategoryHelper(string? input, PluralCategory? expected)
         {
-            Assert.AreEqual(input != null, input.TryPluralCategory(out var actual));
+            Assert.AreEqual(expected != null, input.TryPluralCategory(out var actual));
             Assert.AreEqual(expected, actual);
-        }
-
-        [Test]
-        public void TestFailPluralCategory()
-        {
-            Assert.Throws(typeof(ArgumentException), () => "unknown".TryPluralCategory(out _));
         }
     }
 }

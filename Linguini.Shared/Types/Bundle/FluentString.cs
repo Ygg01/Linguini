@@ -3,6 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Linguini.Shared.Types.Bundle
 {
+    /// <summary>
+    /// Fluent representation of a string value
+    /// </summary>
     public record FluentString : IFluentType
     {
         private readonly string _content;

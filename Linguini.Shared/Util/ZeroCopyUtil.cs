@@ -3,6 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace Linguini.Shared.Util
 {
+    /// <summary>
+    /// Utils used for Zero copy parsing.
+    /// </summary>
     public static class ZeroCopyUtil
     {
         private const int CharLength = 1;
