@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IncludeBuildOutput>true</IncludeBuildOutput>
-        <PackageVersion>0.1.0</PackageVersion>
+        <PackageVersion>0.1.1</PackageVersion>
         <Title>Source Generator for Plural Rules</Title>
         <Authors>Daniel Fath</Authors>
         <Description>Source generator that converts xml for plural rules into a compile time functions.</Description>
