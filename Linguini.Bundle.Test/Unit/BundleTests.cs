@@ -151,6 +151,24 @@ new1  = new
             Parallel.For(0, 10, i => bundler.AddResourceOverriding($"term-2= {i + 1}"));
             Assert.True(bundler.HasMessage("term-1"));
         }
+        
+        [Test]
+        public void TestExample()
+        {
+            var bundler = LinguiniBuilder.Builder()
+                .CultureInfo(new CultureInfo("en"))
+                .AddResource("hello-user =  Hello, { $username }!")
+                .SetUseIsolating(false)
+                .UncheckedBuild();
+            
+            var props = new Dictionary<string, IFluentType>()
+            {
+                {"username", (FluentString)"Test"}
+            };
+
+            var message = bundler.GetAttrMessage("hello-user", props);
+            Assert.AreEqual("Hello, Test!", message);
+        }
 
 
         [Test]

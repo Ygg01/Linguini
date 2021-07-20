@@ -6,12 +6,12 @@ namespace Linguini.Bundle.Errors
 {
     public class LinguiniException : Exception
     {
-        public LinguiniException(List<FluentError> errors) 
+        public LinguiniException(IList<FluentError> errors) 
             : this(FluentErrorsToString(errors))
         {
         }
 
-        private static string FluentErrorsToString(List<FluentError> errors)
+        private static string FluentErrorsToString(IList<FluentError> errors)
         {
             StringBuilder sb = new();
             sb.Append("Following errors weren't handled:\n");

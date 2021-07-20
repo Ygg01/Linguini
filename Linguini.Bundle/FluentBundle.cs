@@ -187,6 +187,17 @@ namespace Linguini.Bundle
                    && _entries[id] is AstMessage;
         }
 
+        public string? GetAttrMessage(string msgWithAttr, FluentArgs? args = null)
+        {
+            TryGetAttrMsg(msgWithAttr, args, out var errors, out var message);
+            if (errors.Count > 0)
+            {
+                throw new LinguiniException(errors);
+            }
+
+            return message;
+        }
+
         public bool TryGetAttrMsg(string msgWithAttr, FluentArgs? args,
             out IList<FluentError> errors, out string? message)
         {
