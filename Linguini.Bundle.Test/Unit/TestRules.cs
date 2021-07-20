@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
@@ -17,6 +18,7 @@ namespace Linguini.Bundle.Test.Unit
 
         [Test]
         [Parallelizable]
+        [Category("Cardinals")]
         [TestCaseSource(nameof(CardinalTestData))]
         public void TestCardinal(string cultureStr, RuleType type, bool isDecimal, string lower, string? upper,
             PluralCategory expected)
@@ -26,6 +28,7 @@ namespace Linguini.Bundle.Test.Unit
 
         [Test]
         [Parallelizable]
+        [Category("Ordinals")]
         [TestCaseSource(nameof(OrdinalTestData))]
         public void TestOrdinal(string cultureStr, RuleType type, bool isDecimal, string lower, string? upper,
             PluralCategory expected)
@@ -46,15 +49,8 @@ namespace Linguini.Bundle.Test.Unit
         private static void TestData(string cultureStr, RuleType type, bool isDecimal, string lower, string? upper,
             PluralCategory expected)
         {
-            CultureInfo info;
-            try
-            {
-                info = new CultureInfo(cultureStr);
-            }
-            catch (Exception)
-            {
-                info = CultureInfo.InvariantCulture;
-            }
+            if (!TryGetCultureInfo(cultureStr, type, out var info))
+                return;
 
             // If upper limit exist, we probe the range a bit
             if (upper != null)
@@ -77,9 +73,34 @@ namespace Linguini.Bundle.Test.Unit
             {
                 var value = FluentNumber.FromString(lower);
                 var actual = GetPluralCategory(info, type, value);
-
                 Assert.AreEqual(expected, actual);
             }
+        }
+
+        private static bool TryGetCultureInfo(string cultureStr, RuleType type,
+            [NotNullWhen(true)] out CultureInfo? culture)
+        {
+            if (cultureStr.Equals("root"))
+            {
+                culture = CultureInfo.InvariantCulture;
+                return true;
+            }
+
+            try
+            {
+                var cultureStrInfo = IsSpecialCase(cultureStr, type)
+                    ? cultureStr.Replace('_', '-')
+                    : cultureStr;
+                culture = new CultureInfo(cultureStrInfo);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e);
+            }
+
+            culture = null;
+            return false;
         }
     }
 }

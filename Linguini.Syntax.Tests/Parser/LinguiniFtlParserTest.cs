@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using FluentAssertions.Json;
@@ -15,7 +16,9 @@ namespace Linguini.Syntax.Tests.Parser
     [TestFixture]
     public class LinguiniFtlParserTest
     {
-        private const string FilterComments = "$.body[?(@.type != 'GroupComment' && @.type != 'Comment' && @.type !='ResourceComment')]";
+        private const string FilterComments =
+            "$.body[?(@.type != 'GroupComment' && @.type != 'Comment' && @.type !='ResourceComment')]";
+
         private static string _baseTestDir = "";
 
         private static string BaseTestDir
@@ -26,9 +29,8 @@ namespace Linguini.Syntax.Tests.Parser
                 {
                     // We discard the last three folders from WorkDirectory
                     // to get into common test directory
-                    var testDirStrings = TestContext.CurrentContext.TestDirectory 
-                        .Split(Path.DirectorySeparatorChar)[new Range(0, Index.FromEnd(3))];
-                    _baseTestDir = Path.Combine(testDirStrings);
+                    _baseTestDir = Path.GetFullPath(
+                        Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", ".."));
                 }
 
                 return _baseTestDir;
@@ -64,7 +66,7 @@ namespace Linguini.Syntax.Tests.Parser
 
             return parser.ParseWithComments();
         }
-        
+
         private static Resource ParseFtlFileFast(string path)
         {
             LinguiniParser parser;
@@ -177,13 +179,12 @@ namespace Linguini.Syntax.Tests.Parser
 
         private JToken RemoveComments(JToken actual)
         {
-            
             var selectCommentFields = actual.SelectTokens("$..comment");
             foreach (var el in selectCommentFields)
             {
                 el.Replace(null);
             }
-            
+
             var commentTypes = actual.SelectTokens(FilterComments);
             JContainer body = new JArray();
             foreach (var el in commentTypes)
@@ -199,4 +200,3 @@ namespace Linguini.Syntax.Tests.Parser
         }
     }
 }
-
