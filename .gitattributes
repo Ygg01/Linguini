@@ -1,1 +1,2 @@
 ﻿*.ftl   binary
+*.ftl -crlf
