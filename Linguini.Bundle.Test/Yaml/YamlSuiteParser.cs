@@ -22,11 +22,8 @@ namespace Linguini.Bundle.Test.Yaml
                 {
                     // We discard the last three folders from WorkDirectory
                     // to get into common test directory
-                    var testDirStrings = TestContext
-                        .CurrentContext
-                        .TestDirectory
-                        .Split(Path.DirectorySeparatorChar)[new Range(0, Index.FromEnd(3))];
-                    _baseTestDir = Path.Combine(testDirStrings);
+                    _baseTestDir = Path.GetFullPath(
+                        Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", ".."));
                 }
 
                 return _baseTestDir;

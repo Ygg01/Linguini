@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Linguini.Bundle.Errors;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
@@ -71,7 +72,7 @@ namespace Linguini.Bundle.Resolver
         {
             public static PluralCategory GetPluralCategory(CultureInfo info, RuleType ruleType, FluentNumber number)
             {
-                var specialCase = RuleTable.UseFourLetter(info.Name, ruleType);
+                var specialCase = IsSpecialCase(info.Name, ruleType);
                 var langStr = GetPluralRuleLang(info, specialCase);
                 var func = RuleTable.GetPluralFunc(langStr, ruleType);
                 if (number.TryPluralOperands(out var op))
@@ -80,6 +81,19 @@ namespace Linguini.Bundle.Resolver
                 }
 
                 return PluralCategory.Other;
+            }
+
+            public static bool IsSpecialCase(string info, RuleType ruleType)
+            {
+                if (info.Length < 4)
+                    return false;
+
+                var specialCaseTable = ruleType switch
+                {
+                    RuleType.Ordinal => RuleTable.SpecialCaseOrdinal,
+                    _ => RuleTable.SpecialCaseCardinal
+                };
+                return specialCaseTable.Contains(info);
             }
 
             private static string GetPluralRuleLang(CultureInfo info, bool specialCase)

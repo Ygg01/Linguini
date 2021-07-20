@@ -84,20 +84,17 @@ namespace PluralRulesGenerated
 
             return _ => PluralCategory.Other;
         }}
-        
-        public static bool UseFourLetter(string culture, RuleType type)
-        {{
-            switch (type)
-            {{
-                case RuleType.Cardinal:");
+
+        public static string[] SpecialCaseCardinal = {{");
             WriteSpecialCase(sourceBuilder, _cardinalRules);
-            sourceBuilder.Append(@"
-                case RuleType.Ordinal:");
+            sourceBuilder.Append($@"
+        }};
+
+        public static string[] SpecialCaseOrdinal = {{");
             WriteSpecialCase(sourceBuilder, _ordinalRules);
-            sourceBuilder.Append(@"            }
-            
-            return false;
-        }
+            sourceBuilder.Append(@"
+        };
+        
     }
 }
 ");
@@ -147,31 +144,18 @@ namespace PluralRulesGenerated.Test
                     if (langId.Length > 4)
                     {
                         var specCase = langId.Replace('_', '-');
+                        specialCases.Add(langId);
                         specialCases.Add(specCase);
                     }
                 }
             }
 
-            if (specialCases.Count == 0)
+            if (specialCases.Count > 0)
             {
-                sourceBuilder.Append(@"
-                    return false;
-");
-            }
-            else
-            {
-                sourceBuilder.Append(@"
-                    switch (culture)
-                    {");
-                foreach (var langId in specialCases)
+                foreach (var specialCase in specialCases)
                 {
-                    sourceBuilder.Append($@"
-                        case ""{langId}"":");
+                    sourceBuilder.Append($"\n            \"{specialCase}\",");
                 }
-                sourceBuilder.Append(@"
-                            return true;
-                        default: return false;
-                    }");
             }
         }
 
@@ -187,8 +171,8 @@ namespace PluralRulesGenerated.Test
                         string category = $"PluralCategory.{ruleMap.Category.FirstCharToUpper()}";
                         foreach (var integerSample in ruleMap.Rule.Samples.IntegerSamples)
                         {
-                            var upper = integerSample.Upper == null 
-                                ? "null" 
+                            var upper = integerSample.Upper == null
+                                ? "null"
                                 : $"\"{integerSample.Upper.Value}\"";
                             testBuilder.Append($@"
             new object?[] {{""{ruleLangId}"", {ruleType}, false, ""{integerSample.Lower.Value}"", {upper}, {category}}},");
@@ -196,8 +180,8 @@ namespace PluralRulesGenerated.Test
 
                         foreach (var decimalSample in ruleMap.Rule.Samples.DecimalSamples)
                         {
-                            var upper = decimalSample.Upper == null 
-                                ? "null" 
+                            var upper = decimalSample.Upper == null
+                                ? "null"
                                 : $"\"{decimalSample.Upper.Value}\"";
                             testBuilder.Append($@"
             new object?[] {{""{ruleLangId}"", {ruleType}, true, ""{decimalSample.Lower.Value}"", {upper}, {category}}},");
@@ -422,7 +406,7 @@ namespace PluralRulesGenerated.Test
                 return rules;
             }
 
-            using var cardinalFileStream = File.OpenRead(path);
+            using var cardinalFileStream = File.OpenRead(path!);
             var xmlElems = XDocument.Load(cardinalFileStream)
                 .XPathSelectElements("//supplementalData/plurals/*");
             rules = Convert(xmlElems);
