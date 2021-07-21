@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Linguini.Bundle.Errors;
 using Linguini.Shared.Types.Bundle;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle.Resolver
@@ -116,7 +118,7 @@ namespace Linguini.Bundle.Resolver
         {
             if (self is TextLiteral textLiteral)
             {
-                writer.Write(textLiteral.Value.Span);
+                UnicodeUtil.WriteUnescapedUnicode(textLiteral.Value, writer);
                 return;
             }
 

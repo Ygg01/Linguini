@@ -42,6 +42,28 @@ term1 = xxx
 new1  = new
     .attr = 6";
 
+        private static string _testEscapeFunc = @"
+x0 = {""hh\\:mm""}
+x1 = {""hh\u005C:mm""}
+x2 = {ID(""hh\u005C:mm"")}
+x3 = {ID(""hh\\:mm"")}
+";
+
+        [Test]
+        public void TestEscapeFunction()
+        {
+            var bundle = LinguiniBuilder.Builder()
+                .Locale("en-US")
+                .AddResource(_testEscapeFunc)
+                .AddFunction("ID", _idFunc)
+                .UncheckedBuild();
+            const string expected = @"hh\:mm";
+            Assert.AreEqual(expected, bundle.GetAttrMessage("x0"));
+            Assert.AreEqual(expected, bundle.GetAttrMessage("x1"));
+            Assert.AreEqual(expected, bundle.GetAttrMessage("x2"));
+            Assert.AreEqual(expected, bundle.GetAttrMessage("x3"));
+        }
+        
         [Test]
         public void TestDefaultBundleOptions()
         {
@@ -122,6 +144,7 @@ new1  = new
         }
 
         [Test]
+        [Parallelizable]
         public void TestEnumeration()
         {
             var bundler = LinguiniBuilder.Builder()
@@ -137,6 +160,7 @@ new1  = new
         }
 
         [Test]
+        [Parallelizable]
         public void TestConcurrencyBundler()
         {
             var bundler = LinguiniBuilder.Builder()
@@ -153,6 +177,7 @@ new1  = new
         }
         
         [Test]
+        [Parallelizable]
         public void TestExample()
         {
             var bundler = LinguiniBuilder.Builder()

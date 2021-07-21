@@ -5,6 +5,7 @@ using System.Linq;
 using Linguini.Bundle.Errors;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using PluralRulesGenerated;
 
@@ -33,7 +34,9 @@ namespace Linguini.Bundle.Resolver
         {
             if (self is TextLiteral textLiteral)
             {
-                return (FluentString)textLiteral.Value.Span;
+                StringWriter stringWriter = new();
+                UnicodeUtil.WriteUnescapedUnicode(textLiteral.Value, stringWriter);
+                return (FluentString)stringWriter.ToString();
             }
 
             if (self is NumberLiteral numberLiteral)
