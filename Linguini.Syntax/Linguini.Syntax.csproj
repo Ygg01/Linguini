@@ -4,13 +4,15 @@
         <TargetFramework>net5.0</TargetFramework>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>0.1.1</PackageVersion>
+        <PackageVersion>0.1.2</PackageVersion>
         <Title>Linguini Syntax - Zero Copy parser used to parse Fluent syntax</Title>
         <Description>Linguini Syntax provides a module for parsing input using zero-copy Fluent parser.</Description>
         <Copyright>Copyright (c) Daniel Fath 2021</Copyright>
         <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/Ygg01/Linguini</RepositoryUrl>
         <PackageTags>fluent, i18n, internationalization, l10n, l20n, globalization, translation</PackageTags>
+        <PackageProjectUrl>https://github.com/Ygg01/Linguini</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
     </PropertyGroup>
 
     <ItemGroup>

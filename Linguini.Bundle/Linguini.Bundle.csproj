@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <PackageVersion>0.1.1</PackageVersion>
+        <PackageVersion>0.1.2</PackageVersion>
         <Title>Linguini Bundle - Fluent implementation</Title>
         <Authors>Daniel Fath</Authors>
         <Description>Linguini Bundle is the C# implementation of Project Fluent, a localization system developed by Mozilla
@@ -19,6 +19,8 @@ It provides easy to use and extend system for describing translations.</Descript
         <OutputType>Library</OutputType>
         <StartupObject />
         <Win32Resource />
+        <PackageProjectUrl>https://github.com/Ygg01/Linguini</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
     </PropertyGroup>
 
     <ItemGroup>
