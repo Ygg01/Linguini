@@ -183,7 +183,6 @@ namespace Linguini.Syntax.Parser
 
         private void AddError(ParseError error, int entryStart, List<ParseError> errors, List<IEntry> body)
         {
-            error.Row = _reader.Row;
             _reader.SkipToNextEntry();
             error.Slice = new Range(entryStart, _reader.Position);
             errors.Add(error);
@@ -253,7 +252,7 @@ namespace Linguini.Syntax.Parser
             }
             else
             {
-                error = ParseError.ExpectedTermField(id, entryStart, _reader.Position);
+                error = ParseError.ExpectedTermField(id, entryStart, _reader.Position, _reader.Row);
                 return (entry, error);
             }
         }
@@ -283,7 +282,7 @@ namespace Linguini.Syntax.Parser
 
             if (pattern == null && attrs.Count < 1)
             {
-                return (entry, ParseError.ExpectedMessageField(id.Name, entryStart, _reader.Position));
+                return (entry, ParseError.ExpectedMessageField(id.Name, entryStart, _reader.Position, _reader.Row));
             }
 
             return (new AstMessage(id, pattern, attrs, null), null);
@@ -302,13 +301,17 @@ namespace Linguini.Syntax.Parser
                 var lineLevel = GetCommentLevel();
                 if (lineLevel == CommentLevel.None)
                 {
+                    _reader.DecrementRow(1);
                     _reader.Position -= 1;
                     break;
                 }
 
                 if (level != CommentLevel.None && lineLevel != level)
                 {
-                    _reader.Position -= (int)lineLevel;
+                    var lineOffset = (int)lineLevel;
+
+                    _reader.DecrementRow(lineOffset);
+                    _reader.Position -= lineOffset;
                     break;
                 }
 
@@ -335,7 +338,10 @@ namespace Linguini.Syntax.Parser
                             return false;
                         }
 
-                        _reader.Position -= (int)lineLevel;
+                        var lineOffset = (int)lineLevel;
+
+                        _reader.DecrementRow(lineOffset);
+                        _reader.Position -= lineOffset;
                         break;
                     }
 
@@ -383,7 +389,7 @@ namespace Linguini.Syntax.Parser
                 return true;
             }
 
-            error = ParseError.ExpectedToken(c, _reader.PeekCharSpan(), _reader.Position);
+            error = ParseError.ExpectedToken(c, _reader.PeekCharSpan(), _reader.Position, _reader.Row);
             return false;
         }
 
@@ -397,7 +403,7 @@ namespace Linguini.Syntax.Parser
                 return true;
             }
 
-            error = ParseError.ExpectedCharRange("a-zA-Z", _reader.Position);
+            error = ParseError.ExpectedCharRange("a-zA-Z", _reader.Position, _reader.Row);
             id = default!;
             return false;
         }
@@ -639,7 +645,7 @@ namespace Linguini.Syntax.Parser
                 else if ('}'.EqualsSpans(span))
                 {
                     textElement = null;
-                    error = ParseError.UnbalancedClosingBrace(_reader.Position);
+                    error = ParseError.UnbalancedClosingBrace(_reader.Position, _reader.Row);
                     return false;
                 }
                 else
@@ -677,7 +683,7 @@ namespace Linguini.Syntax.Parser
                     break;
                 }
 
-                if (TryGetAttribute(out var attr, out _))
+                if (TryGetAttribute(out var attr))
                 {
                     attributes.Add(attr);
                 }
@@ -691,11 +697,10 @@ namespace Linguini.Syntax.Parser
             return attributes;
         }
 
-        private bool TryGetAttribute([NotNullWhen(true)] out Attribute? attr, out ParseError? error)
+        private bool TryGetAttribute([NotNullWhen(true)] out Attribute? attr)
         {
             if (!TryGetIdentifier(out var id, out var err))
             {
-                error = err;
                 attr = default!;
                 return false;
             }
@@ -704,19 +709,17 @@ namespace Linguini.Syntax.Parser
 
             if (!TryExpectChar('=', out err))
             {
-                error = err;
                 attr = default!;
                 return false;
             }
 
             if (TryGetPattern(out var pattern, out err) && pattern != null)
             {
-                error = null;
                 attr = new Attribute(id, pattern);
                 return true;
             }
 
-            error = ParseError.MissingValue(_reader.Position);
+            ParseError.MissingValue(_reader.Position, _reader.Row);
             attr = default!;
             return false;
         }
@@ -743,7 +746,7 @@ namespace Linguini.Syntax.Parser
             if (expr is TermReference { Attribute: { } })
             {
                 expr = null;
-                error = ParseError.TermAttributeAsPlaceable(_reader.Position);
+                error = ParseError.TermAttributeAsPlaceable(_reader.Position, _reader.Row);
                 return false;
             }
 
@@ -765,7 +768,7 @@ namespace Linguini.Syntax.Parser
             {
                 if (inlineExpression is TermReference { Attribute: { } })
                 {
-                    error = ParseError.TermAttributeAsPlaceable(_reader.Position);
+                    error = ParseError.TermAttributeAsPlaceable(_reader.Position, _reader.Row);
                     retVal = null;
                     return false;
                 }
@@ -778,12 +781,12 @@ namespace Linguini.Syntax.Parser
             {
                 if (msgRef.Attribute == null)
                 {
-                    error = ParseError.MessageReferenceAsSelector(_reader.Position);
+                    error = ParseError.MessageReferenceAsSelector(_reader.Position, _reader.Row);
                     retVal = null;
                     return false;
                 }
 
-                error = ParseError.MessageAttributeAsSelector(_reader.Position);
+                error = ParseError.MessageAttributeAsSelector(_reader.Position, _reader.Row);
                 retVal = null;
                 return false;
             }
@@ -796,7 +799,7 @@ namespace Linguini.Syntax.Parser
                     && inlineExpression is not FunctionReference)
                 {
                     retVal = null;
-                    error = ParseError.ExpectedSimpleExpressionAsSelector(_reader.Position);
+                    error = ParseError.ExpectedSimpleExpressionAsSelector(_reader.Position, _reader.Row);
                     return false;
                 }
             }
@@ -805,7 +808,7 @@ namespace Linguini.Syntax.Parser
                 if (termRef.Attribute == null)
                 {
                     retVal = null;
-                    error = ParseError.TermReferenceAsSelector(_reader.Position);
+                    error = ParseError.TermReferenceAsSelector(_reader.Position, _reader.Row);
                     return false;
                 }
             }
@@ -816,7 +819,7 @@ namespace Linguini.Syntax.Parser
             _reader.SkipBlankInline();
             if (!_reader.SkipEol())
             {
-                error = ParseError.ExpectedCharRange(@"\n | \r\n", _reader.Position);
+                error = ParseError.ExpectedCharRange(@"\n | \r\n", _reader.Position, _reader.Row);
                 retVal = null;
                 return false;
             }
@@ -846,7 +849,7 @@ namespace Linguini.Syntax.Parser
                 {
                     if (hasDefault)
                     {
-                        error = ParseError.MultipleDefaultVariants(_reader.Position);
+                        error = ParseError.MultipleDefaultVariants(_reader.Position, _reader.Row);
                         return true;
                     }
 
@@ -878,7 +881,7 @@ namespace Linguini.Syntax.Parser
                 }
                 else
                 {
-                    error = ParseError.MissingValue(_reader.Position);
+                    error = ParseError.MissingValue(_reader.Position, _reader.Row);
                     return false;
                 }
             }
@@ -889,7 +892,7 @@ namespace Linguini.Syntax.Parser
                 return true;
             }
 
-            error = ParseError.MissingDefaultVariant(_reader.Position);
+            error = ParseError.MissingDefaultVariant(_reader.Position, _reader.Row);
             return false;
         }
 
@@ -971,7 +974,7 @@ namespace Linguini.Syntax.Parser
                         else
                         {
                             var seq = c[0];
-                            error = ParseError.UnknownEscapeSequence(seq, _reader.Position);
+                            error = ParseError.UnknownEscapeSequence(seq, _reader.Position, _reader.Row);
                             expr = null;
                             return false;
                         }
@@ -982,7 +985,7 @@ namespace Linguini.Syntax.Parser
                     }
                     else if ('\n'.EqualsSpans(b))
                     {
-                        error = ParseError.UnterminatedStringLiteral(_reader.Position);
+                        error = ParseError.UnterminatedStringLiteral(_reader.Position, _reader.Row);
                         expr = null;
                         return false;
                     }
@@ -1077,7 +1080,7 @@ namespace Linguini.Syntax.Parser
                 {
                     if (!id.Name.IsCallee())
                     {
-                        error = ParseError.ForbiddenCallee(_reader.Position);
+                        error = ParseError.ForbiddenCallee(_reader.Position, _reader.Row);
                         expr = null;
                         return false;
                     }
@@ -1114,12 +1117,12 @@ namespace Linguini.Syntax.Parser
 
             if (onlyLiteral)
             {
-                error = ParseError.ExpectedLiteral(_reader.Position);
+                error = ParseError.ExpectedLiteral(_reader.Position, _reader.Row);
                 expr = null;
                 return false;
             }
 
-            error = ParseError.ExpectedInlineExpression(_reader.Position);
+            error = ParseError.ExpectedInlineExpression(_reader.Position, _reader.Row);
             expr = null;
             return false;
         }
@@ -1157,7 +1160,7 @@ namespace Linguini.Syntax.Parser
                 if (!_reader.PeekCharSpan().IsOneOf(',', ')'))
                 {
                     args = new CallArguments(positional, nameArgs);
-                    error = ParseError.ExpectedToken(',', ')', _reader.PeekCharSpan(), _reader.Position);
+                    error = ParseError.ExpectedToken(',', ')', _reader.PeekCharSpan(), _reader.Position, _reader.Row);
                     return false;
                 }
 
@@ -1192,7 +1195,7 @@ namespace Linguini.Syntax.Parser
                 {
                     if (argNames.Contains(id))
                     {
-                        error = ParseError.DuplicatedNamedArgument(id, _reader.Position);
+                        error = ParseError.DuplicatedNamedArgument(id, _reader.Position, _reader.Row);
                         return false;
                     }
 
@@ -1211,7 +1214,7 @@ namespace Linguini.Syntax.Parser
                 {
                     if (argNames.Count > 0)
                     {
-                        error = ParseError.PositionalArgumentFollowsNamed(_reader.Position);
+                        error = ParseError.PositionalArgumentFollowsNamed(_reader.Position, _reader.Row);
                         return false;
                     }
 
@@ -1222,7 +1225,7 @@ namespace Linguini.Syntax.Parser
             {
                 if (argNames.Count > 0)
                 {
-                    error = ParseError.PositionalArgumentFollowsNamed(_reader.Position);
+                    error = ParseError.PositionalArgumentFollowsNamed(_reader.Position, _reader.Row);
                     return false;
                 }
 
@@ -1280,7 +1283,7 @@ namespace Linguini.Syntax.Parser
 
             if (start == _reader.Position)
             {
-                error = ParseError.ExpectedCharRange("0-9", _reader.Position);
+                error = ParseError.ExpectedCharRange("0-9", _reader.Position, _reader.Row);
                 return false;
             }
 
@@ -1307,7 +1310,7 @@ namespace Linguini.Syntax.Parser
             {
                 var end = _reader.IsEof ? _reader.Position : _reader.Position + 1;
                 var seq = _reader.ReadSliceToStr(start, end);
-                error = ParseError.InvalidUnicodeEscapeSequence(seq, _reader.Position);
+                error = ParseError.InvalidUnicodeEscapeSequence(seq, _reader.Position, _reader.Row);
                 return false;
             }
 

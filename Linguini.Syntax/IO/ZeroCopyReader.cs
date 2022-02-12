@@ -170,10 +170,11 @@ namespace Linguini.Syntax.IO
                 var newline = _position == 0
                               || '\n'.EqualsSpans(PeekCharSpan(-1));
 
-                if (newline && (span.IsAsciiAlphabetic() || span.IsOneOf('#', '-')))
+                if (newline)
                 {
                     _row += 1;
-                    break;
+                    if (span.IsAsciiAlphabetic() || span.IsOneOf('#', '-'))
+                        break;
                 }
 
                 _position += 1;
@@ -207,6 +208,16 @@ namespace Linguini.Syntax.IO
                 {
                     break;
                 }
+            }
+        }
+
+        public void DecrementRow(int offset)
+        {
+            var span = _unconsumedData.Slice(_position - offset, offset);
+            foreach (var chr in span.ToArray())
+            {
+                if (chr == '\n')
+                    _row -= 1;
             }
         }
     }

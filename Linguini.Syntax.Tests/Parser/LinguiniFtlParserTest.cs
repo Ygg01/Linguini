@@ -79,8 +79,10 @@ namespace Linguini.Syntax.Tests.Parser
         
         [Test]
         [Parallelizable]
-        [TestCase("fixtures_errors/error_wrong", true)]
-        [TestCase("fixtures_errors/error_wrong", false)]
+        [TestCase("fixtures_errors/func", true)]
+        [TestCase("fixtures_errors/func", false)]
+        [TestCase("fixtures_errors/wrong_row", true)]
+        [TestCase("fixtures_errors/wrong_row", false)]
         public void TestLinguiniErrors(string file, bool ignoreComments = false)
         {
             var path = GetFullPathFor(file);
