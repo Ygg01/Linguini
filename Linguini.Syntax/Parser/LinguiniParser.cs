@@ -383,7 +383,7 @@ namespace Linguini.Syntax.Parser
                 return true;
             }
 
-            error = ParseError.ExpectedToken(c, _reader.Position);
+            error = ParseError.ExpectedToken(c, _reader.PeekCharSpan(), _reader.Position);
             return false;
         }
 
@@ -1147,62 +1147,20 @@ namespace Linguini.Syntax.Parser
                     break;
                 }
 
-                if (!TryGetInlineExpression(false, out var expr, out error))
+                if (!TryGetArgument(out error, argNames, nameArgs, positional))
                 {
                     args = null;
                     return false;
                 }
 
-                if (expr is MessageReference { Attribute: null } msgRef)
-                {
-                    var id = msgRef.Id;
-                    _reader.SkipBlank();
-                    if (_reader.IsCurrentChar(':'))
-                    {
-                        if (argNames.Contains(id))
-                        {
-                            args = null;
-                            error = ParseError.DuplicatedNamedArgument(id, _reader.Position);
-                            return false;
-                        }
-
-                        _reader.Position += 1;
-                        _reader.SkipBlank();
-
-                        if (!TryGetInlineExpression(true, out var val, out error))
-                        {
-                            args = null;
-                            return false;
-                        }
-
-                        argNames.Add(id);
-                        nameArgs.Add(new NamedArgument(id, val));
-                    }
-                    else
-                    {
-                        if (argNames.Count > 0)
-                        {
-                            args = null;
-                            error = ParseError.PositionalArgumentFollowsNamed(_reader.Position);
-                            return false;
-                        }
-
-                        positional.Add(expr);
-                    }
-                }
-                else
-                {
-                    if (argNames.Count > 0)
-                    {
-                        args = null;
-                        error = ParseError.PositionalArgumentFollowsNamed(_reader.Position);
-                        return false;
-                    }
-
-                    positional.Add(expr);
-                }
-
                 _reader.SkipBlank();
+                if (!_reader.PeekCharSpan().IsOneOf(',', ')'))
+                {
+                    args = new CallArguments(positional, nameArgs);
+                    error = ParseError.ExpectedToken(',', ')', _reader.PeekCharSpan(), _reader.Position);
+                    return false;
+                }
+
                 _reader.ReadCharIf(',');
                 _reader.SkipBlank();
             }
@@ -1214,6 +1172,63 @@ namespace Linguini.Syntax.Parser
             }
 
             args = new CallArguments(positional, nameArgs);
+            return true;
+        }
+
+        private bool TryGetArgument(out ParseError? error,
+            List<Identifier> argNames, List<NamedArgument> nameArgs,
+            List<IInlineExpression> positional)
+        {
+            if (!TryGetInlineExpression(false, out var expr, out error))
+            {
+                return false;
+            }
+
+            if (expr is MessageReference { Attribute: null } msgRef)
+            {
+                var id = msgRef.Id;
+                _reader.SkipBlank();
+                if (_reader.IsCurrentChar(':'))
+                {
+                    if (argNames.Contains(id))
+                    {
+                        error = ParseError.DuplicatedNamedArgument(id, _reader.Position);
+                        return false;
+                    }
+
+                    _reader.Position += 1;
+                    _reader.SkipBlank();
+
+                    if (!TryGetInlineExpression(true, out var val, out error))
+                    {
+                        return false;
+                    }
+
+                    argNames.Add(id);
+                    nameArgs.Add(new NamedArgument(id, val));
+                }
+                else
+                {
+                    if (argNames.Count > 0)
+                    {
+                        error = ParseError.PositionalArgumentFollowsNamed(_reader.Position);
+                        return false;
+                    }
+
+                    positional.Add(expr);
+                }
+            }
+            else
+            {
+                if (argNames.Count > 0)
+                {
+                    error = ParseError.PositionalArgumentFollowsNamed(_reader.Position);
+                    return false;
+                }
+
+                positional.Add(expr);
+            }
+
             return true;
         }
 

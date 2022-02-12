@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices.ComTypes;
-using Linguini.Shared;
-using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
 using Linguini.Syntax.Parser.Error;
@@ -47,11 +44,11 @@ namespace Linguini.Syntax.Tests.Parser
         [Test]
         [Parallelizable]
         [TestCase("#Comment", ErrorType.ExpectedToken,
-            "Expected a token starting with  \" \"", 1, 2, 0, 8)]
+            "Expected a token starting with  \" \" found \"C\" instead", 1, 2, 0, 8)]
         [TestCase("#Comment\n", ErrorType.ExpectedToken,
-            "Expected a token starting with  \" \"", 1, 2, 0, 9)]
+            "Expected a token starting with  \" \" found \"C\" instead", 1, 2, 0, 9)]
         [TestCase("#Comment\r\n", ErrorType.ExpectedToken,
-            "Expected a token starting with  \" \"", 1, 2, 0, 10)]
+            "Expected a token starting with  \" \" found \"C\" instead", 1, 2, 0, 10)]
         public void TestErrorCommentParse(string input, ErrorType expErrType, string expMsg, int start, int end,
             int sliceStart, int sliceEnd)
         {
@@ -161,8 +158,8 @@ namespace Linguini.Syntax.Tests.Parser
                 if (parsed.Entries[0] is AstComment comment
                     && parsed.Entries[1] is AstTerm term)
                 {
-                    Assert.AreEqual(expComment, comment!.AsStr());
-                    Assert.AreEqual(expTerm, new string(term!.Id.Name.ToArray()));
+                    Assert.AreEqual(expComment, comment.AsStr());
+                    Assert.AreEqual(expTerm, new string(term.Id.Name.ToArray()));
                 }
                 else
                 {
@@ -192,7 +189,7 @@ namespace Linguini.Syntax.Tests.Parser
                 Assert.IsInstanceOf(typeof(NumberLiteral), placeable.Expression);
                 Assert.NotNull(numberLiteral);
                 Assert.AreEqual(identifier, message.Id.ToString());
-                Assert.AreEqual(value, numberLiteral!.ToString());
+                Assert.AreEqual(value, numberLiteral.ToString());
             }
         }
     }

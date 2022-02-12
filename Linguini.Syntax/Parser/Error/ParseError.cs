@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Text;
+using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.IO;
+using Linguini.Syntax.Serialization;
 
 namespace Linguini.Syntax.Parser.Error
 {
+    [JsonConverter(typeof(ParseErrorSerializer))]
     public class ParseError
     {
         public ErrorType Kind { get; }
@@ -22,9 +25,24 @@ namespace Linguini.Syntax.Parser.Error
             Row = 0;
         }
 
-        public static ParseError ExpectedToken(char chr, int pos)
+        public static ParseError ExpectedToken(char expected, ReadOnlySpan<char> actual, int pos)
         {
-            var sb = new StringBuilder().AppendFormat("Expected a token starting with  \"{0}\"", chr);
+            var sb = new StringBuilder()
+                .AppendFormat("Expected a token starting with  \"{0}\" found \"{1}\" instead", expected,
+                    actual.ToString());
+
+            return new(
+                ErrorType.ExpectedToken,
+                sb.ToString(),
+                new Range(pos, pos + 1)
+            );
+        }
+
+        public static ParseError ExpectedToken(char exp1, char exp2, ReadOnlySpan<char> actual, int pos)
+        {
+            var sb = new StringBuilder()
+                .AppendFormat("Expected  \"{0}\" or \"{1}\" found \"{2}\" instead", 
+                    exp1, exp2, actual.ToString());
 
             return new(
                 ErrorType.ExpectedToken,

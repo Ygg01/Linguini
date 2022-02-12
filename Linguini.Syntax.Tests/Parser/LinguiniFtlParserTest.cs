@@ -1,8 +1,6 @@
 ﻿#nullable enable
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using FluentAssertions.Json;
@@ -76,6 +74,31 @@ namespace Linguini.Syntax.Tests.Parser
             }
 
             return parser.Parse();
+        }
+        
+        
+        [Test]
+        [Parallelizable]
+        [TestCase("fixtures_errors/error_wrong", true)]
+        [TestCase("fixtures_errors/error_wrong", false)]
+        public void TestLinguiniErrors(string file, bool ignoreComments = false)
+        {
+            var path = GetFullPathFor(file);
+            var expected = WrapArray(JArray.Parse(File.ReadAllText($@"{path}.json")));
+            var resource = ignoreComments
+                ? ParseFtlFileFast(@$"{path}.ftl")
+                : ParseFtlFile(@$"{path}.ftl");
+            
+            var actual = WrapArray(JArray.Parse(JsonSerializer.Serialize(resource.Errors, TestJsonOptions())));
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        private JToken WrapArray(JArray array)
+        {
+            JContainer newToken = new JObject();
+            newToken.Add(new JProperty("errors", array));
+
+            return newToken;
         }
 
         [Test]
