@@ -1,0 +1,16 @@
+﻿version 0.1.0 (yanked)
+    - Initial release 
+    
+version 0.1.1 
+    - Move PluralRules to netstandard 2.1
+    - Fix .ftl tests treated by Git as binary
+    
+version 0.1.2 
+    - Fix escaping 
+    - Add 3rd party licenses
+    - Nit - remove annoying warning
+    
+version 0.1.3 
+    - Fix row counting
+    - Fix error reports
+    - Make builds reproducible
