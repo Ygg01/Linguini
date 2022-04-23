@@ -60,7 +60,7 @@ namespace Linguini.Bundle.Test.Unit
                 var midDouble = (end.Value - start.Value) / 2 + start;
                 FluentNumber mid = isDecimal
                     ? midDouble
-                    : Convert.ToInt32(Math.Floor(midDouble));
+                    : Convert.ToInt32(Math.Floor(midDouble), CultureInfo.InvariantCulture);
 
                 var actualStart = GetPluralCategory(info, type, start);
                 Assert.AreEqual(expected, actualStart, $"Failed on start of range: {start}");

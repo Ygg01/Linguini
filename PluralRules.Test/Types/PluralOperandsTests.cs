@@ -152,7 +152,7 @@ namespace PluralRule.Test.Types
         {
             if (input >= float.MinValue && input <= float.MaxValue)
             {
-                float floatInput = Convert.ToSingle(input);
+                float floatInput = Convert.ToSingle(input, CultureInfo.InvariantCulture);
                 var x = floatInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }

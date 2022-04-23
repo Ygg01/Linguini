@@ -45,7 +45,7 @@ namespace Linguini.Shared.Types.Bundle
 
         public static FluentNumber FromString(ReadOnlySpan<char> input)
         {
-            var parsed = Double.Parse(input);
+            var parsed = Double.Parse(input, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture);
             var options = new FluentNumberOptions();
             if (input.IndexOf('.') != -1)
             {
