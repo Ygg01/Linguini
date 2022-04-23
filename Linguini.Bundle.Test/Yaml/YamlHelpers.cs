@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Threading;
 using Linguini.Shared.Types.Bundle;
 using YamlDotNet.RepresentationModel;
@@ -233,7 +234,9 @@ namespace Linguini.Bundle.Test.Yaml
                 var key = (YamlScalarNode)arg.Key;
                 var val = (YamlScalarNode)arg.Value;
                 IFluentType fluentVal;
-                if (Double.TryParse(val.AsString(), out var result))
+                if (Double.TryParse(val.AsString(),
+                        NumberStyles.Float | NumberStyles.AllowThousands, NumberFormatInfo.InvariantInfo,
+                        out var result))
                 {
                     fluentVal = (FluentNumber)result;
                 }

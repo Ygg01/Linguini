@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Linguini.Shared.Types;
 using NUnit.Framework;
 
@@ -24,6 +25,35 @@ namespace PluralRule.Test.Types
         [TestCase(1234.567, 1234, 4, 3, 5670, 567, "-1234.5670")]
         public void TestOperandsFromStr(double n, long I, int v, int w, long f, long t, string input)
         {
+            var x = input.TryPluralOperands(out var operands);
+            Assert.True(x, $"Parsing operand failed for {input}");
+            Assert.AreEqual(n, operands!.N);
+            Assert.AreEqual(I, operands!.I);
+            Assert.AreEqual(v, operands!.V);
+            Assert.AreEqual(w, operands!.W);
+            Assert.AreEqual(f, operands!.F);
+            Assert.AreEqual(t, operands!.T);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCase(0, 0, 0, 0, 0, 0, "0")]
+        [TestCase(2, 2, 0, 0, 0, 0, "2")]
+        [TestCase(57, 57, 0, 0, 0, 0, "57")]
+        [TestCase(987, 987, 0, 0, 0, 0, "987")]
+        [TestCase(1234567, 1234567, 0, 0, 0, 0, "1234567")]
+        [TestCase(10, 10, 0, 0, 0, 0, "-10")]
+        [TestCase(1000000, 1000000, 0, 0, 0, 0, "-1000000")]
+        [TestCase(0.23, 0, 2, 2, 23, 23, "-0.23")]
+        [TestCase(0.230, 0, 3, 2, 230, 23, "0.230")]
+        [TestCase(23.00, 23, 2, 0, 00, 0, "23.00")]
+        [TestCase(0.0203000, 0, 7, 4, 203000, 203, "0.0203000")]
+        [TestCase(123.45, 123, 2, 2, 45, 45, "123.45")]
+        [TestCase(1234.567, 1234, 3, 3, 567, 567, "-1234.567")]
+        [TestCase(1234.567, 1234, 4, 3, 5670, 567, "-1234.5670")]
+        public void TestOperandsFromStrInDifferentCulture(double n, long I, int v, int w, long f, long t, string input)
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
             var x = input.TryPluralOperands(out var operands);
             Assert.True(x, $"Parsing operand failed for {input}");
             Assert.AreEqual(n, operands!.N);

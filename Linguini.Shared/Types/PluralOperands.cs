@@ -49,7 +49,7 @@ namespace Linguini.Shared.Types
 
         public int Exp()
         {
-            return (int) Math.Floor(Math.Log10(N));
+            return (int)Math.Floor(Math.Log10(N));
         }
     }
 
@@ -61,7 +61,9 @@ namespace Linguini.Shared.Types
                 ? input.AsSpan()[1..]
                 : input.AsSpan();
 
-            if (!double.TryParse(absStr, out var absoluteValue))
+            if (!double.TryParse(absStr,
+                    NumberStyles.Float | NumberStyles.AllowThousands, NumberFormatInfo.InvariantInfo,
+                    out var absoluteValue))
             {
                 operands = null;
                 return false;
@@ -79,7 +81,7 @@ namespace Linguini.Shared.Types
                 var intStr = absStr[..decPos];
                 var decStr = absStr[(decPos + 1) ..];
 
-                if (!ulong.TryParse(intStr, out intDigits))
+                if (!ulong.TryParse(intStr, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out intDigits))
                 {
                     operands = null;
                     return false;
@@ -89,13 +91,13 @@ namespace Linguini.Shared.Types
 
                 numFractionDigits0 = decStr.Length;
                 numFractionDigits = backTrace.Length;
-                if (!long.TryParse(decStr, out fractionDigits0))
+                if (!long.TryParse(decStr, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits0))
                 {
                     operands = null;
                     return false;
                 }
 
-                if (!long.TryParse(backTrace, out fractionDigits))
+                if (!long.TryParse(backTrace, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits))
                 {
                     fractionDigits = 0;
                 }
@@ -151,7 +153,7 @@ namespace Linguini.Shared.Types
         }
 
         #endregion
-        
+
         #region UNSIGNED_INTS
 
         public static bool TryPluralOperands(this byte input, [NotNullWhen(true)] out PluralOperands? operands)
