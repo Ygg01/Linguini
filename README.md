@@ -1,4 +1,8 @@
 [![.NET](https://github.com/Ygg01/Linguini/actions/workflows/dotnet.yml/badge.svg?branch=master)](https://github.com/Ygg01/Linguini/actions/workflows/dotnet.yml)
+![Nuget](https://img.shields.io/nuget/v/Linguini.Bundle?label=Linguini.Bundle)
+![Nuget](https://img.shields.io/nuget/v/Linguini.Shared?label=Linguini.Shared)
+![Nuget](https://img.shields.io/nuget/v/Linguini.Syntax?label=Linguini.Syntax)
+![Nuget](https://img.shields.io/nuget/v/PluralRules.Generator?label=%20PluralRules.Generator)
 
 # Linguini
 Linguini is a C# implementation of Project Fluent, a localization system for natural-sounding translations with features like:
