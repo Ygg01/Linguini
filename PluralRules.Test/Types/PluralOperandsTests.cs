@@ -37,6 +37,7 @@ namespace PluralRule.Test.Types
         
         [Test]
         [Parallelizable]
+        [SetCulture("de-DE")]
         [TestCase(0, 0, 0, 0, 0, 0, "0")]
         [TestCase(2, 2, 0, 0, 0, 0, "2")]
         [TestCase(57, 57, 0, 0, 0, 0, "57")]
@@ -53,7 +54,6 @@ namespace PluralRule.Test.Types
         [TestCase(1234.567, 1234, 4, 3, 5670, 567, "-1234.5670")]
         public void TestOperandsFromStrInDifferentCulture(double n, long I, int v, int w, long f, long t, string input)
         {
-            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
             var x = input.TryPluralOperands(out var operands);
             Assert.True(x, $"Parsing operand failed for {input}");
             Assert.AreEqual(n, operands!.N);
