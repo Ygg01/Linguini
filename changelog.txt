@@ -18,3 +18,8 @@ version 0.1.3
 version 0.1.4
     - Fix issue with number formatting using `CultureInfo.CurrentCulture` instead of `CultureInfo.InvariantCulture`. 
      Big thanks to @Mailaender
+
+version 0.2.0
+    - Linguini supports netstandard2.1 for use in Mono (this changes no API but introduces 
+    polyfills for netstandard2.1)
+    - Fix some stale dependencies
