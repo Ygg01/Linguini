@@ -9,9 +9,8 @@
         <Copyright>Copyright (c) Daniel Fath 2021</Copyright>
         <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
         <PackageTags>fluent, i18n, internationalization, l10n, l20n, globalization, translation</PackageTags>
-    
-
         <IncludeSymbols>false</IncludeSymbols>
+        <PackageVersion>0.1.4</PackageVersion>
     </PropertyGroup>
 
 </Project>

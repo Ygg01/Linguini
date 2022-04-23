@@ -14,3 +14,7 @@ version 0.1.3
     - Fix row counting
     - Fix error reports
     - Make builds reproducible
+    
+version 0.1.4
+    - Fix issue with number formatting using `CultureInfo.CurrentCulture` instead of `CultureInfo.InvariantCulture`. 
+     Big thanks to @Mailaender
