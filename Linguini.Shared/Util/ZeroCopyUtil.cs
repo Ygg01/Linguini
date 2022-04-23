@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Linguini.Shared.Util
@@ -182,6 +183,25 @@ namespace Linguini.Shared.Util
             var x = MemoryMarshal.GetReference(charSpan);
             return x == c1 || x == c2 || x == c3 || x == c4;
         }
+#if NETSTANDARD2_1_OR_GREATER
+        // Polyfill for netstandard 2.1 until dotnet backports MemoryExtension
+        public static ReadOnlyMemory<char> TrimEndPolyFill(this ReadOnlyMemory<char> memory)
+            => memory.Slice(0, FindLastWhitespace(memory.Span));
+
+        private static int FindLastWhitespace(ReadOnlySpan<char> span)
+        {
+            int end = span.Length - 1;
+            for (; end >= 0; end--)
+            {
+                if (!char.IsWhiteSpace(span[end]))
+                {
+                    break;
+                }
+            }
+
+            return end + 1;
+        }
+#endif
 
         private static bool IsInside(char c, char min, char max) => (uint) (c - min) <= (uint) (max - min);
     }

@@ -574,7 +574,12 @@ namespace Linguini.Syntax.Parser
                             var value = _reader.ReadSlice(start, end);
                             if (lastNonBlank == i)
                             {
+#if NET5_0_OR_GREATER
                                 value = value.TrimEnd();
+#endif
+#if NETSTANDARD2_1_OR_GREATER
+                                value = value.TrimEndPolyFill();
+#endif
                             }
 
                             patterns.Add(new TextLiteral(value));
