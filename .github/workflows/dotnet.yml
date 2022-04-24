@@ -26,3 +26,16 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build  --verbosity normal
+      
+  linux-mono:
+    name: Linux (mono)
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Clone Repository
+      uses: actions/checkout@v2
+
+    - name: Check Code
+      run: |
+        mono --version
+        msbuild -t:Build -restore
