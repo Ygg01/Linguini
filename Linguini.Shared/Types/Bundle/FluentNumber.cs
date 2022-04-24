@@ -7,8 +7,33 @@ namespace Linguini.Shared.Types.Bundle
     /// <summary>
     /// Fluent representation of a number in double precision
     /// </summary>
-    public class FluentNumber : IFluentType
+    public class FluentNumber : IFluentType, IEquatable<FluentNumber>
     {
+        public bool Equals(FluentNumber? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Value.Equals(other.Value);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((FluentNumber)obj);
+        }
+
+        public static bool operator ==(FluentNumber? left, FluentNumber? right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(FluentNumber? left, FluentNumber? right)
+        {
+            return !Equals(left, right);
+        }
+
         public readonly double Value;
         private readonly FluentNumberOptions _options;
 
