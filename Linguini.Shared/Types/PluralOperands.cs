@@ -111,7 +111,7 @@ namespace Linguini.Shared.Types
                 fractionDigits = 0;
             }
 
-            operands = new(
+            operands = new PluralOperands(
                 absoluteValue,
                 intDigits,
                 numFractionDigits0,
@@ -141,7 +141,7 @@ namespace Linguini.Shared.Types
 
         public static bool TryPluralOperands(this long input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            operands = new(
+            operands = new PluralOperands(
                 Convert.ToDouble(Math.Abs(input)),
                 Convert.ToUInt64(Math.Abs(input)),
                 0,
@@ -158,7 +158,7 @@ namespace Linguini.Shared.Types
 
         public static bool TryPluralOperands(this byte input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            operands = new(
+            operands = new PluralOperands(
                 Convert.ToDouble(input),
                 Convert.ToUInt64(input),
                 0,
@@ -171,7 +171,7 @@ namespace Linguini.Shared.Types
 
         public static bool TryPluralOperands(this ushort input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            operands = new(
+            operands = new PluralOperands(
                 Convert.ToDouble(input),
                 Convert.ToUInt64(input),
                 0,
@@ -184,7 +184,7 @@ namespace Linguini.Shared.Types
 
         public static bool TryPluralOperands(this uint input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            operands = new(
+            operands = new PluralOperands(
                 Convert.ToDouble(input),
                 Convert.ToUInt64(input),
                 0,
@@ -197,7 +197,7 @@ namespace Linguini.Shared.Types
 
         public static bool TryPluralOperands(this ulong input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            operands = new(
+            operands = new PluralOperands(
                 Convert.ToDouble(input),
                 Convert.ToUInt64(input),
                 0,

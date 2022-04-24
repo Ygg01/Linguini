@@ -147,5 +147,21 @@ namespace Linguini.Bundle.Resolver
         }
     }
 
-    public record ResolvedArgs(IList<IFluentType> Positional, IDictionary<string, IFluentType> Named);
+    public class ResolvedArgs
+    {
+        public IList<IFluentType> Positional;
+        public IDictionary<string, IFluentType> Named;
+
+        public ResolvedArgs(IList<IFluentType> positional, IDictionary<string, IFluentType> named)
+        {
+            Positional = positional;
+            Named = named;
+        }
+
+        public void Deconstruct(out IList<IFluentType> posArg, out IDictionary<string, IFluentType> namedArg)
+        {
+            posArg = Positional;
+            namedArg = Named;
+        }
+    }
 }

@@ -81,12 +81,12 @@ namespace Linguini.Bundle.Builder
         private class StepBuilder : IReadyStep, ILocaleStep, IResourceStep
         {
             private CultureInfo _culture;
-            private readonly List<string> _locales = new();
-            private readonly List<Resource> _resources = new();
+            private readonly List<string> _locales = new List<string>();
+            private readonly List<Resource> _resources = new List<Resource>();
             private bool _useIsolating = true;
             private Func<IFluentType, string>? _formatterFunc;
             private Func<string, string>? _transformFunc;
-            private readonly Dictionary<string, ExternalFunction> _functions = new();
+            private readonly Dictionary<string, ExternalFunction> _functions = new Dictionary<string, ExternalFunction>();
             private bool _concurrent;
 
             internal StepBuilder()

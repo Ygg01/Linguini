@@ -61,7 +61,7 @@ namespace Linguini.Syntax.Parser
             {
                 var entryStart = _reader.Position;
                 (var entry, ParseError? error) = GetEntryRuntime(entryStart);
-                if (entry is { } and not Junk)
+                if (entry != null && !(entry is Junk))
                 {
                     body.Add(entry);
                 }
@@ -186,7 +186,7 @@ namespace Linguini.Syntax.Parser
             _reader.SkipToNextEntry();
             error.Slice = new Range(entryStart, _reader.Position);
             errors.Add(error);
-            Junk junk = new();
+            var junk = new Junk();
             var contentSpan = _reader.ReadSlice(entryStart, _reader.Position);
             junk.Content = contentSpan;
             body.Add(junk);
@@ -417,7 +417,7 @@ namespace Linguini.Syntax.Parser
                 ptr += 1;
             }
 
-            Identifier id = new(_reader.ReadSlice(_reader.Position - 1, ptr));
+            var id = new Identifier(_reader.ReadSlice(_reader.Position - 1, ptr));
             _reader.Position = ptr;
             return id;
         }
@@ -543,7 +543,7 @@ namespace Linguini.Syntax.Parser
 
             if (lastNonBlank != null)
             {
-                List<IPatternElement> patterns = new(lastNonBlank.Value + 1);
+                var patterns = new List<IPatternElement>(lastNonBlank.Value + 1);
 
                 for (int i = 0; i < lastNonBlank + 1; i++)
                 {
@@ -796,24 +796,25 @@ namespace Linguini.Syntax.Parser
                 return false;
             }
 
-            if (inlineExpression is not TermReference termRef)
-            {
-                if (inlineExpression is not TextLiteral
-                    && inlineExpression is not NumberLiteral
-                    && inlineExpression is not VariableReference
-                    && inlineExpression is not FunctionReference)
-                {
-                    retVal = null;
-                    error = ParseError.ExpectedSimpleExpressionAsSelector(_reader.Position, _reader.Row);
-                    return false;
-                }
-            }
-            else
+            if (inlineExpression is TermReference termRef)
             {
                 if (termRef.Attribute == null)
                 {
                     retVal = null;
                     error = ParseError.TermReferenceAsSelector(_reader.Position, _reader.Row);
+                    return false;
+                }
+                
+            }
+            else
+            {
+                if (!(inlineExpression is TextLiteral
+                    || inlineExpression is NumberLiteral
+                    || inlineExpression is VariableReference
+                    || inlineExpression is FunctionReference))
+                {
+                    retVal = null;
+                    error = ParseError.ExpectedSimpleExpressionAsSelector(_reader.Position, _reader.Row);
                     return false;
                 }
             }

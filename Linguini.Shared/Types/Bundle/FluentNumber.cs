@@ -7,7 +7,7 @@ namespace Linguini.Shared.Types.Bundle
     /// <summary>
     /// Fluent representation of a number in double precision
     /// </summary>
-    public record FluentNumber : IFluentType
+    public class FluentNumber : IFluentType
     {
         public readonly double Value;
         private readonly FluentNumberOptions _options;
@@ -72,8 +72,8 @@ namespace Linguini.Shared.Types.Bundle
         }
 
         public static implicit operator double(FluentNumber fs) => fs.Value;
-        public static implicit operator FluentNumber(double db) => new(db, new FluentNumberOptions());
-        public static implicit operator FluentNumber(float fl) => new(fl, new FluentNumberOptions());
+        public static implicit operator FluentNumber(double db) => new FluentNumber(db, new FluentNumberOptions());
+        public static implicit operator FluentNumber(float fl) => new FluentNumber(fl, new FluentNumberOptions());
 
         public IFluentType Copy()
         {
@@ -86,7 +86,7 @@ namespace Linguini.Shared.Types.Bundle
         }
     }
 
-    public record FluentNumberOptions
+    public class FluentNumberOptions
     {
         public FluentNumberStyle Style;
         public string? Currency;

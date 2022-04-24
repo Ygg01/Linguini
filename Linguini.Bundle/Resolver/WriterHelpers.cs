@@ -75,7 +75,7 @@ namespace Linguini.Bundle.Resolver
             else if (expression is SelectExpression selectExpression)
             {
                 var selector = selectExpression.Selector.Resolve(scope);
-                if (selector is FluentString or FluentNumber)
+                if (selector is FluentString || selector is FluentNumber)
                 {
                     foreach (var variant in selectExpression.Variants)
                     {

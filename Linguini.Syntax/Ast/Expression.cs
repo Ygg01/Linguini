@@ -16,7 +16,7 @@ namespace Linguini.Syntax.Ast
 
         public override string ToString()
         {
-            return new(Value.Span);
+            return new string(Value.Span);
         }
     }
 
@@ -31,7 +31,7 @@ namespace Linguini.Syntax.Ast
 
         public override string ToString()
         {
-            return new(Value.Span);
+            return new string(Value.Span);
         }
     }
 

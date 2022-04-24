@@ -46,7 +46,7 @@ namespace Linguini.Bundle.Test.Yaml
                 var (testSuites, suiteName) = ParseTest(path);
                 foreach (var testCase in testSuites)
                 {
-                    TestCaseData testCaseData = new(testCase, defaultBuilder);
+                    TestCaseData testCaseData = new TestCaseData(testCase, defaultBuilder);
                     testCaseData.SetCategory(path);
                     testCaseData.SetName($"({path}) {suiteName} {testCase.Name}");
                     yield return testCaseData;
@@ -151,7 +151,7 @@ namespace Linguini.Bundle.Test.Yaml
             List<FluentError> errors)
         {
             bundle.AddFunction(funcName, externalFunction, out var errs);
-            if (errs is { Count: > 0 })
+            if (errs != null && errs.Count > 0)
             {
                 errors.AddRange(errs);
             }
@@ -159,8 +159,7 @@ namespace Linguini.Bundle.Test.Yaml
 
         private static string GetFullPathFor(string file)
         {
-            List<string> list = new();
-            list.Add(BaseTestDir);
+            var list = new List<string> { BaseTestDir };
             list.AddRange(file.Split(@"/"));
             return Path.Combine(list.ToArray());
         }
@@ -195,7 +194,7 @@ namespace Linguini.Bundle.Test.Yaml
         private static YamlDocument ParseYamlDoc(string path)
         {
             using var reader = new StreamReader(path);
-            YamlStream yamlStream = new();
+            YamlStream yamlStream = new YamlStream();
             yamlStream.Load(reader);
             YamlDocument doc = yamlStream.Documents[0];
             return doc;
@@ -206,7 +205,7 @@ namespace Linguini.Bundle.Test.Yaml
             var yamlBundle = ParseYamlDoc(path)
                 .RootNode["bundle"];
 
-            List<string> locales = new();
+            var locales = new List<string>();
             var isIsolating = false;
             if (yamlBundle is YamlMappingNode map)
             {

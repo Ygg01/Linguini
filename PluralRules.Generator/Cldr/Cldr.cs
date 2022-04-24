@@ -108,7 +108,7 @@ namespace PluralRules.Generator.Cldr
         }
     }
 
-    public record Condition 
+    public class Condition 
     {
         public List<AndCondition> Conditions;
 

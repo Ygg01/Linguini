@@ -10,7 +10,7 @@ using Linguini.Syntax.Serialization;
 namespace Linguini.Syntax.Ast
 {
     [JsonConverter(typeof(ResourceSerializer))]
-    public record Resource
+    public class Resource
     {
         public readonly List<IEntry> Entries;
         public readonly List<ParseError> Errors;
@@ -92,7 +92,7 @@ namespace Linguini.Syntax.Ast
 
         public string AsStr(string lineEnd = "\n")
         {
-            StringBuilder sb = new();
+            var sb = new StringBuilder();
             for (int i = 0; i < _content.Count; i++)
             {
                 if (i > 0)
@@ -119,12 +119,12 @@ namespace Linguini.Syntax.Ast
 
         public string AsStr()
         {
-            return new(Content.Span);
+            return new string(Content.Span);
         }
 
         public string GetId()
         {
-            return new(Content.Span);
+            return new string(Content.Span);
         }
     }
 }

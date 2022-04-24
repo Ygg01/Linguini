@@ -7,7 +7,7 @@
     </ItemGroup>
     <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard2.1'">
         <!-- .Net Language options -->
-        <LangVersion>9</LangVersion>
+        <LangVersion>8.0</LangVersion>
         <Nullable>enable</Nullable>
         
         <!-- Author and licence info -->
@@ -31,9 +31,9 @@
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
     <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-        <LangVersion>9</LangVersion>
+        <LangVersion>8.0</LangVersion>
         <Nullable>enable</Nullable>
-
+        
         <!-- Author and licence info -->
         <Authors>Daniel Fath</Authors>
         <Copyright>Copyright (c) Daniel Fath 2022</Copyright>

@@ -53,7 +53,7 @@ namespace Linguini.Syntax.Ast
 
         public override string ToString()
         {
-            return new(Name.Span);
+            return new string(Name.Span);
         }
 
         public bool Equals(Identifier? other)

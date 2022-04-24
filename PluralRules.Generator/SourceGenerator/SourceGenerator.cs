@@ -13,8 +13,8 @@ namespace PluralRules.Generator.SourceGenerator
     [Generator]
     public class SourceGenerator : ISourceGenerator
     {
-        private List<CldrRule> _ordinalRules = new();
-        private List<CldrRule> _cardinalRules = new();
+        private List<CldrRule> _ordinalRules = new List<CldrRule>();
+        private List<CldrRule> _cardinalRules = new List<CldrRule>();
 
         public void Initialize(GeneratorInitializationContext context)
         {
@@ -136,7 +136,7 @@ namespace PluralRulesGenerated.Test
 
         private void WriteSpecialCase(StringBuilder sourceBuilder, List<CldrRule> cldrRules)
         {
-            List<string> specialCases = new();
+            var specialCases = new List<string>();
             foreach (var cldr in cldrRules)
             {
                 foreach (var langId in cldr.LangIds)
@@ -295,7 +295,7 @@ namespace PluralRulesGenerated.Test
                 if (relation.Op.IsNegated())
                 {
                     stringBuilder.Append('!');
-                    if (relation.RangeListItems[0] is not RangeElem)
+                    if (!(relation.RangeListItems[0] is RangeElem))
                     {
                         // Have to bracket negation of plain mod
                         // e.g. instead of !po.N % 10 == 0

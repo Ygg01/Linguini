@@ -37,7 +37,7 @@ namespace Linguini.Syntax.Tests.Parser
 
         private static JsonSerializerOptions TestJsonOptions()
         {
-            return new()
+            return new JsonSerializerOptions()
             {
                 IgnoreReadOnlyFields = false,
                 WriteIndented = true,
@@ -47,8 +47,7 @@ namespace Linguini.Syntax.Tests.Parser
 
         private static string GetFullPathFor(string file)
         {
-            List<string> list = new();
-            list.Add(BaseTestDir);
+            var list = new List<string> { BaseTestDir };
             list.AddRange(file.Split(@"/"));
             return Path.Combine(list.ToArray());
         }

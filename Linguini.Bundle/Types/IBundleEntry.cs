@@ -1,7 +1,13 @@
 namespace Linguini.Bundle.Types
 {
-    public record FluentFunction(ExternalFunction Function)
+    public class FluentFunction
     {
-        public static implicit operator FluentFunction(ExternalFunction ef) => new(ef);
+        public ExternalFunction Function;
+        private FluentFunction(ExternalFunction function)
+        {
+            Function = function;
+        }
+
+        public static implicit operator FluentFunction(ExternalFunction ef) => new FluentFunction(ef);
     }
 }

@@ -43,7 +43,7 @@ namespace Linguini.Bundle.Test.Yaml
         // We use a thread local one to avoid allocating one every fetch, since we just replace the inner value.
         // Obviously thread local to avoid threading issues.
         private static readonly ThreadLocal<YamlScalarNode> FetchNode =
-            new(() => new YamlScalarNode());
+            new ThreadLocal<YamlScalarNode>(() => new YamlScalarNode());
 
         [Pure]
         public static bool TryGetNode<T>(this YamlMappingNode mapping, string key,
@@ -123,7 +123,7 @@ namespace Linguini.Bundle.Test.Yaml
                 testSuite.Resources.AddRange(res);
                 if (testSuite.Bundle == null)
                 {
-                    testSuite.Bundle = new();
+                    testSuite.Bundle = new ResolverTestSuite.ResolverTestBundle();
                 }
 
                 testSuite.Bundle.Errors.AddRange(errs);
@@ -301,8 +301,8 @@ namespace Linguini.Bundle.Test.Yaml
         private static (List<string>, List<ResolverTestSuite.ResolverTestError>)
             ProcessResources(YamlSequenceNode returnNode)
         {
-            List<string> resource = new();
-            List<ResolverTestSuite.ResolverTestError> errors = new();
+            var resource = new List<string>();
+            var errors = new List<ResolverTestSuite.ResolverTestError>();
             foreach (var resNode in returnNode.Children)
             {
                 if (resNode is YamlMappingNode map)
@@ -324,7 +324,7 @@ namespace Linguini.Bundle.Test.Yaml
 
         private static List<ResolverTestSuite.ResolverTestError> ProcessErrors(YamlSequenceNode errorNode)
         {
-            List<ResolverTestSuite.ResolverTestError> resolverTestErrors = new();
+            List<ResolverTestSuite.ResolverTestError> resolverTestErrors = new List<ResolverTestSuite.ResolverTestError>();
             foreach (var error in errorNode.Children)
             {
                 if (error is YamlMappingNode errMap)

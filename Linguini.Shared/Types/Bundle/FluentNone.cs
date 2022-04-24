@@ -4,12 +4,12 @@
     /// Fluent value representing lack of value
     /// similar to <c>Nullable</c> or <c>Option</c> monad. 
     /// </summary>
-    public record FluentNone : IFluentType
+    public class FluentNone : IFluentType
     {
         /// <summary>
         /// Static value representing empty value.
         /// </summary>
-        public static readonly FluentNone None = new();
+        public static readonly FluentNone None = new FluentNone();
         
         private FluentNone()
         {

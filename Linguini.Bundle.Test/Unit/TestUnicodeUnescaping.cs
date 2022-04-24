@@ -24,7 +24,7 @@ namespace Linguini.Bundle.Test.Unit
         [TestCase("\\U01F602", "😂")]
         public void TestUnescape(string input, string expected)
         {
-            StringWriter stringWriter = new();
+            var stringWriter = new StringWriter();
             UnicodeUtil.WriteUnescapedUnicode(input.AsMemory(), stringWriter);
             
             Assert.AreEqual(expected, stringWriter.ToString());

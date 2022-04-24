@@ -23,8 +23,8 @@ namespace Linguini.Bundle
         public List<string> Locales { get; internal set; }
         public bool UseIsolating { get; set; }
         public Func<string, string>? TransformFunc { get; set; }
-        public Func<IFluentType, string>? FormatterFunc { get; init; }
-        public byte MaxPlaceable { get; private init; }
+        public Func<IFluentType, string>? FormatterFunc { get; set; }
+        public byte MaxPlaceable { get; private set; }
 
         private FluentBundle()
         {
@@ -173,7 +173,7 @@ namespace Linguini.Bundle
             {
                 var entry = res.Entries[entryPos];
 
-                if (entry is AstTerm or AstMessage)
+                if (entry != null && (entry is AstTerm || entry is AstMessage))
                 {
                     AddEntry(new List<FluentError>(), entry, true);
                 }
@@ -321,7 +321,7 @@ namespace Linguini.Bundle
 
         public FluentBundle DeepClone()
         {
-            return new()
+            return new FluentBundle()
             {
                 Culture = (CultureInfo)Culture.Clone(),
                 FormatterFunc = FormatterFunc,

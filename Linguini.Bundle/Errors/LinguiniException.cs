@@ -13,7 +13,7 @@ namespace Linguini.Bundle.Errors
 
         private static string FluentErrorsToString(IList<FluentError> errors)
         {
-            StringBuilder sb = new();
+            var sb = new StringBuilder();
             sb.Append("Following errors weren't handled:\n");
             foreach (var error in errors)
             {

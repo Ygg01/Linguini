@@ -50,7 +50,7 @@
     /// <summary>
     /// Fluent type used to denote errors, it's only basic type that returns true for <c>IsError</c>
     /// </summary>
-    public record FluentErrType : IFluentType
+    public class FluentErrType : IFluentType
     {
         /// <inheritdoc/>
         public IFluentType Copy()

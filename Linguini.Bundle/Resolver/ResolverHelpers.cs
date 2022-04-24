@@ -34,7 +34,7 @@ namespace Linguini.Bundle.Resolver
         {
             if (self is TextLiteral textLiteral)
             {
-                StringWriter stringWriter = new();
+                var stringWriter = new StringWriter();
                 UnicodeUtil.WriteUnescapedUnicode(textLiteral.Value, stringWriter);
                 return (FluentString)stringWriter.ToString();
             }

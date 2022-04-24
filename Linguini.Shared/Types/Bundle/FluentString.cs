@@ -6,7 +6,7 @@ namespace Linguini.Shared.Types.Bundle
     /// <summary>
     /// Fluent representation of a string value
     /// </summary>
-    public record FluentString : IFluentType
+    public class FluentString : IFluentType
     {
         private readonly string _content;
 
@@ -27,8 +27,8 @@ namespace Linguini.Shared.Types.Bundle
         }
 
         public static implicit operator string(FluentString fs) => fs._content;
-        public static implicit operator FluentString(string s) => new(s);
-        public static implicit operator FluentString(ReadOnlySpan<char> s) => new(new string(s));
+        public static implicit operator FluentString(string s) => new FluentString(s);
+        public static implicit operator FluentString(ReadOnlySpan<char> s) => new FluentString(new string(s));
 
         public IFluentType Copy()
         {

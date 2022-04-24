@@ -16,7 +16,7 @@ namespace Linguini.Bundle.Test.Unit
     [Parallelizable]
     public class BundleTests
     {
-        private readonly ExternalFunction _zeroFunc = (_, _) => FluentNone.None;
+        private readonly ExternalFunction _zeroFunc = (a, b) => FluentNone.None;
         private readonly ExternalFunction _idFunc = (args, _) => args[0];
         private readonly Func<IFluentType, string> _formatter = _ => "";
         private readonly Func<string, string> _transform = str => str.ToUpper(CultureInfo.InvariantCulture);

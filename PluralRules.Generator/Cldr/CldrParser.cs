@@ -498,7 +498,8 @@ namespace PluralRules.Generator.Cldr
 
             var x = MemoryMarshal.GetReference(charSpan);
             return IsInside(x, '\x09', '\x0D')
-                   || x is ' ' or '\u0085' or '\u200E' or '\u200F' or '\u2028' or '\u2029';
+                   || x == ' ' || x == '\u0085' || x =='\u200E' 
+                   || x == '\u200F' || x== '\u2028' || x == '\u2029';
         }
 
         public static bool IsEqual(this ReadOnlySpan<char> charSpan, char c1)

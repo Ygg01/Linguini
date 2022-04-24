@@ -5,7 +5,7 @@ using Linguini.Syntax.Parser.Error;
 
 namespace Linguini.Bundle.Errors
 {
-    public abstract record FluentError
+    public abstract class FluentError
     {
         public abstract ErrorType ErrorKind();
 
@@ -23,11 +23,25 @@ namespace Linguini.Bundle.Errors
     /// <param name="EndSpan">End of error context</param>
     /// <param name="StartMark">Start of error mark</param>
     /// <param name="EndMark">End of error mark</param>
-    public record ErrorSpan(int Row, int StartSpan, int EndSpan, int StartMark, int EndMark)
+    public class ErrorSpan
     {
+        public int Row;
+        public int StartSpan;
+        public int EndSpan;
+        public int StartMark;
+        public int EndMark;
+
+        public ErrorSpan(int row, int startSpan, int endSpan, int startMark, int endMark)
+        {
+            Row = row;
+            StartSpan = startSpan;
+            EndSpan = endSpan;
+            StartMark = startMark;
+            EndMark = endMark;
+        }
     }
 
-    public record OverrideFluentError : FluentError
+    public class OverrideFluentError : FluentError
     {
         private readonly string _id;
         private readonly EntryKind _kind;
@@ -49,7 +63,7 @@ namespace Linguini.Bundle.Errors
         }
     }
 
-    public record ResolverFluentError : FluentError
+    public class ResolverFluentError : FluentError
     {
         private string Description;
         private ErrorType Kind;
@@ -72,22 +86,22 @@ namespace Linguini.Bundle.Errors
 
         public static ResolverFluentError NoValue(ReadOnlyMemory<char> idName)
         {
-            return new($"No value: {idName.Span.ToString()}", ErrorType.NoValue);
+            return new ResolverFluentError($"No value: {idName.Span.ToString()}", ErrorType.NoValue);
         }
 
         public static ResolverFluentError NoValue(string pattern)
         {
-            return new($"No value: {pattern}", ErrorType.NoValue);
+            return new ResolverFluentError($"No value: {pattern}", ErrorType.NoValue);
         }
 
         public static ResolverFluentError UnknownVariable(VariableReference outType)
         {
-            return new($"Unknown variable: ${outType.Id}", ErrorType.Reference);
+            return new ResolverFluentError($"Unknown variable: ${outType.Id}", ErrorType.Reference);
         }
 
         public static ResolverFluentError TooManyPlaceables()
         {
-            return new("Too many placeables", ErrorType.TooManyPlaceables);
+            return new ResolverFluentError("Too many placeables", ErrorType.TooManyPlaceables);
         }
 
         public static ResolverFluentError Reference(IInlineExpression self)
@@ -95,32 +109,32 @@ namespace Linguini.Bundle.Errors
             // TODO only allow references here
             if (self is FunctionReference funcRef)
             {
-                return new($"Unknown function: {funcRef.Id}()", ErrorType.Reference);
+                return new ResolverFluentError($"Unknown function: {funcRef.Id}()", ErrorType.Reference);
             }
 
             if (self is MessageReference msgRef)
             {
                 if (msgRef.Attribute == null)
                 {
-                    return new($"Unknown message: {msgRef.Id}", ErrorType.Reference);
+                    return new ResolverFluentError($"Unknown message: {msgRef.Id}", ErrorType.Reference);
                 }
 
-                return new($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}", ErrorType.Reference);
+                return new ResolverFluentError($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}", ErrorType.Reference);
             }
 
             if (self is TermReference termReference)
             {
                 if (termReference.Attribute == null)
                 {
-                    return new($"Unknown term: -{termReference.Id}", ErrorType.Reference);
+                    return new ResolverFluentError($"Unknown term: -{termReference.Id}", ErrorType.Reference);
                 }
 
-                return new($"Unknown attribute: -{termReference.Id}.{termReference.Attribute}", ErrorType.Reference);
+                return new ResolverFluentError($"Unknown attribute: -{termReference.Id}.{termReference.Attribute}", ErrorType.Reference);
             }
 
             if (self is VariableReference varRef)
             {
-                return new($"Unknown variable: ${varRef.Id}", ErrorType.Reference);
+                return new ResolverFluentError($"Unknown variable: ${varRef.Id}", ErrorType.Reference);
             }
 
             throw new ArgumentException($"Expected reference got ${self.GetType()}");
@@ -128,16 +142,16 @@ namespace Linguini.Bundle.Errors
 
         public static ResolverFluentError Cyclic(Pattern pattern)
         {
-            return new($"Cyclic reference in {pattern.Stringify()} detected!", ErrorType.Cyclic);
+            return new ResolverFluentError($"Cyclic reference in {pattern.Stringify()} detected!", ErrorType.Cyclic);
         }
 
         public static ResolverFluentError MissingDefault()
         {
-            return new("No default", ErrorType.MissingDefault);
+            return new ResolverFluentError("No default", ErrorType.MissingDefault);
         }
     }
 
-    public record ParserFluentError : FluentError
+    public class ParserFluentError : FluentError
     {
         private readonly ParseError _error;
 
@@ -148,7 +162,7 @@ namespace Linguini.Bundle.Errors
 
         public static ParserFluentError ParseError(ParseError parseError)
         {
-            return new(parseError);
+            return new ParserFluentError(parseError);
         }
 
         public override ErrorType ErrorKind()
@@ -166,7 +180,7 @@ namespace Linguini.Bundle.Errors
             if (_error.Slice == null)
                 return null;
 
-            return new(_error.Row, _error.Slice.Value.Start.Value, _error.Slice.Value.End.Value,
+            return new ErrorSpan(_error.Row, _error.Slice.Value.Start.Value, _error.Slice.Value.End.Value,
                 _error.Position.Start.Value, _error.Position.End.Value);
         }
     }
