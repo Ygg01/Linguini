@@ -19,4 +19,14 @@
         <ProjectReference Include="..\Linguini.Shared\Linguini.Shared.csproj" />
         <PackageReference Condition="'$(TargetFramework)' == 'netstandard2.1'" Include="System.Text.Json" Version="6.0.3" />
     </ItemGroup>
+
+  <PropertyGroup>
+    <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+  </PropertyGroup>
+
+  <Target Name="GetDependencyTargetPaths" AfterTargets="ResolvePackageDependenciesForBuild">
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="@(ResolvedCompileFileDefinitions)" IncludeRuntimeDependency="false" />
+    </ItemGroup>
+  </Target>
 </Project>
