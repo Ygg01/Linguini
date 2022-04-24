@@ -25,6 +25,34 @@ namespace Linguini.Bundle.Errors
     /// <param name="EndMark">End of error mark</param>
     public class ErrorSpan
     {
+        protected bool Equals(ErrorSpan other)
+        {
+            return Row == other.Row && StartSpan == other.StartSpan && EndSpan == other.EndSpan && StartMark == other.StartMark && EndMark == other.EndMark;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((ErrorSpan)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Row, StartSpan, EndSpan, StartMark, EndMark);
+        }
+
+        public static bool operator ==(ErrorSpan? left, ErrorSpan? right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(ErrorSpan? left, ErrorSpan? right)
+        {
+            return !Equals(left, right);
+        }
+
         public int Row;
         public int StartSpan;
         public int EndSpan;
@@ -38,6 +66,12 @@ namespace Linguini.Bundle.Errors
             EndSpan = endSpan;
             StartMark = startMark;
             EndMark = endMark;
+        }
+
+        public override string ToString()
+        {
+            return $"ErrorSpan (Row = {Row}, StartSpan = {StartSpan}, EndSpan = {EndSpan}," +
+                   $" StartSpan = {StartMark}, StartSpan = {EndMark})";
         }
     }
 
