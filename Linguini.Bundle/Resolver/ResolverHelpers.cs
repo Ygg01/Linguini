@@ -7,7 +7,8 @@ using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
-using PluralRulesGenerated;
+using PluralRules.Generated.Static;
+
 
 namespace Linguini.Bundle.Resolver
 {

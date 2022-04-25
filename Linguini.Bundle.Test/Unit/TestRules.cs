@@ -4,7 +4,7 @@ using System.Globalization;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using NUnit.Framework;
-using PluralRulesGenerated.Test;
+using PluralRules.Generated.Static.Test;
 using static Linguini.Bundle.Resolver.ResolverHelpers.PluralRules;
 
 namespace Linguini.Bundle.Test.Unit

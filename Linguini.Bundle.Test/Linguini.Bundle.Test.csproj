@@ -9,19 +9,23 @@
 
     <ItemGroup>
         <PackageReference Include="NUnit" Version="3.12.0" />
-<!--        <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />-->
+        <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
         <PackageReference Include="YamlDotNet" Version="11.0.1" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Linguini.Bundle\Linguini.Bundle.csproj" />
-        <ProjectReference Include="..\PluralRules.Generator\PluralRules.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\PluralRules.Generated.Static.Test\PluralRules.Generated.Static.Test.csproj" />
+        <ProjectReference Include="..\PluralRules.Generated.Static\PluralRules.Generated.Static.csproj" />
+        <!--  Temporaily removed for Mono Compatibility  -->
+<!--        <ProjectReference Include="..\PluralRules.Generator\PluralRules.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />-->
     </ItemGroup>
-
-    <ItemGroup>
-        <AdditionalFiles Include="..\PluralRules.Generator\cldr_data\ordinals.xml" />
-        <AdditionalFiles Include="..\PluralRules.Generator\cldr_data\plurals.xml" />
-    </ItemGroup>
+    
+<!--  Temporaily removed for Mono Compatibility  -->
+<!--    <ItemGroup>-->
+<!--        <AdditionalFiles Include="..\PluralRules.Generator\cldr_data\ordinals.xml" />-->
+<!--        <AdditionalFiles Include="..\PluralRules.Generator\cldr_data\plurals.xml" />-->
+<!--    </ItemGroup>-->
 
 </Project>
