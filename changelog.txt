@@ -27,3 +27,8 @@ version 0.2.0
 version 0.2.1
     - Fix issue with `System.Text.Json` leaking analyzers, causing issues on Mono
     - Minor tweak of versions of `System.Text.Json` and enabling tests
+
+version 0.2.2
+    - Fix issue with `System.Text.Json` causing problems with Mono see https://github.com/mono/mono/issues/15833
+    ```Chatted with @danroth27 and he mentioned that this could be due to mono lagging in netstandard2.1 support.
+     I can imagine that if they were missing a typeforward in netstandard.dll for IAsyncDisposable this could happen.```
