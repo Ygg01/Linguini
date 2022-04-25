@@ -23,3 +23,7 @@ version 0.2.0
     - Linguini supports netstandard2.1 for use in Mono (this changes no API but introduces 
     polyfills for netstandard2.1)
     - Fix some stale dependencies
+    
+version 0.2.1
+    - Fix issue with `System.Text.Json` leaking analyzers, causing issues on Mono
+    - Minor tweak of versions of `System.Text.Json` and enabling tests
