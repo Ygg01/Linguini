@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Text;
+#if NET5_0_OR_GREATER
 using System.Text.Json.Serialization;
-using Linguini.Syntax.Ast;
 using Linguini.Syntax.Serialization;
+#endif
+using Linguini.Syntax.Ast;
 
 namespace Linguini.Syntax.Parser.Error
 {
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(ParseErrorSerializer))]
+#endif
     public class ParseError
     {
         public ErrorType Kind { get; }

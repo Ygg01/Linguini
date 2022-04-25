@@ -2,14 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+#if NET5_0_OR_GREATER
 using System.Text.Json.Serialization;
+using Linguini.Syntax.Serialization;
+#endif
 using Linguini.Syntax.Parser;
 using Linguini.Syntax.Parser.Error;
-using Linguini.Syntax.Serialization;
+
 
 namespace Linguini.Syntax.Ast
 {
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(ResourceSerializer))]
+#endif
     public record Resource
     {
         public readonly List<IEntry> Entries;
@@ -31,8 +36,9 @@ namespace Linguini.Syntax.Ast
             return new LinguiniParser(input).Parse();
         }
     }
-
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(MessageSerializer))]
+#endif
     public class AstMessage : IEntry
     {
         public Identifier Id;
@@ -54,7 +60,9 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(TermSerializer))]
+#endif
     public class AstTerm : IEntry
     {
         public Identifier Id;
@@ -77,8 +85,9 @@ namespace Linguini.Syntax.Ast
         }
     }
 
-
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(CommentSerializer))]
+#endif
     public class AstComment : IEntry
     {
         public CommentLevel CommentLevel;
@@ -112,7 +121,9 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(JunkSerializer))]
+#endif
     public class Junk : IEntry
     {
         public ReadOnlyMemory<char> Content;

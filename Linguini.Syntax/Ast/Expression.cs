@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+#if NET5_0_OR_GREATER
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Serialization;
+#endif
 
 namespace Linguini.Syntax.Ast
 {
@@ -35,7 +37,9 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(FunctionReferenceSerializer))]
+#endif
     public class FunctionReference : IInlineExpression
     {
         public Identifier Id;
@@ -47,8 +51,9 @@ namespace Linguini.Syntax.Ast
             Arguments = arguments;
         }
     }
-
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(MessageReferenceSerializer))]
+#endif
     public class MessageReference : IInlineExpression
     {
         public Identifier Id;
@@ -61,7 +66,9 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(TermReferenceSerializer))]
+#endif
     public class TermReference : IInlineExpression
     {
         public Identifier Id;
@@ -76,7 +83,9 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(VariableReferenceSerializer))]
+#endif
     public class VariableReference : IInlineExpression
     {
         public Identifier Id;
@@ -87,7 +96,9 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(PlaceableSerializer))]
+#endif
     public class Placeable : IInlineExpression, IPatternElementPlaceholder, IPatternElement
     {
         public IExpression Expression;
@@ -98,7 +109,9 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(CallArgumentsSerializer))]
+#endif
     public struct CallArguments
     {
         public List<IInlineExpression> PositionalArgs;
@@ -111,7 +124,9 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(NamedArgumentSerializer))]
+#endif
     public struct NamedArgument
     {
         public Identifier Name;
@@ -124,7 +139,9 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(SelectExpressionSerializer))]
+#endif
     public class SelectExpression : IExpression
     {
         public IInlineExpression Selector;
@@ -143,7 +160,9 @@ namespace Linguini.Syntax.Ast
         NumberLiteral,
     }
 
+#if NET5_0_OR_GREATER
     [JsonConverter(typeof(VariantSerializer))]
+#endif
     public class Variant
     {
         public VariantType Type;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NET5_0_OR_GREATER
+using System;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -57,3 +58,4 @@ namespace Linguini.Syntax.Serialization
         }
     }
 }
+#endif

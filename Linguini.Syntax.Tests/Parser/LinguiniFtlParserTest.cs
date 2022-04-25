@@ -1,6 +1,8 @@
-﻿#nullable enable
+﻿#if NET5_0_OR_GREATER
+#nullable enable
 using System.Collections.Generic;
 using System.IO;
+
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using FluentAssertions.Json;
@@ -225,3 +227,4 @@ namespace Linguini.Syntax.Tests.Parser
         }
     }
 }
+#endif
