@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 #if NET5_0_OR_GREATER
@@ -61,7 +62,8 @@ namespace Linguini.Syntax.Ast
 
         public override string ToString()
         {
-            return new(Name.Span);
+            MemoryMarshal.TryGetString(Name, out var text, out var _, out var _);
+            return text;
         }
 
         public bool Equals(Identifier? other)

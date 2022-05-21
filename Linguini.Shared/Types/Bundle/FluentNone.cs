@@ -32,5 +32,17 @@
         {
             return AsString();
         }
+
+        /// <inheritdoc/>
+        public bool IsError()
+        {
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public bool Matches(IFluentType other, IScope scope)
+        {
+            return false;
+        }
     }
 }

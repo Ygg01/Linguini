@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.IO;
 using System.Text;
 #if NET5_0_OR_GREATER
@@ -109,7 +110,7 @@ namespace Linguini.Syntax.Ast
                     sb.Append(lineEnd);
                 }
 
-                sb.Append(_content[i].Span);
+                sb.Append(_content[i].Span.ToString());
             }
 
             return sb.ToString();
@@ -130,12 +131,14 @@ namespace Linguini.Syntax.Ast
 
         public string AsStr()
         {
-            return new(Content.Span);
+            MemoryMarshal.TryGetString(Content, out var text, out var _, out var _);
+            return text;
         }
 
         public string GetId()
         {
-            return new(Content.Span);
+            MemoryMarshal.TryGetString(Content, out var text, out var _, out var _);
+            return text;
         }
     }
 }

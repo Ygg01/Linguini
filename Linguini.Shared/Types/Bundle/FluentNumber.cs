@@ -45,7 +45,7 @@ namespace Linguini.Shared.Types.Bundle
 
         public static FluentNumber FromString(ReadOnlySpan<char> input)
         {
-            var parsed = Double.Parse(input, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture);
+            var parsed = Double.Parse(input.ToString(), NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture);
             var options = new FluentNumberOptions();
             if (input.IndexOf('.') != -1)
             {
@@ -83,6 +83,21 @@ namespace Linguini.Shared.Types.Bundle
         public override int GetHashCode()
         {
             return Value.GetHashCode();
+        }
+
+        /// <inheritdoc/>
+        public bool IsError()
+        {
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public bool Matches(IFluentType other, IScope scope)
+        {
+            return other switch {
+                FluentNumber other2 => this.Equals(other2),
+                _ => false,
+            };
         }
     }
 

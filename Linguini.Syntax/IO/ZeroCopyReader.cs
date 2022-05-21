@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Linguini.Shared.Util;
 
 namespace Linguini.Syntax.IO
@@ -160,7 +161,8 @@ namespace Linguini.Syntax.IO
 
         public string ReadSliceToStr(int start, int end)
         {
-            return new(_unconsumedData.Slice(start, end - start).Span);
+            MemoryMarshal.TryGetString(_unconsumedData.Slice(start, end - start), out var text, out var _, out var _);
+            return text;
         }
 
         public void SkipToNextEntry()

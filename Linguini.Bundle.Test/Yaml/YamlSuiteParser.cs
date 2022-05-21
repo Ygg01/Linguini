@@ -161,7 +161,7 @@ namespace Linguini.Bundle.Test.Yaml
         {
             List<string> list = new();
             list.Add(BaseTestDir);
-            list.AddRange(file.Split(@"/"));
+            list.AddRange(file.Split('/'));
             return Path.Combine(list.ToArray());
         }
 

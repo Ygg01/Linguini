@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 #if NET5_0_OR_GREATER
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Serialization;
@@ -18,7 +19,8 @@ namespace Linguini.Syntax.Ast
 
         public override string ToString()
         {
-            return new(Value.Span);
+            MemoryMarshal.TryGetString(Value, out var text, out var _, out var _);
+            return text;
         }
     }
 
@@ -33,7 +35,8 @@ namespace Linguini.Syntax.Ast
 
         public override string ToString()
         {
-            return new(Value.Span);
+            MemoryMarshal.TryGetString(Value, out var text, out var _, out var _);
+            return text;
         }
     }
 

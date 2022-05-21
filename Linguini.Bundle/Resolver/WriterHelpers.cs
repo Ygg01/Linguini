@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.IO;
 using System.Text;
 using Linguini.Bundle.Errors;
@@ -34,7 +35,8 @@ namespace Linguini.Bundle.Resolver
                     }
                     else
                     {
-                        writer.Write(textLiteral.Value.Span);
+                        MemoryMarshal.TryGetString(textLiteral.Value, out var text, out var _, out var _);
+                        writer.Write(text);
                     }
                 }
                 else if (elem is Placeable placeable)

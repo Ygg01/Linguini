@@ -98,12 +98,16 @@ namespace Linguini.Bundle
             switch (behavior)
             {
                 case InsertBehavior.None:
-                    if (!_funcList.TryAdd(key, fluentFunction))
+                    if (_funcList.ContainsKey(key))
                     {
                         errors = new List<FluentError>
                         {
                             new OverrideFluentError(funcName, EntryKind.Unknown)
                         };
+                    }
+                    else
+                    {
+                        _funcList.Add(key, fluentFunction);
                     }
 
                     break;
@@ -201,7 +205,7 @@ namespace Linguini.Bundle
         public bool TryGetAttrMsg(string msgWithAttr, FluentArgs? args,
             out IList<FluentError> errors, out string? message)
         {
-            if (msgWithAttr.Contains('.'))
+            if (msgWithAttr.Contains("."))
             {
                 var split = msgWithAttr.Split('.');
                 return TryGetMsg(split[0], split[1], args, out errors, out message);

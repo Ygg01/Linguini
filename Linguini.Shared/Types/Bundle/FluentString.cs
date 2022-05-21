@@ -28,7 +28,7 @@ namespace Linguini.Shared.Types.Bundle
 
         public static implicit operator string(FluentString fs) => fs._content;
         public static implicit operator FluentString(string s) => new(s);
-        public static implicit operator FluentString(ReadOnlySpan<char> s) => new(new string(s));
+        public static implicit operator FluentString(ReadOnlySpan<char> s) => new(s.ToString());
 
         public IFluentType Copy()
         {
@@ -43,6 +43,22 @@ namespace Linguini.Shared.Types.Bundle
         public bool TryGetPluralCategory([NotNullWhen(true)] out PluralCategory? category)
         {
             return _content.TryPluralCategory(out category);
+        }
+
+        /// <inheritdoc/>
+        public bool IsError()
+        {
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public bool Matches(IFluentType other, IScope scope)
+        {
+            return other switch {
+                FluentString other2 => this.Equals(other2),
+                FluentNumber other2 => scope.MatchByPluralCategory(this, other2),
+                _ => false,
+            };
         }
     }
 }

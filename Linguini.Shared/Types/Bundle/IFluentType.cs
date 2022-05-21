@@ -15,10 +15,7 @@
         /// Determines if type is an error. Defaults to <c>false</c>.
         /// </summary>
         /// <returns>If the value returned is an error.</returns>
-        bool IsError()
-        {
-            return false;
-        }
+        bool IsError();
 
         /// <summary>
         /// Method for matching Fluent types.
@@ -29,16 +26,7 @@
         /// <param name="other">The other FluentType to compare this value with</param>
         /// <param name="scope">Current scope of the fluent bundle</param>
         /// <returns><c>true</c> if the values match and <c>false</c> otherwise</returns>
-        bool Matches(IFluentType other, IScope scope)
-        {
-            return (this, other) switch
-            {
-                (FluentString fs1, FluentString fs2) => fs1.Equals(fs2),
-                (FluentNumber fn1, FluentNumber fn2) => fn1.Equals(fn2),
-                (FluentString fs1, FluentNumber fn2) => scope.MatchByPluralCategory(fs1, fn2),
-                _ => false,
-            };
-        }
+        bool Matches(IFluentType other, IScope scope);
 
         /// <summary>
         /// Copies the Fluent value
@@ -71,6 +59,12 @@
         public bool IsError()
         {
             return true;
+        }
+
+        /// <inheritdoc/>
+        public bool Matches(IFluentType other, IScope scope)
+        {
+            return false;
         }
     }
 }
