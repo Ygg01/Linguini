@@ -183,7 +183,7 @@ namespace Linguini.Shared.Util
             var x = MemoryMarshal.GetReference(charSpan);
             return x == c1 || x == c2 || x == c3 || x == c4;
         }
-#if NETSTANDARD2_1_OR_GREATER
+#if !NET5_0_OR_GREATER 
         // Polyfill for netstandard 2.1 until dotnet backports MemoryExtension
         public static ReadOnlyMemory<char> TrimEndPolyFill(this ReadOnlyMemory<char> memory)
             => memory.Slice(0, FindLastWhitespace(memory.Span));
