@@ -1,8 +1,7 @@
-﻿#if NET5_0_OR_GREATER
+﻿#if NET461_OR_GREATER
 #nullable enable
 using System.Collections.Generic;
 using System.IO;
-
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -75,7 +74,7 @@ namespace Linguini.Syntax.Tests.Parser
         {
             List<string> list = new();
             list.Add(BaseTestDir);
-            list.AddRange(file.Split(@"/"));
+            list.AddRange(file.Split('/'));
             return Path.Combine(list.ToArray());
         }
 
