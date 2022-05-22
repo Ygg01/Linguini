@@ -5,7 +5,9 @@ using System.IO;
 
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentAssertions.Json;
+using Linguini.Serialization.Converters;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
 using Newtonsoft.Json.Linq;
@@ -43,7 +45,29 @@ namespace Linguini.Syntax.Tests.Parser
             {
                 IgnoreReadOnlyFields = false,
                 WriteIndented = true,
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                Converters =
+                {
+                    new AttributeSerializer(),
+                    new CallArgumentsSerializer(),
+                    new CommentSerializer(),
+                    new FunctionReferenceSerializer(),
+                    new IdentifierSerializer(),
+                    new JunkSerializer(),
+                    new MessageReferenceSerializer(),
+                    new MessageSerializer(),
+                    new NamedArgumentSerializer(),
+                    new ParseErrorSerializer(),
+                    new PatternSerializer(),
+                    new PlaceableSerializer(),
+                    new ResourceSerializer(),
+                    new PlaceableSerializer(),
+                    new SelectExpressionSerializer(),
+                    new TermReferenceSerializer(),
+                    new TermSerializer(),
+                    new VariantSerializer(),
+                    new VariableReferenceSerializer(),
+                },
             };
         }
 
@@ -77,8 +101,8 @@ namespace Linguini.Syntax.Tests.Parser
 
             return parser.Parse();
         }
-        
-        
+
+
         [Test]
         [Parallelizable]
         [TestCase("fixtures_errors/func", true)]
@@ -92,7 +116,7 @@ namespace Linguini.Syntax.Tests.Parser
             var resource = ignoreComments
                 ? ParseFtlFileFast(@$"{path}.ftl")
                 : ParseFtlFile(@$"{path}.ftl");
-            
+
             var actual = WrapArray(JArray.Parse(JsonSerializer.Serialize(resource.Errors, TestJsonOptions())));
             actual.Should().BeEquivalentTo(expected);
         }
