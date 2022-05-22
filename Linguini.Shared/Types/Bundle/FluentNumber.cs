@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using Linguini.Shared.Util;
 
 #nullable enable
 namespace Linguini.Shared.Types.Bundle
@@ -43,9 +44,19 @@ namespace Linguini.Shared.Types.Bundle
             return stringVal;
         }
 
+        public bool IsError()
+        {
+            return false;
+        }
+
+        public bool Matches(IFluentType other, IScope scope)
+        {
+            return SharedUtil.Matches(this, other, scope);
+        }
+
         public static FluentNumber FromString(ReadOnlySpan<char> input)
         {
-            var parsed = Double.Parse(input, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture);
+            var parsed = Double.Parse(input.ToString(), NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture);
             var options = new FluentNumberOptions();
             if (input.IndexOf('.') != -1)
             {

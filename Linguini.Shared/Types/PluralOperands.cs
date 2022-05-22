@@ -61,7 +61,7 @@ namespace Linguini.Shared.Types
                 ? input.AsSpan()[1..]
                 : input.AsSpan();
 
-            if (!double.TryParse(absStr,
+            if (!double.TryParse(absStr.ToString(),
                     NumberStyles.Float | NumberStyles.AllowThousands, NumberFormatInfo.InvariantInfo,
                     out var absoluteValue))
             {
@@ -81,7 +81,7 @@ namespace Linguini.Shared.Types
                 var intStr = absStr[..decPos];
                 var decStr = absStr[(decPos + 1) ..];
 
-                if (!ulong.TryParse(intStr, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out intDigits))
+                if (!ulong.TryParse(intStr.ToString(), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out intDigits))
                 {
                     operands = null;
                     return false;
@@ -91,13 +91,13 @@ namespace Linguini.Shared.Types
 
                 numFractionDigits0 = decStr.Length;
                 numFractionDigits = backTrace.Length;
-                if (!long.TryParse(decStr, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits0))
+                if (!long.TryParse(decStr.ToString(), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits0))
                 {
                     operands = null;
                     return false;
                 }
 
-                if (!long.TryParse(backTrace, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits))
+                if (!long.TryParse(backTrace.ToString(), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits))
                 {
                     fractionDigits = 0;
                 }

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Linguini.Bundle.Errors;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Shared.Util;
@@ -34,7 +33,7 @@ namespace Linguini.Bundle.Resolver
                     }
                     else
                     {
-                        writer.Write(textLiteral.Value.Span);
+                        writer.Write(textLiteral.Value.Span.ToString());
                     }
                 }
                 else if (elem is Placeable placeable)
@@ -236,7 +235,6 @@ namespace Linguini.Bundle.Resolver
                     else
                     {
                         scope.WriteRefError(writer, self);
-                        return;
                     }
                 }
                 else

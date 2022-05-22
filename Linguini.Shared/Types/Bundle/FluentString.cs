@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using Linguini.Shared.Util;
 
 namespace Linguini.Shared.Types.Bundle
 {
@@ -26,9 +27,19 @@ namespace Linguini.Shared.Types.Bundle
             return _content;
         }
 
+        public bool IsError()
+        {
+            return false;
+        }
+
+        public bool Matches(IFluentType other, IScope scope)
+        {
+            return SharedUtil.Matches(this, other, scope);
+        }
+
         public static implicit operator string(FluentString fs) => fs._content;
         public static implicit operator FluentString(string s) => new(s);
-        public static implicit operator FluentString(ReadOnlySpan<char> s) => new(new string(s));
+        public static implicit operator FluentString(ReadOnlySpan<char> s) => new(s.ToString());
 
         public IFluentType Copy()
         {
