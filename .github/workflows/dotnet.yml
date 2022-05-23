@@ -27,4 +27,5 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build  --verbosity normal
-      
+    - name: Test461
+      run: dotnet test --no-build  --verbosity normal -f net461
