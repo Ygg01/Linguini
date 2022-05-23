@@ -4,6 +4,6 @@
     {
         None,
         Overriding,
-        Throw,
+        Error,
     }
 }

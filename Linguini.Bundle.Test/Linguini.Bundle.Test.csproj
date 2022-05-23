@@ -3,7 +3,7 @@
     <PropertyGroup>
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
-        <TargetFrameworks>net5.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net461;net5.0;netstandard2.1</TargetFrameworks>
         <OutputType>Library</OutputType>
     </PropertyGroup>
 
@@ -24,4 +24,9 @@
         <AdditionalFiles Include="..\PluralRules.Generator\cldr_data\plurals.xml" />
     </ItemGroup>
 
+    <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+        <PackageReference Include="IndexRange" Version="1.0.2" PrivateAssets="all" />
+        <PackageReference Include="Nullable" Version="1.3.0" PrivateAssets="all" />
+        <PackageReference Include="System.Memory" Version="4.5.4" PrivateAssets="all" />
+    </ItemGroup>
 </Project>

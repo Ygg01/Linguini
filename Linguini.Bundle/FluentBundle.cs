@@ -77,7 +77,7 @@ namespace Linguini.Bundle
         }
 
         public void AddFunctions(IDictionary<string, ExternalFunction> functions, out List<FluentError> errors,
-            InsertBehavior behavior = InsertBehavior.Throw)
+            InsertBehavior behavior = InsertBehavior.Error)
         {
             errors = new List<FluentError>();
             foreach (var keyValue in functions)
@@ -90,41 +90,34 @@ namespace Linguini.Bundle
         }
 
         public bool AddFunction(string funcName, ExternalFunction fluentFunction,
-            [NotNullWhen(false)] out IList<FluentError>? errors,
-            InsertBehavior behavior = InsertBehavior.Throw)
+            out IList<FluentError> errors,
+            InsertBehavior behavior = InsertBehavior.Error)
         {
             errors = new List<FluentError>();
-            var key = funcName;
             switch (behavior)
             {
+#if NET5_0_OR_GREATER
                 case InsertBehavior.None:
-                    if (!_funcList.TryAdd(key, fluentFunction))
-                    {
-                        errors = new List<FluentError>
-                        {
-                            new OverrideFluentError(funcName, EntryKind.Unknown)
-                        };
-                    }
-
-                    break;
+                    return _funcList.TryAdd(funcName, fluentFunction);
+#endif
                 case InsertBehavior.Overriding:
-                    _funcList[key] = fluentFunction;
+                    _funcList[funcName] = fluentFunction;
                     break;
                 default:
-                    if (_funcList.ContainsKey(key))
+                    if (_funcList.ContainsKey(funcName))
                     {
                         errors.Add(new OverrideFluentError(funcName, EntryKind.Unknown));
                         return false;
                     }
 
-                    _funcList.Add(key, fluentFunction);
+                    _funcList.Add(funcName, fluentFunction);
                     break;
             }
 
             return true;
         }
 
-        public bool AddResource(Resource res, [NotNullWhen(false)] out List<FluentError> errors)
+        public bool AddResource(Resource res, out List<FluentError> errors)
         {
             errors = new List<FluentError>();
             foreach (var parseError in res.Errors)
@@ -201,7 +194,7 @@ namespace Linguini.Bundle
         public bool TryGetAttrMsg(string msgWithAttr, FluentArgs? args,
             out IList<FluentError> errors, out string? message)
         {
-            if (msgWithAttr.Contains('.'))
+            if (msgWithAttr.Contains("."))
             {
                 var split = msgWithAttr.Split('.');
                 return TryGetMsg(split[0], split[1], args, out errors, out message);

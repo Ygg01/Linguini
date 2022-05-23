@@ -30,7 +30,7 @@ namespace Linguini.Bundle.Test.Yaml
             }
         }
 
-        static IEnumerable<TestCaseData> MyTestCases()
+        static IEnumerable<TestCaseData> YamlTestCases()
         {
             var defaultPath = GetFullPathFor("fixtures/defaults.yaml");
             var defaultBuilder = ParseDefault(defaultPath);
@@ -54,8 +54,7 @@ namespace Linguini.Bundle.Test.Yaml
             }
         }
 
-
-        [TestCaseSource(nameof(MyTestCases))]
+        [TestCaseSource(nameof(YamlTestCases))]
         [Parallelizable]
         public void MyTestMethod(ResolverTestSuite parsedTestSuite, LinguiniBuilder.IReadyStep builder)
         {
@@ -161,7 +160,7 @@ namespace Linguini.Bundle.Test.Yaml
         {
             List<string> list = new();
             list.Add(BaseTestDir);
-            list.AddRange(file.Split(@"/"));
+            list.AddRange(file.Split('/'));
             return Path.Combine(list.ToArray());
         }
 

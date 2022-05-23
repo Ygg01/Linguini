@@ -160,7 +160,7 @@ namespace Linguini.Syntax.IO
 
         public string ReadSliceToStr(int start, int end)
         {
-            return new(_unconsumedData.Slice(start, end - start).Span);
+            return _unconsumedData.Slice(start, end - start).Span.ToString();
         }
 
         public void SkipToNextEntry()

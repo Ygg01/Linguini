@@ -1,4 +1,6 @@
-﻿namespace Linguini.Shared.Types.Bundle
+﻿using Linguini.Shared.Util;
+
+namespace Linguini.Shared.Types.Bundle
 {
     /// <summary>
     /// Fluent value representing lack of value
@@ -15,6 +17,11 @@
         {
         }
 
+        public bool Matches(IFluentType other, IScope scope)
+        {
+            return SharedUtil.Matches(this, other, scope);
+        }
+
         /// <inheritdoc/>
         public IFluentType Copy()
         {
@@ -25,6 +32,11 @@
         public string AsString()
         {
             return "{???}";
+        }
+
+        public bool IsError()
+        {
+            return false;
         }
 
         /// <inheritdoc/>

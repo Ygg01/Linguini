@@ -2,16 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-#if NET5_0_OR_GREATER
-using System.Text.Json.Serialization;
-using Linguini.Syntax.Serialization;
-#endif
 
 namespace Linguini.Syntax.Ast
 {
-#if NET5_0_OR_GREATER
-    [JsonConverter(typeof(AttributeSerializer))]
-#endif
+
     public class Attribute
     {
         public Identifier Id;
@@ -29,9 +23,7 @@ namespace Linguini.Syntax.Ast
             value = Value;
         }
     }
-#if NET5_0_OR_GREATER
-    [JsonConverter(typeof(PatternSerializer))]
-#endif
+
     public class Pattern
     {
         public List<IPatternElement> Elements;
@@ -47,9 +39,7 @@ namespace Linguini.Syntax.Ast
         }
     }
 
-#if NET5_0_OR_GREATER
-    [JsonConverter(typeof(IdentifierSerializer))]
-#endif
+
     public class Identifier : IEquatable<Identifier>
     {
         public readonly ReadOnlyMemory<char> Name;
@@ -61,7 +51,7 @@ namespace Linguini.Syntax.Ast
 
         public override string ToString()
         {
-            return new(Name.Span);
+            return Name.Span.ToString();
         }
 
         public bool Equals(Identifier? other)

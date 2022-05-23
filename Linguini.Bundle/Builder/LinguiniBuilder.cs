@@ -26,11 +26,7 @@ namespace Linguini.Bundle.Builder
         {
             IResourceStep Locale(string unparsedLocale);
             IResourceStep Locales(IEnumerable<string> unparsedLocales);
-
-            IResourceStep Locales(params string[] unparsedLocales)
-            {
-                return Locales(unparsedLocales.AsEnumerable());
-            }
+            IResourceStep Locales(params string[] unparsedLocales);
 
             IResourceStep CultureInfo(CultureInfo culture);
         }
@@ -38,27 +34,12 @@ namespace Linguini.Bundle.Builder
         public interface IResourceStep : IStep
         {
             IReadyStep AddResources(IEnumerable<string> unparsedResourceList);
-
-            IReadyStep AddResources(params string[] unparsedResourceList)
-            {
-                return AddResources(unparsedResourceList.AsEnumerable());
-            }
-
+            IReadyStep AddResources(params string[] unparsedResourceArray);
             IReadyStep AddResources(IEnumerable<TextReader> unparsedStreamList);
-
-            IReadyStep AddResources(params TextReader[] unparsedStreamList)
-            {
-                return AddResources(unparsedStreamList.AsEnumerable());
-            }
-
+            IReadyStep AddResources(params TextReader[] unparsedStreamList);
             IReadyStep AddResource(Resource resource);
             IReadyStep AddResources(IEnumerable<Resource> resources);
-
-            IReadyStep AddResources(params Resource[] resources)
-            {
-                return AddResources(resources.AsEnumerable());
-            }
-
+            IReadyStep AddResources(params Resource[] resources);
             IReadyStep SkipResources();
         }
 
@@ -176,6 +157,11 @@ namespace Linguini.Bundle.Builder
 
             public IResourceStep Locales(IEnumerable<string> unparsedLocales)
             {
+                return Locales(unparsedLocales.ToArray());
+            }
+
+            public IResourceStep Locales(params string[] unparsedLocales)
+            {
                 _locales.AddRange(unparsedLocales);
                 if (_locales.Count > 0)
                 {
@@ -211,6 +197,17 @@ namespace Linguini.Bundle.Builder
                 return this;
             }
 
+            public IReadyStep AddResources(params TextReader[] unparsedStreamList)
+            {
+                foreach (var unparsed in unparsedStreamList)
+                {
+                    var parsed = new LinguiniParser(unparsed).Parse();
+                    _resources.Add(parsed);
+                }
+
+                return this;
+            }
+
             public IReadyStep AddResource(Resource parsedResource)
             {
                 _resources.Add(parsedResource);
@@ -220,6 +217,17 @@ namespace Linguini.Bundle.Builder
             public IReadyStep AddResources(IEnumerable<string> unparsedResources)
             {
                 foreach (var unparsed in unparsedResources)
+                {
+                    var parsed = new LinguiniParser(unparsed).Parse();
+                    _resources.Add(parsed);
+                }
+
+                return this;
+            }
+
+            public IReadyStep AddResources(params string[] unparsedResourceArray)
+            {
+                foreach (var unparsed in unparsedResourceArray)
                 {
                     var parsed = new LinguiniParser(unparsed).Parse();
                     _resources.Add(parsed);
@@ -242,6 +250,12 @@ namespace Linguini.Bundle.Builder
             public IReadyStep AddResources(IEnumerable<Resource> parsedResource)
             {
                 _resources.AddRange(parsedResource);
+                return this;
+            }
+
+            public IReadyStep AddResources(params Resource[] resources)
+            {
+                _resources.AddRange(resources);
                 return this;
             }
 
