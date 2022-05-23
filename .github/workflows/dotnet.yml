@@ -13,19 +13,18 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        dotnet: [5.0.x]
+        conf: ["", "-f net461"]
 
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: ${{matrix.dotnet}}
+        dotnet-version: 5.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build  --verbosity normal
-    - name: Test461
-      run: dotnet test --no-build  --verbosity normal -f net461
+      run: dotnet test --no-build  --verbosity normal $${{matrix.conf}}
+
