@@ -40,7 +40,7 @@ namespace Linguini.Syntax.Tests.Parser
 
         private static JsonSerializerOptions TestJsonOptions()
         {
-            return new()
+            return new JsonSerializerOptions
             {
                 IgnoreReadOnlyFields = false,
                 WriteIndented = true,
