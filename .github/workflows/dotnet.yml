@@ -13,13 +13,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        dotnet: [5.0.x]
 
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: ${{matrix.dotnet}}
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -27,15 +28,3 @@ jobs:
     - name: Test
       run: dotnet test --no-build  --verbosity normal
       
-  linux-mono:
-    name: Linux (mono)
-    runs-on: ubuntu-20.04
-
-    steps:
-    - name: Clone Repository
-      uses: actions/checkout@v2
-
-    - name: Check Code
-      run: |
-        mono --version
-        msbuild -t:Build -restore
