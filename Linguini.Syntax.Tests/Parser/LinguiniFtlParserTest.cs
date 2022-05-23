@@ -1,16 +1,15 @@
-﻿#if NET461_OR_GREATER
-#nullable enable
+﻿#nullable enable
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using FluentAssertions.Json;
 using Linguini.Serialization.Converters;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Linguini.Syntax.Tests.Parser
 {
@@ -250,4 +249,3 @@ namespace Linguini.Syntax.Tests.Parser
         }
     }
 }
-#endif
