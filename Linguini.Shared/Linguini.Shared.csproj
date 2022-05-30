@@ -9,7 +9,7 @@
         <PackageLicenseExpression>MIT OR Apache-2.0</PackageLicenseExpression>
         <PackageTags>fluent, i18n, internationalization, l10n, l20n, globalization, translation</PackageTags>
         <IncludeSymbols>false</IncludeSymbols>
-        <PackageVersion>0.2.1</PackageVersion>
+        <PackageVersion>0.3.0</PackageVersion>
         <TargetFrameworks>net461;netstandard2.1</TargetFrameworks>
     </PropertyGroup>
     

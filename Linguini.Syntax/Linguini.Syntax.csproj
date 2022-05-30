@@ -12,7 +12,7 @@
         <PackageProjectUrl>https://github.com/Ygg01/Linguini</PackageProjectUrl>
         <RepositoryType>git</RepositoryType>
         <TargetFrameworks>net461;net5.0;netstandard2.1</TargetFrameworks>
-        <PackageVersion>0.2.2</PackageVersion>
+        <PackageVersion>0.3.0</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
