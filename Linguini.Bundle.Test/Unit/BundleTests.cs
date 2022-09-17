@@ -42,28 +42,7 @@ term1 = xxx
 new1  = new
     .attr = 6";
 
-        private static string _testEscapeFunc = @"
-x0 = {""hh\\:mm""}
-x1 = {""hh\u005C:mm""}
-x2 = {ID(""hh\u005C:mm"")}
-x3 = {ID(""hh\\:mm"")}
-";
 
-        [Test]
-        public void TestEscapeFunction()
-        {
-            var bundle = LinguiniBuilder.Builder()
-                .Locale("en-US")
-                .AddResource(_testEscapeFunc)
-                .AddFunction("ID", _idFunc)
-                .UncheckedBuild();
-            const string expected = @"hh\:mm";
-            Assert.AreEqual(expected, bundle.GetAttrMessage("x0"));
-            Assert.AreEqual(expected, bundle.GetAttrMessage("x1"));
-            Assert.AreEqual(expected, bundle.GetAttrMessage("x2"));
-            Assert.AreEqual(expected, bundle.GetAttrMessage("x3"));
-        }
-        
         [Test]
         public void TestDefaultBundleOptions()
         {
@@ -81,7 +60,7 @@ x3 = {ID(""hh\\:mm"")}
         {
             var defaultBundleOpt = new FluentBundleOption()
             {
-                Locales = {"en"},
+                Locales = { "en" },
                 MaxPlaceable = 123,
                 UseIsolating = false,
                 TransformFunc = _transform,
@@ -155,8 +134,8 @@ x3 = {ID(""hh\\:mm"")}
                 .UncheckedBuild();
             var messages = bundler.GetMessageEnumerable().ToArray();
             var functions = bundler.GetFuncEnumerable().ToArray();
-            CollectionAssert.AreEquivalent(new[] {"term1", "term2"}, messages);
-            CollectionAssert.AreEquivalent(new[] {"id", "zero"}, functions);
+            CollectionAssert.AreEquivalent(new[] { "term1", "term2" }, messages);
+            CollectionAssert.AreEquivalent(new[] { "id", "zero" }, functions);
         }
 
         [Test]
@@ -175,7 +154,23 @@ x3 = {ID(""hh\\:mm"")}
             Parallel.For(0, 10, i => bundler.AddResourceOverriding($"term-2= {i + 1}"));
             Assert.True(bundler.HasMessage("term-1"));
         }
-        
+
+        [Test]
+        public void TestConcurrencyOption()
+        {
+            var bundleOpt = new FluentBundleOption()
+            {
+                Locales = { "en-US" },
+                UseConcurrent = true,
+            };
+            var optBundle = FluentBundle.MakeUnchecked(bundleOpt);
+            Parallel.For(0, 10, i => optBundle.AddResource($"term-1 = {i}", out _));
+            Parallel.For(0, 10, i => optBundle.AddResource($"term-2= {i}", out _));
+            Parallel.For(0, 10, i => optBundle.TryGetAttrMsg("term-1", null, out _, out _));
+            Parallel.For(0, 10, i => optBundle.AddResourceOverriding($"term-2= {i + 1}"));
+            Assert.True(optBundle.HasMessage("term-1"));
+        }
+
         [Test]
         [Parallelizable]
         public void TestExample()
@@ -185,31 +180,14 @@ x3 = {ID(""hh\\:mm"")}
                 .AddResource("hello-user =  Hello, { $username }!")
                 .SetUseIsolating(false)
                 .UncheckedBuild();
-            
+
             var props = new Dictionary<string, IFluentType>()
             {
-                {"username", (FluentString)"Test"}
+                { "username", (FluentString)"Test" }
             };
 
             var message = bundler.GetAttrMessage("hello-user", props);
             Assert.AreEqual("Hello, Test!", message);
-        }
-
-
-        [Test]
-        public void TestConcurrencyOption()
-        {
-            var bundleOpt = new FluentBundleOption()
-            {
-                Locales = {"en-US"},
-                UseConcurrent = true,
-            };
-            var optBundle = FluentBundle.MakeUnchecked(bundleOpt);
-            Parallel.For(0, 10, i => optBundle.AddResource($"term-1 = {i}", out _));
-            Parallel.For(0, 10, i => optBundle.AddResource($"term-2= {i}", out _));
-            Parallel.For(0, 10, i => optBundle.TryGetAttrMsg("term-1", null, out _, out _));
-            Parallel.For(0, 10, i => optBundle.AddResourceOverriding($"term-2= {i + 1}"));
-            Assert.True(optBundle.HasMessage("term-1"));
         }
 
         public static IEnumerable<TestCaseData> TestBundleErrors
