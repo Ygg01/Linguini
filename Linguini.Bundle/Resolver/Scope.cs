@@ -138,7 +138,7 @@ namespace Linguini.Bundle.Resolver
         {
             _localArgs = resNamed != null
                 ? new Dictionary<string, IFluentType>(resNamed)
-                : new Dictionary<string, IFluentType>();
+                : null;
         }
 
         public PluralCategory GetPluralRules(RuleType type, FluentNumber number)
