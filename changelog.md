@@ -55,3 +55,8 @@ version 0.3.0
 - Extracted `Linguini.Syntax.Serializers` to a separate package
 - Changed the way `InsertBehavior` works
 - Add support for net461 @mtkennerly
+
+version 0.3.1
+========
+
+- Fixed error in `Linguini.Bundle` that prevented term and scope arguments from coexisting. @adcdefg30
