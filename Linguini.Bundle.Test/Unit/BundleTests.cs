@@ -93,16 +93,16 @@ new1  = new
                 .SetUseIsolating(false);
 
             var bundle = bundler.UncheckedBuild();
-            Assert.IsTrue(bundle.TryGetAttrMsg("term1", null, out _, out var termMsg));
+            Assert.IsTrue(bundle.TryGetAttrMessage("term1", null, out _, out var termMsg));
             Assert.AreEqual("val1", termMsg);
-            Assert.IsTrue(bundle.TryGetAttrMsg("term2", null, out _, out var termMsg2));
+            Assert.IsTrue(bundle.TryGetAttrMessage("term2", null, out _, out var termMsg2));
             Assert.AreEqual("val2", termMsg2);
 
             bundle.AddResourceOverriding(_replace2);
-            Assert.IsTrue(bundle.TryGetAttrMsg("term2", null, out _, out _));
-            Assert.IsTrue(bundle.TryGetAttrMsg("term1", null, out _, out termMsg));
+            Assert.IsTrue(bundle.TryGetAttrMessage("term2", null, out _, out _));
+            Assert.IsTrue(bundle.TryGetAttrMessage("term1", null, out _, out termMsg));
             Assert.AreEqual("xxx", termMsg);
-            Assert.IsTrue(bundle.TryGetAttrMsg("new1.attr", null, out _, out var newMsg));
+            Assert.IsTrue(bundle.TryGetAttrMessage("new1.attr", null, out _, out var newMsg));
             Assert.AreEqual("6", newMsg);
         }
 
@@ -150,7 +150,7 @@ new1  = new
 
             Parallel.For(0, 10, i => bundler.AddResource($"term-1 = {i}", out _));
             Parallel.For(0, 10, i => bundler.AddResource($"term-2= {i}", out _));
-            Parallel.For(0, 10, i => bundler.TryGetAttrMsg("term-1", null, out _, out _));
+            Parallel.For(0, 10, i => bundler.TryGetAttrMessage("term-1", null, out _, out _));
             Parallel.For(0, 10, i => bundler.AddResourceOverriding($"term-2= {i + 1}"));
             Assert.True(bundler.HasMessage("term-1"));
         }
@@ -166,7 +166,7 @@ new1  = new
             var optBundle = FluentBundle.MakeUnchecked(bundleOpt);
             Parallel.For(0, 10, i => optBundle.AddResource($"term-1 = {i}", out _));
             Parallel.For(0, 10, i => optBundle.AddResource($"term-2= {i}", out _));
-            Parallel.For(0, 10, i => optBundle.TryGetAttrMsg("term-1", null, out _, out _));
+            Parallel.For(0, 10, i => optBundle.TryGetAttrMessage("term-1", null, out _, out _));
             Parallel.For(0, 10, i => optBundle.AddResourceOverriding($"term-2= {i + 1}"));
             Assert.True(optBundle.HasMessage("term-1"));
         }
@@ -188,6 +188,24 @@ new1  = new
 
             var message = bundler.GetAttrMessage("hello-user", props);
             Assert.AreEqual("Hello, Test!", message);
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCase("new1.attr", true)]
+        [TestCase("new1", true)]
+        [TestCase("new1.", false)]
+        [TestCase("new2", false)]
+        public void TestHasAttrMessage(string idWithAttr, bool found)
+        {
+            var bundle = LinguiniBuilder.Builder()
+                .CultureInfo(new CultureInfo("en"))
+                .AddResource(_replace2)
+                .SetUseIsolating(false)
+                .UncheckedBuild();
+
+            Assert.AreEqual(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
+                bundle.HasAttrMessage(idWithAttr));
         }
 
         public static IEnumerable<TestCaseData> TestBundleErrors

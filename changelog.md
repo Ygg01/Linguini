@@ -60,3 +60,10 @@ version 0.3.1
 ========
 
 - Fixed error in `Linguini.Bundle` that prevented term and scope arguments from coexisting. @adcdefg30
+
+version 0.3.2
+========
+
+- Adds `LinguiniBundle.HasAttrMessage` method
+- Obsoletes `LinguiniBundle.TryGetAttrMsg` for `LinguiniBundle.TryGetAttrMessage`
+- Obsoletes `LinguiniBundle.TryGetMsg` for `LinguiniBundle.TryGetMessage`

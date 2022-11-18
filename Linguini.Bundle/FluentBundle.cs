@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Resolver;
@@ -173,6 +174,7 @@ namespace Linguini.Bundle
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasMessage(string identifier)
         {
             var id = (identifier, EntryKind.Message);
@@ -180,9 +182,27 @@ namespace Linguini.Bundle
                    && _entries[id] is AstMessage;
         }
 
+        public bool HasAttrMessage(string idWithAttr)
+        {
+            var attributes = idWithAttr.IndexOf('.');
+            if (attributes < 0)
+            {
+                return HasMessage(idWithAttr);
+            }
+
+            var id = idWithAttr.AsSpan(0, attributes).ToString();
+            var attr = idWithAttr.AsSpan(attributes + 1).ToString();
+            if (TryGetAstMessage(id, out var astMessage))
+            {
+                return astMessage.GetAttribute(attr) != null;
+            }
+
+            return false;
+        }
+
         public string? GetAttrMessage(string msgWithAttr, FluentArgs? args = null)
         {
-            TryGetAttrMsg(msgWithAttr, args, out var errors, out var message);
+            TryGetAttrMessage(msgWithAttr, args, out var errors, out var message);
             if (errors.Count > 0)
             {
                 throw new LinguiniException(errors);
@@ -191,25 +211,23 @@ namespace Linguini.Bundle
             return message;
         }
 
-        public bool TryGetAttrMsg(string msgWithAttr, FluentArgs? args,
+        public bool TryGetAttrMessage(string msgWithAttr, FluentArgs? args,
             out IList<FluentError> errors, out string? message)
         {
             if (msgWithAttr.Contains("."))
             {
                 var split = msgWithAttr.Split('.');
-                return TryGetMsg(split[0], split[1], args, out errors, out message);
+                return TryGetMessage(split[0], split[1], args, out errors, out message);
             }
 
-            return TryGetMsg(msgWithAttr, args, out errors, out message);
+            return TryGetMessage(msgWithAttr, null, args, out errors, out message);
         }
 
-        public bool TryGetMsg(string id, FluentArgs? args,
+        public bool TryGetMessage(string id, FluentArgs? args,
             out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
-        {
-            return TryGetMsg(id, null, args, out errors, out message);
-        }
+            => TryGetMessage(id, null, args, out errors, out message);
 
-        public bool TryGetMsg(string id, string? attribute, FluentArgs? args,
+        public bool TryGetMessage(string id, string? attribute, FluentArgs? args,
             out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
         {
             string? value = null;
@@ -325,5 +343,24 @@ namespace Linguini.Bundle
                 UseIsolating = UseIsolating,
             };
         }
+
+        #region Obsolete
+
+        [Obsolete("Use TryGetAttrMessage(string, FluentArgs?, out IList<FluentError>, out string?)")]
+        public bool TryGetAttrMsg(string msgWithAttr, FluentArgs? args,
+            out IList<FluentError> errors, out string? message) =>
+            TryGetAttrMessage(msgWithAttr, args, out errors, out message);
+
+        [Obsolete("Use TryGetMessage(string, FluentArgs?, out IList<FluentError>, out string?")]
+        public bool TryGetMsg(string id, FluentArgs? args,
+            out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
+            => TryGetMessage(id, args, out errors, out message);
+
+        [Obsolete("Use TryGetMessage")]
+        public bool TryGetMsg(string id, string? attribute, FluentArgs? args,
+            out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
+            => TryGetMessage(id, attribute, args, out errors, out message);
+
+        #endregion
     }
 }
