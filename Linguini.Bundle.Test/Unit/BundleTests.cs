@@ -89,8 +89,7 @@ new1  = new
         {
             var bundler = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
-                .AddResource(_replace1)
-                .SetUseIsolating(false);
+                .AddResource(_replace1);
 
             var bundle = bundler.UncheckedBuild();
             Assert.IsTrue(bundle.TryGetAttrMessage("term1", null, out _, out var termMsg));
@@ -113,7 +112,6 @@ new1  = new
             var bundler = LinguiniBuilder.Builder()
                 .Locales("en-US", "sr-RS")
                 .AddResources(_wrong, _res1)
-                .SetUseIsolating(false)
                 .SetFormatterFunc(_formatter)
                 .SetTransformFunc(_transform)
                 .AddFunction("id", _idFunc)
@@ -191,7 +189,6 @@ new1  = new
             var bundler = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
                 .AddResource("hello-user =  Hello, { $username }!")
-                .SetUseIsolating(false)
                 .UncheckedBuild();
 
             var props = new Dictionary<string, IFluentType>()
@@ -201,6 +198,23 @@ new1  = new
 
             var message = bundler.GetAttrMessage("hello-user", props);
             Assert.AreEqual("Hello, Test!", message);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCase("new1.attr", true)]
+        [TestCase("new1", true)]
+        [TestCase("new1.", false)]
+        [TestCase("new2", false)]
+        public void TestBehavior(string idWithAttr, bool found)
+        {
+            var bundle = LinguiniBuilder.Builder()
+                .CultureInfo(new CultureInfo("en"))
+                .AddResource(_replace2)
+                .UncheckedBuild();
+
+            Assert.AreEqual(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
+                bundle.HasAttrMessage(idWithAttr));
         }
 
         [Test]
@@ -214,7 +228,6 @@ new1  = new
             var bundle = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
                 .AddResource(_replace2)
-                .SetUseIsolating(false)
                 .UncheckedBuild();
 
             Assert.AreEqual(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),

@@ -64,7 +64,7 @@ namespace Linguini.Bundle.Builder
             private CultureInfo _culture;
             private readonly List<string> _locales = new();
             private readonly List<Resource> _resources = new();
-            private bool _useIsolating = true;
+            private bool _useIsolating;
             private Func<IFluentType, string>? _formatterFunc;
             private Func<string, string>? _transformFunc;
             private readonly Dictionary<string, ExternalFunction> _functions = new();
