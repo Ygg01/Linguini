@@ -19,10 +19,10 @@ Need just parsing? Get Linguni.Syntax.
 Need only Plural Rules data? Get PluralRules.Generator and connect to XML CLDR Plural rules data.
 
 ## Performant
-Linguini uses a zero-copy parser to parse the resources. While at the moment there are no benchmarks,
+Linguini uses a zero-copy parser to parse the resources. While at the moment, there are no benchmarks,
 it is used by [RobustToolbox as](https://github.com/space-wizards/RobustToolbox) as a localization framework.
 
-# How to get?
+# How to get it?
 
 To install the [Fluent Bundle](https://www.nuget.org/packages/Linguini.Bundle/) type in your console:
 
@@ -30,39 +30,34 @@ To install the [Fluent Bundle](https://www.nuget.org/packages/Linguini.Bundle/) 
 
 You can also follow other NuGet installation instructions.
 
-# How to use?
+# How to use it?
 
-For a 1 minute tour of Linguini add this to your C# code:
+For a 2-minute tour of Linguini, add this to your C# code:
 ```csharp
 var bundler = LinguiniBuilder.Builder()
     .CultureInfo(new CultureInfo("en"))
     .AddResource("hello-user =  Hello, { $username }!")
     .UncheckedBuild();
 
-var props = new Dictionary<string, IFluentType>()
-{
-    {"username", (FluentString)"Test"}
-};
-
-var message = bundler.GetAttrMessage("hello-user", props);
+var message = bundler.GetAttrMessage("hello-user",  ("username", (FluentString)"Test"));
 Assert.AreEqual("Hello, Test!", message);
 ```
 
 ## The 10 min tour - What do the lines mean?
 
-Let's go line by line, and see how `LinguiniBuilder` works.
+Let's go line by line and see how `LinguiniBuilder` works.
 
-1. Init - Follwoing creates a `LinguiniBuilder` using a type-safe builder pattern.
+1. Init - This creates a `LinguiniBuilder` using a type-safe builder pattern.
     ```csharp
     var bundler = LinguiniBuilder.Builder()
     ```
 
-2. Set the language - a translation bundle **must** have a language to translate to. In this case we choose English language.
+2. Set the language - a translation bundle **must** have a language to translate to. In this case, we choose the English language.
     ```csharp
     .CultureInfo(new CultureInfo("en"))
     ```
 
-3. Add a resource - translation bundle with no resources isn't really useful. We choose inline for easy of example, files are fine
+3. Add a resource - a translation bundle without resources is pointless. We choose inline for ease of example, for passing files checking documentation or source code.
     ```csharp
         .AddResource("hello-user =  Hello, { $username }!")
     ```
@@ -73,10 +68,38 @@ Let's go line by line, and see how `LinguiniBuilder` works.
        .UncheckedBuild();
    ```
    
-5. Set p
+5. Get `hello-user` term where `username` is `Test`.
+   ```csharp
+   bundler.GetAttrMessage("hello-user",  ("username", (FluentString)"Test"));
+   ```
 
-# What is Fluent?
-For more details see [Fluent syntax guide](https://projectfluent.org/fluent/guide/).
+# Quick questions and answers
+
+## FluentBundle isn't thread-safe.
+
+Making it concurrent could add a performance penalty; otherwise, a concurrent bundle would be the default. To make it thread-safe, add `UseConcurrent()`
+in builder:
+```csharp
+    var bundler = LinguiniBuilder.Builder()
+       .CultureInfo(new CultureInfo("en"))
+       .AddResource("hello-user =  Hello, { $username }!")
+       .UseConcurrent()
+       .UncheckedBuild();
+```
+Or set `UseConcurrent = true` in `FluentBundleOption` passed to the factory method:
+```csharp
+    var x = new FluentBundleOption()
+    {
+        UseConcurrent = true,
+    };
+    var bundle = FluentBundle.MakeUnchecked(defaultBundleOpt);
+```
+## Isn't `.ftl` FreeMarker Template language?
+
+No, it can also be Fluent, a localization system by Mozilla.
+
+## What syntax does Fluent Localization uses?
+For more details, see [Fluent syntax guide](https://projectfluent.org/fluent/guide/).
 
 # Licenses
 

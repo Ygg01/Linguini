@@ -191,12 +191,7 @@ new1  = new
                 .AddResource("hello-user =  Hello, { $username }!")
                 .UncheckedBuild();
 
-            var props = new Dictionary<string, IFluentType>()
-            {
-                { "username", (FluentString)"Test" }
-            };
-
-            var message = bundler.GetAttrMessage("hello-user", props);
+            var message = bundler.GetAttrMessage("hello-user",  ("username", (FluentString)"Test"));
             Assert.AreEqual("Hello, Test!", message);
         }
 
