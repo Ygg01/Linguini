@@ -136,7 +136,7 @@ namespace Linguini.Bundle.Test.Yaml
                     }
                     else
                     {
-                        testBundle.TryGetMsg(assert.Id, assert.Attribute, assert.Args,
+                        testBundle.TryGetMessage(assert.Id, assert.Attribute, assert.Args,
                             out var errs,
                             out var actualValue);
                         Assert.AreEqual(assert.ExpectedValue, actualValue, test.TestName);

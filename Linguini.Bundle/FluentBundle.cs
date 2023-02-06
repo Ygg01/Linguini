@@ -397,24 +397,5 @@ namespace Linguini.Bundle
                 UseIsolating = UseIsolating,
             };
         }
-
-        #region Obsolete
-
-        [Obsolete("Use TryGetAttrMessage(string, FluentArgs?, out IList<FluentError>, out string?)")]
-        public bool TryGetAttrMsg(string msgWithAttr, FluentArgs? args,
-            out IList<FluentError> errors, out string? message) =>
-            TryGetAttrMessage(msgWithAttr, args, out errors, out message);
-
-        [Obsolete("Use TryGetMessage(string, FluentArgs?, out IList<FluentError>, out string?")]
-        public bool TryGetMsg(string id, FluentArgs? args,
-            out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
-            => TryGetMessage(id, args, out errors, out message);
-
-        [Obsolete("Use TryGetMessage")]
-        public bool TryGetMsg(string id, string? attribute, FluentArgs? args,
-            out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
-            => TryGetMessage(id, attribute, args, out errors, out message);
-
-        #endregion
     }
 }
