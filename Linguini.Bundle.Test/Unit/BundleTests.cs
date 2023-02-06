@@ -199,6 +199,22 @@ new1  = new
             var message = bundler.GetAttrMessage("hello-user", props);
             Assert.AreEqual("Hello, Test!", message);
         }
+
+        [Test]
+        [Parallelizable]
+        public void TestFuncAddBehavior()
+        {
+            var bundle = LinguiniBuilder.Builder()
+                .CultureInfo(new CultureInfo("en"))
+                .AddResource("x = y")
+                .UncheckedBuild();
+
+            bundle.TryAddFunction("id", _idFunc);
+            
+            Assert.IsFalse(bundle.TryAddFunction("id", _zeroFunc));
+            Assert.IsTrue(bundle.AddFunctionOverriding("id", _zeroFunc));
+            Assert.Throws<KeyNotFoundException>(() => bundle.AddFunctionUnchecked("id", _zeroFunc));
+        }
         
         [Test]
         [Parallelizable]

@@ -20,12 +20,19 @@ namespace Linguini.Bundle
     {
         private IDictionary<string, FluentFunction> _funcList;
         private IDictionary<(string, EntryKind), IEntry> _entries;
+
+        #region Properties
+
         public CultureInfo Culture { get; internal set; }
         public List<string> Locales { get; internal set; }
         public bool UseIsolating { get; set; }
         public Func<string, string>? TransformFunc { get; set; }
         public Func<IFluentType, string>? FormatterFunc { get; init; }
         public byte MaxPlaceable { get; private init; }
+
+        #endregion
+
+        #region Constructors
 
         private FluentBundle()
         {
@@ -77,46 +84,9 @@ namespace Linguini.Bundle
             };
         }
 
-        public void AddFunctions(IDictionary<string, ExternalFunction> functions, out List<FluentError> errors,
-            InsertBehavior behavior = InsertBehavior.Error)
-        {
-            errors = new List<FluentError>();
-            foreach (var keyValue in functions)
-            {
-                if (!AddFunction(keyValue.Key, keyValue.Value, out var errs, behavior))
-                {
-                    errors.AddRange(errs);
-                }
-            }
-        }
+        #endregion
 
-        public bool AddFunction(string funcName, ExternalFunction fluentFunction,
-            out IList<FluentError> errors,
-            InsertBehavior behavior = InsertBehavior.Error)
-        {
-            errors = new List<FluentError>();
-            switch (behavior)
-            {
-#if NET5_0_OR_GREATER
-                case InsertBehavior.None:
-                    return _funcList.TryAdd(funcName, fluentFunction);
-#endif
-                case InsertBehavior.Overriding:
-                    _funcList[funcName] = fluentFunction;
-                    break;
-                default:
-                    if (_funcList.ContainsKey(funcName))
-                    {
-                        errors.Add(new OverrideFluentError(funcName, EntryKind.Unknown));
-                        return false;
-                    }
-
-                    _funcList.Add(funcName, fluentFunction);
-                    break;
-            }
-
-            return true;
-        }
+        #region AddMethods
 
         public bool AddResource(Resource res, out List<FluentError> errors)
         {
@@ -148,19 +118,6 @@ namespace Linguini.Bundle
             return false;
         }
 
-        private void AddEntry(List<FluentError> errors, IEntry term, bool overwrite = false)
-        {
-            var id = (term.GetId(), term.ToKind());
-            if (_entries.ContainsKey(id) && !overwrite)
-            {
-                errors.Add(new OverrideFluentError(id.Item1, id.Item2));
-            }
-            else
-            {
-                _entries[id] = term;
-            }
-        }
-
         public void AddResourceOverriding(Resource res)
         {
             for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
@@ -173,6 +130,84 @@ namespace Linguini.Bundle
                 }
             }
         }
+
+        private void AddEntry(List<FluentError> errors, IEntry term, bool overwrite = false)
+        {
+            var id = (term.GetId(), term.ToKind());
+            if (_entries.ContainsKey(id) && !overwrite)
+            {
+                errors.Add(new OverrideFluentError(id.Item1, id.Item2));
+            }
+            else
+            {
+                _entries[id] = term;
+            }
+        }
+        
+        public bool TryAddFunction(string funcName, ExternalFunction fluentFunction)
+        {
+            return TryInsert(funcName, fluentFunction, InsertBehavior.None);
+        }
+        
+        public bool AddFunctionOverriding(string funcName, ExternalFunction fluentFunction)
+        {
+            return TryInsert(funcName, fluentFunction, InsertBehavior.OverwriteExisting);
+        }
+        
+        public bool AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction)
+        {
+            return TryInsert(funcName, fluentFunction);
+        }
+
+        public void AddFunctions(IDictionary<string, ExternalFunction> functions, out List<FluentError> errors)
+        {
+            errors = new List<FluentError>();
+            foreach (var keyValue in functions)
+            {
+                if (!TryInsert(keyValue.Key, keyValue.Value, InsertBehavior.None))
+                {
+                    errors.Add(new OverrideFluentError(keyValue.Key, EntryKind.Func));
+                }
+            }
+        }
+
+        private bool TryInsert(string funcName, ExternalFunction fluentFunction,
+            InsertBehavior behavior = InsertBehavior.ThrowOnExisting)
+        {
+            switch (behavior)
+            {
+#if NET5_0_OR_GREATER
+                case InsertBehavior.None:
+                    return _funcList.TryAdd(funcName, fluentFunction);
+#else
+                case InsertBehavior.None:
+                    if (!_funcList.ContainsKey(funcName))
+                    {
+                        _funcList.Add(funcName, fluentFunction);
+                        return true;
+                    }
+
+                    return false;
+#endif
+                case InsertBehavior.OverwriteExisting:
+                    _funcList[funcName] = fluentFunction;
+                    break;
+                default:
+                    if (_funcList.ContainsKey(funcName))
+                    {
+                        throw new KeyNotFoundException($"Function {funcName} already exists!");
+                    }
+
+                    _funcList.Add(funcName, fluentFunction);
+                    break;
+            }
+
+            return true;
+        }
+
+        #endregion
+
+        #region AttrMessage
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasMessage(string identifier)
@@ -210,7 +245,7 @@ namespace Linguini.Bundle
 
             return message;
         }
-        
+
         public string? GetAttrMessage(string msgWithAttr, params (string, IFluentType)[] args)
         {
             var dictionary = new Dictionary<string, IFluentType>(args.Length);
@@ -218,6 +253,7 @@ namespace Linguini.Bundle
             {
                 dictionary.Add(key, val);
             }
+
             TryGetAttrMessage(msgWithAttr, dictionary, out var errors, out var message);
             if (errors.Count > 0)
             {
@@ -319,6 +355,8 @@ namespace Linguini.Bundle
             function = null;
             return false;
         }
+
+        #endregion
 
         public string FormatPattern(Pattern pattern, FluentArgs? args,
             out IList<FluentError> errors)

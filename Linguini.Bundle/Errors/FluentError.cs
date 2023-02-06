@@ -175,7 +175,7 @@ namespace Linguini.Bundle.Errors
     {
         Message,
         Term,
-        Unknown,
+        Func,
     }
 
     public static class EntryHelper
@@ -187,7 +187,7 @@ namespace Linguini.Bundle.Errors
                 return EntryKind.Term;
             }
 
-            return self is AstMessage ? EntryKind.Message : EntryKind.Unknown;
+            return self is AstMessage ? EntryKind.Message : EntryKind.Func;
         }
     }
 

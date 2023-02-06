@@ -149,17 +149,15 @@ namespace Linguini.Bundle.Test.Yaml
         private static void AddFunc(FluentBundle bundle, string funcName, ExternalFunction externalFunction,
             List<FluentError> errors)
         {
-            bundle.AddFunction(funcName, externalFunction, out var errs);
-            if (errs is { Count: > 0 })
+            if (!bundle.TryAddFunction(funcName, externalFunction))
             {
-                errors.AddRange(errs);
+                errors.Add(new OverrideFluentError(funcName, EntryKind.Func));
             }
         }
 
         private static string GetFullPathFor(string file)
         {
-            List<string> list = new();
-            list.Add(BaseTestDir);
+            List<string> list = new() { BaseTestDir };
             list.AddRange(file.Split('/'));
             return Path.Combine(list.ToArray());
         }
