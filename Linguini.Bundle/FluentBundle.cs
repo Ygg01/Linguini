@@ -210,6 +210,22 @@ namespace Linguini.Bundle
 
             return message;
         }
+        
+        public string? GetAttrMessage(string msgWithAttr, params (string, IFluentType)[] args)
+        {
+            var dictionary = new Dictionary<string, IFluentType>(args.Length);
+            foreach (var (key, val) in args)
+            {
+                dictionary.Add(key, val);
+            }
+            TryGetAttrMessage(msgWithAttr, dictionary, out var errors, out var message);
+            if (errors.Count > 0)
+            {
+                throw new LinguiniException(errors);
+            }
+
+            return message;
+        }
 
         public bool TryGetAttrMessage(string msgWithAttr, FluentArgs? args,
             out IList<FluentError> errors, out string? message)

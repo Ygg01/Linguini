@@ -32,12 +32,11 @@ You can also follow other NuGet installation instructions.
 
 # How to use?
 
-For a 2 minute tour of Linguini add this to your C# code:
+For a 1 minute tour of Linguini add this to your C# code:
 ```csharp
 var bundler = LinguiniBuilder.Builder()
     .CultureInfo(new CultureInfo("en"))
     .AddResource("hello-user =  Hello, { $username }!")
-    .SetUseIsolating(false)
     .UncheckedBuild();
 
 var props = new Dictionary<string, IFluentType>()
@@ -49,6 +48,34 @@ var message = bundler.GetAttrMessage("hello-user", props);
 Assert.AreEqual("Hello, Test!", message);
 ```
 
+## The 10 min tour - What do the lines mean?
+
+Let's go line by line, and see how `LinguiniBuilder` works.
+
+1. Init - Follwoing creates a `LinguiniBuilder` using a type-safe builder pattern.
+    ```csharp
+    var bundler = LinguiniBuilder.Builder()
+    ```
+
+2. Set the language - a translation bundle **must** have a language to translate to. In this case we choose English language.
+    ```csharp
+    .CultureInfo(new CultureInfo("en"))
+    ```
+
+3. Add a resource - translation bundle with no resources isn't really useful. We choose inline for easy of example, files are fine
+    ```csharp
+        .AddResource("hello-user =  Hello, { $username }!")
+    ```
+
+4. Complete the `ResourceBundle` - We call `UncheckedBuild()` to convert a builder to a bundle. Bundle will parse its resources and report
+   errors. Since we don't care about errors, we are fine with `ResourceBundle` throwing errors.
+   ```
+       .UncheckedBuild();
+   ```
+   
+5. Set p
+
+# What is Fluent?
 For more details see [Fluent syntax guide](https://projectfluent.org/fluent/guide/).
 
 # Licenses

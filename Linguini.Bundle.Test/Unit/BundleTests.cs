@@ -124,6 +124,19 @@ new1  = new
 
         [Test]
         [Parallelizable]
+        public void TestReadme()
+        {
+            var bundle = LinguiniBuilder.Builder()
+                .CultureInfo(new CultureInfo("en"))
+                .AddResource("hello-user =  Hello, { $username }!")
+                .UncheckedBuild();
+
+            var message = bundle.GetAttrMessage("hello-user", ("username", (FluentString)"Test"));
+            Assert.AreEqual("Hello, Test!", message);
+        }
+
+        [Test]
+        [Parallelizable]
         public void TestEnumeration()
         {
             var bundler = LinguiniBuilder.Builder()
