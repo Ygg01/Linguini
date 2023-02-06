@@ -67,3 +67,10 @@ version 0.3.2
 - Adds `LinguiniBundle.HasAttrMessage` method
 - Obsoletes `LinguiniBundle.TryGetAttrMsg` for `LinguiniBundle.TryGetAttrMessage`
 - Obsoletes `LinguiniBundle.TryGetMsg` for `LinguiniBundle.TryGetMessage`
+
+version 0.4.0
+========
+
+- Changes default on `LinguiniBundle.SetIsolating` from `true` to `false`
+- Removes `enum InsertBehavior` in favor of three separate functions.
+- Removes previously obsolete methods.
