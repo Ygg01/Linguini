@@ -72,5 +72,6 @@ version 0.4.0
 ========
 
 - Changes default on `LinguiniBundle.SetIsolating` from `true` to `false`
-- Removes `enum InsertBehavior` in favor of three separate functions.
+- Adds method `GetAttrMessage(string msgWithAttr, params (string, IFluentType)[] args)` for ease of use.
+- Removes `enum InsertBehavior` in favor of three separate functions (`TryAddFunction`, `AddFunctionOverriding`, `AddFunctionUnchecked`)
 - Removes previously obsolete methods.
