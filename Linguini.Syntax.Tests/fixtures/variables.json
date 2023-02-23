@@ -112,15 +112,6 @@
         },
         {
             "type": "Comment",
-            "content": "ERROR Double $$"
-        },
-        {
-            "type": "Junk",
-            "annotations": [],
-            "content": "err02 = {$$var}\n"
-        },
-        {
-            "type": "Comment",
             "content": "ERROR Invalid first char of the identifier"
         },
         {

@@ -1,0 +1,42 @@
+﻿{
+  "type": "Resource",
+  "body": [
+    {
+      "type": "Message",
+      "id": {
+        "type": "Identifier",
+        "name": "attack-log1"
+      },
+      "value": {
+        "type": "Pattern",
+        "elements": [
+          {
+            "type": "Placeable",
+            "expression": {
+              "type": "DynamicReference",
+              "id": {
+                "type": "Identifier",
+                "name": "attacker"
+              }
+            }
+          },
+          {
+            "type": "TextElement",
+            "value": " attacked "
+          },
+          {
+            "type": "Placeable",
+            "expression": {
+              "type": "DynamicReference",
+              "id": {
+                "type": "Identifier",
+                "name": "defender"
+              }
+            }
+          }
+        ]
+      },
+      "attributes": []
+    }
+  ]
+}
