@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using FluentAssertions;
 using FluentAssertions.Json;
 using Linguini.Serialization.Converters;
 using Linguini.Syntax.Ast;
@@ -44,6 +46,7 @@ namespace Linguini.Syntax.Tests.Parser
                 IgnoreReadOnlyFields = false,
                 WriteIndented = true,
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 Converters =
                 {
                     new AttributeSerializer(),
@@ -229,17 +232,16 @@ namespace Linguini.Syntax.Tests.Parser
 
         [Test]
         [Parallelizable]
-        [TestCase("fixtures/x_linguini_ref")]
+        [TestCase("fixtures_ext/x_linguini_ref")]
         public void TestLinguiniExt(string file)
         {
             var path = GetFullPathFor(file);
-            var expected = JToken.Parse(File.ReadAllText($@"{path}.json"));
-            var fastRes = ParseFtlFileFast(@$"{path}.ftl");
-            var ftlAstFastJson = JsonSerializer.Serialize(fastRes, TestJsonOptions());
+            var res = ParseFtlFile(@$"{path}.ftl");
+            var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions());
 
-            var fastExpected = RemoveComments(expected);
-            var fastActual = JToken.Parse(ftlAstFastJson);
-            fastActual.Should().BeEquivalentTo(fastExpected);
+            var expected = JToken.Parse(File.ReadAllText($@"{path}.json"));
+            var actual = JToken.Parse(ftlAstJson);
+            actual.Should().BeEquivalentTo(expected);
         }
 
         private JToken RemoveComments(JToken actual)
