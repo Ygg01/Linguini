@@ -17,7 +17,9 @@
               "id": {
                 "type": "Identifier",
                 "name": "attacker"
-              }
+              },
+              "attribute": null,
+              "arguments": null
             }
           },
           {
@@ -31,12 +33,15 @@
               "id": {
                 "type": "Identifier",
                 "name": "defender"
-              }
+              },
+              "attribute": null,
+              "arguments": null
             }
           }
         ]
       },
-      "attributes": []
+      "attributes": [],
+      "comment": null
     }
   ]
 }
