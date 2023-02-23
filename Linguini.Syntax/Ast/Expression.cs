@@ -57,6 +57,20 @@ namespace Linguini.Syntax.Ast
             Attribute = attribute;
         }
     }
+
+    public class DynamicReference : IInlineExpression
+    {
+        public Identifier Id;
+        public Identifier? Attribute;
+        public CallArguments? Arguments;
+
+        public DynamicReference(Identifier id, Identifier? attribute, CallArguments? arguments)
+        {
+            Id = id;
+            Attribute = attribute;
+            Arguments = arguments;
+        }
+    }
     
     public class TermReference : IInlineExpression
     {

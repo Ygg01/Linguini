@@ -1101,6 +1101,40 @@ namespace Linguini.Syntax.Parser
                         return false;
                     }
                 }
+                if ('$' == peekChr && _reader.PeekChar(1) == '$')
+                {
+                    _reader.Position += 3;
+                    var id = GetUncheckedIdentifier();
+
+                    if (!TryCallArguments(out var args, out error))
+                    {
+                        expr = null;
+                        return false;
+                    }
+
+                    if (args != null)
+                    {
+                        if (!id.Name.Span.IsCallee())
+                        {
+                            error = ParseError.ForbiddenCallee(_reader.Position, _reader.Row);
+                            expr = null;
+                            return false;
+                        }
+
+                        error = null;
+                        expr = new FunctionReference(id, args.Value);
+                        return true;
+                    }
+
+                    if (!TryGetAttributeAccessor(out var attribute, out error))
+                    {
+                        expr = null;
+                        return false;
+                    }
+
+                    expr = new DynamicReference(id, attribute, args);
+                    return true;
+                }
                 else if ('$' == peekChr && !onlyLiteral)
                 {
                     _reader.Position += 1;
@@ -1137,6 +1171,7 @@ namespace Linguini.Syntax.Parser
                         expr = new FunctionReference(id, args.Value);
                         return true;
                     }
+
                     else
                     {
                         if (!TryGetAttributeAccessor(out var attribute, out error))

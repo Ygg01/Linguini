@@ -11,7 +11,5 @@ $var}
 
 # ERROR Missing variable identifier
 err01 = {$}
-# ERROR Double $$
-err02 = {$$var}
 # ERROR Invalid first char of the identifier
 err03 = {$-var}

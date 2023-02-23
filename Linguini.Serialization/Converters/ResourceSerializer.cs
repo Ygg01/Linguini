@@ -85,6 +85,10 @@ namespace Linguini.Serialization.Converters
             {
                 JsonSerializer.Serialize(writer, variableReference, options);
             }
+            else if (value is DynamicReference dynamicReference)
+            {
+                JsonSerializer.Serialize(writer, dynamicReference, options);
+            }
         }
     }
 }

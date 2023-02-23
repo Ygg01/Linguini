@@ -54,6 +54,7 @@ namespace Linguini.Syntax.Tests.Parser
                     new JunkSerializer(),
                     new MessageReferenceSerializer(),
                     new MessageSerializer(),
+                    new DynamicReferenceSerializer(),
                     new NamedArgumentSerializer(),
                     new ParseErrorSerializer(),
                     new PatternSerializer(),
@@ -215,6 +216,21 @@ namespace Linguini.Syntax.Tests.Parser
         [TestCase("fixtures/zero_length")]
         // [TestCase("fixtures/comments")] Errors in ignored comments aren't detected
         public void TestReadFast(string file)
+        {
+            var path = GetFullPathFor(file);
+            var expected = JToken.Parse(File.ReadAllText($@"{path}.json"));
+            var fastRes = ParseFtlFileFast(@$"{path}.ftl");
+            var ftlAstFastJson = JsonSerializer.Serialize(fastRes, TestJsonOptions());
+
+            var fastExpected = RemoveComments(expected);
+            var fastActual = JToken.Parse(ftlAstFastJson);
+            fastActual.Should().BeEquivalentTo(fastExpected);
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCase("fixtures/x_linguini_ref")]
+        public void TestLinguiniExt(string file)
         {
             var path = GetFullPathFor(file);
             var expected = JToken.Parse(File.ReadAllText($@"{path}.json"));
