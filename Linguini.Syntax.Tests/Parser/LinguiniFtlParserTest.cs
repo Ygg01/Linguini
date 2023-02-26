@@ -236,9 +236,9 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestLinguiniExt(string file)
         {
             var path = GetFullPathFor(file);
-            var res = ParseFtlFile(@$"{path}.ftl");
+            var res = ParseFtlFileFast(@$"{path}.ftl");
             var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions());
-
+        
             var expected = JToken.Parse(File.ReadAllText($@"{path}.json"));
             var actual = JToken.Parse(ftlAstJson);
             actual.Should().BeEquivalentTo(expected);

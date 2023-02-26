@@ -1112,20 +1112,6 @@ namespace Linguini.Syntax.Parser
                         return false;
                     }
 
-                    if (args != null)
-                    {
-                        if (!id.Name.Span.IsCallee())
-                        {
-                            error = ParseError.ForbiddenCallee(_reader.Position, _reader.Row);
-                            expr = null;
-                            return false;
-                        }
-
-                        error = null;
-                        expr = new FunctionReference(id, args.Value);
-                        return true;
-                    }
-
                     if (!TryGetAttributeAccessor(out var attribute, out error))
                     {
                         expr = null;
@@ -1211,7 +1197,7 @@ namespace Linguini.Syntax.Parser
             return false;
         }
 
-        private bool TryCallArguments(out CallArguments? args, out ParseError? error)
+        private bool TryCallArguments(out CallArguments? args, out ParseError? error, bool onlyLiteral = false)
         {
             _reader.SkipBlank();
             if (!_reader.ReadCharIf('('))
@@ -1234,7 +1220,7 @@ namespace Linguini.Syntax.Parser
                     break;
                 }
 
-                if (!TryGetArgument(out error, argNames, nameArgs, positional))
+                if (!TryGetArgument(out error, argNames, nameArgs, positional, onlyLiteral))
                 {
                     args = null;
                     return false;
@@ -1264,9 +1250,9 @@ namespace Linguini.Syntax.Parser
 
         private bool TryGetArgument(out ParseError? error,
             List<Identifier> argNames, List<NamedArgument> nameArgs,
-            List<IInlineExpression> positional)
+            List<IInlineExpression> positional, bool onlyLiteral = false)
         {
-            if (!TryGetInlineExpression(false, out var expr, out error))
+            if (!TryGetInlineExpression(onlyLiteral, out var expr, out error))
             {
                 return false;
             }
@@ -1286,7 +1272,7 @@ namespace Linguini.Syntax.Parser
                     _reader.Position += 1;
                     _reader.SkipBlank();
 
-                    if (!TryGetInlineExpression(true, out var val, out error))
+                    if (!TryGetInlineExpression(onlyLiteral, out var val, out error))
                     {
                         return false;
                     }

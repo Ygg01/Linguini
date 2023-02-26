@@ -266,5 +266,28 @@ new1  = new
                 .Build();
             return error.Select(e => e.GetSpan()).ToList();
         }
+
+        private const string DynRef = @"
+cat = {$number ->
+  *[one] Cat
+  [other] Cats
+}
+dog = {$number ->
+  *[one] Dog
+  [other] Dogs
+}
+attack-log = { $$attacker } attacked {$$defender}.
+"; 
+        
+        
+        [Test]
+        [TestCase(DynRef)]
+        public void TestDynamicReference(string input)
+        {
+            var (res, err) =  LinguiniBuilder.Builder().Locale("en-US")
+                .AddResource(input)
+                .Build();
+            Assert.IsEmpty(err);
+        }
     }
 }

@@ -1,0 +1,27 @@
+﻿suites:
+  - name: Linguini dynamic Reference
+    resources:
+      - source: |-
+          cat = {$number ->
+              *[one] Cat
+              [other] Cats
+          }
+          dog = {$number ->
+              *[one] Dog
+              [other] Dogs
+          }
+          attack-log = { $$attacker(number: $atk_num) } attacked {$$defender(number: $def_num)}.
+    tests:
+    - name: regular reference
+      asserts:
+        - id: cat
+          args:
+            number: 3
+          value: "Cats"
+#        - id: cat
+#          args:
+#            attacker: "cat"
+#            atk_num: 1
+#            defender: "dog"
+#            def_num: 2
+#          value: "Cat attacked dogs"
