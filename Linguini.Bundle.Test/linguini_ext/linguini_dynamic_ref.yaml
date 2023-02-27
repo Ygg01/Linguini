@@ -11,6 +11,8 @@
               [other] Dogs
           }
           attack-log = { $$attacker(number: $atk_num) } attacked {$$defender(number: $def_num)}.
+    bundles:
+    - useExtensions: true
     tests:
     - name: regular reference
       asserts:

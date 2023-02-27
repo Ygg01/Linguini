@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO;
 using System.Runtime.CompilerServices;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
@@ -11,6 +12,7 @@ using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
+using Linguini.Syntax.Parser;
 
 namespace Linguini.Bundle
 {
@@ -29,6 +31,8 @@ namespace Linguini.Bundle
         public Func<string, string>? TransformFunc { get; set; }
         public Func<IFluentType, string>? FormatterFunc { get; init; }
         public byte MaxPlaceable { get; private init; }
+        
+        public bool EnableExtensions { get; init; }
 
         #endregion
 
@@ -42,6 +46,7 @@ namespace Linguini.Bundle
             Locales = new List<string>();
             UseIsolating = true;
             MaxPlaceable = 100;
+            EnableExtensions = false;
         }
 
         public static FluentBundle MakeUnchecked(FluentBundleOption option)
@@ -81,6 +86,7 @@ namespace Linguini.Bundle
                 FormatterFunc = option.FormatterFunc,
                 UseIsolating = option.UseIsolating,
                 MaxPlaceable = option.MaxPlaceable,
+                EnableExtensions = option.EnableExtensions,
             };
         }
 
@@ -88,7 +94,20 @@ namespace Linguini.Bundle
 
         #region AddMethods
 
-        public bool AddResource(Resource res, out List<FluentError> errors)
+        public bool AddResource(string input, out List<FluentError> errors)
+        {
+            var res = new LinguiniParser(input, EnableExtensions).Parse();
+            return AddResource(res, out errors);
+        }
+        
+        public bool AddResource(TextReader reader, out List<FluentError> errors)
+        {
+            var res = new LinguiniParser(reader, EnableExtensions).Parse();
+            return AddResource(res, out errors);
+        }
+
+
+        internal bool AddResource(Resource res, out List<FluentError> errors)
         {
             errors = new List<FluentError>();
             foreach (var parseError in res.Errors)
@@ -118,11 +137,11 @@ namespace Linguini.Bundle
             return false;
         }
 
-        public void AddResourceOverriding(Resource res)
+        private void InternalResourceOverriding(Resource resource)
         {
-            for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
+            for (var entryPos = 0; entryPos < resource.Entries.Count; entryPos++)
             {
-                var entry = res.Entries[entryPos];
+                var entry = resource.Entries[entryPos];
 
                 if (entry is AstTerm or AstMessage)
                 {
@@ -130,11 +149,23 @@ namespace Linguini.Bundle
                 }
             }
         }
-
-        private void AddEntryOverriding(IEntry term)
+        
+        private void AddEntryOverriding(IEntry term) 
         {
             var id = (term.GetId(), term.ToKind());
             _entries[id] = term;
+        }
+
+        public void AddResourceOverriding(string input)
+        {
+            var res = new LinguiniParser(input, EnableExtensions).Parse();
+            InternalResourceOverriding(res);
+        }
+        
+        public void AddResourceOverriding(TextReader input)
+        {
+            var res = new LinguiniParser(input, EnableExtensions).Parse();
+            InternalResourceOverriding(res);
         }
 
         private void AddEntry(List<FluentError> errors, IEntry term)

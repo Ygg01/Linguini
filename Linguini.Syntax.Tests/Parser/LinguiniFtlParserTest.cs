@@ -93,12 +93,12 @@ namespace Linguini.Syntax.Tests.Parser
             return parser.ParseWithComments();
         }
 
-        private static Resource ParseFtlFileFast(string path)
+        private static Resource ParseFtlFileFast(string path, bool enableExtensions = false)
         {
             LinguiniParser parser;
             using (var reader = new StreamReader(path))
             {
-                parser = new LinguiniParser(reader);
+                parser = new LinguiniParser(reader, enableExtensions);
             }
 
             return parser.Parse();
@@ -236,7 +236,7 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestLinguiniExt(string file)
         {
             var path = GetFullPathFor(file);
-            var res = ParseFtlFileFast(@$"{path}.ftl");
+            var res = ParseFtlFileFast(@$"{path}.ftl", true);
             var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions());
         
             var expected = JToken.Parse(File.ReadAllText($@"{path}.json"));
