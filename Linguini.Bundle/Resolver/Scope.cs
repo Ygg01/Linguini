@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Linguini.Bundle.Errors;
 using Linguini.Shared.Types;
@@ -108,6 +109,19 @@ namespace Linguini.Bundle.Resolver
             {
                 return false;
             }
+        }
+
+        
+        public bool TryGetReference(string argument, [NotNullWhen(true)] out FluentReference? reference)
+        {
+            if (_args != null && _args.TryGetValue(argument, out var fluentType) && fluentType is FluentReference refs)
+            {
+                reference = refs;
+                return true;
+            }
+
+            reference = null;
+            return false;
         }
 
         public ResolvedArgs GetArguments(CallArguments? callArguments)

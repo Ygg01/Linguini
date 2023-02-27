@@ -284,10 +284,17 @@ attack-log = { $$attacker } attacked {$$defender}.
         [TestCase(DynRef)]
         public void TestDynamicReference(string input)
         {
-            var (res, err) =  LinguiniBuilder.Builder().Locale("en-US")
+            var (bundle, err) =  LinguiniBuilder.Builder().Locale("en-US")
                 .AddResource(input)
                 .Build();
             Assert.IsEmpty(err);
+            var args = new Dictionary<string, IFluentType>()
+            {
+                ["attacker"] = (FluentReference)"cat",
+                ["defender"] = (FluentReference)"dog",
+            };
+            Assert.True(bundle.TryGetMessage("attack-log", args, out _, out var message));
+            Assert.AreEqual("Cat attacked Dog.", message);
         }
     }
 }

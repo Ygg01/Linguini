@@ -156,6 +156,12 @@ namespace Linguini.Bundle.Resolver
                 return;
             }
 
+            if (self is DynamicReference dynRef)
+            {
+                ProcessDynRef(self, writer, scope, dynRef);
+                return;
+            }
+
             if (self is FunctionReference funcRef)
             {
                 var (resolvedPosArgs, resolvedNamedArgs) = scope.GetArguments(funcRef.Arguments);
@@ -256,6 +262,43 @@ namespace Linguini.Bundle.Resolver
             {
                 scope.WriteRefError(writer, self);
             }
+        }
+
+        private static void ProcessDynRef(IInlineExpression self, TextWriter writer, Scope scope,
+            DynamicReference dynRef)
+        {
+            var res = scope.GetArguments(dynRef.Arguments);
+            scope.SetLocalArgs(res.Named);
+
+            if (!scope.TryGetReference(dynRef.Id.ToString(), out FluentReference? reference))
+            {
+                return;
+            }
+            
+            if (scope.Bundle.TryGetAstTerm(reference, out var term))
+            {
+                var attrName = dynRef.Attribute;
+                var attr = term
+                    .Attributes
+                    .Find(a => a.Id.Equals(attrName));
+
+                scope.Track(writer, attr != null ? attr.Value : term.Value, self);
+            }
+            else if (scope.Bundle.TryGetAstMessage(reference, out var astMessage))
+            {
+                var attrName = dynRef.Attribute;
+                var attr = astMessage
+                    .Attributes
+                    .Find(a => a.Id.Equals(attrName));
+
+                scope.Track(writer, attr != null ? attr.Value : astMessage.Value!, self);
+            }
+            else
+            {
+                scope.WriteRefError(writer, self);
+            }
+
+            scope.SetLocalArgs(null);
         }
 
         public static void WriteError(this IExpression self, TextWriter writer)
