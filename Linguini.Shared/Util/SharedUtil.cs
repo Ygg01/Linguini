@@ -22,6 +22,7 @@ namespace Linguini.Shared.Util
             {
                 (FluentString fs1, FluentString fs2) => fs1.Equals(fs2),
                 (FluentNumber fn1, FluentNumber fn2) => fn1.Equals(fn2),
+                (FluentReference fn1, FluentReference fn2) => fn1.Equals(fn2),
                 (FluentString fs1, FluentNumber fn2) => scope.MatchByPluralCategory(fs1, fn2),
                 _ => false,
             };
