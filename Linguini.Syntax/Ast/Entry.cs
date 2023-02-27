@@ -18,16 +18,6 @@ namespace Linguini.Syntax.Ast
             Entries = body;
             Errors = errors;
         }
-
-        public static implicit operator Resource(string input)
-        {
-            return new LinguiniParser(input).Parse();
-        }
-
-        public static implicit operator Resource(TextReader input)
-        {
-            return new LinguiniParser(input).Parse();
-        }
     }
 
     public class AstMessage : IEntry

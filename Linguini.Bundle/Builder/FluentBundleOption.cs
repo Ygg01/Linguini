@@ -8,6 +8,7 @@ namespace Linguini.Bundle.Builder
     public class FluentBundleOption
     {
         public bool UseConcurrent { get; init; }
+        public bool EnableExtensions { get; init; }
         public bool UseIsolating { get; init; } = true;
         public byte MaxPlaceable { get; init; } = 100;
 

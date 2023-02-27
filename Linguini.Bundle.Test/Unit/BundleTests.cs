@@ -284,7 +284,7 @@ attack-log = { $$attacker } attacked {$$defender}.
         [TestCase(DynRef)]
         public void TestDynamicReference(string input)
         {
-            var (bundle, err) =  LinguiniBuilder.Builder().Locale("en-US")
+            var (bundle, err) =  LinguiniBuilder.Builder(extension: true).Locale("en-US")
                 .AddResource(input)
                 .Build();
             Assert.IsEmpty(err);

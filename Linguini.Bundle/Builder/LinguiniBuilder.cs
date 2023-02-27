@@ -13,9 +13,9 @@ namespace Linguini.Bundle.Builder
 {
     public static class LinguiniBuilder
     {
-        public static ILocaleStep Builder()
+        public static ILocaleStep Builder(bool extension = false)
         {
-            return new StepBuilder();
+            return new StepBuilder(extension);
         }
 
         public interface IStep
@@ -37,7 +37,8 @@ namespace Linguini.Bundle.Builder
             IReadyStep AddResources(params string[] unparsedResourceArray);
             IReadyStep AddResources(IEnumerable<TextReader> unparsedStreamList);
             IReadyStep AddResources(params TextReader[] unparsedStreamList);
-            IReadyStep AddResource(Resource resource);
+            IReadyStep AddResource(string resource);
+            IReadyStep AddResource(TextReader resource);
             IReadyStep AddResources(IEnumerable<Resource> resources);
             IReadyStep AddResources(params Resource[] resources);
             IReadyStep SkipResources();
@@ -64,15 +65,18 @@ namespace Linguini.Bundle.Builder
             private CultureInfo _culture;
             private readonly List<string> _locales = new();
             private readonly List<Resource> _resources = new();
+            private readonly List<object> _source = new();
             private bool _useIsolating;
             private Func<IFluentType, string>? _formatterFunc;
             private Func<string, string>? _transformFunc;
             private readonly Dictionary<string, ExternalFunction> _functions = new();
             private bool _concurrent;
+            private readonly bool _enableExtensions;
 
-            internal StepBuilder()
+            internal StepBuilder(bool enableExtensions = false)
             {
                 _culture = System.Globalization.CultureInfo.CurrentCulture;
+                _enableExtensions = enableExtensions;
             }
 
             public IReadyStep SetUseIsolating(bool isIsolating)
@@ -125,7 +129,8 @@ namespace Linguini.Bundle.Builder
                     TransformFunc = _transformFunc,
                     Locales = _locales,
                     UseIsolating = _useIsolating,
-                    UseConcurrent = _concurrent
+                    UseConcurrent = _concurrent,
+                    EnableExtensions = _enableExtensions,
                 };
                 var bundle = FluentBundle.MakeUnchecked(concurrent);
                 bundle.Culture = _culture;
@@ -139,7 +144,7 @@ namespace Linguini.Bundle.Builder
 
                 foreach (var resource in _resources)
                 {
-                    if (!bundle.AddResource(resource, out var resErr))
+                    if (!bundle.AddResource(resource,out var resErr))
                     {
                         errors.AddRange(resErr);
                     }
@@ -185,14 +190,14 @@ namespace Linguini.Bundle.Builder
 
             public IReadyStep AddResource(string unparsed)
             {
-                var resource = new LinguiniParser(unparsed).Parse();
+                var resource = new LinguiniParser(unparsed, _enableExtensions).Parse();
                 _resources.Add(resource);
                 return this;
             }
 
             public IReadyStep AddResource(TextReader unparsed)
             {
-                var resource = new LinguiniParser(unparsed).Parse();
+                var resource = new LinguiniParser(unparsed, _enableExtensions).Parse();
                 _resources.Add(resource);
                 return this;
             }
@@ -201,16 +206,10 @@ namespace Linguini.Bundle.Builder
             {
                 foreach (var unparsed in unparsedStreamList)
                 {
-                    var parsed = new LinguiniParser(unparsed).Parse();
+                    var parsed = new LinguiniParser(unparsed, _enableExtensions).Parse();
                     _resources.Add(parsed);
                 }
 
-                return this;
-            }
-
-            public IReadyStep AddResource(Resource parsedResource)
-            {
-                _resources.Add(parsedResource);
                 return this;
             }
 
@@ -218,7 +217,7 @@ namespace Linguini.Bundle.Builder
             {
                 foreach (var unparsed in unparsedResources)
                 {
-                    var parsed = new LinguiniParser(unparsed).Parse();
+                    var parsed = new LinguiniParser(unparsed, _enableExtensions).Parse();
                     _resources.Add(parsed);
                 }
 
@@ -229,7 +228,7 @@ namespace Linguini.Bundle.Builder
             {
                 foreach (var unparsed in unparsedResourceArray)
                 {
-                    var parsed = new LinguiniParser(unparsed).Parse();
+                    var parsed = new LinguiniParser(unparsed, _enableExtensions).Parse();
                     _resources.Add(parsed);
                 }
 
@@ -240,7 +239,7 @@ namespace Linguini.Bundle.Builder
             {
                 foreach (var unparsed in unparsedStream)
                 {
-                    var parsed = new LinguiniParser(unparsed).Parse();
+                    var parsed = new LinguiniParser(unparsed, _enableExtensions).Parse();
                     _resources.Add(parsed);
                 }
 

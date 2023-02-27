@@ -20,26 +20,31 @@ namespace Linguini.Syntax.Parser
     public class LinguiniParser
     {
         private readonly ZeroCopyReader _reader;
+        private readonly bool _enableExtensions;
         private const string CR = "\n";
 
         /// <summary>
         /// Set input to <c>string</c>
         /// </summary>
         /// <param name="input">Input to be parsed</param>
-        public LinguiniParser(string input)
+        /// <param name="enableExtensions">Using non-standard Fluent extensions</param>
+        public LinguiniParser(string input, bool enableExtensions = false)
         {
             _reader = new ZeroCopyReader(input);
+            _enableExtensions = enableExtensions;
         }
 
         /// <summary>
         /// Set input to <c>TextReader</c>
         /// </summary>
         /// <param name="input">TextReader to be parsed to Fluent AST.</param>
-        public LinguiniParser(TextReader input)
+        /// <param name="enableExtensions">Using non-standard Fluent extensions</param>
+        public LinguiniParser(TextReader input, bool enableExtensions = false)
         {
             using (input)
             {
                 _reader = new ZeroCopyReader(input.ReadToEnd());
+                _enableExtensions = enableExtensions;
             }
         }
 
@@ -1101,7 +1106,7 @@ namespace Linguini.Syntax.Parser
                         return false;
                     }
                 }
-                if ('$' == peekChr && _reader.PeekChar(1) == '$')
+                if (_enableExtensions && '$' == peekChr && _reader.PeekChar(1) == '$')
                 {
                     _reader.Position += 3;
                     var id = GetUncheckedIdentifier();
