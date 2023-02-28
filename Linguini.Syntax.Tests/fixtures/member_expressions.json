@@ -71,8 +71,7 @@
                                 "attribute": {
                                     "type": "Identifier",
                                     "name": "attr"
-                                },
-                                "arguments": null
+                                }
                             },
                             "variants": [
                                 {

@@ -32,7 +32,7 @@ namespace Linguini.Serialization.Converters
             writer.WriteEndArray();
 
 
-            if (term.Comment != null || !options.IgnoreNullValues)
+            if (term.Comment != null || options.DefaultIgnoreCondition != JsonIgnoreCondition.WhenWritingNull)
             {
                 writer.WritePropertyName("comment");
                 JsonSerializer.Serialize(writer, term.Comment, options);

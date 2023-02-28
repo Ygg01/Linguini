@@ -33,8 +33,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Term",
@@ -54,8 +53,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Comment",
@@ -134,8 +132,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Term",
@@ -169,8 +166,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         }
     ]
 }

@@ -16,8 +16,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -51,8 +50,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -102,8 +100,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -111,7 +108,6 @@
                 "type": "Identifier",
                 "name": "key03"
             },
-            "value": null,
             "attributes": [
                 {
                     "type": "Attribute",
@@ -129,8 +125,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -138,7 +133,6 @@
                 "type": "Identifier",
                 "name": "key04"
             },
-            "value": null,
             "attributes": [
                 {
                     "type": "Attribute",
@@ -172,8 +166,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -181,7 +174,6 @@
                 "type": "Identifier",
                 "name": "key05"
             },
-            "value": null,
             "attributes": [
                 {
                     "type": "Attribute",
@@ -237,8 +229,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -272,8 +263,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -293,8 +283,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Comment",
@@ -329,8 +318,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -347,8 +335,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -365,8 +352,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -383,8 +369,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -401,8 +386,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Comment",

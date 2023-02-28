@@ -24,8 +24,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "GroupComment",
@@ -37,7 +36,6 @@
                 "type": "Identifier",
                 "name": "key01"
             },
-            "value": null,
             "attributes": [
                 {
                     "type": "Attribute",
@@ -55,8 +53,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Junk",
@@ -129,8 +126,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         }
     ]
 }

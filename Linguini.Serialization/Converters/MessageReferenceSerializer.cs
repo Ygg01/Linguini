@@ -19,7 +19,7 @@ namespace Linguini.Serialization.Converters
             writer.WriteStringValue("MessageReference");
             writer.WritePropertyName("id");
             JsonSerializer.Serialize(writer, msgRef.Id, options);
-            if (msgRef.Attribute != null || !options.IgnoreNullValues)
+            if (msgRef.Attribute != null || options.DefaultIgnoreCondition != JsonIgnoreCondition.WhenWritingNull)
             {
                 writer.WritePropertyName("attribute");
                 JsonSerializer.Serialize(writer, msgRef.Attribute, options);

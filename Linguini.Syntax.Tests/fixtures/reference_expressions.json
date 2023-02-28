@@ -21,14 +21,12 @@
                             "id": {
                                 "type": "Identifier",
                                 "name": "msg"
-                            },
-                            "attribute": null
+                            }
                         }
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -46,15 +44,12 @@
                             "id": {
                                 "type": "Identifier",
                                 "name": "term"
-                            },
-                            "attribute": null,
-                            "arguments": null
+                            }
                         }
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -77,8 +72,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -96,8 +90,7 @@
                             "id": {
                                 "type": "Identifier",
                                 "name": "FUN"
-                            },
-                            "attribute": null
+                            }
                         }
                     }
                 ]
@@ -155,8 +148,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Comment",
