@@ -296,5 +296,34 @@ attack-log = { $$attacker } attacked {$$defender}.
             Assert.True(bundle.TryGetMessage("attack-log", args, out _, out var message));
             Assert.AreEqual("Cat attacked Dog.", message);
         }
+
+        private const string Macros = @"
+-ship = Ship
+    .gender = {$style ->
+        *[traditional] neuter
+          [chicago] feminine
+    }
+call-attr-no-args = {-ship.gender() ->
+    *[masculine] He
+      [feminine] She
+      [neuter] It
+}
+"; 
+        
+        [Test]
+        [Parallelizable]
+        public void TestMacrosFail()
+        {
+            var (bundle, err) =  LinguiniBuilder.Builder().Locale("en-US")
+                .AddResource(Macros)
+                .Build();
+            Assert.IsEmpty(err);
+            var args = new Dictionary<string, IFluentType>
+            {
+                ["style"] = (FluentString)"chicago",
+            };
+            Assert.True(bundle.TryGetMessage("call-attr-no-args", args, out _, out var message));
+            Assert.AreEqual("It", message);
+        }
     }
 }

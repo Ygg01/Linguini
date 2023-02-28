@@ -232,7 +232,8 @@ namespace Linguini.Syntax.Tests.Parser
 
         [Test]
         [Parallelizable]
-        [TestCase("fixtures_ext/x_linguini_ref")]
+        // [TestCase("fixtures_ext/x_linguini_ref")]
+        [TestCase("fixtures_ext/x_linguini_term_ref")]
         public void TestLinguiniExt(string file)
         {
             var path = GetFullPathFor(file);

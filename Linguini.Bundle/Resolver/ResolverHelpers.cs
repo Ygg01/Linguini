@@ -30,7 +30,7 @@ namespace Linguini.Bundle.Resolver
             return (FluentString)stringWriter.ToString();
         }
 
-        public static IFluentType Resolve(this IInlineExpression self, Scope scope)
+        public static IFluentType Resolve(this IInlineExpression self, Scope scope, int? pos = null)
         {
             if (self is TextLiteral textLiteral)
             {
@@ -46,14 +46,20 @@ namespace Linguini.Bundle.Resolver
 
             if (self is VariableReference varRef)
             {
-                var args = scope.LocalArgs ?? scope.Args;
+                var args = scope.LocalNameArgs ?? scope.Args;
                 if (args != null
                     && args.TryGetValue(varRef.Id.ToString(), out var arg))
                 {
                     return arg.Copy();
                 }
 
-                if (scope.LocalArgs == null)
+                if (scope.LocalPosArgs != null && pos != null
+                                               && pos < scope.LocalPosArgs.Count)
+                {
+                    return scope.LocalPosArgs[pos.Value];
+                }
+
+                if (scope.LocalNameArgs == null)
                 {
                     scope.AddError(ResolverFluentError.UnknownVariable(varRef));
                 }

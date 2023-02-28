@@ -14,7 +14,8 @@ namespace Linguini.Bundle.Resolver
     {
         public readonly FluentBundle Bundle;
         private readonly Dictionary<string, IFluentType>? _args;
-        private Dictionary<string, IFluentType>? _localArgs;
+        private Dictionary<string, IFluentType>? _localNameArgs;
+        private List<IFluentType>? _localPosArgs;
         private readonly List<Pattern> _travelled;
         private readonly List<FluentError> _errors;
 
@@ -29,7 +30,8 @@ namespace Linguini.Bundle.Resolver
             _travelled = new List<Pattern>();
             _args = args != null ? new Dictionary<string, IFluentType>(args) : null;
 
-            _localArgs = null;
+            _localNameArgs = null;
+            _localPosArgs = null;
             _errors = new List<FluentError>();
         }
 
@@ -38,14 +40,14 @@ namespace Linguini.Bundle.Resolver
 
         public IList<FluentError> Errors => _errors;
 
-        public IReadOnlyDictionary<string, IFluentType>? LocalArgs => _localArgs;
+        public IReadOnlyDictionary<string, IFluentType>? LocalNameArgs => _localNameArgs;
+        public IReadOnlyList<IFluentType>? LocalPosArgs => _localPosArgs;
 
         public IReadOnlyDictionary<string, IFluentType>? Args => _args;
 
-        public short IncrPlaceable()
+        public bool IncrPlaceable()
         {
-            Placeable += 1;
-            return Placeable;
+            return ++Placeable <= Bundle.MaxPlaceable;
         }
 
         public void AddError(ResolverFluentError resolverFluentError)
@@ -53,14 +55,14 @@ namespace Linguini.Bundle.Resolver
             _errors.Add(resolverFluentError);
         }
 
-        public void MaybeTrack(TextWriter writer, Pattern pattern, IExpression expr)
+        public void MaybeTrack(TextWriter writer, Pattern pattern, IExpression expr, int pos)
         {
             if (_travelled.Count == 0)
             {
                 _travelled.Add(pattern);
             }
 
-            expr.TryWrite(writer, this);
+            expr.TryWrite(writer, this, pos);
 
             if (Dirty)
             {
@@ -111,7 +113,7 @@ namespace Linguini.Bundle.Resolver
             }
         }
 
-        
+
         public bool TryGetReference(string argument, [NotNullWhen(true)] out FluentReference? reference)
         {
             if (_args != null && _args.TryGetValue(argument, out var fluentType) && fluentType is FluentReference refs)
@@ -150,14 +152,46 @@ namespace Linguini.Bundle.Resolver
 
         public void SetLocalArgs(IDictionary<string, IFluentType>? resNamed)
         {
-            _localArgs = resNamed != null
+            _localNameArgs = resNamed != null
                 ? new Dictionary<string, IFluentType>(resNamed)
                 : null;
+        }
+
+        public void SetLocalArgs(ResolvedArgs resNamed)
+        {
+            _localNameArgs = (Dictionary<string, IFluentType>?)resNamed.Named;
+            _localPosArgs = (List<IFluentType>?)resNamed.Positional;
+        }
+
+        public void ClearLocalArgs()
+        {
+            _localNameArgs = null;
+            _localPosArgs = null;
         }
 
         public PluralCategory GetPluralRules(RuleType type, FluentNumber number)
         {
             return ResolverHelpers.PluralRules.GetPluralCategory(Bundle.Culture, type, number);
+        }
+
+        public string ResolveReference(Identifier refId)
+        {
+            var refArg = refId.ToString();
+            while (true)
+            {
+                if (IncrPlaceable() && _args != null && _args.TryGetValue(refArg, out var fluentType))
+                {
+                    if (fluentType is FluentReference dynamicReference)
+                    {
+                        refArg = dynamicReference.AsString();
+                        continue;
+                    }
+
+                    return fluentType.AsString();
+                }
+
+                return refArg;
+            }
         }
     }
 
