@@ -17,9 +17,7 @@
               "id": {
                 "type": "Identifier",
                 "name": "attacker"
-              },
-              "attribute": null,
-              "arguments": null
+              }
             }
           },
           {
@@ -33,15 +31,12 @@
               "id": {
                 "type": "Identifier",
                 "name": "defender"
-              },
-              "attribute": null,
-              "arguments": null
+              }
             }
           }
         ]
       },
-      "attributes": [],
-      "comment": null
+      "attributes": []
     },
     {
       "type": "Message",
@@ -60,7 +55,6 @@
                 "type": "Identifier",
                 "name": "attacker"
               },
-              "attribute": null,
               "arguments": {
                 "type": "CallArguments",
                 "positional": [],
@@ -95,7 +89,6 @@
                 "type": "Identifier",
                 "name": "defender"
               },
-              "attribute": null,
               "arguments": {
                 "type": "CallArguments",
                 "positional": [
@@ -113,8 +106,7 @@
           }
         ]
       },
-      "attributes": [],
-      "comment": null
+      "attributes": []
     }
   ]
 }

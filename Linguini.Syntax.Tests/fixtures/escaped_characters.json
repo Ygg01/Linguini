@@ -20,8 +20,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -38,8 +37,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -61,14 +59,12 @@
                             "id": {
                                 "type": "Identifier",
                                 "name": "placeable"
-                            },
-                            "attribute": null
+                            }
                         }
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -85,8 +81,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -103,8 +98,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "GroupComment",
@@ -128,8 +122,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -149,8 +142,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Comment",
@@ -201,8 +193,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -222,8 +213,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -243,8 +233,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -264,8 +253,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -363,8 +351,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -392,8 +379,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         }
     ]
 }

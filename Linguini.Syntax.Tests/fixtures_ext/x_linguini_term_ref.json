@@ -18,7 +18,6 @@
                 "type": "Identifier",
                 "name": "cause-3rd-person"
               },
-              "attribute": null,
               "arguments": {
                 "type": "CallArguments",
                 "positional": [
@@ -40,8 +39,7 @@
           }
         ]
       },
-      "attributes": [],
-      "comment": null
+      "attributes": []
     }
   ]
 }

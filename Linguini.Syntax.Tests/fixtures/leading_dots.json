@@ -16,8 +16,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -34,8 +33,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -59,8 +57,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -84,8 +81,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -113,8 +109,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -142,8 +137,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -195,7 +189,6 @@
                 "type": "Identifier",
                 "name": "key10"
             },
-            "value": null,
             "attributes": [
                 {
                     "type": "Attribute",
@@ -213,8 +206,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -238,8 +230,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -247,7 +238,6 @@
                 "type": "Identifier",
                 "name": "key12"
             },
-            "value": null,
             "attributes": [
                 {
                     "type": "Attribute",
@@ -265,8 +255,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -274,7 +263,6 @@
                 "type": "Identifier",
                 "name": "key13"
             },
-            "value": null,
             "attributes": [
                 {
                     "type": "Attribute",
@@ -292,8 +280,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -301,7 +288,6 @@
                 "type": "Identifier",
                 "name": "key14"
             },
-            "value": null,
             "attributes": [
                 {
                     "type": "Attribute",
@@ -326,8 +312,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -393,8 +378,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Comment",
@@ -429,7 +413,6 @@
                 "type": "Identifier",
                 "name": "key19"
             },
-            "value": null,
             "attributes": [
                 {
                     "type": "Attribute",
@@ -447,8 +430,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -472,8 +454,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         }
     ]
 }

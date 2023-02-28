@@ -16,8 +16,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -25,7 +24,6 @@
                 "type": "Identifier",
                 "name": "key02"
             },
-            "value": null,
             "attributes": [
                 {
                     "type": "Attribute",
@@ -43,8 +41,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -78,8 +75,7 @@
                         ]
                     }
                 }
-            ],
-            "comment": null
+            ]
         },
         {
             "type": "Message",
@@ -96,8 +92,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -156,8 +151,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         }
     ]
 }

@@ -23,7 +23,7 @@ namespace Linguini.Serialization.Converters
             writer.WritePropertyName("id");
             JsonSerializer.Serialize(writer, msg.Id, options);
 
-            if (msg.Value != null || !options.IgnoreNullValues)
+            if (msg.Value != null || options.DefaultIgnoreCondition != JsonIgnoreCondition.WhenWritingNull)
             {
                 writer.WritePropertyName("value");
                 JsonSerializer.Serialize(writer, msg.Value, options);
@@ -39,7 +39,7 @@ namespace Linguini.Serialization.Converters
             writer.WriteEndArray();
 
 
-            if (msg.Comment != null || !options.IgnoreNullValues)
+            if (msg.Comment != null || options.DefaultIgnoreCondition != JsonIgnoreCondition.WhenWritingNull)
             {
                 writer.WritePropertyName("comment");
                 JsonSerializer.Serialize(writer, msg.Comment, options);

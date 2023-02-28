@@ -73,8 +73,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -98,8 +97,7 @@
                                 "attribute": {
                                     "type": "Identifier",
                                     "name": "case"
-                                },
-                                "arguments": null
+                                }
                             },
                             "variants": [
                                 {
@@ -124,8 +122,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Comment",
@@ -209,8 +206,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -263,8 +259,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -337,8 +332,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Comment",

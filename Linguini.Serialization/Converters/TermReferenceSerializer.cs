@@ -20,13 +20,13 @@ namespace Linguini.Serialization.Converters
             writer.WritePropertyName("id");
             JsonSerializer.Serialize(writer, value.Id, options);
             
-            if (value.Attribute != null || !options.IgnoreNullValues)
+            if (value.Attribute != null || options.DefaultIgnoreCondition != JsonIgnoreCondition.WhenWritingNull)
             {
                 writer.WritePropertyName("attribute");
                 JsonSerializer.Serialize(writer, value.Attribute, options);
             }
             
-            if (value.Arguments != null || !options.IgnoreNullValues)
+            if (value.Arguments != null || options.DefaultIgnoreCondition != JsonIgnoreCondition.WhenWritingNull)
             {
                 writer.WritePropertyName("arguments");
                 JsonSerializer.Serialize(writer, value.Arguments, options);

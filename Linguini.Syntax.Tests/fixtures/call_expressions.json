@@ -31,8 +31,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -60,8 +59,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -89,8 +87,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Comment",
@@ -165,8 +162,7 @@
                                         "id": {
                                             "type": "Identifier",
                                             "name": "msg"
-                                        },
-                                        "attribute": null
+                                        }
                                     }
                                 ],
                                 "named": []
@@ -175,8 +171,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -227,8 +222,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -279,8 +273,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -315,8 +308,7 @@
                                         "id": {
                                             "type": "Identifier",
                                             "name": "msg"
-                                        },
-                                        "attribute": null
+                                        }
                                     }
                                 ],
                                 "named": [
@@ -348,8 +340,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Comment",
@@ -402,8 +393,7 @@
                                         "id": {
                                             "type": "Identifier",
                                             "name": "msg"
-                                        },
-                                        "attribute": null
+                                        }
                                     }
                                 ],
                                 "named": [
@@ -424,8 +414,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -453,8 +442,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -485,8 +473,7 @@
                                         "id": {
                                             "type": "Identifier",
                                             "name": "msg"
-                                        },
-                                        "attribute": null
+                                        }
                                     }
                                 ],
                                 "named": [
@@ -507,8 +494,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -539,8 +525,7 @@
                                         "id": {
                                             "type": "Identifier",
                                             "name": "msg"
-                                        },
-                                        "attribute": null
+                                        }
                                     }
                                 ],
                                 "named": [
@@ -561,8 +546,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -590,8 +574,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -624,8 +607,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -658,8 +640,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -686,8 +667,7 @@
                                         "id": {
                                             "type": "Identifier",
                                             "name": "msg"
-                                        },
-                                        "attribute": null
+                                        }
                                     }
                                 ],
                                 "named": []
@@ -696,8 +676,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -724,9 +703,7 @@
                                         "id": {
                                             "type": "Identifier",
                                             "name": "msg"
-                                        },
-                                        "attribute": null,
-                                        "arguments": null
+                                        }
                                     }
                                 ],
                                 "named": []
@@ -735,8 +712,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -772,8 +748,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -814,8 +789,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -855,8 +829,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -883,8 +856,7 @@
                                         "id": {
                                             "type": "Identifier",
                                             "name": "x"
-                                        },
-                                        "attribute": null
+                                        }
                                     }
                                 ],
                                 "named": []
@@ -893,8 +865,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "GroupComment",
@@ -931,8 +902,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -973,8 +943,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -1015,8 +984,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -1053,8 +1021,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -1091,8 +1058,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "GroupComment",
@@ -1177,8 +1143,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -1218,8 +1183,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         },
         {
             "type": "Message",
@@ -1259,8 +1223,7 @@
                     }
                 ]
             },
-            "attributes": [],
-            "comment": null
+            "attributes": []
         }
     ]
 }
