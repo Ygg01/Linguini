@@ -10,7 +10,8 @@
               *[one] Dog
               [other] Dogs
           }
-          attack-log = { $$attacker(number: $atk_num) } attacked {$$defender(number: $def_num)}.
+          attack-log1 = { $$attacker($atk_num) } attacked {$$defender($def_num)}.
+          attack-log2 = { $$attacker(number: $atk_num) } attacked {$$defender(number: $def_num)}.
     bundles:
     - useExtensions: true
     tests:
@@ -20,10 +21,17 @@
           args:
             number: 3
           value: "Cats"
-#        - id: cat
-#          args:
-#            attacker: "cat"
-#            atk_num: 1
-#            defender: "dog"
-#            def_num: 2
-#          value: "Cat attacked dogs"
+        - id: attack-log1
+          args:
+            attacker: "cat"
+            atk_num: 1
+            defender: "dog"
+            def_num: 2
+          value: "Cat attacked Dogs."
+        - id: attack-log2
+          args:
+            attacker: "cat"
+            atk_num: 1
+            defender: "dog"
+            def_num: 2
+          value: "Cat attacked Dogs."

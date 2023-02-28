@@ -462,6 +462,28 @@ namespace Linguini.Syntax.Parser
                     elements.Add(new Placeable(exp));
                     textElementRole = TextElementPosition.Continuation;
                 }
+                else if (_enableExtensions && '-' == _reader.PeekChar())
+                {
+                    _reader.Position += 1;
+                    if (_reader.TryPeekChar(out var c) && c.IsAsciiAlphabetic())
+                    {
+                        _reader.Position += 1;
+                        var id = GetUncheckedIdentifier();
+                        if (!TryGetAttributeAccessor(out var attribute, out error))
+                        {
+                            pattern = null;
+                            return false;
+                        }
+
+                        if (!TryCallArguments(out var args, out error))
+                        {
+                            pattern = null;
+                            return false;
+                        }
+
+                        elements.Add(new Placeable(new TermReference(id, attribute, args)));
+                    }
+                }
                 else
                 {
                     var sliceStart = _reader.Position;

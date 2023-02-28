@@ -15,7 +15,7 @@ namespace Linguini.Bundle.Resolver
         {
             var len = pattern.Elements.Count;
             var transformFunc = scope.Bundle.TransformFunc;
-
+            var placeablePos = 0;
             for (var i = 0; i < len; i++)
             {
                 if (scope.Dirty)
@@ -39,7 +39,7 @@ namespace Linguini.Bundle.Resolver
                 else if (elem is Placeable placeable)
                 {
                     var expr = placeable.Expression;
-                    if (scope.IncrPlaceable() > scope.Bundle.MaxPlaceable)
+                    if (!scope.IncrPlaceable())
                     {
                         scope.Dirty = true;
                         scope.AddError(ResolverFluentError.TooManyPlaceables());
@@ -54,7 +54,7 @@ namespace Linguini.Bundle.Resolver
                         writer.Write('\u2068');
                     }
 
-                    scope.MaybeTrack(writer, pattern, expr);
+                    scope.MaybeTrack(writer, pattern, expr, placeablePos++);
 
                     if (needsIsolating)
                     {
@@ -64,7 +64,7 @@ namespace Linguini.Bundle.Resolver
             }
         }
 
-        public static bool TryWrite(this IExpression expression, TextWriter writer, Scope scope)
+        public static bool TryWrite(this IExpression expression, TextWriter writer, Scope scope, int? pos = null)
         {
             var errors = new List<FluentError>();
             if (expression is IInlineExpression inlineExpression)
@@ -73,7 +73,7 @@ namespace Linguini.Bundle.Resolver
             }
             else if (expression is SelectExpression selectExpression)
             {
-                var selector = selectExpression.Selector.Resolve(scope);
+                var selector = selectExpression.Selector.Resolve(scope, pos);
                 if (selector is FluentString or FluentNumber)
                 {
                     foreach (var variant in selectExpression.Variants)
@@ -152,7 +152,7 @@ namespace Linguini.Bundle.Resolver
                     scope.WriteRefError(writer, self);
                 }
 
-                scope.SetLocalArgs(null);
+                scope.ClearLocalArgs();
                 return;
             }
 
@@ -187,7 +187,7 @@ namespace Linguini.Bundle.Resolver
             if (self is VariableReference varRef)
             {
                 var id = varRef.Id;
-                var args = scope.LocalArgs ?? scope.Args;
+                var args = scope.LocalNameArgs ?? scope.Args;
 
                 if (args != null
                     && args.TryGetValue(id.ToString(), out var arg))
@@ -196,7 +196,7 @@ namespace Linguini.Bundle.Resolver
                 }
                 else
                 {
-                    if (scope.LocalArgs == null)
+                    if (scope.LocalNameArgs == null)
                     {
                         scope.AddError(ResolverFluentError.Reference(self));
                     }
@@ -268,14 +268,11 @@ namespace Linguini.Bundle.Resolver
             DynamicReference dynRef)
         {
             var res = scope.GetArguments(dynRef.Arguments);
-            scope.SetLocalArgs(res.Named);
-
-            if (!scope.TryGetReference(dynRef.Id.ToString(), out FluentReference? reference))
-            {
-                return;
-            }
+            scope.SetLocalArgs(res);
+            var strRef = scope.ResolveReference(dynRef.Id);
             
-            if (scope.Bundle.TryGetAstTerm(reference, out var term))
+            
+            if (scope.Bundle.TryGetAstTerm(strRef, out var term))
             {
                 var attrName = dynRef.Attribute;
                 var attr = term
@@ -284,7 +281,7 @@ namespace Linguini.Bundle.Resolver
 
                 scope.Track(writer, attr != null ? attr.Value : term.Value, self);
             }
-            else if (scope.Bundle.TryGetAstMessage(reference, out var astMessage))
+            else if (scope.Bundle.TryGetAstMessage(strRef, out var astMessage))
             {
                 var attrName = dynRef.Attribute;
                 var attr = astMessage
@@ -298,7 +295,7 @@ namespace Linguini.Bundle.Resolver
                 scope.WriteRefError(writer, self);
             }
 
-            scope.SetLocalArgs(null);
+            scope.ClearLocalArgs();
         }
 
         public static void WriteError(this IExpression self, TextWriter writer)
@@ -347,6 +344,12 @@ namespace Linguini.Bundle.Resolver
                 writer.Write($"${varRef.Id}");
                 return;
             }
+            else if (self is DynamicReference dynamicReference)
+            {
+                writer.Write($"$${dynamicReference.Id}");
+                return;
+            }
+
 
             throw new ArgumentException($"Unexpected inline expression `{self.GetType()}`!");
         }
