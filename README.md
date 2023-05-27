@@ -98,7 +98,7 @@ Or set `UseConcurrent = true` in `FluentBundleOption` passed to the factory meth
 
 No, it can also be Fluent, a localization system by Mozilla.
 
-## What syntax does Fluent Localization uses?
+## What syntax does Fluent Localization use?
 For more details, see [Fluent syntax guide](https://projectfluent.org/fluent/guide/).
 
 # Licenses
