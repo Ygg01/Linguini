@@ -14,20 +14,10 @@ namespace Linguini.Syntax.Tests.IO
         [TestCase("단편")]
         [TestCase("かんじ")]
         [TestCase("Северный поток")]
-        public void OperationOnNonCharSpanReturnFalse(string input)
+        public void OperationOnNonCalleeReturnFalse(string input)
         {
             var span = input.AsSpan();
-            Assert.False('c'.EqualsSpans(span));
-            Assert.False(span.IsEqual('c'));
-            Assert.False(span.IsAsciiAlphabetic());
-            Assert.False(span.IsAsciiDigit());
-            Assert.False(span.IsAsciiHexdigit());
-            Assert.False(span.IsAsciiUppercase());
-            Assert.False(span.IsOneOf('c', 's'));
-            Assert.False(span.IsOneOf('c', 's', 'l'));
-            Assert.False(span.IsOneOf('c', 's', 'a', 'l'));
-            Assert.False(span.IsNumberStart());
-            Assert.False(input.AsMemory().IsCallee());
+            Assert.False(span.IsCallee());
         }
     }
 }

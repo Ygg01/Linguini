@@ -79,15 +79,9 @@ namespace Linguini.Syntax.Parser
 
         private void SkipComment()
         {
-            while (_reader.IsNotEof)
+            while (_reader.SeekEol())
             {
-                while (_reader.IsNotEof
-                       && !_reader.SkipEol())
-                {
-                    _reader.Position += 1;
-                }
-
-                if (_reader.PeekCharSpan().IsEqual('#'))
+                if (_reader.TryPeekChar(out var c) && c == '#')
                 {
                     _reader.Position += 1;
                 }
@@ -100,16 +94,18 @@ namespace Linguini.Syntax.Parser
 
         private (IEntry?, ParseError?) GetEntryRuntime(int entryStart)
         {
-            var chrSpan = _reader.PeekCharSpan();
-            if (chrSpan.IsEqual('#'))
+            if (_reader.TryPeekChar(out var c))
             {
-                SkipComment();
-                return (null, null);
-            }
+                if (c == '#')
+                {
+                    SkipComment();
+                    return (null, null);
+                }
 
-            if (chrSpan.IsEqual('-'))
-            {
-                return GetTerm(entryStart);
+                if (c == '-')
+                {
+                    return GetTerm(entryStart);
+                }
             }
 
             return GetMessage(entryStart);
@@ -194,9 +190,9 @@ namespace Linguini.Syntax.Parser
 
         private (IEntry, ParseError?) GetEntry(int entryStart)
         {
-            var charSpan = _reader.PeekCharSpan();
+            var charSpan = _reader.PeekChar();
 
-            if ('#'.EqualsSpans(charSpan))
+            if ('#' == charSpan)
             {
                 IEntry entry = new Junk();
                 if (TryGetComment(out var comment, out var error))
@@ -207,7 +203,7 @@ namespace Linguini.Syntax.Parser
                 return (entry, error);
             }
 
-            if ('-'.EqualsSpans(charSpan))
+            if ('-' == charSpan)
             {
                 return GetTerm(entryStart);
             }
@@ -322,8 +318,8 @@ namespace Linguini.Syntax.Parser
                     break;
                 }
 
-                if ('\n'.EqualsSpans(_reader.PeekCharSpan())
-                    || ('\r'.EqualsSpans(_reader.PeekCharSpan()) && '\n'.EqualsSpans(_reader.PeekCharSpan(1))))
+                if ('\n' == _reader.PeekChar()
+                    || ('\r' == _reader.PeekChar() && '\n' == _reader.PeekChar(1)))
                 {
                     content.Add(_reader.GetCommentLine());
                 }
@@ -389,13 +385,13 @@ namespace Linguini.Syntax.Parser
                 return true;
             }
 
-            error = ParseError.ExpectedToken(c, _reader.PeekCharSpan(), _reader.Position, _reader.Row);
+            error = ParseError.ExpectedToken(c, _reader.PeekChar(), _reader.Position, _reader.Row);
             return false;
         }
 
         private bool TryGetIdentifier([NotNullWhen(true)] out Identifier? id, out ParseError? error)
         {
-            if (_reader.PeekCharSpan().IsAsciiAlphabetic())
+            if (_reader.TryPeekChar(out var c) && c.IsAsciiAlphabetic())
             {
                 _reader.Position += 1;
                 error = null;
@@ -412,7 +408,7 @@ namespace Linguini.Syntax.Parser
         {
             // First character is already checked
             var ptr = _reader.Position;
-            while (_reader.PeekCharSpanAt(ptr).IsIdentifier())
+            while (_reader.TryPeekCharAt(ptr, out var c) && c.IsIdentifier())
             {
                 ptr += 1;
             }
@@ -467,11 +463,11 @@ namespace Linguini.Syntax.Parser
                     if (textElementRole == TextElementPosition.LineStart)
                     {
                         indent = _reader.SkipBlankInline();
-                        if (_reader.TryPeekCharSpan(out var b))
+                        if (_reader.TryPeekChar(out var b))
                         {
                             if (indent == 0)
                             {
-                                if (!'\r'.EqualsSpans(b) && !'\n'.EqualsSpans(b))
+                                if ('\r' != b && '\n' != b)
                                 {
                                     break;
                                 }
@@ -602,13 +598,22 @@ namespace Linguini.Syntax.Parser
             var startPos = _reader.Position;
             var textElementType = TextElementType.Blank;
 
-            while (_reader.TryPeekCharSpan(out var span))
+            int index;
+            while ((index = _reader.IndexOfAnyChar(" \n\r{}".AsSpan())) != -1)
             {
-                if (' '.EqualsSpans(span))
+                if (index > 0)
+                {
+                    textElementType = TextElementType.NonBlank;
+                }
+
+                _reader.Position += index;
+                var c = _reader.CurrentChar();
+
+                if (' ' == c)
                 {
                     _reader.Position += 1;
                 }
-                else if ('\n'.EqualsSpans(span))
+                else if ('\n' == c)
                 {
                     _reader.Position += 1;
                     textElement = new TextSlice(
@@ -620,8 +625,8 @@ namespace Linguini.Syntax.Parser
                     error = null;
                     return true;
                 }
-                else if ('\r'.EqualsSpans(span)
-                         && '\n'.EqualsSpans(_reader.PeekCharSpan(1)))
+                else if ('\r' == c
+                         && '\n' == _reader.PeekChar(1))
                 {
                     _reader.Position += 1;
                     // This takes one less element because it converts CRLF endings
@@ -635,7 +640,7 @@ namespace Linguini.Syntax.Parser
                     error = null;
                     return true;
                 }
-                else if ('{'.EqualsSpans(span))
+                else if ('{' == c)
                 {
                     textElement = new TextSlice(
                         startPos,
@@ -646,7 +651,7 @@ namespace Linguini.Syntax.Parser
                     error = null;
                     return true;
                 }
-                else if ('}'.EqualsSpans(span))
+                else if ('}' == c)
                 {
                     textElement = null;
                     error = ParseError.UnbalancedClosingBrace(_reader.Position, _reader.Row);
@@ -657,6 +662,12 @@ namespace Linguini.Syntax.Parser
                     textElementType = TextElementType.NonBlank;
                     _reader.Position += 1;
                 }
+            }
+
+            if (_reader.Position < _reader.GetData.Length)
+            {
+                textElementType = TextElementType.NonBlank;
+                _reader.Position = _reader.GetData.Length;
             }
 
             textElement = new TextSlice(
@@ -767,8 +778,8 @@ namespace Linguini.Syntax.Parser
 
             _reader.SkipBlank();
 
-            if (!'-'.EqualsSpans(_reader.PeekCharSpan())
-                || !'>'.EqualsSpans(_reader.PeekCharSpan(1)))
+            if ('-' != _reader.PeekChar()
+                || '>' != _reader.PeekChar(1))
             {
                 if (inlineExpression is TermReference { Attribute: { } })
                 {
@@ -906,7 +917,7 @@ namespace Linguini.Syntax.Parser
             VariantType variantType;
 
 
-            if (_reader.PeekCharSpan().IsNumberStart())
+            if (_reader.TryPeekChar(out var c) && c.IsNumberStart())
             {
                 variantType = VariantType.NumberLiteral;
                 if (!TryGetNumberLiteral(out var num, out error))
@@ -942,98 +953,139 @@ namespace Linguini.Syntax.Parser
         private bool TryGetInlineExpression(bool onlyLiteral, [NotNullWhen(true)] out IInlineExpression? expr,
             out ParseError? error)
         {
-            var peekChr = _reader.PeekCharSpan();
-            if ('"'.EqualsSpans(peekChr))
+            if (_reader.TryPeekChar(out var peekChr))
             {
-                _reader.Position += 1;
-                var start = _reader.Position;
-                while (true)
+                if ('"' == peekChr)
                 {
-                    var b = _reader.PeekCharSpan();
-                    if ('\\'.EqualsSpans(b))
+                    _reader.Position += 1;
+                    var start = _reader.Position;
+                    while (true)
                     {
-                        var c = _reader.PeekCharSpan(1);
-                        if (c.IsOneOf('\\', '{', '"'))
+                        var b = _reader.PeekChar();
+                        if ('\\' == b)
                         {
-                            _reader.Position += 2;
-                        }
-                        else if ('u'.EqualsSpans(c))
-                        {
-                            _reader.Position += 2;
-                            if (!TrySkipUnicodeSequence(4, out error))
+                            if (_reader.TryPeekCharAt(_reader.Position + 1, out var c))
                             {
-                                expr = null;
-                                return false;
+                                if (c.IsOneOf('\\', '{', '"'))
+                                {
+                                    _reader.Position += 2;
+                                }
+                                else if ('u'== c)
+                                {
+                                    _reader.Position += 2;
+                                    if (!TrySkipUnicodeSequence(4, out error))
+                                    {
+                                        expr = null;
+                                        return false;
+                                    }
+                                }
+                                else if ('U'== c)
+                                {
+                                    _reader.Position += 2;
+                                    if (!TrySkipUnicodeSequence(6, out error))
+                                    {
+                                        expr = null;
+                                        return false;
+                                    }
+                                }
+                                else
+                                {
+                                    error = ParseError.UnknownEscapeSequence(c, _reader.Position, _reader.Row);
+                                    expr = null;
+                                    return false;
+                                }
                             }
                         }
-                        else if ('U'.EqualsSpans(c))
+                        else if ('"' == b)
                         {
-                            _reader.Position += 2;
-                            if (!TrySkipUnicodeSequence(6, out error))
-                            {
-                                expr = null;
-                                return false;
-                            }
+                            break;
                         }
-                        else
+                        else if ('\n' == b)
                         {
-                            var seq = c[0];
-                            error = ParseError.UnknownEscapeSequence(seq, _reader.Position, _reader.Row);
+                            error = ParseError.UnterminatedStringLiteral(_reader.Position, _reader.Row);
                             expr = null;
                             return false;
                         }
+                        else
+                        {
+                            _reader.Position += 1;
+                        }
                     }
-                    else if ('"'.EqualsSpans(b))
+
+                    if (!TryExpectChar('"', out error))
                     {
-                        break;
-                    }
-                    else if ('\n'.EqualsSpans(b))
-                    {
-                        error = ParseError.UnterminatedStringLiteral(_reader.Position, _reader.Row);
                         expr = null;
                         return false;
+                    }
+
+                    var slice = _reader.ReadSlice(start, _reader.Position - 1);
+                    expr = new TextLiteral(slice);
+                    return true;
+                }
+
+                if (peekChr.IsAsciiDigit())
+                {
+                    if (!TryGetNumberLiteral(out var num, out error))
+                    {
+                        expr = null;
+                        return false;
+                    }
+
+                    expr = new NumberLiteral(num);
+                    return true;
+                }
+
+                if ('-' == peekChr && !onlyLiteral)
+                {
+                    _reader.Position += 1;
+                    if (_reader.TryPeekChar(out var c) && c.IsAsciiAlphabetic())
+                    {
+                        _reader.Position += 1;
+                        var id = GetUncheckedIdentifier();
+                        if (!TryGetAttributeAccessor(out var attribute, out error))
+                        {
+                            expr = null;
+                            return false;
+                        }
+
+                        if (!TryCallArguments(out var args, out error))
+                        {
+                            expr = null;
+                            return false;
+                        }
+
+                        expr = new TermReference(id, attribute, args);
+                        return true;
                     }
                     else
                     {
-                        _reader.Position += 1;
+                        _reader.Position -= 1;
+                        if (TryGetNumberLiteral(out var num, out error))
+                        {
+                            expr = new NumberLiteral(num);
+                            return true;
+                        }
+
+                        expr = null;
+                        return false;
                     }
                 }
-
-                if (!TryExpectChar('"', out error))
-                {
-                    expr = null;
-                    return false;
-                }
-
-                var slice = _reader.ReadSlice(start, _reader.Position - 1);
-                expr = new TextLiteral(slice);
-                return true;
-            }
-
-            if (peekChr.IsAsciiDigit())
-            {
-                if (!TryGetNumberLiteral(out var num, out error))
-                {
-                    expr = null;
-                    return false;
-                }
-
-                expr = new NumberLiteral(num);
-                return true;
-            }
-
-            if ('-'.EqualsSpans(peekChr) && !onlyLiteral)
-            {
-                _reader.Position += 1;
-                if (_reader.PeekCharSpan().IsAsciiAlphabetic())
+                else if ('$' == peekChr && !onlyLiteral)
                 {
                     _reader.Position += 1;
-                    var id = GetUncheckedIdentifier();
-                    if (!TryGetAttributeAccessor(out var attribute, out error))
+                    if (!TryGetIdentifier(out var id, out error))
                     {
                         expr = null;
                         return false;
                     }
+
+                    expr = new VariableReference(id);
+                    return true;
+                }
+                else if (peekChr.IsAsciiAlphabetic())
+                {
+                    _reader.Position += 1;
+                    var id = GetUncheckedIdentifier();
 
                     if (!TryCallArguments(out var args, out error))
                     {
@@ -1041,82 +1093,44 @@ namespace Linguini.Syntax.Parser
                         return false;
                     }
 
-                    expr = new TermReference(id, attribute, args);
-                    return true;
-                }
-                else
-                {
-                    _reader.Position -= 1;
-                    if (TryGetNumberLiteral(out var num, out error))
+                    if (args != null)
                     {
-                        expr = new NumberLiteral(num);
+                        if (!id.Name.Span.IsCallee())
+                        {
+                            error = ParseError.ForbiddenCallee(_reader.Position, _reader.Row);
+                            expr = null;
+                            return false;
+                        }
+
+                        error = null;
+                        expr = new FunctionReference(id, args.Value);
                         return true;
                     }
-
-                    expr = null;
-                    return false;
-                }
-            }
-            else if ('$'.EqualsSpans(peekChr) && !onlyLiteral)
-            {
-                _reader.Position += 1;
-                if (!TryGetIdentifier(out var id, out error))
-                {
-                    expr = null;
-                    return false;
-                }
-
-                expr = new VariableReference(id);
-                return true;
-            }
-            else if (peekChr.IsAsciiAlphabetic())
-            {
-                _reader.Position += 1;
-                var id = GetUncheckedIdentifier();
-
-                if (!TryCallArguments(out var args, out error))
-                {
-                    expr = null;
-                    return false;
-                }
-
-                if (args != null)
-                {
-                    if (!id.Name.IsCallee())
+                    else
                     {
-                        error = ParseError.ForbiddenCallee(_reader.Position, _reader.Row);
+                        if (!TryGetAttributeAccessor(out var attribute, out error))
+                        {
+                            expr = null;
+                            return false;
+                        }
+
+                        expr = new MessageReference(id, attribute);
+                        return true;
+                    }
+                }
+                else if ('{' == peekChr && !onlyLiteral)
+                {
+                    _reader.Position += 1;
+                    if (!TryGetPlaceable(out var exp, out error))
+                    {
                         expr = null;
                         return false;
                     }
 
                     error = null;
-                    expr = new FunctionReference(id, args.Value);
+                    expr = new Placeable(exp);
                     return true;
                 }
-                else
-                {
-                    if (!TryGetAttributeAccessor(out var attribute, out error))
-                    {
-                        expr = null;
-                        return false;
-                    }
-
-                    expr = new MessageReference(id, attribute);
-                    return true;
-                }
-            }
-            else if ('{'.EqualsSpans(peekChr) && !onlyLiteral)
-            {
-                _reader.Position += 1;
-                if (!TryGetPlaceable(out var exp, out error))
-                {
-                    expr = null;
-                    return false;
-                }
-
-                error = null;
-                expr = new Placeable(exp);
-                return true;
             }
 
             if (onlyLiteral)
@@ -1149,7 +1163,7 @@ namespace Linguini.Syntax.Parser
 
             while (_reader.IsNotEof)
             {
-                if (_reader.IsCurrentChar(')'))
+                if (')' == _reader.PeekChar())
                 {
                     break;
                 }
@@ -1161,10 +1175,10 @@ namespace Linguini.Syntax.Parser
                 }
 
                 _reader.SkipBlank();
-                if (!_reader.PeekCharSpan().IsOneOf(',', ')'))
+                if (!(_reader.TryPeekChar(out var c) && c.IsOneOf(',', ')')))
                 {
                     args = new CallArguments(positional, nameArgs);
-                    error = ParseError.ExpectedToken(',', ')', _reader.PeekCharSpan(), _reader.Position, _reader.Row);
+                    error = ParseError.ExpectedToken(',', ')', _reader.PeekChar(), _reader.Position, _reader.Row);
                     return false;
                 }
 
@@ -1195,7 +1209,7 @@ namespace Linguini.Syntax.Parser
             {
                 var id = msgRef.Id;
                 _reader.SkipBlank();
-                if (_reader.IsCurrentChar(':'))
+                if (':' == _reader.PeekChar())
                 {
                     if (argNames.Contains(id))
                     {
@@ -1280,7 +1294,7 @@ namespace Linguini.Syntax.Parser
         private bool TrySkipDigits(out ParseError? error)
         {
             var start = _reader.Position;
-            while (_reader.PeekCharSpan().IsAsciiDigit())
+            while (_reader.TryPeekChar(out var c) && c.IsAsciiDigit())
             {
                 _reader.Position += 1;
             }
@@ -1300,7 +1314,7 @@ namespace Linguini.Syntax.Parser
             var start = _reader.Position;
             for (int i = 0; i < length; i++)
             {
-                if (_reader.PeekCharSpan().IsAsciiHexdigit())
+                if (_reader.TryPeekChar(out var c) && c.IsAsciiHexdigit())
                 {
                     _reader.Position += 1;
                 }

@@ -126,15 +126,21 @@ namespace Linguini.Bundle
 
                 if (entry is AstTerm or AstMessage)
                 {
-                    AddEntry(new List<FluentError>(), entry, true);
+                    AddEntryOverriding(entry);
                 }
             }
         }
 
-        private void AddEntry(List<FluentError> errors, IEntry term, bool overwrite = false)
+        private void AddEntryOverriding(IEntry term)
         {
             var id = (term.GetId(), term.ToKind());
-            if (_entries.ContainsKey(id) && !overwrite)
+            _entries[id] = term;
+        }
+
+        private void AddEntry(List<FluentError> errors, IEntry term)
+        {
+            var id = (term.GetId(), term.ToKind());
+            if (_entries.ContainsKey(id))
             {
                 errors.Add(new OverrideFluentError(id.Item1, id.Item2));
             }
