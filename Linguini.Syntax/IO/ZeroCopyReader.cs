@@ -38,27 +38,14 @@ namespace Linguini.Syntax.IO
         public bool IsEof => !IsNotEof;
         internal ReadOnlyMemory<char> GetData => _unconsumedData;
 
-        public ReadOnlySpan<char> PeekCharSpan(int offset = 0)
+        public char? PeekChar(int offset = 0)
         {
-            return _unconsumedData.PeakCharAt(_position + offset);
-        }
+            if (_unconsumedData.TryReadChar(_position + offset, out var c))
+            {
+                return c;
+            }
 
-        public bool IsCurrentChar(char c)
-        {
-            return c.EqualsSpans(_unconsumedData.PeakCharAt(_position));
-        }
-
-        public ReadOnlySpan<char> PeekCharSpanAt(int pos)
-        {
-            return _unconsumedData.PeakCharAt(pos);
-        }
-
-
-        public ReadOnlySpan<char> GetCharSpan()
-        {
-            var chr = PeekCharSpan();
-            _position += 1;
-            return chr;
+            return null;
         }
 
         public int SkipBlankBlock()
@@ -80,17 +67,31 @@ namespace Linguini.Syntax.IO
             return count;
         }
 
+        public bool SeekEol()
+        {
+            var index = _unconsumedData.Span.Slice(_position).IndexOf('\n');
+            if (index != -1)
+            {
+                _row += 1;
+                _position += index + 1;
+                return true;
+            }
+
+            _position = _unconsumedData.Length;
+            return false;
+        }
+
         public bool SkipEol()
         {
-            if ('\n'.EqualsSpans(PeekCharSpan()))
+            if ('\n' == PeekChar())
             {
                 _row += 1;
                 _position += 1;
                 return true;
             }
 
-            if ('\r'.EqualsSpans(PeekCharSpan())
-                && '\n'.EqualsSpans(PeekCharSpan(1)))
+            if ('\r' == PeekChar()
+                && '\n' == PeekChar(1))
             {
                 _row += 1;
                 _position += 2;
@@ -103,7 +104,7 @@ namespace Linguini.Syntax.IO
         public int SkipBlankInline()
         {
             var start = _position;
-            while (' '.EqualsSpans(PeekCharSpan()))
+            while (_unconsumedData.TryReadChar(_position, out var c) && ' ' == c)
             {
                 _position += 1;
             }
@@ -113,7 +114,7 @@ namespace Linguini.Syntax.IO
 
         public bool ReadCharIf(char c)
         {
-            if (c.EqualsSpans(PeekCharSpan()))
+            if (_unconsumedData.TryReadChar(_position, out var c1) && c == c1)
             {
                 if (c == '\n')
                 {
@@ -141,11 +142,11 @@ namespace Linguini.Syntax.IO
 
         private bool IsEol()
         {
-            var chr = PeekCharSpan();
+            var chr = PeekChar();
 
-            if ('\n'.EqualsSpans(chr)) return true;
-            if ('\r'.EqualsSpans(chr)
-                && '\n'.EqualsSpans(PeekCharSpan(1)))
+            if ('\n' == chr) return true;
+            if ('\r' == chr
+                && '\n' == PeekChar(1))
             {
                 return true;
             }
@@ -165,15 +166,15 @@ namespace Linguini.Syntax.IO
 
         public void SkipToNextEntry()
         {
-            while (_unconsumedData.TryReadCharSpan(_position, out var span))
+            while (_unconsumedData.TryReadChar(_position, out var c))
             {
                 var newline = _position == 0
-                              || '\n'.EqualsSpans(PeekCharSpan(-1));
+                              || '\n' == PeekChar(-1);
 
                 if (newline)
                 {
                     _row += 1;
-                    if (span.IsAsciiAlphabetic() || span.IsOneOf('#', '-'))
+                    if (c.IsAsciiAlphabetic() || c.IsOneOf('#', '-'))
                         break;
                 }
 
@@ -181,25 +182,40 @@ namespace Linguini.Syntax.IO
             }
         }
 
-        public bool TryPeekCharSpan(out ReadOnlySpan<char> span)
+        public int IndexOfAnyChar(ReadOnlySpan<char> values)
         {
-            return _unconsumedData.TryReadCharSpan(_position, out span);
+            return _unconsumedData.Span.Slice(_position).IndexOfAny(values);
+        }
+
+        public bool TryPeekChar(out char c)
+        {
+            return _unconsumedData.TryReadChar(_position, out c);
+        }
+
+        public bool TryPeekCharAt(int pos, out char c)
+        {
+            return _unconsumedData.TryReadChar(pos, out c);
+        }
+
+        public char CurrentChar()
+        {
+            return _unconsumedData.Span[_position];
         }
 
         public void SkipBlank()
         {
-            while (TryPeekCharSpan(out var span))
+            while (TryPeekChar(out var c))
             {
-                if (' '.EqualsSpans(span))
+                if (' ' == c)
                 {
                     _position += 1;
                 }
-                else if ('\n'.EqualsSpans(span))
+                else if ('\n' == c)
                 {
                     _position += 1;
                     _row += 1;
                 }
-                else if ('\r'.EqualsSpans(span) && '\n'.EqualsSpans(PeekCharSpan(1)))
+                else if ('\r' == c && '\n' == PeekChar(1))
                 {
                     _position += 2;
                     _row += 1;

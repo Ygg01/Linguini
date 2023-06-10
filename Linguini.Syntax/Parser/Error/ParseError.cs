@@ -22,7 +22,7 @@ namespace Linguini.Syntax.Parser.Error
             Row = row;
         }
 
-        public static ParseError ExpectedToken(char expected, ReadOnlySpan<char> actual, int pos, int row)
+        public static ParseError ExpectedToken(char expected, char? actual, int pos, int row)
         {
             var sb = new StringBuilder()
                 .AppendFormat("Expected a token starting with  \"{0}\" found \"{1}\" instead", expected,
@@ -36,7 +36,7 @@ namespace Linguini.Syntax.Parser.Error
             );
         }
 
-        public static ParseError ExpectedToken(char exp1, char exp2, ReadOnlySpan<char> actual, int pos, int row)
+        public static ParseError ExpectedToken(char exp1, char exp2, char? actual, int pos, int row)
         {
             var sb = new StringBuilder()
                 .AppendFormat("Expected  \"{0}\" or \"{1}\" found \"{2}\" instead",

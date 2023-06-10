@@ -9,123 +9,51 @@ namespace Linguini.Shared.Util
     /// </summary>
     public static class ZeroCopyUtil
     {
-        private const int CharLength = 1;
-        private static readonly ReadOnlyMemory<char> Eof = ReadOnlyMemory<char>.Empty;
-
-        public static ReadOnlySpan<char> PeakCharAt(this ReadOnlyMemory<char> memory, int pos)
+        public static bool TryReadChar(this ReadOnlyMemory<char> memory, int pos, out char c)
         {
-            memory.TryReadCharSpan(pos, out var span);
-            return span;
-        }
-
-        public static bool TryReadCharSpan(this ReadOnlyMemory<char> memory, int pos, out ReadOnlySpan<char> span)
-        {
-            span = Eof.Span;
-            if (pos + CharLength > memory.Length)
+            if (pos >= memory.Length)
             {
+                c = default;
                 return false;
             }
 
-            span = memory.Slice(pos, CharLength).Span;
+            c = memory.Span[pos];
             return true;
         }
 
-        public static bool EqualsSpans(this char chr, ReadOnlySpan<char> chrSpan)
+        public static bool IsAsciiAlphabetic(this char c)
         {
-            if (chrSpan.Length > CharLength)
-            {
-                return false;
-            }
-
-            return chrSpan.Length != 0 && IsEqual(chrSpan, chr);
-        }
-
-        public static bool EqualsSpans(this char? lhs, ReadOnlySpan<char> chrSpan)
-        {
-            if (lhs == null)
-            {
-                return chrSpan == Eof.Span;
-            }
-
-            return EqualsSpans((char) lhs, chrSpan);
-        }
-
-        public static bool IsEqual(this ReadOnlySpan<char> charSpan, char c1)
-        {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            return MemoryMarshal.GetReference(charSpan) == c1;
-        }
-
-        public static bool IsAsciiAlphabetic(this ReadOnlySpan<char> charSpan)
-        {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var c = MemoryMarshal.GetReference(charSpan);
             return IsInside(c, 'a', 'z')
                    || IsInside(c, 'A', 'Z');
         }
 
-        public static bool IsAsciiHexdigit(this ReadOnlySpan<char> charSpan)
+        public static bool IsAsciiHexdigit(this char c)
         {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var c = MemoryMarshal.GetReference(charSpan);
             return IsInside(c, '0', '9')
                    || IsInside(c, 'a', 'f')
                    || IsInside(c, 'A', 'F');
         }
 
-        public static bool IsAsciiUppercase(this ReadOnlySpan<char> charSpan)
+        public static bool IsAsciiUppercase(this char c)
         {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var c = MemoryMarshal.GetReference(charSpan);
             return IsInside(c, 'A', 'Z');
         }
 
-        public static bool IsAsciiDigit(this ReadOnlySpan<char> charSpan)
+        public static bool IsAsciiDigit(this char c)
         {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var c = MemoryMarshal.GetReference(charSpan);
             return IsInside(c, '0', '9');
         }
 
-        
-
-        public static bool IsNumberStart(this ReadOnlySpan<char> charSpan)
+        public static bool IsNumberStart(this char c)
         {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var c = MemoryMarshal.GetReference(charSpan);
             return IsInside(c, '0', '9') || c == '-';
         }
 
-        public static bool IsCallee(this ReadOnlyMemory<char> charSpan)
+        public static bool IsCallee(this ReadOnlySpan<char> charSpan)
         {
             bool isCallee = true;
-            for (int i = 0; i < charSpan.Length - 1; i++)
+            foreach (var c in charSpan)
             {
-                var c = charSpan.Slice(i, 1).Span;
                 if (!(c.IsAsciiUppercase() || c.IsAsciiDigit() || c.IsOneOf('_', '-')))
                 {
                     isCallee = false;
@@ -136,53 +64,29 @@ namespace Linguini.Shared.Util
             return isCallee;
         }
 
-
-        public static bool IsIdentifier(this ReadOnlySpan<char> charSpan)
+        public static bool IsIdentifier(this char c)
         {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var c = MemoryMarshal.GetReference(charSpan);
             return IsInside(c, 'a', 'z')
                    || IsInside(c, 'A', 'Z')
                    || IsInside(c, '0', '9')
                    || c == '-' || c == '_';
         }
 
-        public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2)
+        public static bool IsOneOf(this char c, char c1, char c2)
         {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var x = MemoryMarshal.GetReference(charSpan);
-            return x == c1 || x == c2;
+            return c == c1 || c == c2;
         }
 
-        public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2, char c3)
+        public static bool IsOneOf(this char c, char c1, char c2, char c3)
         {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var x = MemoryMarshal.GetReference(charSpan);
-            return x == c1 || x == c2 || x == c3;
+            return c == c1 || c == c2 || c == c3;
         }
 
-        public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2, char c3, char c4)
+        public static bool IsOneOf(this char c, char c1, char c2, char c3, char c4)
         {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var x = MemoryMarshal.GetReference(charSpan);
-            return x == c1 || x == c2 || x == c3 || x == c4;
+            return c == c1 || c == c2 || c == c3 || c == c4;
         }
+
 #if !NET5_0_OR_GREATER 
         // Polyfill for netstandard 2.1 until dotnet backports MemoryExtension
         public static ReadOnlyMemory<char> TrimEndPolyFill(this ReadOnlyMemory<char> memory)
