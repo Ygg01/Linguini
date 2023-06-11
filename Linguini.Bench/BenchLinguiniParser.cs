@@ -13,7 +13,7 @@ namespace Linguini.Bench
         [GlobalSetup]
         public void Setup()
         {
-            var baseFolder = Path.Combine(Path.GetFullPath("."), "..", "..", "..", "bench_ftl");
+            var baseFolder = Path.Combine(BenchRunner.BaseDir, "bench_ftl");
             var filePath = Path.GetFullPath(Path.Combine(baseFolder, "large.ftl"));
             _largeFtl = File.ReadAllText(filePath);
         }
