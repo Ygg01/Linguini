@@ -75,3 +75,24 @@ version 0.4.0
 - Adds method `GetAttrMessage(string msgWithAttr, params (string, IFluentType)[] args)` for ease of use.
 - Removes `enum InsertBehavior` in favor of three separate functions (`TryAddFunction`, `AddFunctionOverriding`, `AddFunctionUnchecked`)
 - Removes previously obsolete methods.
+
+version 0.5.0
+========
+
+- Improves parsing performance by eliminating bounds check on `ReadOnlySpan<char>` for `char` @RoosterDragon
+  Breaking changes:
+  - ZeroCopyUtil
+    - `TryReadCharSpan` replaced with `TryReadChar`
+    - Methods `IsIdentifier`/`IsNumberStart`/`IsAsciiDigit`/`IsAsciiUppercase`/`IsAsciiHexdigit`/`IsAsciiAlphabetic`
+      take char rather than `ReadOnlySpan<char>`
+    - `EqualSpans` method removed
+  - ZeroCopyReader
+    - method signature `ReadOnlySpan<char> PeekCharSpan(int offset = 0)` changed to `char? PeekChar(int offset = 0)`
+    - method `SeekEol` added.
+    - methods `TryPeekChar`, `TryPeekCharAt`,`CurrentChar`, and  `IndexOfAnyChar` added.
+  - ParserError
+    - factory method for `ExpectedTokens` arguments changed
+  - LinguiniParser
+    - changed to use new ZeroCopyUtil internally.
+  Non-breaking changes:
+  - Fluent bundle private bundle method separated into `AddEntry` and `AddEntryOverriding` 
