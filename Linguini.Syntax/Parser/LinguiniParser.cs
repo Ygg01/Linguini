@@ -462,7 +462,7 @@ namespace Linguini.Syntax.Parser
                     elements.Add(new Placeable(exp));
                     textElementRole = TextElementPosition.Continuation;
                 }
-                else if (_enableExtensions && '-' == _reader.PeekChar())
+                else if (_enableExtensions && '-' == _reader.PeekChar() && textElementRole != TextElementPosition.LineStart)
                 {
                     _reader.Position += 1;
                     if (_reader.TryPeekChar(out var c) && c.IsAsciiAlphabetic())
@@ -869,7 +869,8 @@ namespace Linguini.Syntax.Parser
                 if (inlineExpression is not TextLiteral
                     && inlineExpression is not NumberLiteral
                     && inlineExpression is not VariableReference
-                    && inlineExpression is not FunctionReference)
+                    && inlineExpression is not FunctionReference
+                    && (!_enableExtensions || inlineExpression is not DynamicReference))
                 {
                     retVal = null;
                     error = ParseError.ExpectedSimpleExpressionAsSelector(_reader.Position, _reader.Row);
@@ -1131,22 +1132,7 @@ namespace Linguini.Syntax.Parser
                 if (_enableExtensions && '$' == peekChr && _reader.PeekChar(1) == '$')
                 {
                     _reader.Position += 3;
-                    var id = GetUncheckedIdentifier();
-
-                    if (!TryCallArguments(out var args, out error))
-                    {
-                        expr = null;
-                        return false;
-                    }
-
-                    if (!TryGetAttributeAccessor(out var attribute, out error))
-                    {
-                        expr = null;
-                        return false;
-                    }
-
-                    expr = new DynamicReference(id, attribute, args);
-                    return true;
+                    return TryGetDynamicReference(out expr, out error);
                 }
                 else if ('$' == peekChr && !onlyLiteral)
                 {
@@ -1222,6 +1208,26 @@ namespace Linguini.Syntax.Parser
             error = ParseError.ExpectedInlineExpression(_reader.Position, _reader.Row);
             expr = null;
             return false;
+        }
+
+        private bool TryGetDynamicReference(out IInlineExpression? expr, out ParseError? error)
+        {
+            var id = GetUncheckedIdentifier();
+
+            if (!TryCallArguments(out var args, out error))
+            {
+                expr = null;
+                return false;
+            }
+
+            if (!TryGetAttributeAccessor(out var attribute, out error))
+            {
+                expr = null;
+                return false;
+            }
+
+            expr = new DynamicReference(id, attribute, args);
+            return true;
         }
 
         private bool TryCallArguments(out CallArguments? args, out ParseError? error, bool onlyLiteral = false)

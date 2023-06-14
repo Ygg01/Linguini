@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FluentAssertions.Execution;
 using FluentAssertions.Json;
 using Linguini.Serialization.Converters;
 using Linguini.Syntax.Ast;
@@ -79,12 +80,12 @@ namespace Linguini.Syntax.Tests.Parser
         }
 
 
-        private static Resource ParseFtlFile(string path)
+        private static Resource ParseFtlFile(string path, bool enableExtensions = false)
         {
             LinguiniParser parser;
             using (var reader = new StreamReader(path))
             {
-                parser = new LinguiniParser(reader);
+                parser = new LinguiniParser(reader, enableExtensions);
             }
 
             return parser.ParseWithComments();
@@ -179,12 +180,49 @@ namespace Linguini.Syntax.Tests.Parser
 
         [Test]
         [Parallelizable]
+        [TestCase("fixtures/any_char")]
+        [TestCase("fixtures/astral")]
+        [TestCase("fixtures/call_expressions")]
+        [TestCase("fixtures/callee_expressions")]
+        [TestCase("fixtures/comments")]
+        [TestCase("fixtures/cr")]
+        [TestCase("fixtures/crlf")]
+        [TestCase("fixtures/eof_comment")]
+        [TestCase("fixtures/eof_empty")]
+        [TestCase("fixtures/eof_id")]
+        [TestCase("fixtures/eof_id_equals")]
+        [TestCase("fixtures/eof_junk")]
+        [TestCase("fixtures/eof_value")]
+        [TestCase("fixtures/escaped_characters")]
+        [TestCase("fixtures/junk")]
+        [TestCase("fixtures/leading_dots")]
+        [TestCase("fixtures/literal_expressions")]
+        [TestCase("fixtures/member_expressions")]
+        [TestCase("fixtures/messages")]
+        [TestCase("fixtures/mixed_entries")]
+        [TestCase("fixtures/multiline_values")]
+        [TestCase("fixtures/numbers")]
+        [TestCase("fixtures/obsolete")]
+        [TestCase("fixtures/placeables")]
+        [TestCase("fixtures/reference_expressions")]
+        [TestCase("fixtures/select_expressions")]
+        [TestCase("fixtures/select_indent")]
+        [TestCase("fixtures/sparse_entries")]
+        [TestCase("fixtures/special_chars")]
+        [TestCase("fixtures/tab")]
+        [TestCase("fixtures/term_parameters")]
+        [TestCase("fixtures/terms")]
+        // [TestCase("fixtures/variables")] Illegal because one error is promoted to syntax.
+        [TestCase("fixtures/variant_keys")]
+        [TestCase("fixtures/whitespace_in_value")]
+        [TestCase("fixtures/zero_length")]
         [TestCase("fixtures_ext/x_linguini_ref")]
         [TestCase("fixtures_ext/x_linguini_term_ref")]
+        [TestCase("fixtures_ext/x_linguini_ref_attr")]
         public void TestLinguiniExt(string file)
         {
             var path = GetFullPathFor(file);
-            var res = ParseFtlFileFast(@$"{path}.ftl", true);
+            var res = ParseFtlFile(@$"{path}.ftl", true);
             var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions());
         
             var expected = JToken.Parse(File.ReadAllText($@"{path}.json"));
