@@ -26,8 +26,8 @@
             attacker: "cat"
             atk_num: 1
             defender: "dog"
-            def_num: 2
-          value: "Cat attacked Dogs."
+            def_num: 1
+          value: "Cat attacked Dog."
         - id: attack-log2
           args:
             attacker: "cat"

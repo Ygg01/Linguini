@@ -1,0 +1,56 @@
+﻿{
+    "type": "Resource",
+    "body": [
+        {
+            "type": "Term",
+            "id": {
+                "type": "Identifier",
+                "name": "creature-fairy"
+            },
+            "value": {
+                "type": "Pattern",
+                "elements": [
+                    {
+                        "type": "TextElement",
+                        "value": "fairy"
+                    }
+                ]
+            },
+            "attributes": []
+        },
+        {
+            "type": "Term",
+            "id": {
+                "type": "Identifier",
+                "name": "creature-elf"
+            },
+            "value": {
+                "type": "Pattern",
+                "elements": [
+                    {
+                        "type": "TextElement",
+                        "value": "elf"
+                    }
+                ]
+            },
+            "attributes": [
+                {
+                    "type": "Attribute",
+                    "id": {
+                        "type": "Identifier",
+                        "name": "StartsWith"
+                    },
+                    "value": {
+                        "type": "Pattern",
+                        "elements": [
+                            {
+                                "type": "TextElement",
+                                "value": "vowel"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
