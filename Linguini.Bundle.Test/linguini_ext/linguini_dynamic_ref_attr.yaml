@@ -15,11 +15,11 @@
     tests:
       - name: regular reference
         asserts:
-          - id: see-elf
+          - id: you-see
             args:
-              object: "-creature-elf"
+              object: "creature-elf"
             value: "You see an elf."
-          - id: see-fairy
+          - id: you-see
             args:
-              object: "-creature-fairy"
+              object: "creature-fairy"
             value: "You see a fairy."
