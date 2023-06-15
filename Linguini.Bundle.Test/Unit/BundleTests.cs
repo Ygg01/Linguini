@@ -314,7 +314,7 @@ call-attr-no-args = {-ship.gender() ->
         [Parallelizable]
         public void TestMacrosFail()
         {
-            var (bundle, err) =  LinguiniBuilder.Builder().Locale("en-US")
+            var (bundle, err) =  LinguiniBuilder.Builder(extension: true).Locale("en-US")
                 .AddResource(Macros)
                 .Build();
             Assert.IsEmpty(err);
@@ -324,6 +324,39 @@ call-attr-no-args = {-ship.gender() ->
             };
             Assert.True(bundle.TryGetMessage("call-attr-no-args", args, out _, out var message));
             Assert.AreEqual("It", message);
+        }
+        private const string DynamicSelectors = @"
+-creature-fairy = fairy
+-creature-elf = elf
+    .StartsWith = vowel
+
+you-see = You see { $$object.StartsWith ->
+    [vowel] an { $$object }
+    *[consonant] a { $$object }
+}.
+"; 
+        
+        [Test]
+        [Parallelizable]
+        public void TestDynamicSelectors()
+        {
+            var (bundle, err) = LinguiniBuilder.Builder(extension: true)
+                .Locale("en-US")
+                .AddResource(DynamicSelectors)
+                .Build();
+            Assert.IsEmpty(err);
+            var args = new Dictionary<string, IFluentType>
+            {
+                ["object"] = (FluentReference)"creature-elf",
+            };
+            Assert.True(bundle.TryGetMessage("you-see", args, out _, out var message1));
+            Assert.AreEqual("You see an elf.", message1);
+            args = new Dictionary<string, IFluentType>
+            {
+                ["object"] = (FluentReference)"creature-fairy",
+            };
+            Assert.True(bundle.TryGetMessage("you-see", args, out _, out var message2));
+            Assert.AreEqual("You see a fairy.", message2);
         }
     }
 }
