@@ -20,7 +20,7 @@ Need only Plural Rules data? Get PluralRules.Generator and connect to XML CLDR P
 
 ## Performant
 Linguini uses a zero-copy parser to parse the resources. While at the moment, there are no benchmarks,
-it is used by [RobustToolbox as](https://github.com/space-wizards/RobustToolbox) as a localization framework.
+it is used by [RobustToolbox](https://github.com/space-wizards/RobustToolbox) as a localization framework.
 
 # How to get it?
 
@@ -57,12 +57,17 @@ Let's go line by line and see how `LinguiniBuilder` works.
     .CultureInfo(new CultureInfo("en"))
     ```
 
-3. Add a resource - a translation bundle without resources is pointless. We choose inline for ease of example, for passing files checking documentation or source code.
+3. Add a resource - a translation bundle without resources is pointless. We choose inline string for ease of the example. 
     ```csharp
         .AddResource("hello-user =  Hello, { $username }!")
     ```
+    
+   If you need an example of passing files, here is a oneliner example assuming you defined `using var streamReader = new StreamReader(path_to_file);` somewhere (Hint: no need to use `StreamReader`, any [`TextReader`](https://learn.microsoft.com/en-us/dotnet/api/system.io.textreader?view=net-7.0) will do).
+   ```csharp
+        .AddResource(streamReader)
+   ```
 
-4. Complete the `ResourceBundle` - We call `UncheckedBuild()` to convert a builder to a bundle. Bundle will parse its resources and report
+4. Complete the `ResourceBundle` - We call `UncheckedBuild()` to convert a builder to a bundle. The bundle will parse its resources and report
    errors. Since we don't care about errors, we are fine with `ResourceBundle` throwing errors.
    ```
        .UncheckedBuild();
@@ -75,7 +80,7 @@ Let's go line by line and see how `LinguiniBuilder` works.
 
 # Quick questions and answers
 
-## FluentBundle isn't thread-safe.
+## Why FluentBundle isn't thread-safe?
 
 Making it concurrent could add a performance penalty; otherwise, a concurrent bundle would be the default. To make it thread-safe, add `UseConcurrent()`
 in builder:
