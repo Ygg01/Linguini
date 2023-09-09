@@ -616,6 +616,8 @@ namespace Linguini.Syntax.Parser
                 else if ('\n' == c)
                 {
                     _reader.Position += 1;
+                    _reader.Row += 1;
+
                     textElement = new TextSlice(
                         startPos,
                         _reader.Position,
@@ -628,7 +630,9 @@ namespace Linguini.Syntax.Parser
                 else if ('\r' == c
                          && '\n' == _reader.PeekChar(1))
                 {
-                    _reader.Position += 1;
+                    _reader.Position += 2;
+                    _reader.Row += 1;
+
                     // This takes one less element because it converts CRLF endings
                     // to LF endings
                     textElement = new TextSlice(
