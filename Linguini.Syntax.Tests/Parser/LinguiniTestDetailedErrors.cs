@@ -24,5 +24,23 @@ namespace Linguini.Syntax.Tests.Parser
             Assert.AreEqual(new Range(startErr, endErr), detailMsg.Slice!.Value);
             Assert.AreEqual(new Range(startMark, endMark), detailMsg.Position);
         }
+
+        [Test]
+        public void TestLineOffset()
+        {
+            const string code = @"a = b
+c = d
+
+foo = {
+
+d = e
+";
+
+            var parser = new LinguiniParser(code);
+            var result = parser.Parse();
+            var error = result.Errors[0];
+
+            Assert.That(error.Row, Is.EqualTo(6));
+        }
     }
 }

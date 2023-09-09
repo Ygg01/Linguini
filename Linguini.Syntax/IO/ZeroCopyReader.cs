@@ -32,6 +32,7 @@ namespace Linguini.Syntax.IO
         public int Row
         {
             get => _row;
+            set => _row = value;
         }
 
         public bool IsNotEof => _position < _unconsumedData.Length;
