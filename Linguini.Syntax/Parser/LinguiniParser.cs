@@ -521,7 +521,8 @@ namespace Linguini.Syntax.Parser
                                 sliceStart,
                                 text.End,
                                 indent,
-                                textElementRole
+                                textElementRole,
+                                text.TerminationReason == TextElementTermination.CRLF
                             ));
                         }
                     }
@@ -567,7 +568,18 @@ namespace Linguini.Syntax.Parser
                                 }
                             }
 
-                            var value = _reader.ReadSlice(start, end);
+                            ReadOnlyMemory<char> value;
+                            if (textLiteral.MissingEol)
+                            {
+                                var str = _reader.ReadSlice(start, end) + "\n";
+                                value = str.AsMemory();
+                            }
+                            else
+                            {
+                                value = _reader.ReadSlice(start, end);
+                            }
+                            // var value = _reader.ReadSlice(start, end);
+
                             if (lastNonBlank == i)
                             {
 #if NET5_0_OR_GREATER 
@@ -630,17 +642,18 @@ namespace Linguini.Syntax.Parser
                 else if ('\r' == c
                          && '\n' == _reader.PeekChar(1))
                 {
-                    _reader.Position += 2;
-                    _reader.Row += 1;
-
-                    // This takes one less element because it converts CRLF endings
-                    // to LF endings
+                    // If this is one `/r/n` (CRLF) line ending we take position before CRLF
+                    // and set flag in TextElementPlaceholder that value is missing a EOL mark (which is LF)
                     textElement = new TextSlice(
                         startPos,
-                        _reader.Position - 1,
+                        _reader.Position,
                         textElementType,
                         TextElementTermination.CRLF
                     );
+                    
+                    _reader.Position += 2;
+                    _reader.Row += 1;
+                    
                     error = null;
                     return true;
                 }
