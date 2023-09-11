@@ -3,8 +3,8 @@
     <PropertyGroup>
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
-        <TargetFrameworks>net461;net5.0</TargetFrameworks>
         <OutputType>Library</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
