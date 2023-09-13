@@ -10,7 +10,7 @@
         <PackageTags>fluent, i18n, internationalization, l10n, l20n, globalization, translation</PackageTags>
         <IncludeSymbols>false</IncludeSymbols>
         <PackageVersion>0.5.0</PackageVersion>
-        <TargetFrameworks>net461;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
     </PropertyGroup>
     
     <ItemGroup Condition="'$(TargetFramework)' == 'net461'">

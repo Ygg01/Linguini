@@ -11,7 +11,7 @@
         <PackageTags>fluent, i18n, internationalization, l10n, l20n, globalization, translation</PackageTags>
         <PackageProjectUrl>https://github.com/Ygg01/Linguini</PackageProjectUrl>
         <RepositoryType>git</RepositoryType>
-        <TargetFrameworks>net461;net5.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
         <PackageVersion>0.5.0</PackageVersion>
     </PropertyGroup>
 

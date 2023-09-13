@@ -4,7 +4,7 @@
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
         <RootNamespace>PluralRules.Test</RootNamespace>
-        <TargetFrameworks>net5.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
         <OutputType>Library</OutputType>
     </PropertyGroup>
 
