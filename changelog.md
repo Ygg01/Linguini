@@ -95,4 +95,10 @@ version 0.5.0
   - LinguiniParser
     - changed to use new ZeroCopyUtil internally.
   Non-breaking changes:
-  - Fluent bundle private bundle method separated into `AddEntry` and `AddEntryOverriding` 
+  - Fluent bundle private bundle method separated into `AddEntry` and `AddEntryOverriding`
+
+version 0.6.0
+========
+- Fixes errors when reading line numbers due to interaction
+  with ZeroCopy Parser (thanks to @PJB3005)
+- Moves project to minimal dotnet version to 6
