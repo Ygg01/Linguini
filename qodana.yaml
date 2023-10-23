@@ -34,3 +34,7 @@ exclude:
   - name: CheckNamespace
     paths:
       - Linguini.Bundle\IsExternalInit.cs
+  - name: HeapView.ObjectAllocation.Evident
+  - name: HeapView.DelegateAllocation
+  - name: HeapView.BoxingAllocation
+  - name: HeapView.ClosureAllocation
