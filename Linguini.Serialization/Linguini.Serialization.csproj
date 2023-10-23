@@ -3,6 +3,7 @@
     <PropertyGroup>
         <PackageVersion>0.6.0</PackageVersion>
         <TargetFramework>net6.0</TargetFramework>
+        <PackageIcon>linguini.jpg</PackageIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -12,6 +13,14 @@
     <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
         <PackageReference Include="System.Text.Json" Version="6.0.4" PrivateAssets="all" />
         <PackageReference Include="IndexRange" Version="1.0.2" PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\linguini.jpg">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+        <Link>linguini.jpg</Link>
+      </None>
     </ItemGroup>
 
 </Project>

@@ -13,10 +13,17 @@
         <RepositoryType>git</RepositoryType>
         <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
         <PackageVersion>0.6.1</PackageVersion>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>linguini.jpg</PackageIcon>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Linguini.Shared\Linguini.Shared.csproj" />
+        <None Include="..\linguini.jpg" PackagePath="">
+          <Pack>True</Pack>
+            <Link>linguini.jpg</Link>
+        </None>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
