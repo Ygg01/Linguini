@@ -12,6 +12,7 @@
         <PackageVersion>0.6.0</PackageVersion>
         <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
         <PackageIcon>linguini.jpg</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
     
     <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
@@ -27,6 +28,7 @@
         <Pack>True</Pack>
           <Link>linguini.jpg</Link>
       </None>
+      <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>

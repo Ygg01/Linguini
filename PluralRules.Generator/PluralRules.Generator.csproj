@@ -7,8 +7,9 @@
         <Description>Source generator that converts xml for plural rules into a compile time functions.</Description>
 
         <IncludeSymbols>false</IncludeSymbols>
-
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>linguini.jpg</PackageIcon>
+        <PackageTags>sourcegen, plural rules, icu</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
@@ -21,6 +22,7 @@
         <Pack>True</Pack>
           <Link>linguini.jpg</Link>
       </None>
+      <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>
