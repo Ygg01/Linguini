@@ -31,3 +31,6 @@ exclude:
   - name: All
     paths:
       - Linguini.Bundle\IsExternalInit.cs
+  - name: CheckNamespace
+    paths:
+      - Linguini.Bundle\IsExternalInit.cs
