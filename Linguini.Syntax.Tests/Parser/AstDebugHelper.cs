@@ -1,6 +1,7 @@
 ﻿using System.Text;
+using Linguini.Syntax.Ast;
 
-namespace Linguini.Syntax.Ast
+namespace Linguini.Syntax.Tests.Parser
 {
     public static class AstDebugHelper
     {
@@ -14,7 +15,7 @@ namespace Linguini.Syntax.Ast
                     switch (patternElement)
                     {
                         case TextLiteral textLiteral:
-                            stringBuilder.Append(textLiteral.Value);
+                            stringBuilder.Append((object)textLiteral.Value);
                             break;
                         case Placeable placeable:
                             Debug(placeable, stringBuilder);
