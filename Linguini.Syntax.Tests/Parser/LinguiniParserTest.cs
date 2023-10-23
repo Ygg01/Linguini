@@ -175,7 +175,7 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestNumExpressions(string input, string identifier, string value)
         {
             var res = new LinguiniParser(input).Parse();
-
+            
             Assert.AreEqual(0, res.Errors.Count);
             Assert.AreEqual(1, res.Entries.Count);
             Assert.IsInstanceOf(typeof(AstMessage), res.Entries[0]);
@@ -191,6 +191,34 @@ namespace Linguini.Syntax.Tests.Parser
                 Assert.AreEqual(identifier, message.Id.ToString());
                 Assert.AreEqual(value, numberLiteral.ToString());
             }
+        }
+
+        private const string CrlfEscape = "message = \r\n" +
+                              "  Line1\r\n" +
+                              "  \r\n" +
+                              "  \r\n" +
+                              "  Line2.\r\n";
+        
+        private const string CrEscape = "message = \n" +
+                                       "  Line1\n" +
+                                       "\n" +
+                                       "\n" +
+                                       "  Line2.\n";
+
+        private const string expected = "Line1\n\n\nLine2.";
+        
+        [Test]
+        [TestCase(CrlfEscape)]
+        // [TestCase(CrEscape)]
+        public void TestNewlinePreservation(string input)
+        {
+            var parse = new LinguiniParser(input).Parse();
+            
+            Assert.AreEqual(0, parse.Errors.Count);
+            var msg = parse.Entries[0]; 
+            Assert.IsInstanceOf(typeof(AstMessage), msg);
+            var astMsg = (AstMessage)msg;
+            Assert.AreEqual(expected,  astMsg.Debug());
         }
     }
 }
