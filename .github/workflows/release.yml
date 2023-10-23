@@ -28,6 +28,9 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
 
+    # Run build in Release mode
+    - run: dotnet build --configuration Release
+
     # Create the NuGet package in the folder from the environment variable NuGetDirectory
     - run: dotnet pack --configuration Release --output ${{ env.NuGetDirectory }}
 
