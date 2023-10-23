@@ -102,3 +102,7 @@ version 0.6.0
 - Fixes errors when reading line numbers due to interaction
   with ZeroCopy Parser (thanks to @PJB3005)
 - Moves project to minimal dotnet version to 6
+
+version 0.6.1
+========
+- Fixes errors when reading an empty line on Windows (reported by @JosefNemec)
