@@ -21,6 +21,7 @@ It provides easy to use and extend system for describing translations.</Descript
         <PackageVersion>0.6.1</PackageVersion>
         <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
         <PackageIcon>linguini.jpg</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -46,6 +47,7 @@ It provides easy to use and extend system for describing translations.</Descript
         <Pack>True</Pack>
           <Link>linguini.jpg</Link>
       </None>
+      <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>

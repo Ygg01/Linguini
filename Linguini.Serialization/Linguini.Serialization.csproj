@@ -4,6 +4,8 @@
         <PackageVersion>0.6.0</PackageVersion>
         <TargetFramework>net6.0</TargetFramework>
         <PackageIcon>linguini.jpg</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>serialization, linguini, utility</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
@@ -21,6 +23,7 @@
         <PackagePath></PackagePath>
         <Link>linguini.jpg</Link>
       </None>
+      <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
 </Project>
