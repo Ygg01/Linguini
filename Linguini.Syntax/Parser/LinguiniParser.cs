@@ -20,6 +20,7 @@ namespace Linguini.Syntax.Parser
     public class LinguiniParser
     {
         private readonly ZeroCopyReader _reader;
+        private const string CR = "\n";
 
         /// <summary>
         /// Set input to <c>string</c>
@@ -526,6 +527,16 @@ namespace Linguini.Syntax.Parser
                             ));
                         }
                     }
+                    // In case an empty newline is emitted, we create an artificial token to represent LINEFEED (`\n`)
+                    else if (text.Start == text.End && text.TerminationReason == TextElementTermination.CRLF)
+                    {
+                        elements.Add(new TextElementPlaceholder(
+                            0,
+                            0,
+                            indent,
+                            textElementRole,
+                            true));
+                    }
 
                     textElementRole = text.TerminationReason switch
                     {
@@ -560,29 +571,32 @@ namespace Linguini.Syntax.Parser
                             {
                                 if (commonIndent == null)
                                 {
-                                    start = start + indent;
+                                    start += indent;
                                 }
                                 else
                                 {
-                                    start = start + Math.Min(indent, commonIndent.Value);
+                                    start += Math.Min(indent, commonIndent.Value);
                                 }
                             }
 
                             ReadOnlyMemory<char> value;
-                            if (textLiteral.MissingEol)
+                            if (textLiteral.MissingEol && textLiteral.Start == textLiteral.End)
                             {
-                                var str = _reader.ReadSlice(start, end) + "\n";
+                                value = CR.AsMemory();
+                            }
+                            else if (textLiteral.MissingEol && textLiteral.Start != textLiteral.End)
+                            {
+                                var str = _reader.ReadSlice(start, end) + CR;
                                 value = str.AsMemory();
                             }
                             else
                             {
                                 value = _reader.ReadSlice(start, end);
                             }
-                            // var value = _reader.ReadSlice(start, end);
 
                             if (lastNonBlank == i)
                             {
-#if NET5_0_OR_GREATER 
+#if NET5_0_OR_GREATER
                                 value = value.TrimEnd();
 #else
                                 value = value.TrimEndPolyFill();
@@ -650,10 +664,10 @@ namespace Linguini.Syntax.Parser
                         textElementType,
                         TextElementTermination.CRLF
                     );
-                    
+
                     _reader.Position += 2;
                     _reader.Row += 1;
-                    
+
                     error = null;
                     return true;
                 }
@@ -987,7 +1001,7 @@ namespace Linguini.Syntax.Parser
                                 {
                                     _reader.Position += 2;
                                 }
-                                else if ('u'== c)
+                                else if ('u' == c)
                                 {
                                     _reader.Position += 2;
                                     if (!TrySkipUnicodeSequence(4, out error))
@@ -996,7 +1010,7 @@ namespace Linguini.Syntax.Parser
                                         return false;
                                     }
                                 }
-                                else if ('U'== c)
+                                else if ('U' == c)
                                 {
                                     _reader.Position += 2;
                                     if (!TrySkipUnicodeSequence(6, out error))
