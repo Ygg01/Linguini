@@ -20,31 +20,31 @@ namespace Linguini.Syntax.Parser
     public class LinguiniParser
     {
         private readonly ZeroCopyReader _reader;
-        private readonly bool _enableExtensions;
+        private readonly bool _enableExperimental;
         private const string CR = "\n";
 
         /// <summary>
         /// Set input to <c>string</c>
         /// </summary>
         /// <param name="input">Input to be parsed</param>
-        /// <param name="enableExtensions">Using non-standard Fluent extensions</param>
-        public LinguiniParser(string input, bool enableExtensions = false)
+        /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
+        public LinguiniParser(string input, bool enableExperimental = false)
         {
             _reader = new ZeroCopyReader(input);
-            _enableExtensions = enableExtensions;
+            _enableExperimental = enableExperimental;
         }
 
         /// <summary>
         /// Set input to <c>TextReader</c>
         /// </summary>
         /// <param name="input">TextReader to be parsed to Fluent AST.</param>
-        /// <param name="enableExtensions">Using non-standard Fluent extensions</param>
-        public LinguiniParser(TextReader input, bool enableExtensions = false)
+        /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
+        public LinguiniParser(TextReader input, bool enableExperimental = false)
         {
             using (input)
             {
                 _reader = new ZeroCopyReader(input.ReadToEnd());
-                _enableExtensions = enableExtensions;
+                _enableExperimental = enableExperimental;
             }
         }
 
@@ -462,7 +462,7 @@ namespace Linguini.Syntax.Parser
                     elements.Add(new Placeable(exp));
                     textElementRole = TextElementPosition.Continuation;
                 }
-                else if (_enableExtensions && '-' == _reader.PeekChar() && textElementRole != TextElementPosition.LineStart)
+                else if (_enableExperimental && '-' == _reader.PeekChar() && textElementRole != TextElementPosition.LineStart)
                 {
                     _reader.Position += 1;
                     if (_reader.TryPeekChar(out var c) && c.IsAsciiAlphabetic())
@@ -870,7 +870,7 @@ namespace Linguini.Syntax.Parser
                     && inlineExpression is not NumberLiteral
                     && inlineExpression is not VariableReference
                     && inlineExpression is not FunctionReference
-                    && (!_enableExtensions || inlineExpression is not DynamicReference))
+                    && (!_enableExperimental || inlineExpression is not DynamicReference))
                 {
                     retVal = null;
                     error = ParseError.ExpectedSimpleExpressionAsSelector(_reader.Position, _reader.Row);
@@ -1129,7 +1129,7 @@ namespace Linguini.Syntax.Parser
                         return false;
                     }
                 }
-                if (_enableExtensions && '$' == peekChr && _reader.PeekChar(1) == '$')
+                if (_enableExperimental && '$' == peekChr && _reader.PeekChar(1) == '$')
                 {
                     _reader.Position += 3;
                     return TryGetDynamicReference(out expr, out error);
