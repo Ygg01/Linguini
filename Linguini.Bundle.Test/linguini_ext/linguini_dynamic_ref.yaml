@@ -1,5 +1,5 @@
 ﻿suites:
-  - name: Linguini dynamic Reference
+  - name: Linguini dynamic reference
     resources:
       - source: |-
           cat = {$number ->
