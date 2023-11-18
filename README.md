@@ -28,7 +28,15 @@ To install the [Fluent Bundle](https://www.nuget.org/packages/Linguini.Bundle/) 
 
 ```dotnet add package Linguini.Bundle```
 
-You can also follow other NuGet installation instructions.
+You can also follow other NuGet installation instructions. E.g. :
+
+```paket add Linguini.Bundle```
+
+Or copy this code to your [PackageReference](https://learn.microsoft.com/en-gb/nuget/consume-packages/package-references-in-project-files)
+
+```xml
+<PackageReference Include="Linguini.Bundle" Version="0.7.0" />
+```
 
 # How to use it?
 
