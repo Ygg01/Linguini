@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
         <OutputType>Library</OutputType>
+        <PackageVersion>0.7.0</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
