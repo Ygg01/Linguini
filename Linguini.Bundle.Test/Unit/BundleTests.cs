@@ -21,23 +21,23 @@ namespace Linguini.Bundle.Test.Unit
         private readonly Func<IFluentType, string> _formatter = _ => "";
         private readonly Func<string, string> _transform = str => str.ToUpper(CultureInfo.InvariantCulture);
 
-        private static string _res1 = @"
+        private const string Res1 = @"
 term = term
     .attr = 3";
 
-        private static string _wrong = @"
+        private const string Wrong = @"
     term = 1";
 
-        private static string _multi = @"
+        private const string Multi = @"
 term1 = val1
 term2 = val2
     .attr = 6";
 
-        private static string _replace1 = @"
+        private const string Replace1 = @"
 term1 = val1
 term2 = val2";
 
-        private static string _replace2 = @"
+        private const string Replace2 = @"
 term1 = xxx
 new1  = new
     .attr = 6";
@@ -47,7 +47,7 @@ new1  = new
         public void TestDefaultBundleOptions()
         {
             var defaultBundleOpt = new FluentBundleOption();
-            var bundle = FluentBundle.MakeUnchecked(defaultBundleOpt);
+            var bundle = FluentBundle.FromBundleOptions(defaultBundleOpt);
             Assert.AreEqual(CultureInfo.CurrentCulture, bundle.Culture);
             Assert.IsNull(bundle.FormatterFunc);
             Assert.IsNull(bundle.TransformFunc);
@@ -58,9 +58,9 @@ new1  = new
         [Test]
         public void TestNonDefaultBundleOptions()
         {
-            var defaultBundleOpt = new FluentBundleOption()
+            var defaultBundleOpt = new FluentBundleOption
             {
-                Locales = { "en" },
+                Culture= new CultureInfo("en"),
                 MaxPlaceable = 123,
                 UseIsolating = false,
                 TransformFunc = _transform,
@@ -71,7 +71,8 @@ new1  = new
                     ["id"] = _idFunc,
                 }
             };
-            var bundle = FluentBundle.MakeUnchecked(defaultBundleOpt);
+            var bundle = FluentBundle.FromBundleOptions(defaultBundleOpt);
+            bundle.AddResource("test", out _);
             Assert.AreEqual(new CultureInfo("en"), bundle.Culture);
             Assert.AreEqual(defaultBundleOpt.FormatterFunc, bundle.FormatterFunc);
             Assert.AreEqual(defaultBundleOpt.TransformFunc, bundle.TransformFunc);
@@ -89,7 +90,7 @@ new1  = new
         {
             var bundler = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
-                .AddResource(_replace1);
+                .AddResource(Replace1);
 
             var bundle = bundler.UncheckedBuild();
             Assert.IsTrue(bundle.TryGetAttrMessage("term1", null, out _, out var termMsg));
@@ -97,7 +98,7 @@ new1  = new
             Assert.IsTrue(bundle.TryGetAttrMessage("term2", null, out _, out var termMsg2));
             Assert.AreEqual("val2", termMsg2);
 
-            bundle.AddResourceOverriding(_replace2);
+            bundle.AddResourceOverriding(Replace2);
             Assert.IsTrue(bundle.TryGetAttrMessage("term2", null, out _, out _));
             Assert.IsTrue(bundle.TryGetAttrMessage("term1", null, out _, out termMsg));
             Assert.AreEqual("xxx", termMsg);
@@ -111,7 +112,7 @@ new1  = new
         {
             var bundler = LinguiniBuilder.Builder()
                 .Locales("en-US", "sr-RS")
-                .AddResources(_wrong, _res1)
+                .AddResources(Wrong, Res1)
                 .SetFormatterFunc(_formatter)
                 .SetTransformFunc(_transform)
                 .AddFunction("id", _idFunc)
@@ -139,7 +140,7 @@ new1  = new
         {
             var bundler = LinguiniBuilder.Builder()
                 .Locale("en-US")
-                .AddResource(_multi)
+                .AddResource(Multi)
                 .AddFunction("id", _idFunc)
                 .AddFunction("zero", _zeroFunc)
                 .UncheckedBuild();
@@ -174,7 +175,7 @@ new1  = new
                 Locales = { "en-US" },
                 UseConcurrent = true,
             };
-            var optBundle = FluentBundle.MakeUnchecked(bundleOpt);
+            var optBundle = FluentBundle.FromBundleOptions(bundleOpt);
             Parallel.For(0, 10, i => optBundle.AddResource($"term-1 = {i}", out _));
             Parallel.For(0, 10, i => optBundle.AddResource($"term-2= {i}", out _));
             Parallel.For(0, 10, i => optBundle.TryGetAttrMessage("term-1", null, out _, out _));
@@ -221,7 +222,7 @@ new1  = new
         {
             var bundle = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
-                .AddResource(_replace2)
+                .AddResource(Replace2)
                 .UncheckedBuild();
 
             Assert.AreEqual(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
@@ -238,7 +239,7 @@ new1  = new
         {
             var bundle = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
-                .AddResource(_replace2)
+                .AddResource(Replace2)
                 .UncheckedBuild();
 
             Assert.AreEqual(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
@@ -284,11 +285,11 @@ attack-log = { $$attacker } attacked {$$defender}.
         [TestCase(DynRef)]
         public void TestDynamicReference(string input)
         {
-            var (bundle, err) =  LinguiniBuilder.Builder(extension: true).Locale("en-US")
+            var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
                 .AddResource(input)
                 .Build();
             Assert.IsEmpty(err);
-            var args = new Dictionary<string, IFluentType>()
+            var args = new Dictionary<string, IFluentType>
             {
                 ["attacker"] = (FluentReference)"cat",
                 ["defender"] = (FluentReference)"dog",
@@ -314,7 +315,7 @@ call-attr-no-args = {-ship.gender() ->
         [Parallelizable]
         public void TestMacrosFail()
         {
-            var (bundle, err) =  LinguiniBuilder.Builder(extension: true).Locale("en-US")
+            var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
                 .AddResource(Macros)
                 .Build();
             Assert.IsEmpty(err);
@@ -340,7 +341,7 @@ you-see = You see { $$object.StartsWith ->
         [Parallelizable]
         public void TestDynamicSelectors()
         {
-            var (bundle, err) = LinguiniBuilder.Builder(extension: true)
+            var (bundle, err) = LinguiniBuilder.Builder(useExperimental: true)
                 .Locale("en-US")
                 .AddResource(DynamicSelectors)
                 .Build();

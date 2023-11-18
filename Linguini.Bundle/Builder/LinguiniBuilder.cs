@@ -13,9 +13,9 @@ namespace Linguini.Bundle.Builder
 {
     public static class LinguiniBuilder
     {
-        public static ILocaleStep Builder(bool extension = false)
+        public static ILocaleStep Builder(bool useExperimental = false)
         {
-            return new StepBuilder(extension);
+            return new StepBuilder(useExperimental);
         }
 
         public interface IStep
@@ -62,10 +62,8 @@ namespace Linguini.Bundle.Builder
 
         private class StepBuilder : IReadyStep, ILocaleStep, IResourceStep
         {
-            private CultureInfo _culture;
-            private readonly List<string> _locales = new();
+            private List<CultureInfo> _cultures = new();
             private readonly List<Resource> _resources = new();
-            private readonly List<object> _source = new();
             private bool _useIsolating;
             private Func<IFluentType, string>? _formatterFunc;
             private Func<string, string>? _transformFunc;
@@ -73,10 +71,10 @@ namespace Linguini.Bundle.Builder
             private bool _concurrent;
             private readonly bool _enableExperimental;
 
-            internal StepBuilder(bool isExperimental = false)
+            internal StepBuilder(bool useExperimental = false)
             {
-                _culture = System.Globalization.CultureInfo.CurrentCulture;
-                _enableExperimental = isExperimental;
+                _cultures.Add(System.Globalization.CultureInfo.CurrentCulture);
+                _enableExperimental = useExperimental;
             }
 
             public IReadyStep SetUseIsolating(bool isIsolating)
@@ -127,13 +125,12 @@ namespace Linguini.Bundle.Builder
                 {
                     FormatterFunc = _formatterFunc,
                     TransformFunc = _transformFunc,
-                    Locales = _locales,
+                    Cultures = _cultures,
                     UseIsolating = _useIsolating,
                     UseConcurrent = _concurrent,
                     EnableExtensions = _enableExperimental,
                 };
-                var bundle = FluentBundle.MakeUnchecked(concurrent);
-                bundle.Culture = _culture;
+                var bundle = FluentBundle.FromBundleOptions(concurrent);
 
                 var errors = new List<FluentError>();
                 if (_functions.Count > 0)
@@ -155,8 +152,7 @@ namespace Linguini.Bundle.Builder
 
             public IResourceStep Locale(string unparsedLocale)
             {
-                _culture = new CultureInfo(unparsedLocale);
-                _locales.Add(unparsedLocale);
+                _cultures[0] = new CultureInfo(unparsedLocale);
                 return this;
             }
 
@@ -167,11 +163,11 @@ namespace Linguini.Bundle.Builder
 
             public IResourceStep Locales(params string[] unparsedLocales)
             {
-                _locales.AddRange(unparsedLocales);
-                if (_locales.Count > 0)
+                var parsedLocale = unparsedLocales.Select(x => new CultureInfo(x)).ToList();
+                if (parsedLocale.Count > 0)
                 {
                     // TODO proper culture info negotiations
-                    _culture = new CultureInfo(_locales[0]);
+                    _cultures = parsedLocale;
                 }
                 else
                 {
@@ -183,8 +179,7 @@ namespace Linguini.Bundle.Builder
 
             public IResourceStep CultureInfo(CultureInfo culture)
             {
-                _culture = culture;
-                _locales.Add(culture.ToString());
+                _cultures[0] = culture;
                 return this;
             }
 

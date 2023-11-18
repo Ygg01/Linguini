@@ -1,10 +1,10 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
@@ -22,17 +22,51 @@ namespace Linguini.Bundle
     {
         private IDictionary<string, FluentFunction> _funcList;
         private IDictionary<(string, EntryKind), IEntry> _entries;
+        private IList<CultureInfo> _locales;
 
         #region Properties
 
-        public CultureInfo Culture { get; internal set; }
-        public List<string> Locales { get; internal set; }
+        /// <summary>
+        /// <see cref="CultureInfo"/> of the bundle. Primary bundle locale
+        /// </summary>
+        public CultureInfo Culture => _locales[0];
+
+        /// <summary>
+        /// List of Locales. First element is primary bundle locale, others are fallback locales.
+        /// </summary>
+        public List<string> Locales => _locales.Select(x => x.ToString()).ToList();
+        
+        /// <summary>
+        /// When formatting patterns, FluentBundle inserts Unicode Directionality Isolation Marks to indicate that the direction of a placeable may differ from the surrounding message.
+        /// This is important for cases such as when a right-to-left user name is presented in the left-to-right message.
+        /// </summary>
         public bool UseIsolating { get; set; }
+        
+        /// <summary>
+        /// Specifies a method that will be applied on all textual fragments of the pattern. If empty, no transformation
+        /// will be attempted
+        /// </summary>
         public Func<string, string>? TransformFunc { get; set; }
+        
+        /// <summary>
+        /// Specifies a method that will be applied only on values extending <see cref="IFluentType"/>. Useful for defining a special formatter for <see cref="FluentNumber"/>.
+        /// </summary>
         public Func<IFluentType, string>? FormatterFunc { get; init; }
+        
+        /// <summary>
+        /// Limit of placeable <see cref="AstTerm"/> within one <see cref="Pattern"/>, when fully expanded (all nested elements count towards it). Useful for preventing billion laughs attack. Defaults to 100.
+        /// </summary>
         public byte MaxPlaceable { get; private init; }
         
-        public bool EnableExtensions { get; init; }
+        /// <summary>
+        /// Whether experimental features are enabled.
+        ///
+        /// When `true` experimental features are enabled. Experimental features include stuff like:
+        /// <list type="bullet">
+        /// <item>dynamic reference</item>
+        /// </list>
+        /// </summary>
+        public bool EnableExperimental { get; init; }
 
         #endregion
 
@@ -42,14 +76,24 @@ namespace Linguini.Bundle
         {
             _entries = new Dictionary<(string, EntryKind), IEntry>();
             _funcList = new Dictionary<string, FluentFunction>();
-            Culture = CultureInfo.CurrentCulture;
-            Locales = new List<string>();
+            _locales = new List<CultureInfo> { CultureInfo.CurrentCulture };
             UseIsolating = true;
             MaxPlaceable = 100;
-            EnableExtensions = false;
+            EnableExperimental = false;
         }
 
+        [Obsolete("MakeUnchecked is deprecated. Use FromBundleOption.")]
         public static FluentBundle MakeUnchecked(FluentBundleOption option)
+        {
+            return FromBundleOptions(option);
+        }
+        
+        /// <summary>
+        /// Static factory method for creating <see cref="FluentBundle"/> from <see cref="FluentBundleOption"/>.
+        /// </summary>
+        /// <param name="option"></param>
+        /// <returns></returns>
+        public static FluentBundle FromBundleOptions(FluentBundleOption option)
         {
             var bundle = ConstructBundle(option);
             bundle.AddFunctions(option.Functions, out _);
@@ -58,13 +102,19 @@ namespace Linguini.Bundle
 
         private static FluentBundle ConstructBundle(FluentBundleOption option)
         {
-            var primaryLocale = option.Locales.Count > 0
-                ? option.Locales[0]
-                : CultureInfo.CurrentCulture.Name;
-            var cultureInfo = new CultureInfo(primaryLocale, false);
-            var locales = new List<string> { primaryLocale };
             IDictionary<(string, EntryKind), IEntry> entries;
             IDictionary<string, FluentFunction> functions;
+            IList<CultureInfo> locales = new List<CultureInfo>();
+            locales.Add(option.Culture);
+            foreach (var cultureInfo in option.Cultures)
+            {
+                locales.Add(cultureInfo);
+            }
+
+            if (locales.Count == 0)
+            {
+                throw new Exception("Bundle must have at least one culture");
+            }
             if (option.UseConcurrent)
             {
                 entries = new ConcurrentDictionary<(string, EntryKind), IEntry>();
@@ -78,15 +128,14 @@ namespace Linguini.Bundle
 
             return new FluentBundle
             {
-                Culture = cultureInfo,
-                Locales = locales,
                 _entries = entries,
                 _funcList = functions,
+                _locales = locales,
                 TransformFunc = option.TransformFunc,
                 FormatterFunc = option.FormatterFunc,
                 UseIsolating = option.UseIsolating,
                 MaxPlaceable = option.MaxPlaceable,
-                EnableExtensions = option.EnableExtensions,
+                EnableExperimental = option.EnableExtensions,
             };
         }
 
@@ -96,13 +145,13 @@ namespace Linguini.Bundle
 
         public bool AddResource(string input, out List<FluentError> errors)
         {
-            var res = new LinguiniParser(input, EnableExtensions).Parse();
+            var res = new LinguiniParser(input, EnableExperimental).Parse();
             return AddResource(res, out errors);
         }
         
         public bool AddResource(TextReader reader, out List<FluentError> errors)
         {
-            var res = new LinguiniParser(reader, EnableExtensions).Parse();
+            var res = new LinguiniParser(reader, EnableExperimental).Parse();
             return AddResource(res, out errors);
         }
 
@@ -158,13 +207,13 @@ namespace Linguini.Bundle
 
         public void AddResourceOverriding(string input)
         {
-            var res = new LinguiniParser(input, EnableExtensions).Parse();
+            var res = new LinguiniParser(input, EnableExperimental).Parse();
             InternalResourceOverriding(res);
         }
         
         public void AddResourceOverriding(TextReader input)
         {
-            var res = new LinguiniParser(input, EnableExtensions).Parse();
+            var res = new LinguiniParser(input, EnableExperimental).Parse();
             InternalResourceOverriding(res);
         }
 
@@ -423,11 +472,10 @@ namespace Linguini.Bundle
 
         public FluentBundle DeepClone()
         {
-            return new()
+            return new FluentBundle
             {
-                Culture = (CultureInfo)Culture.Clone(),
                 FormatterFunc = FormatterFunc,
-                Locales = new List<string>(Locales),
+                _locales = new List<CultureInfo>(_locales),
                 _entries = new Dictionary<(string, EntryKind), IEntry>(_entries),
                 _funcList = new Dictionary<string, FluentFunction>(_funcList),
                 TransformFunc = TransformFunc,

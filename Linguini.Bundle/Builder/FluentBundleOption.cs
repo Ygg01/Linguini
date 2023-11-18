@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 
@@ -12,7 +13,11 @@ namespace Linguini.Bundle.Builder
         public bool UseIsolating { get; init; } = true;
         public byte MaxPlaceable { get; init; } = 100;
 
-        public IList<string> Locales { get; init; } = new List<string>();
+        public CultureInfo Culture{ get; init; } = CultureInfo.CurrentCulture;
+        
+        public List<CultureInfo> Cultures{ get; init; } = new();
+
+        public List<string> Locales { get; } = new();
 
         public IDictionary<string, ExternalFunction> Functions { get; init; } =
             new Dictionary<string, ExternalFunction>();
