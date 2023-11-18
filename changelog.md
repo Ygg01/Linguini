@@ -106,3 +106,68 @@ version 0.6.0
 version 0.6.1
 ========
 - Fixes errors when reading an empty line on Windows (reported by @JosefNemec)
+
+version 0.7.0
+========
+- Experimental features when `UseExperimental` flag is true:
+  - Dynamic Reference - ability to reference terms/message using `$$term_ref`.
+    After defining it in file like so:
+      ```fluent
+      # example.ftl
+      cat = {$number ->
+          *[one] Cat
+          [other] Cats
+      }
+      dog = {$number ->
+          *[one] Dog
+          [other] Dogs
+      }
+      attack-log = { $$attacker(number: $atk_num) } attacked {$$defender(number: $def_num)}.
+      ```
+      It can be called like following:
+      ```csharp
+      var args = new Dictionary<string, IFluentType>
+      {
+          ["attacker"] = (FluentReference)"cat",
+          ["defender"] = (FluentReference)"dog",
+      };
+      Assert.True(bundle.TryGetMessage("attack-log", args, out _, out var message));
+      Assert.AreEqual("Cat attacked Dog.", message);
+      ```
+  - Dynamic Reference attributes - You can call an attribute of a dynamic reference. It will be resolved at runtime, so
+    make sure your term/message has the associated attribute.
+    Example:
+    ```fluent
+    # dyn_attr.ftl
+    -creature-elf = elf
+      .StartsWith = vowel
+
+    you-see = You see { $$object.StartsWith ->
+      [vowel] an { $$object }
+      *[consonant] a { $$object }
+    }.
+    ```
+    ```csharp
+    var args = new Dictionary<string, IFluentType>
+    {
+      ["object"] = (FluentReference)"creature-elf",
+    };
+    Assert.True(bundle.TryGetMessage("you-see", args, out _, out var message));
+    Assert.AreEqual("You see an elf.", message);
+    ```
+    
+  - Term passing - experimental feature allows users to override term arguments.
+    ```fluent
+    -ship = Ship
+        .gender =  { $style ->
+            *[traditional] neuter
+            [chicago] feminine
+        }
+    ship-gender = { -ship.gender(style: $style) ->
+        *[masculine] He
+        [feminine] She
+        [neuter] It
+    }
+    ```
+    Usually when style isn't passed, it would to default `-ship.gender()` i.e. `neuter`, which would set `ship-gender` selector to neuter i.e. `It`.
+    In above example if we set style variable to `chicago`, `-ship.gender()` it would evaluate `feminine`, so `ship-gender` would would evaluate to `She`.
