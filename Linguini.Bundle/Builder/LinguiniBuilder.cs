@@ -13,9 +13,9 @@ namespace Linguini.Bundle.Builder
 {
     public static class LinguiniBuilder
     {
-        public static ILocaleStep Builder(bool extension = false)
+        public static ILocaleStep Builder(bool useExperimental = false)
         {
-            return new StepBuilder(extension);
+            return new StepBuilder(useExperimental);
         }
 
         public interface IStep
@@ -73,10 +73,10 @@ namespace Linguini.Bundle.Builder
             private bool _concurrent;
             private readonly bool _enableExperimental;
 
-            internal StepBuilder(bool isExperimental = false)
+            internal StepBuilder(bool useExperimental = false)
             {
                 _culture = System.Globalization.CultureInfo.CurrentCulture;
-                _enableExperimental = isExperimental;
+                _enableExperimental = useExperimental;
             }
 
             public IReadyStep SetUseIsolating(bool isIsolating)

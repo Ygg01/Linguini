@@ -284,7 +284,7 @@ attack-log = { $$attacker } attacked {$$defender}.
         [TestCase(DynRef)]
         public void TestDynamicReference(string input)
         {
-            var (bundle, err) =  LinguiniBuilder.Builder(extension: true).Locale("en-US")
+            var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
                 .AddResource(input)
                 .Build();
             Assert.IsEmpty(err);
@@ -314,7 +314,7 @@ call-attr-no-args = {-ship.gender() ->
         [Parallelizable]
         public void TestMacrosFail()
         {
-            var (bundle, err) =  LinguiniBuilder.Builder(extension: true).Locale("en-US")
+            var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
                 .AddResource(Macros)
                 .Build();
             Assert.IsEmpty(err);
@@ -340,7 +340,7 @@ you-see = You see { $$object.StartsWith ->
         [Parallelizable]
         public void TestDynamicSelectors()
         {
-            var (bundle, err) = LinguiniBuilder.Builder(extension: true)
+            var (bundle, err) = LinguiniBuilder.Builder(useExperimental: true)
                 .Locale("en-US")
                 .AddResource(DynamicSelectors)
                 .Build();

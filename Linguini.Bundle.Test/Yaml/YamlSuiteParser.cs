@@ -230,7 +230,7 @@ namespace Linguini.Bundle.Test.Yaml
 
             List<string> locales = new();
             var isIsolating = false;
-            var useExtensions = false;
+            var useExperimental = false;
             if (yamlBundle is YamlMappingNode map)
             {
                 if (map.TryGetNode("useIsolating", out YamlScalarNode? useIsolatingNode))
@@ -238,9 +238,9 @@ namespace Linguini.Bundle.Test.Yaml
                     isIsolating = useIsolatingNode.AsBool();
                 }
                 
-                if (map.TryGetNode("useExtensions", out YamlScalarNode? useExtensionsNode))
+                if (map.TryGetNode("useExperimental", out YamlScalarNode? useExtensionsNode))
                 {
-                    useExtensions = useExtensionsNode.AsBool();
+                    useExperimental = useExtensionsNode.AsBool();
                 }
 
                 if (map.TryGetNode("locales", out YamlSequenceNode? localesNode))
@@ -252,7 +252,7 @@ namespace Linguini.Bundle.Test.Yaml
                 }
             }
 
-            var bundler = LinguiniBuilder.Builder(useExtensions)
+            var bundler = LinguiniBuilder.Builder(useExperimental)
                 .Locales(locales)
                 .SkipResources()
                 .SetUseIsolating(isIsolating);

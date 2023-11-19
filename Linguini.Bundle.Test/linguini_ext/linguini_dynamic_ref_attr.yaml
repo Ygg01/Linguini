@@ -11,7 +11,7 @@
               *[consonant] a { $$object }
           }.
     bundles:
-      - useExtensions: true
+      - useExperimental: true
     tests:
       - name: regular reference
         asserts:
