@@ -13,7 +13,7 @@
             [neuter] It
           }
     bundles:
-      - useExtensions: true
+      - useExperimental: true
     tests:
       - name: regular reference
         asserts:

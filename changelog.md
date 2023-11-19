@@ -158,6 +158,7 @@ version 0.7.0
     
   - Term passing - experimental feature allows users to override term arguments.
     ```fluent
+    # ship_gender.ftl
     -ship = Ship
         .gender =  { $style ->
             *[traditional] neuter

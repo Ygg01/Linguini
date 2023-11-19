@@ -2,6 +2,6 @@
 
 bundle:
   useIsolating: false
-  useExtensions: true
+  useExperimental: true
   locales:
     - en-US
