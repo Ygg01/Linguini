@@ -24,14 +24,41 @@ namespace Linguini.Bundle
         private IDictionary<(string, EntryKind), IEntry> _entries;
 
         #region Properties
-
+        /// <summary>
+        /// <see cref="CultureInfo"/> of the bundle. Primary bundle locale
+        /// </summary>
         public CultureInfo Culture { get; internal set; }
+        /// <summary>
+        /// List of Locales. First element is primary bundle locale, others are fallback locales.
+        /// </summary>
         public List<string> Locales { get; internal set; }
+        /// <summary>
+        /// When formatting patterns, FluentBundle inserts Unicode Directionality Isolation Marks to indicate that the direction of a placeable may differ from the surrounding message.
+        /// This is important for cases such as when a right-to-left user name is presented in the left-to-right message.
+        /// </summary>
         public bool UseIsolating { get; set; }
+        /// <summary>
+        /// Specifies a method that will be applied only on values extending <see cref="IFluentType"/>. Useful for defining a special formatter for <see cref="FluentNumber"/>.
+        /// </summary>
         public Func<string, string>? TransformFunc { get; set; }
+        /// <summary>
+        /// Specifies a method that will be applied only on values extending <see cref="IFluentType"/>. Useful for defining a special formatter for <see cref="FluentNumber"/>.
+        /// </summary>
         public Func<IFluentType, string>? FormatterFunc { get; init; }
+        /// <summary>
+        /// Limit of placeable <see cref="AstTerm"/> within one <see cref="Pattern"/>, when fully expanded (all nested elements count towards it). Useful for preventing billion laughs attack. Defaults to 100.
+        /// </summary>
         public byte MaxPlaceable { get; private init; }
-        
+        /// <summary>
+        /// Whether experimental features are enabled.
+        ///
+        /// When `true` experimental features are enabled. Experimental features include stuff like:
+        /// <list type="bullet">
+        /// <item>dynamic reference</item>
+        /// <item>dynamic reference attributes</item>
+        /// <item>term reference as parameters</item>
+        /// </list>
+        /// </summary>
         public bool EnableExtensions { get; init; }
 
         #endregion
