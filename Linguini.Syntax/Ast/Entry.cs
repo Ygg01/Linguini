@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
-using Linguini.Syntax.Parser;
 using Linguini.Syntax.Parser.Error;
 
 
@@ -66,25 +64,25 @@ namespace Linguini.Syntax.Ast
     public class AstComment : IEntry
     {
         public CommentLevel CommentLevel;
-        public readonly List<ReadOnlyMemory<char>> _content;
+        public readonly List<ReadOnlyMemory<char>> Content;
 
         public AstComment(CommentLevel commentLevel, List<ReadOnlyMemory<char>> content)
         {
             CommentLevel = commentLevel;
-            _content = content;
+            Content = content;
         }
 
         public string AsStr(string lineEnd = "\n")
         {
             StringBuilder sb = new();
-            for (int i = 0; i < _content.Count; i++)
+            for (int i = 0; i < Content.Count; i++)
             {
                 if (i > 0)
                 {
                     sb.Append(lineEnd);
                 }
 
-                sb.Append(_content[i].Span.ToString());
+                sb.Append(Content[i].Span.ToString());
             }
 
             return sb.ToString();

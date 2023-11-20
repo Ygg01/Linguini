@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -121,12 +120,24 @@ namespace Linguini.Bundle
 
         #region AddMethods
 
+        /// <summary>
+        /// Adds a resources to the bundle. 
+        /// </summary>
+        /// <param name="input">Resource string being added</param>
+        /// <param name="errors">Output list of errors</param>
+        /// <returns>true if resource was added without errors.</returns>
         public bool AddResource(string input, out List<FluentError> errors)
         {
             var res = new LinguiniParser(input, EnableExtensions).Parse();
             return AddResource(res, out errors);
         }
         
+        /// <summary>
+        /// Adds a resources to the bundle. 
+        /// </summary>
+        /// <param name="reader">Text reader being added</param>
+        /// <param name="errors">Output list of errors.</param>
+        /// <returns>true if resource was added without errors.</returns>
         public bool AddResource(TextReader reader, out List<FluentError> errors)
         {
             var res = new LinguiniParser(reader, EnableExtensions).Parse();
@@ -183,12 +194,22 @@ namespace Linguini.Bundle
             _entries[id] = term;
         }
 
+        /// <summary>
+        /// Adds a resources to the bundle, overriding any previously added values.
+        /// </summary>
+        /// <param name="input">Text reader being added</param>
+        /// <returns>true if resource was added without errors.</returns>
         public void AddResourceOverriding(string input)
         {
             var res = new LinguiniParser(input, EnableExtensions).Parse();
             InternalResourceOverriding(res);
         }
         
+        /// <summary>
+        /// Adds a resources to the bundle, overriding any previously added values.
+        /// </summary>
+        /// <param name="input">Text reader being added</param>
+        /// <returns>true if resource was added without errors.</returns>
         public void AddResourceOverriding(TextReader input)
         {
             var res = new LinguiniParser(input, EnableExtensions).Parse();
@@ -218,9 +239,9 @@ namespace Linguini.Bundle
             return TryInsert(funcName, fluentFunction, InsertBehavior.OverwriteExisting);
         }
         
-        public bool AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction)
+        public void AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction)
         {
-            return TryInsert(funcName, fluentFunction);
+            TryInsert(funcName, fluentFunction);
         }
 
         public void AddFunctions(IDictionary<string, ExternalFunction> functions, out List<FluentError> errors)

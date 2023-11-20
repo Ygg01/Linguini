@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -53,7 +51,7 @@ namespace Linguini.Syntax.Parser
         #region FastParse
 
         /// <summary>
-        /// Convert the previously set input to Fluent AST. 
+        /// Convert the previously set input to Fluent AST. Comments will be skipped.
         /// </summary>
         /// <returns>Fluent AST resource.</returns>
         public Resource Parse()
@@ -121,7 +119,7 @@ namespace Linguini.Syntax.Parser
 
 
         /// <summary>
-        /// Convert the previously set input to Fluent AST, ignoring comments.
+        /// Convert the previously set input to Fluent AST, with comments.
         /// </summary>
         /// <returns>Fluent AST resource.</returns>
         public Resource ParseWithComments()
