@@ -205,11 +205,11 @@ namespace Linguini.Syntax.Tests.Parser
                                        "\n" +
                                        "  Line2.\n";
 
-        private const string expected = "Line1\n\n\nLine2.";
+        private const string Expected = "Line1\n\n\nLine2.";
         
         [Test]
         [TestCase(CrlfEscape)]
-        // [TestCase(CrEscape)]
+        [TestCase(CrEscape)]
         public void TestNewlinePreservation(string input)
         {
             var parse = new LinguiniParser(input).Parse();
@@ -218,7 +218,7 @@ namespace Linguini.Syntax.Tests.Parser
             var msg = parse.Entries[0]; 
             Assert.IsInstanceOf(typeof(AstMessage), msg);
             var astMsg = (AstMessage)msg;
-            Assert.AreEqual(expected,  astMsg.Debug());
+            Assert.AreEqual(Expected,  astMsg.Debug());
         }
     }
 }
