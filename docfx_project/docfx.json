@@ -4,17 +4,15 @@
       "src": [
         {
           "files": [
-            "Linguini.Bundle/bin/Release/net5.0/Linguini.Bundle.dll",
-            "Linguini.Bundle/bin/Release/net5.0/Linguini.Shared.dll",
-            "Linguini.Bundle/bin/Release/net5.0/Linguini.Syntax.dll",
-            "Linguini.Serialization/bin/Debug/net5.0/Linguini.Serialization.dll"
+            "Linguini.Bundle/Linguini.Bundle.csproj",
+            "Linguini.Shared/Linguini.Shared.csproj",
+            "Linguini.Syntax/Linguini.Syntax.csproj",
+            "Linguini.Serialization/Linguini.Serialization.csproj"
           ],
           "src": "../"
         }
       ],
-      "dest": "api",
-      "disableGitFeatures": false,
-      "disableDefaultFilter": false
+      "dest": "api"
     }
   ],
   "build": {
