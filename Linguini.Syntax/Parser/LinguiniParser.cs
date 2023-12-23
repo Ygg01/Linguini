@@ -1,5 +1,4 @@
-﻿#nullable enable
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -21,7 +20,7 @@ namespace Linguini.Syntax.Parser
     {
         private readonly ZeroCopyReader _reader;
         private readonly bool _enableExperimental;
-        private const string CR = "\n";
+        private const string Cr = "\n";
 
         /// <summary>
         /// Set input to <c>string</c>
@@ -609,11 +608,11 @@ namespace Linguini.Syntax.Parser
                             ReadOnlyMemory<char> value;
                             if (textLiteral.MissingEol && textLiteral.Start == textLiteral.End)
                             {
-                                value = CR.AsMemory();
+                                value = Cr.AsMemory();
                             }
                             else if (textLiteral.MissingEol && textLiteral.Start != textLiteral.End)
                             {
-                                var str = _reader.ReadSlice(start, end) + CR;
+                                var str = _reader.ReadSlice(start, end) + Cr;
                                 value = str.AsMemory();
                             }
                             else
@@ -623,10 +622,10 @@ namespace Linguini.Syntax.Parser
 
                             if (lastNonBlank == i)
                             {
-#if NET5_0_OR_GREATER
-                                value = value.TrimEnd();
-#else
+#if NETSTANDARD2_1
                                 value = value.TrimEndPolyFill();
+#else
+                                value = value.TrimEnd();
 #endif
                             }
 
@@ -772,7 +771,7 @@ namespace Linguini.Syntax.Parser
 
         private bool TryGetAttribute([NotNullWhen(true)] out Attribute? attr)
         {
-            if (!TryGetIdentifier(out var id, out var err))
+            if (!TryGetIdentifier(out var id, out _))
             {
                 attr = default!;
                 return false;
@@ -780,13 +779,13 @@ namespace Linguini.Syntax.Parser
 
             _reader.SkipBlankInline();
 
-            if (!TryExpectChar('=', out err))
+            if (!TryExpectChar('=', out _))
             {
                 attr = default!;
                 return false;
             }
 
-            if (TryGetPattern(out var pattern, out err) && pattern != null)
+            if (TryGetPattern(out var pattern, out _) && pattern != null)
             {
                 attr = new Attribute(id, pattern);
                 return true;
