@@ -277,8 +277,8 @@ namespace Linguini.Bundle
         public bool HasMessage(string identifier)
         {
             var id = (identifier, EntryKind.Message);
-            return _entries.ContainsKey(id)
-                   && _entries[id] is AstMessage;
+            return _entries.TryGetValue(id, out var message)
+                   && message is AstMessage;
         }
 
         public bool HasAttrMessage(string idWithAttr)
@@ -375,10 +375,8 @@ namespace Linguini.Bundle
         public bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message)
         {
             var id = (ident, EntryKind.Message);
-            if (_entries.ContainsKey(id)
-                && _entries.TryGetValue(id, out var value)
-                && value.ToKind() == EntryKind.Message
-                && _entries[id] is AstMessage astMessage)
+            if (_entries.TryGetValue(id, out var value)
+                && value is AstMessage astMessage)
             {
                 message = astMessage;
                 return true;
@@ -391,10 +389,8 @@ namespace Linguini.Bundle
         public bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? term)
         {
             var termId = (ident, EntryKind.Term);
-            if (_entries.ContainsKey(termId)
-                && _entries.TryGetValue(termId, out var value)
-                && value.ToKind() == EntryKind.Term
-                && _entries[termId] is AstTerm astTerm)
+            if (_entries.TryGetValue(termId, out var value)
+                && value is AstTerm astTerm)
             {
                 term = astTerm;
                 return true;
@@ -411,13 +407,7 @@ namespace Linguini.Bundle
 
         public bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
         {
-            if (_funcList.ContainsKey(funcName))
-            {
-                return _funcList.TryGetValue(funcName, out function);
-            }
-
-            function = null;
-            return false;
+            return _funcList.TryGetValue(funcName, out function);
         }
 
         #endregion
