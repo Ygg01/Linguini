@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -211,18 +212,32 @@ namespace Linguini.Bundle
 
         private void AddTerm(List<FluentError> errors, AstTerm term)
         {
-            if (_terms.TryAdd(term.GetId(), term))
-                return;
-
-            errors.Add(new OverrideFluentError(term.GetId(), EntryKind.Term));
+            var termId = term.GetId();
+            // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd
+            // Using TryAdd here leads to undocumented exceptions
+            if (_terms.ContainsKey(termId))
+            {
+                errors.Add(new OverrideFluentError(termId, EntryKind.Term));
+            }
+            else
+            {
+                _terms[termId] = term;
+            }
         }
 
         private void AddMessage(List<FluentError> errors, AstMessage msg)
         {
-            if (_messages.TryAdd(msg.GetId(), msg))
-                return;
-
-            errors.Add(new OverrideFluentError(msg.GetId(), EntryKind.Message));
+            var msgId = msg.GetId();
+            // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd
+            // Using TryAdd here leads to undocumented exceptions
+            if (_messages.ContainsKey(msgId))
+            {
+                errors.Add(new OverrideFluentError(msg.GetId(), EntryKind.Message));
+            }
+            else
+            {
+                _messages[msgId] = msg;
+            }
         }
 
         public bool TryAddFunction(string funcName, ExternalFunction fluentFunction)
