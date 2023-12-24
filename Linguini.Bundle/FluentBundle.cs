@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -258,10 +257,6 @@ namespace Linguini.Bundle
         {
             switch (behavior)
             {
-#if NET5_0_OR_GREATER
-                case InsertBehavior.None:
-                    return _funcList.TryAdd(funcName, fluentFunction);
-#else
                 case InsertBehavior.None:
                     if (!_funcList.ContainsKey(funcName))
                     {
@@ -270,7 +265,6 @@ namespace Linguini.Bundle
                     }
 
                     return false;
-#endif
                 case InsertBehavior.OverwriteExisting:
                     _funcList[funcName] = fluentFunction;
                     break;
