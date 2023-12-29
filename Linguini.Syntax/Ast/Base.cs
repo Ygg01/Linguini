@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable UnusedMember.Global
+// ReSharper disable ForCanBeConvertedToForeach
 
 namespace Linguini.Syntax.Ast
 {
 
     public class Attribute
     {
-        public Identifier Id;
-        public Pattern Value;
+        public readonly Identifier Id;
+        public readonly Pattern Value;
 
         public Attribute(Identifier id, Pattern value)
         {
@@ -22,11 +24,16 @@ namespace Linguini.Syntax.Ast
             id = Id;
             value = Value;
         }
+        
+        public static Attribute From(string id, PatternBuilder patternBuilder)
+        {
+            return new Attribute(Identifier.From(id), patternBuilder.Build());
+        }
     }
 
     public class Pattern
     {
-        public List<IPatternElement> Elements;
+        public readonly List<IPatternElement> Elements;
 
         public Pattern(List<IPatternElement> elements)
         {
@@ -39,6 +46,30 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+    public class PatternBuilder
+    {
+        private readonly List<IPatternElement> _patternElements = new();
+
+        private PatternBuilder() { }
+
+        public PatternBuilder AddText(string textLiteral)
+        {
+            _patternElements.Add(new TextLiteral(textLiteral.AsMemory()));
+            return this;
+        }
+        
+        public PatternBuilder AddPlaceable(IExpression expr)
+        {
+            _patternElements.Add(new Placeable(expr));
+            return this;
+        }
+
+        public Pattern Build()
+        {
+            return new Pattern(_patternElements);
+        }
+    }
+
 
     public class Identifier : IEquatable<Identifier>
     {
@@ -47,6 +78,11 @@ namespace Linguini.Syntax.Ast
         public Identifier(ReadOnlyMemory<char> name)
         {
             Name = name;
+        }
+
+        public static Identifier From(string id)
+        {
+            return new Identifier(id.AsMemory());
         }
 
         public override string ToString()
@@ -94,12 +130,10 @@ namespace Linguini.Syntax.Ast
         public static string Stringify(this Pattern? pattern)
         {
             var sb = new StringBuilder();
-            if (pattern != null && pattern.Elements.Count > 0)
+            if (pattern == null || pattern.Elements.Count <= 0) return sb.ToString();
+            for (var i = 0; i < pattern.Elements.Count; i++)
             {
-                for (var i = 0; i < pattern.Elements.Count; i++)
-                {
-                    sb.Append(pattern.Elements[i]);
-                }
+                sb.Append(pattern.Elements[i]);
             }
 
             return sb.ToString();

@@ -142,12 +142,12 @@ namespace Linguini.Syntax.Parser
                     if (entry is AstMessage message
                         && lastBlankCount < 2)
                     {
-                        message.Comment = lastComment;
+                        message.InternalComment = lastComment;
                     }
                     else if (entry is AstTerm term
                              && lastBlankCount < 2)
                     {
-                        term.Comment = lastComment;
+                        term.InternalComment = lastComment;
                     }
                     else
                     {

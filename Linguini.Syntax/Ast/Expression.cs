@@ -46,7 +46,7 @@ namespace Linguini.Syntax.Ast
 
     public class FunctionReference : IInlineExpression
     {
-        public Identifier Id;
+        public readonly Identifier Id;
         public CallArguments Arguments;
 
         public FunctionReference(Identifier id, CallArguments arguments)
@@ -58,8 +58,8 @@ namespace Linguini.Syntax.Ast
 
     public class MessageReference : IInlineExpression
     {
-        public Identifier Id;
-        public Identifier? Attribute;
+        public readonly Identifier Id;
+        public readonly Identifier? Attribute;
 
         public MessageReference(Identifier id, Identifier? attribute)
         {
@@ -70,8 +70,8 @@ namespace Linguini.Syntax.Ast
 
     public class DynamicReference : IInlineExpression
     {
-        public Identifier Id;
-        public Identifier? Attribute;
+        public readonly Identifier Id;
+        public readonly Identifier? Attribute;
         public CallArguments? Arguments;
 
         public DynamicReference(Identifier id, Identifier? attribute, CallArguments? arguments)
@@ -84,8 +84,8 @@ namespace Linguini.Syntax.Ast
     
     public class TermReference : IInlineExpression
     {
-        public Identifier Id;
-        public Identifier? Attribute;
+        public readonly Identifier Id;
+        public readonly Identifier? Attribute;
         public CallArguments? Arguments;
 
         public TermReference(Identifier id, Identifier? attribute, CallArguments? arguments)
@@ -98,7 +98,7 @@ namespace Linguini.Syntax.Ast
     
     public class VariableReference : IInlineExpression
     {
-        public Identifier Id;
+        public readonly Identifier Id;
 
         public VariableReference(Identifier id)
         {
@@ -108,7 +108,7 @@ namespace Linguini.Syntax.Ast
     
     public class Placeable : IInlineExpression, IPatternElementPlaceholder, IPatternElement
     {
-        public IExpression Expression;
+        public readonly IExpression Expression;
 
         public Placeable(IExpression expression)
         {
@@ -127,8 +127,8 @@ namespace Linguini.Syntax.Ast
     
     public struct CallArguments
     {
-        public List<IInlineExpression> PositionalArgs;
-        public List<NamedArgument> NamedArgs;
+        public readonly List<IInlineExpression> PositionalArgs;
+        public readonly List<NamedArgument> NamedArgs;
 
         public CallArguments(List<IInlineExpression> positionalArgs, List<NamedArgument> namedArgs)
         {
@@ -139,8 +139,8 @@ namespace Linguini.Syntax.Ast
     
     public struct NamedArgument
     {
-        public Identifier Name;
-        public IInlineExpression Value;
+        public readonly Identifier Name;
+        public readonly IInlineExpression Value;
 
         public NamedArgument(Identifier name, IInlineExpression value)
         {
@@ -151,8 +151,8 @@ namespace Linguini.Syntax.Ast
     
     public class SelectExpression : IExpression
     {
-        public IInlineExpression Selector;
-        public List<Variant> Variants;
+        public readonly IInlineExpression Selector;
+        public readonly List<Variant> Variants;
 
         public SelectExpression(IInlineExpression selector, List<Variant> variants)
         {
