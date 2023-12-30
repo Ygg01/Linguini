@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+// ReSharper disable UnusedMember.Global
 
 namespace Linguini.Syntax.Ast
 {
     public class TextLiteral : IInlineExpression, IPatternElement
     {
-        public ReadOnlyMemory<char> Value;
+        public readonly ReadOnlyMemory<char> Value;
 
         public TextLiteral(ReadOnlyMemory<char> value)
         {
@@ -22,6 +24,11 @@ namespace Linguini.Syntax.Ast
             return false;
         }
 
+        public TextLiteral(string id)
+        {
+            Value = id.AsMemory();
+        }
+
         public override string ToString()
         {
             return Value.Span.ToString();
@@ -30,12 +37,23 @@ namespace Linguini.Syntax.Ast
 
     public class NumberLiteral : IInlineExpression
     {
-        public ReadOnlyMemory<char> Value;
+        public readonly ReadOnlyMemory<char> Value;
 
         public NumberLiteral(ReadOnlyMemory<char> value)
         {
             Value = value;
         }
+        
+        public NumberLiteral(float num)
+        {
+            Value = num.ToString(CultureInfo.InvariantCulture).AsMemory();
+        }
+
+        public NumberLiteral(double num)
+        {
+            Value = num.ToString(CultureInfo.InvariantCulture).AsMemory();
+        }
+
 
         public override string ToString()
         {
@@ -47,11 +65,17 @@ namespace Linguini.Syntax.Ast
     public class FunctionReference : IInlineExpression
     {
         public readonly Identifier Id;
-        public CallArguments Arguments;
+        public readonly CallArguments Arguments;
 
         public FunctionReference(Identifier id, CallArguments arguments)
         {
             Id = id;
+            Arguments = arguments;
+        }
+
+        public FunctionReference(string id, CallArguments arguments)
+        {
+            Id = new Identifier(id);
             Arguments = arguments;
         }
     }
@@ -66,13 +90,22 @@ namespace Linguini.Syntax.Ast
             Id = id;
             Attribute = attribute;
         }
+        
+        public MessageReference(string id, string? attribute = null)
+        {
+            Id = new Identifier(id);
+            if (attribute != null)
+            {
+                Attribute = new Identifier(attribute);
+            }
+        }
     }
 
     public class DynamicReference : IInlineExpression
     {
         public readonly Identifier Id;
         public readonly Identifier? Attribute;
-        public CallArguments? Arguments;
+        public readonly CallArguments? Arguments;
 
         public DynamicReference(Identifier id, Identifier? attribute, CallArguments? arguments)
         {
@@ -80,19 +113,47 @@ namespace Linguini.Syntax.Ast
             Attribute = attribute;
             Arguments = arguments;
         }
+        
+        public DynamicReference(string id, string? attribute = null, CallArguments? arguments = null)
+        {
+            Id = new Identifier(id);
+            if (attribute != null)
+            {
+                Attribute = new Identifier(attribute);
+            }
+
+            if (arguments != null)
+            {
+                Arguments = arguments.Value;
+            }
+        }
     }
-    
+
     public class TermReference : IInlineExpression
     {
         public readonly Identifier Id;
         public readonly Identifier? Attribute;
-        public CallArguments? Arguments;
+        public readonly CallArguments? Arguments;
 
         public TermReference(Identifier id, Identifier? attribute, CallArguments? arguments)
         {
             Id = id;
             Attribute = attribute;
             Arguments = arguments;
+        }
+        
+        public TermReference(string id, string? attribute = null, CallArguments? arguments = null)
+        {
+            Id = new Identifier(id);
+            if (attribute != null)
+            {
+                Attribute = new Identifier(attribute);
+            }
+
+            if (arguments != null)
+            {
+                Arguments = arguments.Value;
+            }
         }
     }
     
@@ -105,7 +166,7 @@ namespace Linguini.Syntax.Ast
             Id = id;
         }
     }
-    
+
     public class Placeable : IInlineExpression, IPatternElementPlaceholder, IPatternElement
     {
         public readonly IExpression Expression;
@@ -136,7 +197,7 @@ namespace Linguini.Syntax.Ast
             NamedArgs = namedArgs;
         }
     }
-    
+
     public struct NamedArgument
     {
         public readonly Identifier Name;
@@ -148,7 +209,7 @@ namespace Linguini.Syntax.Ast
             Value = value;
         }
     }
-    
+
     public class SelectExpression : IExpression
     {
         public readonly IInlineExpression Selector;
@@ -161,6 +222,50 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+    public class SelectExpressionBuilder : IAddVariant
+    {
+        private readonly IInlineExpression _selector;
+        private List<Variant> _variants = new();
+
+        public SelectExpressionBuilder(IInlineExpression selector)
+        {
+            _selector = selector;
+        }
+
+        public IAddVariant AddVariant(string selector, PatternBuilder patternBuilder)
+        {
+            _variants.Add(new Variant(selector, patternBuilder));
+            return this;
+        }
+
+        public IAddVariant AddVariant(float selector, PatternBuilder patternBuilder)
+        {
+            _variants.Add(new Variant(selector, patternBuilder));
+            return this;
+        }
+
+        public SelectExpressionBuilder SetDefault(int? defaultSelector = null)
+        {
+            var selector = defaultSelector is >= 0 && defaultSelector < _variants.Count
+                ? _variants.Count - 1
+                : defaultSelector!.Value;
+            _variants[selector].IsDefault = true;
+            return this;
+        }
+
+        public SelectExpression Build()
+        {
+            return new SelectExpression(_selector, _variants);
+        }
+    }
+
+    public interface IAddVariant
+    {
+        public IAddVariant AddVariant(string selector, PatternBuilder patternBuilder);
+        public IAddVariant AddVariant(float selector, PatternBuilder patternBuilder);
+        public SelectExpressionBuilder SetDefault(int? defaultSelector = null);
+    }
+
     public enum VariantType : byte
     {
         Identifier,
@@ -170,7 +275,7 @@ namespace Linguini.Syntax.Ast
 
     public class Variant
     {
-        public VariantType Type;
+        public readonly VariantType Type;
         public ReadOnlyMemory<char> Key;
         public Pattern Value;
         public bool IsDefault;
@@ -180,6 +285,22 @@ namespace Linguini.Syntax.Ast
             Type = type;
             Key = key;
             Value = new Pattern();
+            IsDefault = false;
+        }
+        
+        public Variant(string key, PatternBuilder builder)
+        {
+            Type = VariantType.Identifier;
+            Key = key.AsMemory();
+            Value = builder.Build();
+            IsDefault = false;
+        }
+        
+        public Variant(float key, PatternBuilder builder)
+        {
+            Type = VariantType.NumberLiteral;
+            Key = key.ToString(CultureInfo.InvariantCulture).AsMemory();
+            Value = builder.Build();
             IsDefault = false;
         }
     }

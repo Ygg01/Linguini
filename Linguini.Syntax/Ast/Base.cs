@@ -27,7 +27,7 @@ namespace Linguini.Syntax.Ast
         
         public static Attribute From(string id, PatternBuilder patternBuilder)
         {
-            return new Attribute(Identifier.From(id), patternBuilder.Build());
+            return new Attribute(new Identifier(id), patternBuilder.Build());
         }
     }
 
@@ -50,17 +50,57 @@ namespace Linguini.Syntax.Ast
     {
         private readonly List<IPatternElement> _patternElements = new();
 
-        private PatternBuilder() { }
-
         public PatternBuilder AddText(string textLiteral)
         {
-            _patternElements.Add(new TextLiteral(textLiteral.AsMemory()));
+            _patternElements.Add(new TextLiteral(textLiteral));
             return this;
         }
         
-        public PatternBuilder AddPlaceable(IExpression expr)
+        public PatternBuilder AddNumberLiteral(float number)
         {
-            _patternElements.Add(new Placeable(expr));
+            _patternElements.Add(new Placeable(new NumberLiteral(number)));
+            return this;
+        }
+        
+        public PatternBuilder AddNumberLiteral(double number)
+        {
+            _patternElements.Add(new Placeable(new NumberLiteral(number)));
+            return this;
+        }
+        
+        public PatternBuilder AddMessage(string id, string? attribute = null)
+        {
+            _patternElements.Add(new Placeable(new MessageReference(id, attribute)));
+            return this;
+        }
+        
+        public PatternBuilder AddTermReference(string id, string? attribute = null, CallArguments? callArguments = null)
+        {
+            _patternElements.Add(new Placeable(new TermReference(id, attribute, callArguments)));
+            return this;
+        }
+        
+        public PatternBuilder AddDynamicReference(string id, string? attribute = null, CallArguments? callArguments = null)
+        {
+            _patternElements.Add(new Placeable(new DynamicReference(id, attribute, callArguments)));
+            return this;
+        }
+
+        public PatternBuilder AddFunctionReference(string functionName, CallArguments funcArgs = default)
+        {
+            _patternElements.Add(new Placeable(new FunctionReference(functionName, funcArgs)));
+            return this;
+        }
+        
+        public PatternBuilder AddMessageReference(string messageId, string? attribute = null)
+        {
+            _patternElements.Add(new Placeable(new MessageReference(messageId, attribute)));
+            return this;
+        }
+
+        public PatternBuilder AddSelectExpression(SelectExpressionBuilder selectExpressionBuilder)
+        {
+            _patternElements.Add(new Placeable(selectExpressionBuilder.Build()));
             return this;
         }
 
@@ -80,9 +120,9 @@ namespace Linguini.Syntax.Ast
             Name = name;
         }
 
-        public static Identifier From(string id)
+        public Identifier(string id)
         {
-            return new Identifier(id.AsMemory());
+            Name = id.AsMemory();
         }
 
         public override string ToString()
