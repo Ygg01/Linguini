@@ -32,8 +32,8 @@ namespace Linguini.Syntax.Tests.Parser
             Assert.That(parsed.Entries.Count, Is.EqualTo(1));
             if (parsed.Entries[0] is AstComment comment)
             {
-                Assert.AreEqual(expectedCommentLevel, comment.CommentLevel);
-                Assert.AreEqual(expectedContent, comment.AsStr());
+                Assert.That(expectedCommentLevel, Is.EqualTo(comment.CommentLevel));
+                Assert.That(expectedContent, Is.EqualTo(comment.AsStr()));
             }
             else
             {
@@ -54,10 +54,10 @@ namespace Linguini.Syntax.Tests.Parser
         {
             Resource parsed = new LinguiniParser(input).ParseWithComments();
             Assert.That(parsed.Errors.Count, Is.EqualTo(1));
-            Assert.AreEqual(expErrType, parsed.Errors[0].Kind);
-            Assert.AreEqual(expMsg, parsed.Errors[0].Message);
-            Assert.AreEqual(new Range(start, end), parsed.Errors[0].Position);
-            Assert.AreEqual(new Range(sliceStart, sliceEnd), parsed.Errors[0].Slice);
+            Assert.That(expErrType, Is.EqualTo(parsed.Errors[0].Kind));
+            Assert.That(expMsg, Is.EqualTo(parsed.Errors[0].Message));
+            Assert.That(new Range(start, end), Is.EqualTo(parsed.Errors[0].Position));
+            Assert.That(new Range(sliceStart, sliceEnd), Is.EqualTo(parsed.Errors[0].Slice));
         }
 
         #endregion
@@ -78,12 +78,12 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestMessageParse(string input, string expName, string expValue)
         {
             Resource parsed = new LinguiniParser(input).ParseWithComments();
-            Assert.AreEqual(0, parsed.Errors.Count, "Failed, with errors");
-            Assert.AreEqual(1, parsed.Entries.Count);
+            Assert.That(0, Is.EqualTo(parsed.Errors.Count), "Failed, with errors");
+            Assert.That(1, Is.EqualTo(parsed.Entries.Count));
             if (parsed.Entries[0] is AstMessage { Value: { } } message)
             {
-                Assert.AreEqual(expName, message.Id.ToString());
-                Assert.AreEqual(expValue, message.Value.Stringify());
+                Assert.That(expName, Is.EqualTo(message.Id.ToString()));
+                Assert.That(expValue, Is.EqualTo(message.Value.Stringify()));
             }
             else
             {
@@ -101,14 +101,14 @@ namespace Linguini.Syntax.Tests.Parser
         {
             var expBodySize = inMessage ? 1 : 2;
             Resource parsed = new LinguiniParser(input).ParseWithComments();
-            Assert.AreEqual(0, parsed.Errors.Count);
-            Assert.AreEqual(expBodySize, parsed.Entries.Count);
+            Assert.That(parsed.Errors.Count, Is.EqualTo(0));
+            Assert.That(parsed.Entries.Count, Is.EqualTo(expBodySize));
             if (inMessage)
             {
                 if (parsed.Entries[0] is AstMessage msg)
                 {
-                    Assert.AreEqual(expMsg, new string(msg.Id.Name.ToArray()));
-                    Assert.AreEqual(expComment, msg.Comment.AsStr());
+                    Assert.That(expMsg, Is.EqualTo(new string(msg.Id.Name.ToArray())));
+                    Assert.That(expComment, Is.EqualTo(msg.Comment.AsStr()));
                 }
                 else
                 {
@@ -120,8 +120,8 @@ namespace Linguini.Syntax.Tests.Parser
                 if (parsed.Entries[0] is AstComment comment
                     && parsed.Entries[1] is AstMessage message)
                 {
-                    Assert.AreEqual(expComment, comment.AsStr());
-                    Assert.AreEqual(expMsg, new string(message.Id.Name.ToArray()));
+                    Assert.That(expComment, Is.EqualTo(comment.AsStr()));
+                    Assert.That(expMsg, Is.EqualTo(new string(message.Id.Name.ToArray())));
                 }
                 else
                 {
@@ -139,14 +139,14 @@ namespace Linguini.Syntax.Tests.Parser
         {
             var expBodySize = inTerm ? 1 : 2;
             Resource parsed = new LinguiniParser(input).ParseWithComments();
-            Assert.AreEqual(0, parsed.Errors.Count);
-            Assert.AreEqual(expBodySize, parsed.Entries.Count);
+            Assert.That(0, Is.EqualTo(parsed.Errors.Count));
+            Assert.That(expBodySize, Is.EqualTo(parsed.Entries.Count));
             if (inTerm)
             {
                 if (parsed.Entries[0] is AstTerm term)
                 {
-                    Assert.AreEqual(expTerm, new string(term.Id.Name.ToArray()));
-                    Assert.AreEqual(expComment, term.Comment.AsStr());
+                    Assert.That(expTerm, Is.EqualTo(new string(term.Id.Name.ToArray())));
+                    Assert.That(expComment, Is.EqualTo(term.Comment.AsStr()));
                 }
                 else
                 {
@@ -158,8 +158,8 @@ namespace Linguini.Syntax.Tests.Parser
                 if (parsed.Entries[0] is AstComment comment
                     && parsed.Entries[1] is AstTerm term)
                 {
-                    Assert.AreEqual(expComment, comment.AsStr());
-                    Assert.AreEqual(expTerm, new string(term.Id.Name.ToArray()));
+                    Assert.That(expComment, Is.EqualTo(comment.AsStr()));
+                    Assert.That(expTerm, Is.EqualTo(new string(term.Id.Name.ToArray())));
                 }
                 else
                 {
@@ -175,50 +175,50 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestNumExpressions(string input, string identifier, string value)
         {
             var res = new LinguiniParser(input).Parse();
+
+            Assert.That(0, Is.EqualTo(res.Errors.Count));
+            Assert.That(1, Is.EqualTo(res.Entries.Count));
+            Assert.That(res.Entries[0], Is.InstanceOf<AstMessage>());
             
-            Assert.AreEqual(0, res.Errors.Count);
-            Assert.AreEqual(1, res.Entries.Count);
-            Assert.IsInstanceOf(typeof(AstMessage), res.Entries[0]);
-            if (res.Entries[0] is AstMessage message
-                && message.Value.Elements[0] is Placeable placeable
-                && placeable.Expression is NumberLiteral numberLiteral)
-            {
-                Assert.AreEqual(1, message.Value.Elements.Count);
-                Assert.IsInstanceOf(typeof(Placeable), message.Value.Elements[0]);
-                Assert.NotNull(placeable);
-                Assert.IsInstanceOf(typeof(NumberLiteral), placeable.Expression);
-                Assert.NotNull(numberLiteral);
-                Assert.AreEqual(identifier, message.Id.ToString());
-                Assert.AreEqual(value, numberLiteral.ToString());
-            }
+            if (res.Entries[0] is not AstMessage message
+                || message.Value.Elements[0] is not Placeable placeable
+                || placeable.Expression is not NumberLiteral numberLiteral) return;
+            
+            Assert.That(1, Is.EqualTo(message.Value.Elements.Count));
+            Assert.That(message.Value.Elements[0], Is.InstanceOf<Placeable>());
+            Assert.That(placeable, Is.Not.Null);
+            Assert.That(placeable.Expression, Is.InstanceOf<NumberLiteral>());
+            Assert.That(numberLiteral, Is.Not.Null);
+            Assert.That(identifier, Is.EqualTo(message.Id.ToString()));
+            Assert.That(value, Is.EqualTo(numberLiteral.ToString()));
         }
 
         private const string CrlfEscape = "message = \r\n" +
-                              "  Line1\r\n" +
-                              "  \r\n" +
-                              "  \r\n" +
-                              "  Line2.\r\n";
-        
-        private const string CrEscape = "message = \n" +
-                                       "  Line1\n" +
-                                       "\n" +
-                                       "\n" +
-                                       "  Line2.\n";
+                                          "  Line1\r\n" +
+                                          "  \r\n" +
+                                          "  \r\n" +
+                                          "  Line2.\r\n";
 
-        private const string expected = "Line1\n\n\nLine2.";
-        
+        private const string CrEscape = "message = \n" +
+                                        "  Line1\n" +
+                                        "\n" +
+                                        "\n" +
+                                        "  Line2.\n";
+
+        private const string Expected = "Line1\n\n\nLine2.";
+
         [Test]
         [TestCase(CrlfEscape)]
         // [TestCase(CrEscape)]
         public void TestNewlinePreservation(string input)
         {
             var parse = new LinguiniParser(input).Parse();
-            
-            Assert.AreEqual(0, parse.Errors.Count);
-            var msg = parse.Entries[0]; 
-            Assert.IsInstanceOf(typeof(AstMessage), msg);
+
+            Assert.That(0, Is.EqualTo(parse.Errors.Count));
+            var msg = parse.Entries[0];
+            Assert.That(msg, Is.InstanceOf<AstMessage>());
             var astMsg = (AstMessage)msg;
-            Assert.AreEqual(expected,  astMsg.Debug());
+            Assert.That(Expected, Is.EqualTo(astMsg.Debug()));
         }
     }
 }

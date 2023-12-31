@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Linguini.Syntax.Ast
 {
@@ -28,8 +29,8 @@ namespace Linguini.Syntax.Ast
     {
     }
 
-    public interface IPatternElement
-    {
+    public interface IPatternElement: IEquatable<IPatternElement>
+    {  
     }
 
     public class TextElementPlaceholder : IPatternElementPlaceholder

@@ -3,14 +3,14 @@
     <PropertyGroup>
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
-        <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
         <OutputType>Library</OutputType>
         <PackageVersion>0.7.0</PackageVersion>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="NUnit" Version="3.12.0" />
-        <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />
+        <PackageReference Include="NUnit" Version="4.0.1" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
         <PackageReference Include="YamlDotNet" Version="11.0.1" />
     </ItemGroup>
@@ -23,11 +23,5 @@
     <ItemGroup>
         <AdditionalFiles Include="..\PluralRules.Generator\cldr_data\ordinals.xml" />
         <AdditionalFiles Include="..\PluralRules.Generator\cldr_data\plurals.xml" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-        <PackageReference Include="IndexRange" Version="1.0.2" PrivateAssets="all" />
-        <PackageReference Include="Nullable" Version="1.3.0" PrivateAssets="all" />
-        <PackageReference Include="System.Memory" Version="4.5.4" PrivateAssets="all" />
     </ItemGroup>
 </Project>

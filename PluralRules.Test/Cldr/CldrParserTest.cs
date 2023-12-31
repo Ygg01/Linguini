@@ -29,23 +29,23 @@ namespace PluralRules.Test
             string[] expRangeList)
         {
             var rule = new CldrParser(input).ParseRule();
-            Assert.IsNotNull(rule);
+            Assert.That(rule, Is.Not.Null);
             var relation = rule.Condition.Conditions[0].Relations[0];
-            Assert.AreEqual(expOperand, relation.Expr.Operand);
+            Assert.That(expOperand, Is.EqualTo(relation.Expr.Operand));
 
             if (modulus != null)
             {
-                Assert.AreEqual(new DecimalValue(modulus), relation.Expr.Modulus);
+                Assert.That(new DecimalValue(modulus), Is.EqualTo(relation.Expr.Modulus));
             }
             else
             {
-                Assert.IsNull(relation.Expr.Modulus);
+                Assert.That(relation.Expr.Modulus, Is.Null);
             }
 
-            Assert.AreEqual(expOp, relation.Op);
+            Assert.That(expOp, Is.EqualTo(relation.Op));
             for (var i = 0; i < expRangeList.Length; i++)
             {
-                Assert.AreEqual(expRangeList[i], relation.RangeListItems[i].ToString());
+                Assert.That(expRangeList[i], Is.EqualTo(relation.RangeListItems[i].ToString()));
             }
         }
 
@@ -53,9 +53,9 @@ namespace PluralRules.Test
         public void ParseEmpty()
         {
             var rule = new CldrParser("").ParseRule();
-            Assert.IsNotNull(rule);
-            Assert.IsEmpty(rule.Condition.Conditions);
-            Assert.IsNull(rule.Samples);
+            Assert.That(rule, Is.Not.Null);
+            Assert.That(rule.Condition.Conditions, Is.Empty);
+            Assert.That(rule.Samples, Is.Null);
         }
 
         [Test]
@@ -67,15 +67,15 @@ namespace PluralRules.Test
         public void ParseSamples(string input, string[] expIntRangeList, string[] expDecRangeList)
         {
             var rule = new CldrParser(input).ParseRule();
-            Assert.IsNotNull(rule.Samples);
+            Assert.That(rule.Samples, Is.Not.Null);
             for (var i = 0; i < expIntRangeList.Length; i++)
             {
-                Assert.AreEqual(expIntRangeList[i], rule.Samples?.IntegerSamples[i].ToString());
+                Assert.That(expIntRangeList[i], Is.EqualTo(rule.Samples?.IntegerSamples[i].ToString()));
             }
 
             for (var i = 0; i < expDecRangeList.Length; i++)
             {
-                Assert.AreEqual(expDecRangeList[i], rule.Samples?.DecimalSamples[i].ToString());
+                Assert.That(expDecRangeList[i], Is.EqualTo(rule.Samples?.DecimalSamples[i].ToString()));
             }
         }
 
@@ -88,8 +88,8 @@ namespace PluralRules.Test
         public void TestParseExponent(string input, int[]? integerRanges, double[]? decimalRanges)
         {
             var rule = new CldrParser(input).ParseRule();
-            Assert.IsNotNull(rule);
-            Assert.IsNotNull(rule.Samples);
+            Assert.That(rule, Is.Not.Null);
+            Assert.That(rule.Samples, Is.Not.Null);
             if (integerRanges != null)
             {
                 for (var index = 0; index < integerRanges.Length; index++)
@@ -97,7 +97,7 @@ namespace PluralRules.Test
                     var expected = integerRanges[index];
                     var ruleStr = rule.Samples?.IntegerSamples[index].Lower.Value;
                     var dec = Double.Parse(ruleStr!);
-                    Assert.AreEqual(expected, Convert.ToInt32(dec));
+                    Assert.That(expected, Is.EqualTo(Convert.ToInt32(dec)));
                 }
             }
 
@@ -108,7 +108,7 @@ namespace PluralRules.Test
                     var expected = decimalRanges[index];
                     var ruleStr = rule.Samples?.DecimalSamples[index].Lower.Value;
                     var actual = Double.Parse(ruleStr!);
-                    Assert.AreEqual(expected, actual);
+                    Assert.That(expected, Is.EqualTo(actual));
                 }
             }
         }
@@ -117,10 +117,10 @@ namespace PluralRules.Test
         public void ParseCondition()
         {
             var rule = new CldrParser("i = 0 or n = 1 and f = 0 ").ParseRule();
-            Assert.IsNotNull(rule.Condition);
-            Assert.AreEqual(2, rule.Condition.Conditions.Count);
-            Assert.AreEqual(1, rule.Condition.Conditions[0].Relations.Count);
-            Assert.AreEqual(2, rule.Condition.Conditions[1].Relations.Count);
+            Assert.That(rule.Condition, Is.Not.Null);
+            Assert.That(2, Is.EqualTo(rule.Condition.Conditions.Count));
+            Assert.That(1, Is.EqualTo(rule.Condition.Conditions[0].Relations.Count));
+            Assert.That(2, Is.EqualTo(rule.Condition.Conditions[1].Relations.Count));
         }
     }
 }

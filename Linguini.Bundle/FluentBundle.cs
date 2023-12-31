@@ -75,6 +75,12 @@ namespace Linguini.Bundle
             EnableExtensions = false;
         }
 
+        /// <summary>
+        /// Creates a new instance of FluentBundle with the specified options, possibly throwing exceptions if errors
+        /// are encountered.
+        /// </summary>
+        /// <param name="option">The options to configure the FluentBundle.</param>
+        /// <returns>A new instance of FluentBundle with the specified options.</returns>
         public static FluentBundle MakeUnchecked(FluentBundleOption option)
         {
             var bundle = ConstructBundle(option);

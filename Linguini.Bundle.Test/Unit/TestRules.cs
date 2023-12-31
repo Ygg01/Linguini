@@ -63,17 +63,17 @@ namespace Linguini.Bundle.Test.Unit
                     : Convert.ToInt32(Math.Floor(midDouble), CultureInfo.InvariantCulture);
 
                 var actualStart = GetPluralCategory(info, type, start);
-                Assert.AreEqual(expected, actualStart, $"Failed on start of range: {start}");
+                Assert.That(expected, Is.EqualTo(actualStart), $"Failed on start of range: {start}");
                 var actualEnd = GetPluralCategory(info, type, end);
-                Assert.AreEqual(expected, actualEnd, $"Failed on end of range: {end}");
+                Assert.That(expected, Is.EqualTo(actualEnd), $"Failed on end of range: {end}");
                 var actualMid = GetPluralCategory(info, type, mid);
-                Assert.AreEqual(expected, actualMid, $"Failed on middle of range: {mid}");
+                Assert.That(expected, Is.EqualTo(actualMid), $"Failed on middle of range: {mid}");
             }
             else
             {
                 var value = FluentNumber.FromString(lower);
                 var actual = GetPluralCategory(info, type, value);
-                Assert.AreEqual(expected, actual);
+                Assert.That(expected, Is.EqualTo(actual));
             }
         }
 

@@ -42,8 +42,8 @@ namespace Linguini.Syntax.Tests.IO
         public void TestExpectChar(string text, char expectedChr, bool expected, char? peek)
         {
             ZeroCopyReader reader = new ZeroCopyReader(text);
-            Assert.AreEqual(expected, reader.ReadCharIf(expectedChr));
-            Assert.True(peek == reader.PeekChar());
+            Assert.That(expected, Is.EqualTo(reader.ReadCharIf(expectedChr)));
+            Assert.That(peek, Is.EqualTo(reader.PeekChar()));
         }
 
         [Test]
@@ -138,8 +138,8 @@ namespace Linguini.Syntax.Tests.IO
         public void TestTryReadSliceOk(string text, int start, int end, string expected)
         {
             ZeroCopyReader reader = new ZeroCopyReader(text);
-            Assert.AreEqual(expected, reader.ReadSliceToStr(start, end));
-            Assert.AreEqual(expected, reader.ReadSlice(start, end).ToArray());
+            Assert.That(expected, Is.EqualTo(reader.ReadSliceToStr(start, end)));
+            Assert.That(expected, Is.EqualTo(reader.ReadSlice(start, end).ToArray()));
         }
     }
 }
