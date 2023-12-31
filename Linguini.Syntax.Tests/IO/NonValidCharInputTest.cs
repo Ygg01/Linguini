@@ -17,7 +17,7 @@ namespace Linguini.Syntax.Tests.IO
         public void OperationOnNonCalleeReturnFalse(string input)
         {
             var span = input.AsSpan();
-            Assert.False(span.IsCallee());
+            Assert.That(span.IsCallee(), Is.False);
         }
     }
 }

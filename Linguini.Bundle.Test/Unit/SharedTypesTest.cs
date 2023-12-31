@@ -20,8 +20,8 @@ namespace Linguini.Bundle.Test.Unit
         [TestCase("err", null)]
         public void TestPluralCategoryHelper(string? input, PluralCategory? expected)
         {
-            Assert.AreEqual(expected != null, input.TryPluralCategory(out var actual));
-            Assert.AreEqual(expected, actual);
+            Assert.That(expected != null, Is.EqualTo(input.TryPluralCategory(out var actual)));
+            Assert.That(expected, Is.EqualTo(actual));
         }
     }
 }

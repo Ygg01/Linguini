@@ -157,14 +157,14 @@ namespace Linguini.Bundle.Test.Yaml
                     if (assert.Missing != null)
                     {
                         var notMissing = testBundle.HasMessage(assert.Id);
-                        Assert.AreEqual(!assert.Missing, notMissing);
+                        Assert.That(!assert.Missing, Is.EqualTo(notMissing));
                     }
                     else
                     {
                         testBundle.TryGetMessage(assert.Id, assert.Attribute, assert.Args,
                             out var errs,
                             out var actualValue);
-                        Assert.AreEqual(assert.ExpectedValue, actualValue, test.TestName);
+                        Assert.That(assert.ExpectedValue, Is.EqualTo(actualValue), test.TestName);
                         AssertErrorCases(assert.ExpectedErrors, errs, test.TestName);
                     }
                 }
@@ -192,16 +192,16 @@ namespace Linguini.Bundle.Test.Yaml
             IList<FluentError> errs,
             String testName)
         {
-            Assert.AreEqual(expectedErrors.Count, errs.Count, testName);
+            Assert.That(expectedErrors.Count, Is.EqualTo(errs.Count), testName);
             for (var i = 0; i < expectedErrors.Count; i++)
             {
                 var actualError = errs[i];
                 var expectedError = expectedErrors[i];
 
-                Assert.AreEqual(expectedError.Type, actualError.ErrorKind());
+                Assert.That(expectedError.Type, Is.EqualTo(actualError.ErrorKind()));
                 if (expectedError.Description != null)
                 {
-                    Assert.AreEqual(expectedError.Description, actualError.ToString());
+                    Assert.That(expectedError.Description, Is.EqualTo(actualError.ToString()));
                 }
             }
         }

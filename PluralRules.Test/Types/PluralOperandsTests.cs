@@ -26,13 +26,13 @@ namespace PluralRule.Test.Types
         public void TestOperandsFromStr(double n, long I, int v, int w, long f, long t, string input)
         {
             var x = input.TryPluralOperands(out var operands);
-            Assert.True(x, $"Parsing operand failed for {input}");
-            Assert.AreEqual(n, operands!.N);
-            Assert.AreEqual(I, operands!.I);
-            Assert.AreEqual(v, operands!.V);
-            Assert.AreEqual(w, operands!.W);
-            Assert.AreEqual(f, operands!.F);
-            Assert.AreEqual(t, operands!.T);
+            Assert.That(x, $"Parsing operand failed for {input}");
+            Assert.That(n, Is.EqualTo(operands!.N));
+            Assert.That(I, Is.EqualTo(operands!.I));
+            Assert.That(v, Is.EqualTo(operands!.V));
+            Assert.That(w, Is.EqualTo(operands!.W));
+            Assert.That(f, Is.EqualTo(operands!.F));
+            Assert.That(t, Is.EqualTo(operands!.T));
         }
         
         [Test]
@@ -55,13 +55,13 @@ namespace PluralRule.Test.Types
         public void TestOperandsFromStrInDifferentCulture(double n, long I, int v, int w, long f, long t, string input)
         {
             var x = input.TryPluralOperands(out var operands);
-            Assert.True(x, $"Parsing operand failed for {input}");
-            Assert.AreEqual(n, operands!.N);
-            Assert.AreEqual(I, operands!.I);
-            Assert.AreEqual(v, operands!.V);
-            Assert.AreEqual(w, operands!.W);
-            Assert.AreEqual(f, operands!.F);
-            Assert.AreEqual(t, operands!.T);
+            Assert.That(x, $"Parsing operand failed for {input}");
+            Assert.That(n, Is.EqualTo(operands!.N));
+            Assert.That(I, Is.EqualTo(operands!.I));
+            Assert.That(v, Is.EqualTo(operands!.V));
+            Assert.That(w, Is.EqualTo(operands!.W));
+            Assert.That(f, Is.EqualTo(operands!.F));
+            Assert.That(t, Is.EqualTo(operands!.T));
         }
 
         [Test]
@@ -166,31 +166,31 @@ namespace PluralRule.Test.Types
         [Test]
         public void TestIncorrectOperand()
         {
-            Assert.IsFalse("foo".TryPluralOperands(out _));
+            Assert.That("foo".TryPluralOperands(out _), Is.False);
         }
         
         private static void CheckInput(double n, long I, int v, int w, long f, long t, bool x,
             PluralOperands? operands)
         {
-            Assert.True(x);
-            Assert.AreEqual(n, operands!.N);
-            Assert.AreEqual(I, operands!.I);
-            Assert.AreEqual(v, operands!.V);
-            Assert.AreEqual(w, operands!.W);
-            Assert.AreEqual(f, operands!.F);
-            Assert.AreEqual(t, operands!.T);
+            Assert.That(x);
+            Assert.That(n, Is.EqualTo(operands!.N));
+            Assert.That(I, Is.EqualTo(operands!.I));
+            Assert.That(v, Is.EqualTo(operands!.V));
+            Assert.That(w, Is.EqualTo(operands!.W));
+            Assert.That(f, Is.EqualTo(operands!.F));
+            Assert.That(t, Is.EqualTo(operands!.T));
         }
         
         private static void CheckInput(double n, ulong I, int v, int w, long f, long t, bool x,
             PluralOperands? operands)
         {
-            Assert.True(x);
-            Assert.AreEqual(n, operands!.N);
-            Assert.AreEqual(I, operands!.I);
-            Assert.AreEqual(v, operands!.V);
-            Assert.AreEqual(w, operands!.W);
-            Assert.AreEqual(f, operands!.F);
-            Assert.AreEqual(t, operands!.T);
+            Assert.That(x);
+            Assert.That(n, Is.EqualTo(operands!.N));
+            Assert.That(I, Is.EqualTo(operands!.I));
+            Assert.That(v, Is.EqualTo(operands!.V));
+            Assert.That(w, Is.EqualTo(operands!.W));
+            Assert.That(f, Is.EqualTo(operands!.F));
+            Assert.That(t, Is.EqualTo(operands!.T));
         }
     }
 }

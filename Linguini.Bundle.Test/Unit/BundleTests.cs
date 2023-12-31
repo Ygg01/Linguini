@@ -8,6 +8,7 @@ using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace Linguini.Bundle.Test.Unit
 {
@@ -48,11 +49,11 @@ new1  = new
         {
             var defaultBundleOpt = new FluentBundleOption();
             var bundle = FluentBundle.MakeUnchecked(defaultBundleOpt);
-            Assert.AreEqual(CultureInfo.CurrentCulture, bundle.Culture);
-            Assert.IsNull(bundle.FormatterFunc);
-            Assert.IsNull(bundle.TransformFunc);
-            Assert.IsTrue(bundle.UseIsolating);
-            Assert.AreEqual(100, bundle.MaxPlaceable);
+            Assert.That(CultureInfo.CurrentCulture, Is.EqualTo(bundle.Culture));
+            Assert.That(bundle.FormatterFunc, Is.Null);
+            Assert.That(bundle.TransformFunc, Is.Null);
+            Assert.That(bundle.UseIsolating);
+            Assert.That(100, Is.EqualTo(bundle.MaxPlaceable));
         }
 
         [Test]
@@ -72,15 +73,15 @@ new1  = new
                 }
             };
             var bundle = FluentBundle.MakeUnchecked(defaultBundleOpt);
-            Assert.AreEqual(new CultureInfo("en"), bundle.Culture);
-            Assert.AreEqual(defaultBundleOpt.FormatterFunc, bundle.FormatterFunc);
-            Assert.AreEqual(defaultBundleOpt.TransformFunc, bundle.TransformFunc);
-            Assert.AreEqual(defaultBundleOpt.UseIsolating, bundle.UseIsolating);
-            Assert.AreEqual(defaultBundleOpt.MaxPlaceable, bundle.MaxPlaceable);
-            Assert.IsTrue(bundle.TryGetFunction("zero", out var zero));
-            Assert.AreEqual(_zeroFunc, zero?.Function);
-            Assert.IsTrue(bundle.TryGetFunction("id", out var id));
-            Assert.AreEqual(_idFunc, id?.Function);
+            Assert.That(new CultureInfo("en"), Is.EqualTo(bundle.Culture));
+            Assert.That(defaultBundleOpt.FormatterFunc, Is.EqualTo(bundle.FormatterFunc));
+            Assert.That(defaultBundleOpt.TransformFunc, Is.EqualTo(bundle.TransformFunc));
+            Assert.That(defaultBundleOpt.UseIsolating, Is.EqualTo(bundle.UseIsolating));
+            Assert.That(defaultBundleOpt.MaxPlaceable, Is.EqualTo(bundle.MaxPlaceable));
+            Assert.That(bundle.TryGetFunction("zero", out var zero));
+            Assert.That(_zeroFunc, Is.EqualTo(zero?.Function));
+            Assert.That(bundle.TryGetFunction("id", out var id));
+            Assert.That(_idFunc, Is.EqualTo(id?.Function));
         }
 
         [Test]
@@ -92,17 +93,17 @@ new1  = new
                 .AddResource(_replace1);
 
             var bundle = bundler.UncheckedBuild();
-            Assert.IsTrue(bundle.TryGetAttrMessage("term1", null, out _, out var termMsg));
-            Assert.AreEqual("val1", termMsg);
-            Assert.IsTrue(bundle.TryGetAttrMessage("term2", null, out _, out var termMsg2));
-            Assert.AreEqual("val2", termMsg2);
+            Assert.That(bundle.TryGetAttrMessage("term1", null, out _, out var termMsg));
+            Assert.That("val1", Is.EqualTo(termMsg));
+            Assert.That(bundle.TryGetAttrMessage("term2", null, out _, out var termMsg2));
+            Assert.That("val2", Is.EqualTo(termMsg2));
 
             bundle.AddResourceOverriding(_replace2);
-            Assert.IsTrue(bundle.TryGetAttrMessage("term2", null, out _, out _));
-            Assert.IsTrue(bundle.TryGetAttrMessage("term1", null, out _, out termMsg));
-            Assert.AreEqual("xxx", termMsg);
-            Assert.IsTrue(bundle.TryGetAttrMessage("new1.attr", null, out _, out var newMsg));
-            Assert.AreEqual("6", newMsg);
+            Assert.That(bundle.TryGetAttrMessage("term2", null, out _, out _));
+            Assert.That(bundle.TryGetAttrMessage("term1", null, out _, out termMsg));
+            Assert.That("xxx", Is.EqualTo(termMsg));
+            Assert.That(bundle.TryGetAttrMessage("new1.attr", null, out _, out var newMsg));
+            Assert.That("6", Is.EqualTo(newMsg));
         }
 
         [Test]
@@ -130,7 +131,7 @@ new1  = new
                 .UncheckedBuild();
 
             var message = bundle.GetAttrMessage("hello-user", ("username", (FluentString)"Test"));
-            Assert.AreEqual("Hello, Test!", message);
+            Assert.That("Hello, Test!", Is.EqualTo(message));
         }
 
         [Test]
@@ -163,7 +164,7 @@ new1  = new
             Parallel.For(0, 10, i => bundler.AddResource($"term-2= {i}", out _));
             Parallel.For(0, 10, i => bundler.TryGetAttrMessage("term-1", null, out _, out _));
             Parallel.For(0, 10, i => bundler.AddResourceOverriding($"term-2= {i + 1}"));
-            Assert.True(bundler.HasMessage("term-1"));
+            Assert.That(bundler.HasMessage("term-1"));
         }
 
         [Test]
@@ -179,7 +180,7 @@ new1  = new
             Parallel.For(0, 10, i => optBundle.AddResource($"term-2= {i}", out _));
             Parallel.For(0, 10, i => optBundle.TryGetAttrMessage("term-1", null, out _, out _));
             Parallel.For(0, 10, i => optBundle.AddResourceOverriding($"term-2= {i + 1}"));
-            Assert.True(optBundle.HasMessage("term-1"));
+            Assert.That(optBundle.HasMessage("term-1"));
         }
 
         [Test]
@@ -192,7 +193,7 @@ new1  = new
                 .UncheckedBuild();
 
             var message = bundler.GetAttrMessage("hello-user",  ("username", (FluentString)"Test"));
-            Assert.AreEqual("Hello, Test!", message);
+            Assert.That("Hello, Test!", Is.EqualTo(message));
         }
 
         [Test]
@@ -206,8 +207,8 @@ new1  = new
 
             bundle.TryAddFunction("id", _idFunc);
             
-            Assert.IsFalse(bundle.TryAddFunction("id", _zeroFunc));
-            Assert.IsTrue(bundle.AddFunctionOverriding("id", _zeroFunc));
+            Assert.That(bundle.TryAddFunction("id", _zeroFunc), Is.False);
+            Assert.That(bundle.AddFunctionOverriding("id", _zeroFunc));
             Assert.Throws<KeyNotFoundException>(() => bundle.AddFunctionUnchecked("id", _zeroFunc));
         }
         
@@ -224,8 +225,8 @@ new1  = new
                 .AddResource(_replace2)
                 .UncheckedBuild();
 
-            Assert.AreEqual(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
-                bundle.HasAttrMessage(idWithAttr));
+            Assert.That(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
+                Is.EqualTo(bundle.HasAttrMessage(idWithAttr)));
         }
 
         [Test]
@@ -241,8 +242,8 @@ new1  = new
                 .AddResource(_replace2)
                 .UncheckedBuild();
 
-            Assert.AreEqual(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
-                bundle.HasAttrMessage(idWithAttr));
+            Assert.That(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
+                Is.EqualTo(bundle.HasAttrMessage(idWithAttr)));
         }
 
         public static IEnumerable<TestCaseData> TestBundleErrors
@@ -287,14 +288,14 @@ attack-log = { $$attacker } attacked {$$defender}.
             var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
                 .AddResource(input)
                 .Build();
-            Assert.IsEmpty(err);
+            Assert.That(err, Is.Empty);
             var args = new Dictionary<string, IFluentType>()
             {
                 ["attacker"] = (FluentReference)"cat",
                 ["defender"] = (FluentReference)"dog",
             };
-            Assert.True(bundle.TryGetMessage("attack-log", args, out _, out var message));
-            Assert.AreEqual("Cat attacked Dog.", message);
+            Assert.That(bundle.TryGetMessage("attack-log", args, out _, out var message));
+            Assert.That("Cat attacked Dog.", Is.EqualTo(message));
         }
 
         private const string Macros = @"
@@ -317,13 +318,13 @@ call-attr-no-args = {-ship.gender() ->
             var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
                 .AddResource(Macros)
                 .Build();
-            Assert.IsEmpty(err);
+            Assert.That(err, Is.Empty);
             var args = new Dictionary<string, IFluentType>
             {
                 ["style"] = (FluentString)"chicago",
             };
-            Assert.True(bundle.TryGetMessage("call-attr-no-args", args, out _, out var message));
-            Assert.AreEqual("It", message);
+            Assert.That(bundle.TryGetMessage("call-attr-no-args", args, out _, out var message));
+            Assert.That("It", Is.EqualTo(message));
         }
         private const string DynamicSelectors = @"
 -creature-fairy = fairy
@@ -344,19 +345,19 @@ you-see = You see { $$object.StartsWith ->
                 .Locale("en-US")
                 .AddResource(DynamicSelectors)
                 .Build();
-            Assert.IsEmpty(err);
+            Assert.That(err, Is.Empty);
             var args = new Dictionary<string, IFluentType>
             {
                 ["object"] = (FluentReference)"creature-elf",
             };
-            Assert.True(bundle.TryGetMessage("you-see", args, out _, out var message1));
-            Assert.AreEqual("You see an elf.", message1);
+            Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message1));
+            Assert.That("You see an elf.", Is.EqualTo(message1));
             args = new Dictionary<string, IFluentType>
             {
                 ["object"] = (FluentReference)"creature-fairy",
             };
-            Assert.True(bundle.TryGetMessage("you-see", args, out _, out var message2));
-            Assert.AreEqual("You see a fairy.", message2);
+            Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message2));
+            Assert.That("You see a fairy.", Is.EqualTo(message2));
         }
     }
 }

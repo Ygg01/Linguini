@@ -12,6 +12,16 @@ namespace Linguini.Syntax.Ast
             Value = value;
         }
 
+        public bool Equals(IPatternElement? other)
+        {
+            if (other is TextLiteral textLiteralOther)
+            {
+                return Value.Span.SequenceEqual(textLiteralOther.Value.Span);
+            }
+
+            return false;
+        }
+
         public override string ToString()
         {
             return Value.Span.ToString();
@@ -103,6 +113,15 @@ namespace Linguini.Syntax.Ast
         public Placeable(IExpression expression)
         {
             Expression = expression;
+        }
+
+        public bool Equals(IPatternElement? other)
+        {
+            if (other is Placeable otherPlaceable)
+            {
+                return Expression == otherPlaceable.Expression;
+            }
+            return false;
         }
     }
     

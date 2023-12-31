@@ -1,6 +1,8 @@
 ﻿using System;
+using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace Linguini.Syntax.Tests.Parser
 {
@@ -15,14 +17,14 @@ namespace Linguini.Syntax.Tests.Parser
             var parse = new LinguiniParser(input).Parse();
             var parseWithComments = new LinguiniParser(input).ParseWithComments();
 
-            Assert.AreEqual(1, parse.Errors.Count);
-            Assert.AreEqual(1, parseWithComments.Errors.Count);
+            Assert.That(1, Is.EqualTo(parse.Errors.Count));
+            Assert.That(1, Is.EqualTo(parseWithComments.Errors.Count));
 
             var detailMsg = parse.Errors[0];
-            Assert.AreEqual(row, detailMsg.Row);
-            Assert.IsNotNull(detailMsg.Slice);
-            Assert.AreEqual(new Range(startErr, endErr), detailMsg.Slice!.Value);
-            Assert.AreEqual(new Range(startMark, endMark), detailMsg.Position);
+            Assert.That(row, Is.EqualTo(detailMsg.Row));
+            Assert.That(detailMsg.Slice, Is.Not.Null);
+            Assert.That(new Range(startErr, endErr), Is.EqualTo(detailMsg.Slice!.Value));
+            Assert.That(new Range(startMark, endMark), Is.EqualTo(detailMsg.Position));
         }
 
         [Test]
