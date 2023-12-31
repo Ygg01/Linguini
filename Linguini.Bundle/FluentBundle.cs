@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -20,7 +21,8 @@ namespace Linguini.Bundle
     public class FluentBundle
     {
         private IDictionary<string, FluentFunction> _funcList;
-        private IDictionary<(string, EntryKind), IEntry> _entries;
+        private IDictionary<string, AstTerm> _terms;
+        private IDictionary<string, AstMessage> _messages;
 
         #region Properties
         /// <summary>
@@ -66,7 +68,8 @@ namespace Linguini.Bundle
 
         private FluentBundle()
         {
-            _entries = new Dictionary<(string, EntryKind), IEntry>();
+            _terms = new Dictionary<string, AstTerm>();
+            _messages = new Dictionary<string, AstMessage>();
             _funcList = new Dictionary<string, FluentFunction>();
             Culture = CultureInfo.CurrentCulture;
             Locales = new List<string>();
@@ -89,16 +92,19 @@ namespace Linguini.Bundle
                 : CultureInfo.CurrentCulture.Name;
             var cultureInfo = new CultureInfo(primaryLocale, false);
             var locales = new List<string> { primaryLocale };
-            IDictionary<(string, EntryKind), IEntry> entries;
+            IDictionary<string, AstTerm> terms;
+            IDictionary<string, AstMessage> messages;
             IDictionary<string, FluentFunction> functions;
             if (option.UseConcurrent)
             {
-                entries = new ConcurrentDictionary<(string, EntryKind), IEntry>();
+                terms = new ConcurrentDictionary<string, AstTerm>();
+                messages = new ConcurrentDictionary<string, AstMessage>();
                 functions = new ConcurrentDictionary<string, FluentFunction>();
             }
             else
             {
-                entries = new Dictionary<(string, EntryKind), IEntry>();
+                terms = new Dictionary<string, AstTerm>();
+                messages = new Dictionary<string, AstMessage>();
                 functions = new Dictionary<string, FluentFunction>();
             }
 
@@ -106,7 +112,8 @@ namespace Linguini.Bundle
             {
                 Culture = cultureInfo,
                 Locales = locales,
-                _entries = entries,
+                _terms = terms,
+                _messages = messages,
                 _funcList = functions,
                 TransformFunc = option.TransformFunc,
                 FormatterFunc = option.FormatterFunc,
@@ -147,10 +154,10 @@ namespace Linguini.Bundle
                 switch (entry)
                 {
                     case AstMessage message:
-                        AddEntry(errors, message);
+                        AddMessage(errors, message);
                         break;
                     case AstTerm term:
-                        AddEntry(errors, term);
+                        AddTerm(errors, term);
                         break;
                 }
             }
@@ -169,17 +176,26 @@ namespace Linguini.Bundle
             {
                 var entry = resource.Entries[entryPos];
 
-                if (entry is AstTerm or AstMessage)
+                switch (entry)
                 {
-                    AddEntryOverriding(entry);
+                    case AstMessage message:
+                        AddMessageOverriding(message);
+                        break;
+                    case AstTerm term:
+                        AddTermOverriding(term);
+                        break;
                 }
             }
         }
-        
-        private void AddEntryOverriding(IEntry term) 
+
+        private void AddMessageOverriding(AstMessage message)
         {
-            var id = (term.GetId(), term.ToKind());
-            _entries[id] = term;
+            _messages[message.GetId()] = message;
+        }
+
+        private void AddTermOverriding(AstTerm term)
+        {
+            _terms[term.GetId()] = term;
         }
 
         public void AddResourceOverriding(string input)
@@ -194,19 +210,36 @@ namespace Linguini.Bundle
             InternalResourceOverriding(res);
         }
 
-        private void AddEntry(List<FluentError> errors, IEntry term)
+        private void AddTerm(List<FluentError> errors, AstTerm term)
         {
-            var id = (term.GetId(), term.ToKind());
-            if (_entries.ContainsKey(id))
+            var termId = term.GetId();
+            // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd
+            // Using TryAdd here leads to undocumented exceptions
+            if (_terms.ContainsKey(termId))
             {
-                errors.Add(new OverrideFluentError(id.Item1, id.Item2));
+                errors.Add(new OverrideFluentError(termId, EntryKind.Term));
             }
             else
             {
-                _entries[id] = term;
+                _terms[termId] = term;
             }
         }
-        
+
+        private void AddMessage(List<FluentError> errors, AstMessage msg)
+        {
+            var msgId = msg.GetId();
+            // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd
+            // Using TryAdd here leads to undocumented exceptions
+            if (_messages.ContainsKey(msgId))
+            {
+                errors.Add(new OverrideFluentError(msg.GetId(), EntryKind.Message));
+            }
+            else
+            {
+                _messages[msgId] = msg;
+            }
+        }
+
         public bool TryAddFunction(string funcName, ExternalFunction fluentFunction)
         {
             return TryInsert(funcName, fluentFunction, InsertBehavior.None);
@@ -270,9 +303,7 @@ namespace Linguini.Bundle
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasMessage(string identifier)
         {
-            var id = (identifier, EntryKind.Message);
-            return _entries.ContainsKey(id)
-                   && _entries[id] is AstMessage;
+            return _messages.ContainsKey(identifier);
         }
 
         public bool HasAttrMessage(string idWithAttr)
@@ -368,34 +399,12 @@ namespace Linguini.Bundle
 
         public bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message)
         {
-            var id = (ident, EntryKind.Message);
-            if (_entries.ContainsKey(id)
-                && _entries.TryGetValue(id, out var value)
-                && value.ToKind() == EntryKind.Message
-                && _entries[id] is AstMessage astMessage)
-            {
-                message = astMessage;
-                return true;
-            }
-
-            message = null;
-            return false;
+            return _messages.TryGetValue(ident, out message);
         }
 
         public bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? term)
         {
-            var termId = (ident, EntryKind.Term);
-            if (_entries.ContainsKey(termId)
-                && _entries.TryGetValue(termId, out var value)
-                && value.ToKind() == EntryKind.Term
-                && _entries[termId] is AstTerm astTerm)
-            {
-                term = astTerm;
-                return true;
-            }
-
-            term = null;
-            return false;
+            return _terms.TryGetValue(ident, out term);
         }
 
         public bool TryGetFunction(Identifier id, [NotNullWhen(true)] out FluentFunction? function)
@@ -427,19 +436,17 @@ namespace Linguini.Bundle
 
         public IEnumerable<string> GetMessageEnumerable()
         {
-            foreach (var keyValue in _entries)
-            {
-                if (keyValue.Value.ToKind() == EntryKind.Message)
-                    yield return keyValue.Key.Item1;
-            }
+            return _messages.Keys;
         }
 
         public IEnumerable<string> GetFuncEnumerable()
         {
-            foreach (var keyValue in _funcList)
-            {
-                yield return keyValue.Key;
-            }
+            return _funcList.Keys;
+        }
+
+        public IEnumerable<string> GetTermEnumerable()
+        {
+            return _terms.Keys;
         }
 
         public FluentBundle DeepClone()
@@ -449,7 +456,8 @@ namespace Linguini.Bundle
                 Culture = (CultureInfo)Culture.Clone(),
                 FormatterFunc = FormatterFunc,
                 Locales = new List<string>(Locales),
-                _entries = new Dictionary<(string, EntryKind), IEntry>(_entries),
+                _messages = new Dictionary<string, AstMessage>(_messages),
+                _terms = new Dictionary<string, AstTerm>(_terms),
                 _funcList = new Dictionary<string, FluentFunction>(_funcList),
                 TransformFunc = TransformFunc,
                 UseIsolating = UseIsolating,
