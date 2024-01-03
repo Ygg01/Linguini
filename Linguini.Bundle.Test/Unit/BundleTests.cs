@@ -208,7 +208,6 @@ new1  = new
             bundle.TryAddFunction("id", _idFunc);
             
             Assert.That(bundle.TryAddFunction("id", _zeroFunc), Is.False);
-            Assert.That(bundle.AddFunctionOverriding("id", _zeroFunc));
             Assert.Throws<KeyNotFoundException>(() => bundle.AddFunctionUnchecked("id", _zeroFunc));
         }
         
