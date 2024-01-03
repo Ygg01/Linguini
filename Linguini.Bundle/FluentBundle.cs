@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Xml.Schema;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Resolver;
@@ -16,40 +16,40 @@ using Linguini.Syntax.Parser;
 
 namespace Linguini.Bundle
 {
-    using FluentArgs = IDictionary<string, IFluentType>;
-
-    public class FluentBundle
+    public abstract class FluentBundle
     {
-        private IDictionary<string, FluentFunction> _funcList;
-        private IDictionary<string, AstTerm> _terms;
-        private IDictionary<string, AstMessage> _messages;
 
-        #region Properties
         /// <summary>
         /// <see cref="CultureInfo"/> of the bundle. Primary bundle locale
         /// </summary>
-        public CultureInfo Culture { get; internal set; }
+        public CultureInfo Culture { get; internal set; } = CultureInfo.CurrentCulture;
+
         /// <summary>
         /// List of Locales. First element is primary bundle locale, others are fallback locales.
         /// </summary>
-        public List<string> Locales { get; internal set; }
+        public List<string> Locales { get; internal set; } = new();
+
         /// <summary>
         /// When formatting patterns, FluentBundle inserts Unicode Directionality Isolation Marks to indicate that the direction of a placeable may differ from the surrounding message.
         /// This is important for cases such as when a right-to-left user name is presented in the left-to-right message.
         /// </summary>
-        public bool UseIsolating { get; set; }
+        public bool UseIsolating { get; set; } = true;
+
         /// <summary>
         /// Specifies a method that will be applied only on values extending <see cref="IFluentType"/>. Useful for defining a special formatter for <see cref="FluentNumber"/>.
         /// </summary>
         public Func<string, string>? TransformFunc { get; set; }
+
         /// <summary>
         /// Specifies a method that will be applied only on values extending <see cref="IFluentType"/>. Useful for defining a special formatter for <see cref="FluentNumber"/>.
         /// </summary>
         public Func<IFluentType, string>? FormatterFunc { get; init; }
+
         /// <summary>
         /// Limit of placeable <see cref="AstTerm"/> within one <see cref="Pattern"/>, when fully expanded (all nested elements count towards it). Useful for preventing billion laughs attack. Defaults to 100.
         /// </summary>
-        public byte MaxPlaceable { get; private init; }
+        public byte MaxPlaceable { get; private init; } = 100;
+
         /// <summary>
         /// Whether experimental features are enabled.
         ///
@@ -60,98 +60,26 @@ namespace Linguini.Bundle
         /// <item>term reference as parameters</item>
         /// </list>
         /// </summary>
-        public bool EnableExtensions { get; init; }
-
-        #endregion
-
-        #region Constructors
-
-        private FluentBundle()
-        {
-            _terms = new Dictionary<string, AstTerm>();
-            _messages = new Dictionary<string, AstMessage>();
-            _funcList = new Dictionary<string, FluentFunction>();
-            Culture = CultureInfo.CurrentCulture;
-            Locales = new List<string>();
-            UseIsolating = true;
-            MaxPlaceable = 100;
-            EnableExtensions = false;
-        }
-
-        /// <summary>
-        /// Creates a new instance of FluentBundle with the specified options, possibly throwing exceptions if errors
-        /// are encountered.
-        /// </summary>
-        /// <param name="option">The options to configure the FluentBundle.</param>
-        /// <returns>A new instance of FluentBundle with the specified options.</returns>
-        public static FluentBundle MakeUnchecked(FluentBundleOption option)
-        {
-            var bundle = ConstructBundle(option);
-            bundle.AddFunctions(option.Functions, out _);
-            return bundle;
-        }
-
-        private static FluentBundle ConstructBundle(FluentBundleOption option)
-        {
-            var primaryLocale = option.Locales.Count > 0
-                ? option.Locales[0]
-                : CultureInfo.CurrentCulture.Name;
-            var cultureInfo = new CultureInfo(primaryLocale, false);
-            var locales = new List<string> { primaryLocale };
-            IDictionary<string, AstTerm> terms;
-            IDictionary<string, AstMessage> messages;
-            IDictionary<string, FluentFunction> functions;
-            if (option.UseConcurrent)
-            {
-                terms = new ConcurrentDictionary<string, AstTerm>();
-                messages = new ConcurrentDictionary<string, AstMessage>();
-                functions = new ConcurrentDictionary<string, FluentFunction>();
-            }
-            else
-            {
-                terms = new Dictionary<string, AstTerm>();
-                messages = new Dictionary<string, AstMessage>();
-                functions = new Dictionary<string, FluentFunction>();
-            }
-
-            return new FluentBundle
-            {
-                Culture = cultureInfo,
-                Locales = locales,
-                _terms = terms,
-                _messages = messages,
-                _funcList = functions,
-                TransformFunc = option.TransformFunc,
-                FormatterFunc = option.FormatterFunc,
-                UseIsolating = option.UseIsolating,
-                MaxPlaceable = option.MaxPlaceable,
-                EnableExtensions = option.EnableExtensions,
-            };
-        }
-
-        #endregion
-
-        #region AddMethods
-
-        public bool AddResource(string input, out List<FluentError> errors)
+        public bool EnableExtensions { get; init; } = false;
+        
+        public bool AddResource(string input, [NotNullWhen(false)] out List<FluentError>? errors)
         {
             var res = new LinguiniParser(input, EnableExtensions).Parse();
             return AddResource(res, out errors);
         }
-        
-        public bool AddResource(TextReader reader, out List<FluentError> errors)
+
+        public bool AddResource(TextReader reader, [NotNullWhen(false)] out List<FluentError>? errors)
         {
             var res = new LinguiniParser(reader, EnableExtensions).Parse();
             return AddResource(res, out errors);
         }
 
-
-        internal bool AddResource(Resource res, out List<FluentError> errors)
+        public bool AddResource(Resource res, [NotNullWhen(false)] out List<FluentError>? errors)
         {
-            errors = new List<FluentError>();
+            var innerErrors = new List<FluentError>();
             foreach (var parseError in res.Errors)
             {
-                errors.Add(ParserFluentError.ParseError(parseError));
+                innerErrors.Add(ParserFluentError.ParseError(parseError));
             }
 
             for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
@@ -160,19 +88,21 @@ namespace Linguini.Bundle
                 switch (entry)
                 {
                     case AstMessage message:
-                        AddMessage(errors, message);
+                        TryAddMessage(message, innerErrors);
                         break;
                     case AstTerm term:
-                        AddTerm(errors, term);
+                        TryAddTerm(term, innerErrors);
                         break;
                 }
             }
 
-            if (errors.Count == 0)
+            if (innerErrors.Count == 0)
             {
+                errors = null;
                 return true;
             }
 
+            errors = innerErrors;
             return false;
         }
 
@@ -194,124 +124,63 @@ namespace Linguini.Bundle
             }
         }
 
-        private void AddMessageOverriding(AstMessage message)
-        {
-            _messages[message.GetId()] = message;
-        }
+        protected abstract void AddMessageOverriding(AstMessage message);
 
-        private void AddTermOverriding(AstTerm term)
-        {
-            _terms[term.GetId()] = term;
-        }
+        protected abstract void AddTermOverriding(AstTerm term);
 
         public void AddResourceOverriding(string input)
         {
             var res = new LinguiniParser(input, EnableExtensions).Parse();
             InternalResourceOverriding(res);
         }
-        
+
         public void AddResourceOverriding(TextReader input)
         {
             var res = new LinguiniParser(input, EnableExtensions).Parse();
             InternalResourceOverriding(res);
         }
 
-        private void AddTerm(List<FluentError> errors, AstTerm term)
-        {
-            var termId = term.GetId();
-            // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd
-            // Using TryAdd here leads to undocumented exceptions
-            if (_terms.ContainsKey(termId))
-            {
-                errors.Add(new OverrideFluentError(termId, EntryKind.Term));
-            }
-            else
-            {
-                _terms[termId] = term;
-            }
-        }
+        protected abstract bool TryAddTerm(AstTerm term, [NotNullWhen(false)] List<FluentError>? errors);
 
-        private void AddMessage(List<FluentError> errors, AstMessage msg)
-        {
-            var msgId = msg.GetId();
-            // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd
-            // Using TryAdd here leads to undocumented exceptions
-            if (_messages.ContainsKey(msgId))
-            {
-                errors.Add(new OverrideFluentError(msg.GetId(), EntryKind.Message));
-            }
-            else
-            {
-                _messages[msgId] = msg;
-            }
-        }
+        protected abstract bool TryAddMessage(AstMessage msg, [NotNullWhen(false)] List<FluentError>? errors);
 
-        public bool TryAddFunction(string funcName, ExternalFunction fluentFunction)
-        {
-            return TryInsert(funcName, fluentFunction, InsertBehavior.None);
-        }
-        
-        public bool AddFunctionOverriding(string funcName, ExternalFunction fluentFunction)
-        {
-            return TryInsert(funcName, fluentFunction, InsertBehavior.OverwriteExisting);
-        }
-        
-        public bool AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction)
-        {
-            return TryInsert(funcName, fluentFunction);
-        }
 
-        public void AddFunctions(IDictionary<string, ExternalFunction> functions, out List<FluentError> errors)
+        public abstract bool TryAddFunction(string funcName, ExternalFunction fluentFunction);
+
+        public abstract void AddFunctionOverriding(string funcName, ExternalFunction fluentFunction);
+
+        public abstract void AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction);
+
+        /// <summary>
+        /// Adds a collection of external functions to the dictionary of available functions.
+        /// If any function cannot be added, the errors are returned in the list.
+        /// </summary>
+        /// <param name="functions">A dictionary of function names and their corresponding ExternalFunction objects.</param>
+        /// <param name="errors">A list of errors indicating functions that could not be added.</param>
+        public void AddFunctions(IDictionary<string, ExternalFunction> functions, out List<FluentError>? errors)
         {
             errors = new List<FluentError>();
             foreach (var keyValue in functions)
             {
-                if (!TryInsert(keyValue.Key, keyValue.Value, InsertBehavior.None))
+                if (!TryAddFunction(keyValue.Key, keyValue.Value))
                 {
                     errors.Add(new OverrideFluentError(keyValue.Key, EntryKind.Func));
                 }
             }
         }
 
-        private bool TryInsert(string funcName, ExternalFunction fluentFunction,
-            InsertBehavior behavior = InsertBehavior.ThrowOnExisting)
-        {
-            switch (behavior)
-            {
-                case InsertBehavior.None:
-                    if (!_funcList.ContainsKey(funcName))
-                    {
-                        _funcList.Add(funcName, fluentFunction);
-                        return true;
-                    }
+        /// <summary>
+        /// Determines if the provided identifier has a message associated with it. </summary>
+        /// <param name="identifier">The identifier to check.</param>
+        /// <returns>True if the identifier has a message; otherwise, false.</returns>
+        /// 
+        public abstract bool HasMessage(string identifier);
 
-                    return false;
-                case InsertBehavior.OverwriteExisting:
-                    _funcList[funcName] = fluentFunction;
-                    break;
-                default:
-                    if (_funcList.ContainsKey(funcName))
-                    {
-                        throw new KeyNotFoundException($"Function {funcName} already exists!");
-                    }
-
-                    _funcList.Add(funcName, fluentFunction);
-                    break;
-            }
-
-            return true;
-        }
-
-        #endregion
-
-        #region AttrMessage
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool HasMessage(string identifier)
-        {
-            return _messages.ContainsKey(identifier);
-        }
-
+        /// <summary>
+        /// Determines whether the given identifier with attribute has a message.
+        /// </summary>
+        /// <param name="idWithAttr">The identifier with attribute.</param>
+        /// <returns>True if the identifier with attribute has a message; otherwise, false.</returns>
         public bool HasAttrMessage(string idWithAttr)
         {
             var attributes = idWithAttr.IndexOf('.');
@@ -330,7 +199,14 @@ namespace Linguini.Bundle
             return false;
         }
 
-        public string? GetAttrMessage(string msgWithAttr, FluentArgs? args = null)
+        /// <summary>
+        /// Retrieves the attribute message by processing the given message template with the provided arguments.
+        /// </summary>
+        /// <param name="msgWithAttr">The string consisting of `messageId.Attribute`.</param>
+        /// <param name="args">The dictionary of arguments to be used for resolution in the message template. Can be null.</param>
+        /// <returns>The processed message.</returns>
+        /// <exception cref="LinguiniException">Thrown when there are errors encountered during attribute substitution.</exception>
+        public string? GetAttrMessage(string msgWithAttr, IDictionary<string, IFluentType>? args = null)
         {
             TryGetAttrMessage(msgWithAttr, args, out var errors, out var message);
             if (errors.Count > 0)
@@ -358,7 +234,7 @@ namespace Linguini.Bundle
             return message;
         }
 
-        public bool TryGetAttrMessage(string msgWithAttr, FluentArgs? args,
+        public bool TryGetAttrMessage(string msgWithAttr, IDictionary<string, IFluentType>? args,
             out IList<FluentError> errors, out string? message)
         {
             if (msgWithAttr.Contains("."))
@@ -370,11 +246,11 @@ namespace Linguini.Bundle
             return TryGetMessage(msgWithAttr, null, args, out errors, out message);
         }
 
-        public bool TryGetMessage(string id, FluentArgs? args,
+        public bool TryGetMessage(string id, IDictionary<string, IFluentType>? args,
             out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
             => TryGetMessage(id, null, args, out errors, out message);
 
-        public bool TryGetMessage(string id, string? attribute, FluentArgs? args,
+        public bool TryGetMessage(string id, string? attribute, IDictionary<string, IFluentType>? args,
             out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
         {
             string? value = null;
@@ -383,7 +259,7 @@ namespace Linguini.Bundle
             if (TryGetAstMessage(id, out var astMessage))
             {
                 var pattern = attribute != null
-                    ? astMessage.GetAttribute(attribute)?.Value
+                    ? TypeHelpers.GetAttribute(astMessage, attribute)?.Value
                     : astMessage.Value;
 
                 if (pattern == null)
@@ -403,35 +279,45 @@ namespace Linguini.Bundle
             return message != null;
         }
 
-        public bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message)
-        {
-            return _messages.TryGetValue(ident, out message);
-        }
+        /// <summary>
+        /// Tries to get the AstMessage associated with the specified ident.
+        /// </summary>
+        /// <param name="ident">The identifier to look for.</param>
+        /// <param name="message">When this method returns, contains the AstMessage associated with the specified ident, if found; otherwise, null.</param>
+        /// <returns>True if an AstMessage was found for the specified ident; otherwise, false.</returns>
+        public abstract bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message);
 
-        public bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? term)
-        {
-            return _terms.TryGetValue(ident, out term);
-        }
+        /// <summary>
+        /// Tries to get a term by its identifier.
+        /// </summary>
+        /// <param name="ident">The identifier of the AST term.</param>
+        /// <param name="term">When this method returns, contains the AST term associated with the specified identifier, if the identifier is found; otherwise, null. This parameter is passed uninitialized.</param>
+        /// <returns>true if the identifier is found and the corresponding AST term is retrieved; otherwise, false.</returns>
+        public abstract bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? term);
 
+        /// <summary>
+        /// Tries to get the FluentFunction associated with the specified Identifier.
+        /// </summary>
+        /// <param name="id">The Identifier used to identify the FluentFunction.</param>
+        /// <param name="function">When the method returns, contains the FluentFunction associated with the Identifier, if the Identifier is found; otherwise, null. This parameter is passed uninitialized.</param>
+        /// <returns>true if the FluentFunction associated with the Identifier is found; otherwise, false.</returns>
         public bool TryGetFunction(Identifier id, [NotNullWhen(true)] out FluentFunction? function)
         {
             return TryGetFunction(id.ToString(), out function);
         }
 
-        public bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
-        {
-            if (_funcList.ContainsKey(funcName))
-            {
-                return _funcList.TryGetValue(funcName, out function);
-            }
+        /// <summary>
+        /// Tries to retrieve a FluentFunction object by the given function name.
+        /// </summary>
+        /// <param name="funcName">The name of the function to retrieve.</param>
+        /// <param name="function">An output parameter that will hold the retrieved FluentFunction object, if found.</param>
+        /// <returns>
+        /// True if a FluentFunction object with the specified name was found and assigned to the function output parameter.
+        /// False if a FluentFunction object with the specified name was not found.
+        /// </returns>
+        public abstract bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function);
 
-            function = null;
-            return false;
-        }
-
-        #endregion
-
-        public string FormatPattern(Pattern pattern, FluentArgs? args,
+        public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             out IList<FluentError> errors)
         {
             var scope = new Scope(this, args);
@@ -440,33 +326,61 @@ namespace Linguini.Bundle
             return value.AsString();
         }
 
-        public IEnumerable<string> GetMessageEnumerable()
-        {
-            return _messages.Keys;
-        }
+        /// <summary>
+        /// This method retrieves an enumerable collection of all message identifiers. </summary>
+        /// <returns>
+        /// An enumerable collection of message identifiers. </returns>
+        public abstract IEnumerable<string> GetMessageEnumerable();
 
-        public IEnumerable<string> GetFuncEnumerable()
-        {
-            return _funcList.Keys;
-        }
+        /// <summary>
+        /// Retrieves an enumerable collection of string function names.
+        /// </summary>
+        /// <returns>An enumerable collection of functions names.</returns>
+        public abstract IEnumerable<string> GetFuncEnumerable();
 
-        public IEnumerable<string> GetTermEnumerable()
-        {
-            return _terms.Keys;
-        }
+        /// <summary>
+        /// Retrieves an enumerable collection of terms.
+        /// </summary>
+        /// <returns>An enumerable collection of terms.</returns>
+        public abstract IEnumerable<string> GetTermEnumerable();
 
-        public FluentBundle DeepClone()
+        /// <summary>
+        /// Creates a deep clone of the current instance of the AbstractFluentBundle class.
+        /// </summary>
+        /// <returns>A new instance of the AbstractFluentBundle class that is a deep clone of the current instance.</returns>
+        public abstract FluentBundle DeepClone();
+
+        public static FluentBundle MakeUnchecked(FluentBundleOption option)
         {
-            return new()
+            var primaryLocale = option.Locales.Count > 0
+                ? option.Locales[0]
+                : CultureInfo.CurrentCulture.Name;
+            var cultureInfo = new CultureInfo(primaryLocale, false);
+            var func = option.Functions.ToDictionary(x => x.Key, x => (FluentFunction)x.Value);
+            return option.UseConcurrent switch
             {
-                Culture = (CultureInfo)Culture.Clone(),
-                FormatterFunc = FormatterFunc,
-                Locales = new List<string>(Locales),
-                _messages = new Dictionary<string, AstMessage>(_messages),
-                _terms = new Dictionary<string, AstTerm>(_terms),
-                _funcList = new Dictionary<string, FluentFunction>(_funcList),
-                TransformFunc = TransformFunc,
-                UseIsolating = UseIsolating,
+                true => new ConcurrentBundle
+                {
+                    Locales = option.Locales,
+                    Culture = cultureInfo,
+                    EnableExtensions = option.EnableExtensions,
+                    FormatterFunc = option.FormatterFunc,
+                    TransformFunc = option.TransformFunc,
+                    MaxPlaceable = option.MaxPlaceable,
+                    UseIsolating = option.UseIsolating,
+                    _funcList = new ConcurrentDictionary<string, FluentFunction>(func),
+                },
+                _ => new NonConcurrentBundle()
+                {
+                    Locales = option.Locales,
+                    Culture = cultureInfo,
+                    EnableExtensions = option.EnableExtensions,
+                    FormatterFunc = option.FormatterFunc,
+                    TransformFunc = option.TransformFunc,
+                    MaxPlaceable = option.MaxPlaceable,
+                    UseIsolating = option.UseIsolating,
+                    _funcList = func,
+                }
             };
         }
     }

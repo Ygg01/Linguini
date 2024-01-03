@@ -48,7 +48,7 @@ namespace Linguini.Bundle.Builder
         {
             FluentBundle UncheckedBuild();
 
-            (FluentBundle, List<FluentError>) Build();
+            (FluentBundle, List<FluentError>?) Build();
         }
 
         public interface IReadyStep : IBuildStep
@@ -65,7 +65,6 @@ namespace Linguini.Bundle.Builder
             private CultureInfo _culture;
             private readonly List<string> _locales = new();
             private readonly List<Resource> _resources = new();
-            private readonly List<object> _source = new();
             private bool _useIsolating;
             private Func<IFluentType, string>? _formatterFunc;
             private Func<string, string>? _transformFunc;
@@ -113,7 +112,7 @@ namespace Linguini.Bundle.Builder
             {
                 var (bundle, errors) = Build();
 
-                if (errors.Count > 0)
+                if (errors is { Count: > 0 })
                 {
                     throw new LinguiniException(errors);
                 }
@@ -121,7 +120,7 @@ namespace Linguini.Bundle.Builder
                 return bundle;
             }
 
-            public (FluentBundle, List<FluentError>) Build()
+            public (FluentBundle, List<FluentError>?) Build()
             {
                 var concurrent = new FluentBundleOption
                 {
@@ -134,18 +133,23 @@ namespace Linguini.Bundle.Builder
                 };
                 var bundle = FluentBundle.MakeUnchecked(concurrent);
                 bundle.Culture = _culture;
+                List<FluentError>? errors = null;
 
-                var errors = new List<FluentError>();
                 if (_functions.Count > 0)
                 {
                     bundle.AddFunctions(_functions, out var funcErr);
-                    errors.AddRange(funcErr);
+                    if (funcErr != null)
+                    {
+                        errors ??= new List<FluentError>();
+                        errors.AddRange(funcErr);
+                    }
                 }
 
                 foreach (var resource in _resources)
                 {
                     if (!bundle.AddResource(resource,out var resErr))
                     {
+                        errors ??= new List<FluentError>(); 
                         errors.AddRange(resErr);
                     }
                 }

@@ -208,7 +208,7 @@ new1  = new
             bundle.TryAddFunction("id", _idFunc);
             
             Assert.That(bundle.TryAddFunction("id", _zeroFunc), Is.False);
-            Assert.Throws<KeyNotFoundException>(() => bundle.AddFunctionUnchecked("id", _zeroFunc));
+            Assert.Throws<ArgumentException>(() => bundle.AddFunctionUnchecked("id", _zeroFunc));
         }
         
         [Test]
@@ -287,7 +287,7 @@ attack-log = { $$attacker } attacked {$$defender}.
             var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
                 .AddResource(input)
                 .Build();
-            Assert.That(err, Is.Empty);
+            Assert.That(err, Is.Null);
             var args = new Dictionary<string, IFluentType>()
             {
                 ["attacker"] = (FluentReference)"cat",
@@ -317,7 +317,7 @@ call-attr-no-args = {-ship.gender() ->
             var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
                 .AddResource(Macros)
                 .Build();
-            Assert.That(err, Is.Empty);
+            Assert.That(err, Is.Null);
             var args = new Dictionary<string, IFluentType>
             {
                 ["style"] = (FluentString)"chicago",
@@ -344,7 +344,7 @@ you-see = You see { $$object.StartsWith ->
                 .Locale("en-US")
                 .AddResource(DynamicSelectors)
                 .Build();
-            Assert.That(err, Is.Empty);
+            Assert.That(err, Is.Null);
             var args = new Dictionary<string, IFluentType>
             {
                 ["object"] = (FluentReference)"creature-elf",

@@ -88,7 +88,10 @@ namespace Linguini.Bundle.Test.Yaml
             foreach (var res in parsedTestSuite.Resources)
             {
                 bundle.AddResource(res, out var err);
-                errors.AddRange(err);
+                if (err != null)
+                {
+                    errors.AddRange(err);
+                }
             }
 
             if (parsedTestSuite.Bundle != null)
@@ -147,7 +150,10 @@ namespace Linguini.Bundle.Test.Yaml
                         else
                         {
                             testBundle.AddResource(res, out var errs);
-                            errors.AddRange(errs);
+                            if (errs != null)
+                            {
+                                errors.AddRange(errs);
+                            }
                         }
                     }
                 }
