@@ -1,10 +1,9 @@
 #nullable enable
 using System;
 using NUnit.Framework;
-using PluralRules.Generator;
 using PluralRules.Generator.Cldr;
 
-namespace PluralRules.Test
+namespace PluralRules.Test.Cldr
 {
     [TestFixture]
     [Parallelizable]

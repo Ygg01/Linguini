@@ -15,13 +15,6 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
     
-    <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-        <PackageReference Include="System.ValueTuple" Version="4.5.0" PrivateAssets="all" />
-        <PackageReference Include="System.Memory" Version="4.5.4" PrivateAssets="all" />
-        <PackageReference Include="Nullable" Version="1.3.0" PrivateAssets="all" />
-        <PackageReference Include="IndexRange" Version="1.0.2" PrivateAssets="all" />
-        <PackageReference Include="TA.System.Runtime.CompilerServices.RuntimeHelpers.GetSubArray" Version="1.0.1" PrivateAssets="all" />
-    </ItemGroup>
     
     <ItemGroup>
       <None Include="..\linguini.jpg" PackagePath="">
@@ -31,8 +24,5 @@
       <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
     
-    <ItemGroup>
-      <PackageReference Include="NUnit" Version="4.0.1" />
-    </ItemGroup>
 
 </Project>

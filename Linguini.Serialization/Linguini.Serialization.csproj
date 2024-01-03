@@ -13,10 +13,6 @@
         <ProjectReference Include="..\Linguini.Syntax\Linguini.Syntax.csproj" />
     </ItemGroup>
 
-    <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-        <PackageReference Include="System.Text.Json" Version="6.0.4" PrivateAssets="all" />
-        <PackageReference Include="IndexRange" Version="1.0.2" PrivateAssets="all" />
-    </ItemGroup>
 
     <ItemGroup>
       <None Include="..\linguini.jpg">

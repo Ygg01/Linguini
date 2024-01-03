@@ -3,7 +3,7 @@ using System.Globalization;
 using Linguini.Shared.Types;
 using NUnit.Framework;
 
-namespace PluralRule.Test.Types
+namespace PluralRules.Test.Types
 {
     public class PluralOperandsTests
     {
