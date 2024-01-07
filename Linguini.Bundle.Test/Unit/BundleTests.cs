@@ -358,5 +358,40 @@ you-see = You see { $$object.StartsWith ->
             Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message2));
             Assert.That("You see a fairy.", Is.EqualTo(message2));
         }
+
+        [Test]
+        public void TestDeepClone()
+        {
+            var originalBundleOption = new FluentBundleOption
+            {
+                Locales = { "en-US" },
+                MaxPlaceable = 123,
+                UseIsolating = false,
+                TransformFunc = _transform,
+                FormatterFunc = _formatter,
+                Functions = new Dictionary<string, ExternalFunction>()
+                {
+                    ["zero"] = _zeroFunc,
+                    ["id"] = _idFunc,
+                }
+            };
+
+            // Assume FluentBundle object has DeepClone method
+            FluentBundle originalBundle = FluentBundle.MakeUnchecked(originalBundleOption);
+            FluentBundle clonedBundle = originalBundle.DeepClone();
+
+            // Assert that the original and cloned objects are not the same reference
+            Assert.That(originalBundle, Is.Not.SameAs(clonedBundle));
+
+            // Assert that the properties are copied properly
+            Assert.That(originalBundle, Is.EqualTo(clonedBundle));
+            
+            // Assert that if original property is changed, new property isn't.
+            originalBundle.AddFunctionOverriding("zero", _idFunc);
+            clonedBundle.TryGetFunction("zero", out var clonedZero);
+            Assert.That((FluentFunction) _zeroFunc, Is.EqualTo(clonedZero));
+            originalBundle.TryGetFunction("zero", out var originalZero);
+            Assert.That((FluentFunction) _idFunc, Is.EqualTo(originalZero));
+        }
     }
 }

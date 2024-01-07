@@ -13,7 +13,7 @@ using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle
 {
-    public sealed class ConcurrentBundle : FluentBundle
+    public sealed class ConcurrentBundle : FluentBundle, IEquatable<ConcurrentBundle>
     {
         internal ConcurrentDictionary<string, FluentFunction> FuncList = new();
         private ConcurrentDictionary<string, AstTerm> _terms = new();
@@ -49,7 +49,7 @@ namespace Linguini.Bundle
             return false;
         }
 
-        
+
         /// <inheritdoc />
         public override bool TryAddFunction(string funcName, ExternalFunction fluentFunction)
         {
@@ -74,7 +74,7 @@ namespace Linguini.Bundle
         {
             return _messages.ContainsKey(identifier);
         }
-        
+
         /// <inheritdoc />
         public override bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message)
         {
@@ -111,7 +111,7 @@ namespace Linguini.Bundle
         {
             return _terms.Keys.ToArray();
         }
-        
+
         /// <inheritdoc/>
         public override FluentBundle DeepClone()
         {
@@ -120,7 +120,7 @@ namespace Linguini.Bundle
                 FuncList = new ConcurrentDictionary<string, FluentFunction>(FuncList),
                 _terms = new ConcurrentDictionary<string, AstTerm>(_terms),
                 _messages = new ConcurrentDictionary<string, AstMessage>(_messages),
-                Culture = (CultureInfo) Culture.Clone(),
+                Culture = (CultureInfo)Culture.Clone(),
                 Locales = new List<string>(Locales),
                 UseIsolating = UseIsolating,
                 TransformFunc = (Func<string, string>?)TransformFunc?.Clone(),
@@ -129,6 +129,26 @@ namespace Linguini.Bundle
                 EnableExtensions = EnableExtensions,
             };
         }
+        
+        /// <inheritdoc/>
+        public bool Equals(ConcurrentBundle? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return base.Equals(other) && FuncList.SequenceEqual(other.FuncList) && _terms.SequenceEqual(other._terms) &&
+                   _messages.SequenceEqual(other._messages);
+        }
 
+        /// <inheritdoc/>
+        public override bool Equals(object? obj)
+        {
+            return ReferenceEquals(this, obj) || obj is ConcurrentBundle other && Equals(other);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(base.GetHashCode(), FuncList, _terms, _messages);
+        }
     }
 }

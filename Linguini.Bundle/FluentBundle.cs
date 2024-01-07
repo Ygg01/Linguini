@@ -15,7 +15,7 @@ using Linguini.Syntax.Parser;
 
 namespace Linguini.Bundle
 {
-    public abstract class FluentBundle
+    public abstract class FluentBundle : IEquatable<FluentBundle>
     {
         /// <summary>
         /// <see cref="CultureInfo"/> of the bundle. Primary bundle locale
@@ -60,7 +60,7 @@ namespace Linguini.Bundle
         /// </summary>
         // ReSharper disable once MemberCanBeProtected.Global
         public bool EnableExtensions { get; init; }
-        
+
         public bool AddResource(string input, [NotNullWhen(false)] out List<FluentError>? errors)
         {
             var res = new LinguiniParser(input, EnableExtensions).Parse();
@@ -123,10 +123,23 @@ namespace Linguini.Bundle
             }
         }
 
+        /// <summary>
+        /// Adds the given AstMessage to the collection of messages, by overriding any existing messages with the same name.
+        /// </summary>
+        /// <param name="message">The AstMessage to be added.</param>
         protected abstract void AddMessageOverriding(AstMessage message);
 
+        /// <summary>
+        /// Adds a term to the AstTerm list, overriding any existing term with the same name.
+        /// </summary>
+        /// <param name="term">The term to be added.</param>
         protected abstract void AddTermOverriding(AstTerm term);
 
+        /// <summary>
+        /// Adds a resource.
+        /// Any messages or terms in bundle will be overriden by the existing ones.
+        /// </summary>
+        /// <param name="input">The input string containing the resource data.</param>
         public void AddResourceOverriding(string input)
         {
             var res = new LinguiniParser(input, EnableExtensions).Parse();
@@ -386,6 +399,33 @@ namespace Linguini.Bundle
                     FuncList = func,
                 }
             };
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(FluentBundle? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Culture.Equals(other.Culture) && Locales.SequenceEqual(other.Locales) &&
+                   UseIsolating == other.UseIsolating && Equals(TransformFunc, other.TransformFunc) &&
+                   Equals(FormatterFunc, other.FormatterFunc) && MaxPlaceable == other.MaxPlaceable &&
+                   EnableExtensions == other.EnableExtensions;
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((FluentBundle)obj);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Culture, Locales, UseIsolating, TransformFunc, FormatterFunc, MaxPlaceable,
+                EnableExtensions);
         }
     }
 }
