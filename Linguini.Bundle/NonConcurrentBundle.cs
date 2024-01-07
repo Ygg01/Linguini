@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
+using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 
 // ReSharper disable UnusedType.Global
@@ -11,9 +14,9 @@ namespace Linguini.Bundle
 {
     public sealed class NonConcurrentBundle : FluentBundle
     {
-        internal Dictionary<string, FluentFunction> _funcList = new();
-        internal Dictionary<string, AstTerm> _terms = new();
-        internal Dictionary<string, AstMessage> _messages = new();
+        internal Dictionary<string, FluentFunction> FuncList = new();
+        private Dictionary<string, AstTerm> _terms = new();
+        private Dictionary<string, AstMessage> _messages = new();
 
         /// <inheritdoc />
         protected override void AddMessageOverriding(AstMessage message)
@@ -49,19 +52,19 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override bool TryAddFunction(string funcName, ExternalFunction fluentFunction)
         {
-            return _funcList.TryAdd(funcName, fluentFunction);
+            return FuncList.TryAdd(funcName, fluentFunction);
         }
 
         /// <inheritdoc />
         public override void AddFunctionOverriding(string funcName, ExternalFunction fluentFunction)
         {
-            _funcList[funcName] = fluentFunction;
+            FuncList[funcName] = fluentFunction;
         }
 
         /// <inheritdoc />
         public override void AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction)
         {
-            _funcList.Add(funcName, fluentFunction);
+            FuncList.Add(funcName, fluentFunction);
         }
 
         /// <inheritdoc />
@@ -86,7 +89,7 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
         {
-            return _funcList.TryGetValue(funcName, out function);
+            return FuncList.TryGetValue(funcName, out function);
         }
 
         /// <inheritdoc />
@@ -98,7 +101,7 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override IEnumerable<string> GetFuncEnumerable()
         {
-            return _funcList.Keys.ToArray();
+            return FuncList.Keys.ToArray();
         }
 
         /// <inheritdoc />
@@ -113,9 +116,16 @@ namespace Linguini.Bundle
         {
             return new NonConcurrentBundle()
             {
-                _funcList = new Dictionary<string, FluentFunction>(_funcList),
+                FuncList = new Dictionary<string, FluentFunction>(FuncList),
                 _terms = new Dictionary<string, AstTerm>(_terms),
                 _messages = new Dictionary<string, AstMessage>(_messages),
+                Culture = (CultureInfo) Culture.Clone(),
+                Locales = new List<string>(Locales),
+                UseIsolating = UseIsolating,
+                TransformFunc = (Func<string, string>?)TransformFunc?.Clone(),
+                FormatterFunc = (Func<IFluentType, string>?)FormatterFunc?.Clone(),
+                MaxPlaceable = MaxPlaceable,
+                EnableExtensions = EnableExtensions,
             };
         }
     }

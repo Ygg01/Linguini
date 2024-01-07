@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Xml.Schema;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Resolver;
@@ -18,7 +17,6 @@ namespace Linguini.Bundle
 {
     public abstract class FluentBundle
     {
-
         /// <summary>
         /// <see cref="CultureInfo"/> of the bundle. Primary bundle locale
         /// </summary>
@@ -48,7 +46,7 @@ namespace Linguini.Bundle
         /// <summary>
         /// Limit of placeable <see cref="AstTerm"/> within one <see cref="Pattern"/>, when fully expanded (all nested elements count towards it). Useful for preventing billion laughs attack. Defaults to 100.
         /// </summary>
-        public byte MaxPlaceable { get; private init; } = 100;
+        public byte MaxPlaceable { get; internal init; } = 100;
 
         /// <summary>
         /// Whether experimental features are enabled.
@@ -60,7 +58,8 @@ namespace Linguini.Bundle
         /// <item>term reference as parameters</item>
         /// </list>
         /// </summary>
-        public bool EnableExtensions { get; init; } = false;
+        // ReSharper disable once MemberCanBeProtected.Global
+        public bool EnableExtensions { get; init; }
         
         public bool AddResource(string input, [NotNullWhen(false)] out List<FluentError>? errors)
         {
@@ -350,6 +349,11 @@ namespace Linguini.Bundle
         /// <returns>A new instance of the AbstractFluentBundle class that is a deep clone of the current instance.</returns>
         public abstract FluentBundle DeepClone();
 
+        /// <summary>
+        /// Creates a FluentBundle object with the specified options.
+        /// </summary>
+        /// <param name="option">The FluentBundleOption object that contains the options for creating the FluentBundle</param>
+        /// <returns>A FluentBundle object created with the specified options</returns>
         public static FluentBundle MakeUnchecked(FluentBundleOption option)
         {
             var primaryLocale = option.Locales.Count > 0
@@ -368,9 +372,9 @@ namespace Linguini.Bundle
                     TransformFunc = option.TransformFunc,
                     MaxPlaceable = option.MaxPlaceable,
                     UseIsolating = option.UseIsolating,
-                    _funcList = new ConcurrentDictionary<string, FluentFunction>(func),
+                    FuncList = new ConcurrentDictionary<string, FluentFunction>(func),
                 },
-                _ => new NonConcurrentBundle()
+                _ => new NonConcurrentBundle
                 {
                     Locales = option.Locales,
                     Culture = cultureInfo,
@@ -379,7 +383,7 @@ namespace Linguini.Bundle
                     TransformFunc = option.TransformFunc,
                     MaxPlaceable = option.MaxPlaceable,
                     UseIsolating = option.UseIsolating,
-                    _funcList = func,
+                    FuncList = func,
                 }
             };
         }

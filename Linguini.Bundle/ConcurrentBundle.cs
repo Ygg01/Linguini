@@ -2,9 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
+using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 
 // ReSharper disable UnusedType.Global
@@ -13,7 +15,7 @@ namespace Linguini.Bundle
 {
     public sealed class ConcurrentBundle : FluentBundle
     {
-        internal ConcurrentDictionary<string, FluentFunction> _funcList = new();
+        internal ConcurrentDictionary<string, FluentFunction> FuncList = new();
         private ConcurrentDictionary<string, AstTerm> _terms = new();
         private ConcurrentDictionary<string, AstMessage> _messages = new();
 
@@ -51,19 +53,19 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override bool TryAddFunction(string funcName, ExternalFunction fluentFunction)
         {
-            return _funcList.TryAdd(funcName, fluentFunction);
+            return FuncList.TryAdd(funcName, fluentFunction);
         }
 
         /// <inheritdoc />
         public override void AddFunctionOverriding(string funcName, ExternalFunction fluentFunction)
         {
-            _funcList[funcName] = fluentFunction;
+            FuncList[funcName] = fluentFunction;
         }
 
         /// <inheritdoc />
         public override void AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction)
         {
-            if (_funcList.TryAdd(funcName, fluentFunction)) return;
+            if (FuncList.TryAdd(funcName, fluentFunction)) return;
             throw new ArgumentException($"Function with name {funcName} already exist");
         }
 
@@ -89,7 +91,7 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
         {
-            return _funcList.TryGetValue(funcName, out function);
+            return FuncList.TryGetValue(funcName, out function);
         }
 
         /// <inheritdoc />
@@ -101,7 +103,7 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override IEnumerable<string> GetFuncEnumerable()
         {
-            return _funcList.Keys.ToArray();
+            return FuncList.Keys.ToArray();
         }
 
         /// <inheritdoc />
@@ -109,17 +111,24 @@ namespace Linguini.Bundle
         {
             return _terms.Keys.ToArray();
         }
-
-
-        /// <inheritdoc />
+        
+        /// <inheritdoc/>
         public override FluentBundle DeepClone()
         {
-            return new ConcurrentBundle()
+            return new ConcurrentBundle
             {
-                _funcList = new ConcurrentDictionary<string, FluentFunction>(_funcList),
+                FuncList = new ConcurrentDictionary<string, FluentFunction>(FuncList),
                 _terms = new ConcurrentDictionary<string, AstTerm>(_terms),
                 _messages = new ConcurrentDictionary<string, AstMessage>(_messages),
+                Culture = (CultureInfo) Culture.Clone(),
+                Locales = new List<string>(Locales),
+                UseIsolating = UseIsolating,
+                TransformFunc = (Func<string, string>?)TransformFunc?.Clone(),
+                FormatterFunc = (Func<IFluentType, string>?)FormatterFunc?.Clone(),
+                MaxPlaceable = MaxPlaceable,
+                EnableExtensions = EnableExtensions,
             };
         }
+
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
-using Linguini.Bundle.Func;
+using Linguini.Bundle.Function;
 using Linguini.Bundle.Types;
 using NUnit.Framework;
 using YamlDotNet.RepresentationModel;

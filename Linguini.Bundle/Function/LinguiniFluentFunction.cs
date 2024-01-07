@@ -5,7 +5,7 @@ using System.Text;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 
-namespace Linguini.Bundle.Func
+namespace Linguini.Bundle.Function
 {
     public static class LinguiniFluentFunctions
     {
