@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,23 +23,23 @@ namespace Linguini.Bundle.Test.Unit
         private readonly Func<IFluentType, string> _formatter = _ => "";
         private readonly Func<string, string> _transform = str => str.ToUpper(CultureInfo.InvariantCulture);
 
-        private static string _res1 = @"
+        private const string Res1 = @"
 term = term
     .attr = 3";
 
-        private static string _wrong = @"
+        private const string Wrong = @"
     term = 1";
 
-        private static string _multi = @"
+        private const string Multi = @"
 term1 = val1
 term2 = val2
     .attr = 6";
 
-        private static string _replace1 = @"
+        private const string Replace1 = @"
 term1 = val1
 term2 = val2";
 
-        private static string _replace2 = @"
+        private const string Replace2 = @"
 term1 = xxx
 new1  = new
     .attr = 6";
@@ -90,7 +91,7 @@ new1  = new
         {
             var bundler = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
-                .AddResource(_replace1);
+                .AddResource(Replace1);
 
             var bundle = bundler.UncheckedBuild();
             Assert.That(bundle.TryGetAttrMessage("term1", null, out _, out var termMsg));
@@ -98,7 +99,7 @@ new1  = new
             Assert.That(bundle.TryGetAttrMessage("term2", null, out _, out var termMsg2));
             Assert.That("val2", Is.EqualTo(termMsg2));
 
-            bundle.AddResourceOverriding(_replace2);
+            bundle.AddResourceOverriding(Replace2);
             Assert.That(bundle.TryGetAttrMessage("term2", null, out _, out _));
             Assert.That(bundle.TryGetAttrMessage("term1", null, out _, out termMsg));
             Assert.That("xxx", Is.EqualTo(termMsg));
@@ -112,7 +113,7 @@ new1  = new
         {
             var bundler = LinguiniBuilder.Builder()
                 .Locales("en-US", "sr-RS")
-                .AddResources(_wrong, _res1)
+                .AddResources(Wrong, Res1)
                 .SetFormatterFunc(_formatter)
                 .SetTransformFunc(_transform)
                 .AddFunction("id", _idFunc)
@@ -140,7 +141,7 @@ new1  = new
         {
             var bundler = LinguiniBuilder.Builder()
                 .Locale("en-US")
-                .AddResource(_multi)
+                .AddResource(Multi)
                 .AddFunction("id", _idFunc)
                 .AddFunction("zero", _zeroFunc)
                 .UncheckedBuild();
@@ -221,7 +222,7 @@ new1  = new
         {
             var bundle = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
-                .AddResource(_replace2)
+                .AddResource(Replace2)
                 .UncheckedBuild();
 
             Assert.That(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
@@ -238,7 +239,7 @@ new1  = new
         {
             var bundle = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
-                .AddResource(_replace2)
+                .AddResource(Replace2)
                 .UncheckedBuild();
 
             Assert.That(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
@@ -264,6 +265,8 @@ new1  = new
             var (_, error) = LinguiniBuilder.Builder().Locale("en-US")
                 .AddResource(input)
                 .Build();
+            Debug.Assert(error != null, nameof(error) + " != null");
+            Assert.That(error, Is.Not.Empty);
             return error.Select(e => e.GetSpan()).ToList();
         }
 
