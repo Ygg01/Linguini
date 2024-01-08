@@ -10,7 +10,7 @@
         <PackageTags>fluent, i18n, internationalization, l10n, l20n, globalization, translation</PackageTags>
         <IncludeSymbols>false</IncludeSymbols>
         <PackageVersion>0.7.0</PackageVersion>
-        <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
+        <TargetFrameworks>net6.0;netstandard2.1;net8.0</TargetFrameworks>
         <PackageIcon>linguini.jpg</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>

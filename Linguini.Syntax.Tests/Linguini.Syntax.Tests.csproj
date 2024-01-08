@@ -4,8 +4,8 @@
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
         <OutputType>Library</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
         <PackageIcon>linguini.jpg</PackageIcon>
+        <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
