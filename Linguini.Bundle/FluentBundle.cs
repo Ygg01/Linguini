@@ -15,7 +15,97 @@ using Linguini.Syntax.Parser;
 
 namespace Linguini.Bundle
 {
-    public abstract class FluentBundle : IEquatable<FluentBundle>
+    public interface IReadBundle
+    {
+        /// <summary>
+        /// Determines if the provided identifier has a message associated with it. </summary>
+        /// <param name="identifier">The identifier to check.</param>
+        /// <returns>True if the identifier has a message; otherwise, false.</returns>
+        /// 
+        bool HasMessage(string identifier);
+
+        /// <summary>
+        /// Determines whether the given identifier with attribute has a message.
+        /// </summary>
+        /// <param name="idWithAttr">The identifier with attribute.</param>
+        /// <returns>True if the identifier with attribute has a message; otherwise, false.</returns>
+        bool HasAttrMessage(string idWithAttr);
+
+        /// <summary>
+        /// Retrieves the attribute message by processing the given message template with the provided arguments.
+        /// </summary>
+        /// <param name="msgWithAttr">The string consisting of `messageId.Attribute`.</param>
+        /// <param name="args">The dictionary of arguments to be used for resolution in the message template. Can be null.</param>
+        /// <returns>The processed message.</returns>
+        /// <exception cref="LinguiniException">Thrown when there are errors encountered during attribute substitution.</exception>
+        string? GetAttrMessage(string msgWithAttr, IDictionary<string, IFluentType>? args = null);
+
+        string? GetAttrMessage(string msgWithAttr, params (string, IFluentType)[] args);
+
+        bool TryGetAttrMessage(string msgWithAttr, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message);
+
+        bool TryGetMessage(string id, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message);
+
+        bool TryGetMessage(string id, string? attribute, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message);
+
+        /// <summary>
+        /// Tries to get the AstMessage associated with the specified ident.
+        /// </summary>
+        /// <param name="ident">The identifier to look for.</param>
+        /// <param name="message">When this method returns, contains the AstMessage associated with the specified ident, if found; otherwise, null.</param>
+        /// <returns>True if an AstMessage was found for the specified ident; otherwise, false.</returns>
+        bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message);
+
+        /// <summary>
+        /// Tries to get a term by its identifier.
+        /// </summary>
+        /// <param name="ident">The identifier of the AST term.</param>
+        /// <param name="term">When this method returns, contains the AST term associated with the specified identifier, if the identifier is found; otherwise, null. This parameter is passed uninitialized.</param>
+        /// <returns>true if the identifier is found and the corresponding AST term is retrieved; otherwise, false.</returns>
+        bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? term);
+
+        /// <summary>
+        /// Tries to get the FluentFunction associated with the specified Identifier.
+        /// </summary>
+        /// <param name="id">The Identifier used to identify the FluentFunction.</param>
+        /// <param name="function">When the method returns, contains the FluentFunction associated with the Identifier, if the Identifier is found; otherwise, null. This parameter is passed uninitialized.</param>
+        /// <returns>true if the FluentFunction associated with the Identifier is found; otherwise, false.</returns>
+        bool TryGetFunction(Identifier id, [NotNullWhen(true)] out FluentFunction? function);
+
+        /// <summary>
+        /// Tries to retrieve a FluentFunction object by the given function name.
+        /// </summary>
+        /// <param name="funcName">The name of the function to retrieve.</param>
+        /// <param name="function">An output parameter that will hold the retrieved FluentFunction object, if found.</param>
+        /// <returns>
+        /// True if a FluentFunction object with the specified name was found and assigned to the function output parameter.
+        /// False if a FluentFunction object with the specified name was not found.
+        /// </returns>
+        bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function);
+
+        /// <summary>
+        /// This method retrieves an enumerable collection of all message identifiers. </summary>
+        /// <returns>
+        /// An enumerable collection of message identifiers. </returns>
+        IEnumerable<string> GetMessageEnumerable();
+
+        /// <summary>
+        /// Retrieves an enumerable collection of string function names.
+        /// </summary>
+        /// <returns>An enumerable collection of functions names.</returns>
+        IEnumerable<string> GetFuncEnumerable();
+
+        /// <summary>
+        /// Retrieves an enumerable collection of terms.
+        /// </summary>
+        /// <returns>An enumerable collection of terms.</returns>
+        IEnumerable<string> GetTermEnumerable();
+    }
+
+    public abstract class FluentBundle : IEquatable<FluentBundle>, IReadBundle
     {
         /// <summary>
         /// <see cref="CultureInfo"/> of the bundle. Primary bundle locale
@@ -221,7 +311,7 @@ namespace Linguini.Bundle
         public string? GetAttrMessage(string msgWithAttr, IDictionary<string, IFluentType>? args = null)
         {
             TryGetAttrMessage(msgWithAttr, args, out var errors, out var message);
-            if (errors.Count > 0)
+            if (errors is { Count: > 0 })
             {
                 throw new LinguiniException(errors);
             }
@@ -238,7 +328,7 @@ namespace Linguini.Bundle
             }
 
             TryGetAttrMessage(msgWithAttr, dictionary, out var errors, out var message);
-            if (errors.Count > 0)
+            if (errors is { Count: > 0 })
             {
                 throw new LinguiniException(errors);
             }
@@ -247,7 +337,7 @@ namespace Linguini.Bundle
         }
 
         public bool TryGetAttrMessage(string msgWithAttr, IDictionary<string, IFluentType>? args,
-            out IList<FluentError> errors, out string? message)
+            [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
         {
             if (msgWithAttr.Contains("."))
             {
@@ -259,11 +349,11 @@ namespace Linguini.Bundle
         }
 
         public bool TryGetMessage(string id, IDictionary<string, IFluentType>? args,
-            out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
+            [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
             => TryGetMessage(id, null, args, out errors, out message);
 
         public bool TryGetMessage(string id, string? attribute, IDictionary<string, IFluentType>? args,
-            out IList<FluentError> errors, [NotNullWhen(true)] out string? message)
+            [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
         {
             string? value = null;
             errors = new List<FluentError>();
@@ -330,7 +420,7 @@ namespace Linguini.Bundle
         public abstract bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function);
 
         public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
-            out IList<FluentError> errors)
+            [NotNullWhen(false)] out IList<FluentError>? errors)
         {
             var scope = new Scope(this, args);
             var value = pattern.Resolve(scope);
