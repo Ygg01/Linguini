@@ -177,11 +177,16 @@ new1  = new
                 UseConcurrent = true,
             };
             var optBundle = FluentBundle.MakeUnchecked(bundleOpt);
+            
             Parallel.For(0, 10, i => optBundle.AddResource($"term-1 = {i}", out _));
             Parallel.For(0, 10, i => optBundle.AddResource($"term-2= {i}", out _));
             Parallel.For(0, 10, i => optBundle.TryGetAttrMessage("term-1", null, out _, out _));
             Parallel.For(0, 10, i => optBundle.AddResourceOverriding($"term-2= {i + 1}"));
             Assert.That(optBundle.HasMessage("term-1"));
+            
+            // Frozen bundle are read only and should be thread-safe
+            var frozenBundle = optBundle.ToFrozenBundle();
+            Parallel.For(0, 10, i => frozenBundle.TryGetAttrMessage("term-1", null, out _, out _));
         }
 
         [Test]
@@ -253,7 +258,7 @@ new1  = new
                 yield return new TestCaseData("### Comment\r\nterm1")
                     .Returns(new List<ErrorSpan?>
                     {
-                        new ErrorSpan(2, 13, 18, 18, 19)
+                        new(2, 13, 18, 18, 19)
                     });
             }
         }
@@ -315,7 +320,7 @@ call-attr-no-args = {-ship.gender() ->
         
         [Test]
         [Parallelizable]
-        public void TestMacrosFail()
+        public void TestExtensionsWork()
         {
             var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
                 .AddResource(Macros)
@@ -327,6 +332,11 @@ call-attr-no-args = {-ship.gender() ->
             };
             Assert.That(bundle.TryGetMessage("call-attr-no-args", args, out _, out var message));
             Assert.That("It", Is.EqualTo(message));
+            
+            // Check Frozen bundle behaves similarly
+            var frozenBundle = bundle.ToFrozenBundle();
+            Assert.That(frozenBundle.TryGetMessage("call-attr-no-args", args, out _, out var frozenMessage));
+            Assert.That("It", Is.EqualTo(frozenMessage));
         }
         private const string DynamicSelectors = @"
 -creature-fairy = fairy
@@ -360,6 +370,21 @@ you-see = You see { $$object.StartsWith ->
             };
             Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message2));
             Assert.That("You see a fairy.", Is.EqualTo(message2));
+            
+            // Check Frozen bundle behaves similarly
+            var frozenBundle = bundle.ToFrozenBundle();
+            args = new Dictionary<string, IFluentType>
+            {
+                ["object"] = (FluentReference)"creature-elf",
+            };
+            Assert.That(frozenBundle.TryGetMessage("you-see", args, out _, out var frozenMessage1));
+            Assert.That("You see an elf.", Is.EqualTo(frozenMessage1));
+            args = new Dictionary<string, IFluentType>
+            {
+                ["object"] = (FluentReference)"creature-fairy",
+            };
+            Assert.That(frozenBundle.TryGetMessage("you-see", args, out _, out var frozenMessage2));
+            Assert.That("You see a fairy.", Is.EqualTo(frozenMessage2));
         }
 
         [Test]

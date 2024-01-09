@@ -195,10 +195,10 @@ namespace Linguini.Bundle.Test.Yaml
 
 
         private static void AssertErrorCases(List<ResolverTestSuite.ResolverTestError> expectedErrors,
-            IList<FluentError> errs,
+            IList<FluentError>? errs,
             String testName)
         {
-            Assert.That(expectedErrors.Count, Is.EqualTo(errs.Count), testName);
+            Assert.That(expectedErrors.Count, Is.EqualTo(errs!.Count), testName);
             for (var i = 0; i < expectedErrors.Count; i++)
             {
                 var actualError = errs[i];

@@ -14,7 +14,7 @@ namespace Linguini.Bundle
 {
     public sealed class NonConcurrentBundle : FluentBundle, IEquatable<NonConcurrentBundle>
     {
-        internal Dictionary<string, FluentFunction> FuncList = new();
+        internal Dictionary<string, FluentFunction> Functions = new();
         private Dictionary<string, AstTerm> _terms = new();
         private Dictionary<string, AstMessage> _messages = new();
 
@@ -52,19 +52,19 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override bool TryAddFunction(string funcName, ExternalFunction fluentFunction)
         {
-            return FuncList.TryAdd(funcName, fluentFunction);
+            return Functions.TryAdd(funcName, fluentFunction);
         }
 
         /// <inheritdoc />
         public override void AddFunctionOverriding(string funcName, ExternalFunction fluentFunction)
         {
-            FuncList[funcName] = fluentFunction;
+            Functions[funcName] = fluentFunction;
         }
 
         /// <inheritdoc />
         public override void AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction)
         {
-            FuncList.Add(funcName, fluentFunction);
+            Functions.Add(funcName, fluentFunction);
         }
 
         /// <inheritdoc />
@@ -89,7 +89,7 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
         {
-            return FuncList.TryGetValue(funcName, out function);
+            return Functions.TryGetValue(funcName, out function);
         }
 
         /// <inheritdoc />
@@ -101,7 +101,7 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override IEnumerable<string> GetFuncEnumerable()
         {
-            return FuncList.Keys.ToArray();
+            return Functions.Keys.ToArray();
         }
 
         /// <inheritdoc />
@@ -110,13 +110,28 @@ namespace Linguini.Bundle
             return _terms.Keys.ToArray();
         }
 
+        internal override IDictionary<string, AstMessage> GetMessagesDictionary()
+        {
+            return _messages;
+        }
+
+        internal override IDictionary<string, AstTerm> GetTermsDictionary()
+        {
+            return _terms;
+        }
+
+        internal override IDictionary<string, FluentFunction> GetFunctionDictionary()
+        {
+            return Functions;
+        }
+
 
         /// <inheritdoc />
         public override FluentBundle DeepClone()
         {
             return new NonConcurrentBundle()
             {
-                FuncList = new Dictionary<string, FluentFunction>(FuncList),
+                Functions = new Dictionary<string, FluentFunction>(Functions),
                 _terms = new Dictionary<string, AstTerm>(_terms),
                 _messages = new Dictionary<string, AstMessage>(_messages),
                 Culture = (CultureInfo)Culture.Clone(),
@@ -128,12 +143,29 @@ namespace Linguini.Bundle
                 EnableExtensions = EnableExtensions,
             };
         }
+        
+        public static NonConcurrentBundle Thaw(FrozenBundle frozenBundle)
+        {
+            return new NonConcurrentBundle
+            {
+                _messages = new Dictionary<string, AstMessage>(frozenBundle.Messages),
+                Functions = new Dictionary<string, FluentFunction>(frozenBundle.Functions),
+                _terms = new Dictionary<string, AstTerm>(frozenBundle.Terms),
+                FormatterFunc = frozenBundle.FormatterFunc,
+                Locales = frozenBundle.Locales,
+                UseIsolating = frozenBundle.UseIsolating,
+                MaxPlaceable = frozenBundle.MaxPlaceable,
+                EnableExtensions = frozenBundle.EnableExtensions,
+                TransformFunc = frozenBundle.TransformFunc,
+                Culture = frozenBundle.Culture
+            };
+        }
 
         public bool Equals(NonConcurrentBundle? other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return base.Equals(other) && FuncList.SequenceEqual(other.FuncList) && _terms.SequenceEqual(other._terms) &&
+            return base.Equals(other) && Functions.SequenceEqual(other.Functions) && _terms.SequenceEqual(other._terms) &&
                    _messages.SequenceEqual(other._messages);
         }
 
@@ -144,7 +176,7 @@ namespace Linguini.Bundle
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), FuncList, _terms, _messages);
+            return HashCode.Combine(base.GetHashCode(), Functions, _terms, _messages);
         }
     }
 }

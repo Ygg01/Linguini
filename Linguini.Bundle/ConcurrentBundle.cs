@@ -15,9 +15,26 @@ namespace Linguini.Bundle
 {
     public sealed class ConcurrentBundle : FluentBundle, IEquatable<ConcurrentBundle>
     {
-        internal ConcurrentDictionary<string, FluentFunction> FuncList = new();
+        internal ConcurrentDictionary<string, FluentFunction> Functions = new();
         private ConcurrentDictionary<string, AstTerm> _terms = new();
         private ConcurrentDictionary<string, AstMessage> _messages = new();
+
+        public static ConcurrentBundle Thaw(FrozenBundle frozenBundle)
+        {
+            return new ConcurrentBundle
+            {
+                _messages = new ConcurrentDictionary<string, AstMessage>(frozenBundle.Messages),
+                Functions = new ConcurrentDictionary<string, FluentFunction>(frozenBundle.Functions),
+                _terms = new ConcurrentDictionary<string, AstTerm>(frozenBundle.Terms),
+                FormatterFunc = frozenBundle.FormatterFunc,
+                Locales = frozenBundle.Locales,
+                UseIsolating = frozenBundle.UseIsolating,
+                MaxPlaceable = frozenBundle.MaxPlaceable,
+                EnableExtensions = frozenBundle.EnableExtensions,
+                TransformFunc = frozenBundle.TransformFunc,
+                Culture = frozenBundle.Culture
+            };
+        }
 
         /// <inheritdoc />
         protected override void AddMessageOverriding(AstMessage message)
@@ -53,19 +70,19 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override bool TryAddFunction(string funcName, ExternalFunction fluentFunction)
         {
-            return FuncList.TryAdd(funcName, fluentFunction);
+            return Functions.TryAdd(funcName, fluentFunction);
         }
 
         /// <inheritdoc />
         public override void AddFunctionOverriding(string funcName, ExternalFunction fluentFunction)
         {
-            FuncList[funcName] = fluentFunction;
+            Functions[funcName] = fluentFunction;
         }
 
         /// <inheritdoc />
         public override void AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction)
         {
-            if (FuncList.TryAdd(funcName, fluentFunction)) return;
+            if (Functions.TryAdd(funcName, fluentFunction)) return;
             throw new ArgumentException($"Function with name {funcName} already exist");
         }
 
@@ -91,25 +108,40 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
         {
-            return FuncList.TryGetValue(funcName, out function);
+            return Functions.TryGetValue(funcName, out function);
         }
 
         /// <inheritdoc />
         public override IEnumerable<string> GetMessageEnumerable()
         {
-            return _messages.Keys.ToArray();
+            return _messages.Keys;
         }
 
         /// <inheritdoc />
         public override IEnumerable<string> GetFuncEnumerable()
         {
-            return FuncList.Keys.ToArray();
+            return Functions.Keys;
         }
 
         /// <inheritdoc />
         public override IEnumerable<string> GetTermEnumerable()
         {
-            return _terms.Keys.ToArray();
+            return _terms.Keys;
+        }
+
+        internal override IDictionary<string, AstMessage> GetMessagesDictionary()
+        {
+            return _messages;
+        }
+
+        internal override IDictionary<string, AstTerm> GetTermsDictionary()
+        {
+            return _terms;
+        }
+
+        internal override IDictionary<string, FluentFunction> GetFunctionDictionary()
+        {
+            return Functions;
         }
 
         /// <inheritdoc/>
@@ -117,7 +149,7 @@ namespace Linguini.Bundle
         {
             return new ConcurrentBundle
             {
-                FuncList = new ConcurrentDictionary<string, FluentFunction>(FuncList),
+                Functions = new ConcurrentDictionary<string, FluentFunction>(Functions),
                 _terms = new ConcurrentDictionary<string, AstTerm>(_terms),
                 _messages = new ConcurrentDictionary<string, AstMessage>(_messages),
                 Culture = (CultureInfo)Culture.Clone(),
@@ -135,7 +167,7 @@ namespace Linguini.Bundle
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return base.Equals(other) && FuncList.SequenceEqual(other.FuncList) && _terms.SequenceEqual(other._terms) &&
+            return base.Equals(other) && Functions.SequenceEqual(other.Functions) && _terms.SequenceEqual(other._terms) &&
                    _messages.SequenceEqual(other._messages);
         }
 
@@ -148,7 +180,7 @@ namespace Linguini.Bundle
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), FuncList, _terms, _messages);
+            return HashCode.Combine(base.GetHashCode(), Functions, _terms, _messages);
         }
     }
 }

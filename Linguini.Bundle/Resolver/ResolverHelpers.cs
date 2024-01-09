@@ -21,7 +21,7 @@ namespace Linguini.Bundle.Resolver
             {
                 if (self.Elements[0] is TextLiteral textLiteral)
                 {
-                    return GetFluentString(textLiteral.ToString(), scope.Bundle.TransformFunc);
+                    return GetFluentString(textLiteral.ToString(), scope.TransformFunc);
                 }
             }
 

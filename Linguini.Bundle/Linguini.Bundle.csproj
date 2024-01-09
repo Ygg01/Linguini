@@ -19,7 +19,7 @@ It provides easy to use and extend system for describing translations.</Descript
         <PackageProjectUrl>https://github.com/Ygg01/Linguini</PackageProjectUrl>
         <RepositoryType>git</RepositoryType>
         <PackageVersion>0.7.0</PackageVersion>
-        <TargetFrameworks>net6.0;netstandard2.1;net8.0</TargetFrameworks>
+        <TargetFrameworks>net8.0;netstandard2.1;net6.0</TargetFrameworks>
         <PackageIcon>linguini.jpg</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
