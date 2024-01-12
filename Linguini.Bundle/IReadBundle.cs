@@ -87,7 +87,7 @@ namespace Linguini.Bundle
         bool TryGetMessage(string id, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
         {
-            return this.TryGetMessage(id, null, args, out errors, out message);
+            return TryGetMessage(id, null, args, out errors, out message);
         }
 
 
@@ -221,6 +221,28 @@ namespace Linguini.Bundle
             params (string, IFluentType)[] args)
         {
             return bundle.GetAttrMessage(msgWithAttr, args);
+        }
+
+
+        /// <summary>
+        /// Retrieves a localized message from the given bundle.
+        /// </summary>
+        /// <param name="bundle">The bundle to retrieve the message from.</param>
+        /// <param name="id">The ID of the message to retrieve.</param>
+        /// <param name="attribute">The optional attribute of the message. Defaults to null.</param>
+        /// <param name="args">The optional dictionary of arguments to be used in the message resolution. Defaults to null.</param>
+        /// <returns>The localized message if found, otherwise null.</returns>
+        /// <exception cref="LinguiniException">Thrown when there are errors retrieving the message.</exception>
+        public static string? GetMessage(this IReadBundle bundle, string id, string? attribute = null,
+            IDictionary<string, IFluentType>? args = null)
+        {
+            bundle.TryGetMessage(id, attribute, args, out var errors, out var message);
+            if (errors is { Count: > 0 })
+            {
+                throw new LinguiniException(errors);
+            }
+
+            return message;
         }
 
         /// <summary>
