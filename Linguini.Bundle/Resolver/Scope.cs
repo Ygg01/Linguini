@@ -1,7 +1,7 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using Linguini.Bundle.Errors;
 using Linguini.Shared.Types;
@@ -12,7 +12,9 @@ namespace Linguini.Bundle.Resolver
 {
     public class Scope : IScope
     {
-        public readonly FluentBundle Bundle;
+        public readonly IReadBundle Bundle;
+        private readonly CultureInfo _culture;
+        private readonly int _maxPlaceable;
         private readonly Dictionary<string, IFluentType>? _args;
         private Dictionary<string, IFluentType>? _localNameArgs;
         private List<IFluentType>? _localPosArgs;
@@ -24,6 +26,12 @@ namespace Linguini.Bundle.Resolver
         {
             Placeable = 0;
             Bundle = fluentBundle;
+            _maxPlaceable = fluentBundle.MaxPlaceable;
+            _culture = fluentBundle.Culture;
+            TransformFunc = fluentBundle.TransformFunc;
+            FormatterFunc = fluentBundle.FormatterFunc;
+            UseIsolating = fluentBundle.UseIsolating;
+            FormatterFunc = fluentBundle.FormatterFunc;
             Dirty = false;
 
             _errors = new List<FluentError>();
@@ -35,6 +43,28 @@ namespace Linguini.Bundle.Resolver
             _errors = new List<FluentError>();
         }
 
+
+        public Scope(FrozenBundle frozenBundle, IDictionary<string, IFluentType>? args)
+        {
+            Placeable = 0;
+            Bundle = frozenBundle;
+            _maxPlaceable = frozenBundle.MaxPlaceable;
+            _culture = frozenBundle.Culture;
+            TransformFunc = frozenBundle.TransformFunc;
+            FormatterFunc = frozenBundle.FormatterFunc;
+            UseIsolating = frozenBundle.UseIsolating;
+            Dirty = false;
+
+            _errors = new List<FluentError>();
+            _travelled = new List<Pattern>();
+            _args = args != null ? new Dictionary<string, IFluentType>(args) : null;
+
+            _localNameArgs = null;
+            _localPosArgs = null;
+            _errors = new List<FluentError>();
+        }
+
+
         public bool Dirty { get; set; }
         private short Placeable { get; set; }
 
@@ -44,10 +74,16 @@ namespace Linguini.Bundle.Resolver
         public IReadOnlyList<IFluentType>? LocalPosArgs => _localPosArgs;
 
         public IReadOnlyDictionary<string, IFluentType>? Args => _args;
+        public Func<IFluentType, string>? FormatterFunc { get; }
+        public Func<string, string>? TransformFunc { get; }
+
+
+        public bool UseIsolating { get; init; }
+
 
         public bool IncrPlaceable()
         {
-            return ++Placeable <= Bundle.MaxPlaceable;
+            return ++Placeable <= _maxPlaceable;
         }
 
         public void AddError(ResolverFluentError resolverFluentError)
@@ -171,7 +207,7 @@ namespace Linguini.Bundle.Resolver
 
         public PluralCategory GetPluralRules(RuleType type, FluentNumber number)
         {
-            return ResolverHelpers.PluralRules.GetPluralCategory(Bundle.Culture, type, number);
+            return ResolverHelpers.PluralRules.GetPluralCategory(_culture, type, number);
         }
 
         public string ResolveReference(Identifier refId)

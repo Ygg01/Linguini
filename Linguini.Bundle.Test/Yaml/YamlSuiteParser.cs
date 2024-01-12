@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
-using Linguini.Bundle.Func;
+using Linguini.Bundle.Function;
 using Linguini.Bundle.Types;
 using NUnit.Framework;
 using YamlDotNet.RepresentationModel;
@@ -88,7 +88,10 @@ namespace Linguini.Bundle.Test.Yaml
             foreach (var res in parsedTestSuite.Resources)
             {
                 bundle.AddResource(res, out var err);
-                errors.AddRange(err);
+                if (err != null)
+                {
+                    errors.AddRange(err);
+                }
             }
 
             if (parsedTestSuite.Bundle != null)
@@ -147,7 +150,10 @@ namespace Linguini.Bundle.Test.Yaml
                         else
                         {
                             testBundle.AddResource(res, out var errs);
-                            errors.AddRange(errs);
+                            if (errs != null)
+                            {
+                                errors.AddRange(errs);
+                            }
                         }
                     }
                 }
@@ -189,10 +195,10 @@ namespace Linguini.Bundle.Test.Yaml
 
 
         private static void AssertErrorCases(List<ResolverTestSuite.ResolverTestError> expectedErrors,
-            IList<FluentError> errs,
+            IList<FluentError>? errs,
             String testName)
         {
-            Assert.That(expectedErrors.Count, Is.EqualTo(errs.Count), testName);
+            Assert.That(expectedErrors.Count, Is.EqualTo(errs!.Count), testName);
             for (var i = 0; i < expectedErrors.Count; i++)
             {
                 var actualError = errs[i];

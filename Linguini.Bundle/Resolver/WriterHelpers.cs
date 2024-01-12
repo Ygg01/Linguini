@@ -14,7 +14,7 @@ namespace Linguini.Bundle.Resolver
         public static void Write(this Pattern pattern, TextWriter writer, Scope scope)
         {
             var len = pattern.Elements.Count;
-            var transformFunc = scope.Bundle.TransformFunc;
+            var transformFunc = scope.TransformFunc;
             var placeablePos = 0;
             for (var i = 0; i < len; i++)
             {
@@ -46,7 +46,7 @@ namespace Linguini.Bundle.Resolver
                         return;
                     }
 
-                    var needsIsolating = scope.Bundle.UseIsolating
+                    var needsIsolating = scope.UseIsolating
                                          && len > 1;
 
                     if (needsIsolating)
@@ -215,9 +215,9 @@ namespace Linguini.Bundle.Resolver
 
         private static void Write(this IFluentType self, TextWriter writer, Scope scope)
         {
-            if (scope.Bundle.FormatterFunc != null)
+            if (scope.FormatterFunc != null)
             {
-                writer.Write(scope.Bundle.FormatterFunc(self));
+                writer.Write(scope.FormatterFunc(self));
             }
 
             writer.Write(self.AsString());

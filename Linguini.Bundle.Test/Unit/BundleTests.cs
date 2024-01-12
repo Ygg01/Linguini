@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,23 +23,23 @@ namespace Linguini.Bundle.Test.Unit
         private readonly Func<IFluentType, string> _formatter = _ => "";
         private readonly Func<string, string> _transform = str => str.ToUpper(CultureInfo.InvariantCulture);
 
-        private static string _res1 = @"
+        private const string Res1 = @"
 term = term
     .attr = 3";
 
-        private static string _wrong = @"
+        private const string Wrong = @"
     term = 1";
 
-        private static string _multi = @"
+        private const string Multi = @"
 term1 = val1
 term2 = val2
     .attr = 6";
 
-        private static string _replace1 = @"
+        private const string Replace1 = @"
 term1 = val1
 term2 = val2";
 
-        private static string _replace2 = @"
+        private const string Replace2 = @"
 term1 = xxx
 new1  = new
     .attr = 6";
@@ -90,7 +91,7 @@ new1  = new
         {
             var bundler = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
-                .AddResource(_replace1);
+                .AddResource(Replace1);
 
             var bundle = bundler.UncheckedBuild();
             Assert.That(bundle.TryGetAttrMessage("term1", null, out _, out var termMsg));
@@ -98,7 +99,7 @@ new1  = new
             Assert.That(bundle.TryGetAttrMessage("term2", null, out _, out var termMsg2));
             Assert.That("val2", Is.EqualTo(termMsg2));
 
-            bundle.AddResourceOverriding(_replace2);
+            bundle.AddResourceOverriding(Replace2);
             Assert.That(bundle.TryGetAttrMessage("term2", null, out _, out _));
             Assert.That(bundle.TryGetAttrMessage("term1", null, out _, out termMsg));
             Assert.That("xxx", Is.EqualTo(termMsg));
@@ -112,7 +113,7 @@ new1  = new
         {
             var bundler = LinguiniBuilder.Builder()
                 .Locales("en-US", "sr-RS")
-                .AddResources(_wrong, _res1)
+                .AddResources(Wrong, Res1)
                 .SetFormatterFunc(_formatter)
                 .SetTransformFunc(_transform)
                 .AddFunction("id", _idFunc)
@@ -140,7 +141,7 @@ new1  = new
         {
             var bundler = LinguiniBuilder.Builder()
                 .Locale("en-US")
-                .AddResource(_multi)
+                .AddResource(Multi)
                 .AddFunction("id", _idFunc)
                 .AddFunction("zero", _zeroFunc)
                 .UncheckedBuild();
@@ -176,11 +177,16 @@ new1  = new
                 UseConcurrent = true,
             };
             var optBundle = FluentBundle.MakeUnchecked(bundleOpt);
+            
             Parallel.For(0, 10, i => optBundle.AddResource($"term-1 = {i}", out _));
             Parallel.For(0, 10, i => optBundle.AddResource($"term-2= {i}", out _));
             Parallel.For(0, 10, i => optBundle.TryGetAttrMessage("term-1", null, out _, out _));
             Parallel.For(0, 10, i => optBundle.AddResourceOverriding($"term-2= {i + 1}"));
             Assert.That(optBundle.HasMessage("term-1"));
+            
+            // Frozen bundle are read only and should be thread-safe
+            var frozenBundle = optBundle.ToFrozenBundle();
+            Parallel.For(0, 10, i => frozenBundle.TryGetAttrMessage("term-1", null, out _, out _));
         }
 
         [Test]
@@ -208,7 +214,7 @@ new1  = new
             bundle.TryAddFunction("id", _idFunc);
             
             Assert.That(bundle.TryAddFunction("id", _zeroFunc), Is.False);
-            Assert.Throws<KeyNotFoundException>(() => bundle.AddFunctionUnchecked("id", _zeroFunc));
+            Assert.Throws<ArgumentException>(() => bundle.AddFunctionUnchecked("id", _zeroFunc));
         }
         
         [Test]
@@ -221,7 +227,7 @@ new1  = new
         {
             var bundle = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
-                .AddResource(_replace2)
+                .AddResource(Replace2)
                 .UncheckedBuild();
 
             Assert.That(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
@@ -238,7 +244,7 @@ new1  = new
         {
             var bundle = LinguiniBuilder.Builder()
                 .CultureInfo(new CultureInfo("en"))
-                .AddResource(_replace2)
+                .AddResource(Replace2)
                 .UncheckedBuild();
 
             Assert.That(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
@@ -252,7 +258,7 @@ new1  = new
                 yield return new TestCaseData("### Comment\r\nterm1")
                     .Returns(new List<ErrorSpan?>
                     {
-                        new ErrorSpan(2, 13, 18, 18, 19)
+                        new(2, 13, 18, 18, 19)
                     });
             }
         }
@@ -264,6 +270,8 @@ new1  = new
             var (_, error) = LinguiniBuilder.Builder().Locale("en-US")
                 .AddResource(input)
                 .Build();
+            Debug.Assert(error != null, nameof(error) + " != null");
+            Assert.That(error, Is.Not.Empty);
             return error.Select(e => e.GetSpan()).ToList();
         }
 
@@ -287,7 +295,7 @@ attack-log = { $$attacker } attacked {$$defender}.
             var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
                 .AddResource(input)
                 .Build();
-            Assert.That(err, Is.Empty);
+            Assert.That(err, Is.Null);
             var args = new Dictionary<string, IFluentType>()
             {
                 ["attacker"] = (FluentReference)"cat",
@@ -312,18 +320,23 @@ call-attr-no-args = {-ship.gender() ->
         
         [Test]
         [Parallelizable]
-        public void TestMacrosFail()
+        public void TestExtensionsWork()
         {
             var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
                 .AddResource(Macros)
                 .Build();
-            Assert.That(err, Is.Empty);
+            Assert.That(err, Is.Null);
             var args = new Dictionary<string, IFluentType>
             {
                 ["style"] = (FluentString)"chicago",
             };
             Assert.That(bundle.TryGetMessage("call-attr-no-args", args, out _, out var message));
             Assert.That("It", Is.EqualTo(message));
+            
+            // Check Frozen bundle behaves similarly
+            var frozenBundle = bundle.ToFrozenBundle();
+            Assert.That(frozenBundle.TryGetMessage("call-attr-no-args", args, out _, out var frozenMessage));
+            Assert.That("It", Is.EqualTo(frozenMessage));
         }
         private const string DynamicSelectors = @"
 -creature-fairy = fairy
@@ -344,7 +357,7 @@ you-see = You see { $$object.StartsWith ->
                 .Locale("en-US")
                 .AddResource(DynamicSelectors)
                 .Build();
-            Assert.That(err, Is.Empty);
+            Assert.That(err, Is.Null);
             var args = new Dictionary<string, IFluentType>
             {
                 ["object"] = (FluentReference)"creature-elf",
@@ -357,6 +370,56 @@ you-see = You see { $$object.StartsWith ->
             };
             Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message2));
             Assert.That("You see a fairy.", Is.EqualTo(message2));
+            
+            // Check Frozen bundle behaves similarly
+            var frozenBundle = bundle.ToFrozenBundle();
+            args = new Dictionary<string, IFluentType>
+            {
+                ["object"] = (FluentReference)"creature-elf",
+            };
+            Assert.That(frozenBundle.TryGetMessage("you-see", args, out _, out var frozenMessage1));
+            Assert.That("You see an elf.", Is.EqualTo(frozenMessage1));
+            args = new Dictionary<string, IFluentType>
+            {
+                ["object"] = (FluentReference)"creature-fairy",
+            };
+            Assert.That(frozenBundle.TryGetMessage("you-see", args, out _, out var frozenMessage2));
+            Assert.That("You see a fairy.", Is.EqualTo(frozenMessage2));
+        }
+
+        [Test]
+        public void TestDeepClone()
+        {
+            var originalBundleOption = new FluentBundleOption
+            {
+                Locales = { "en-US" },
+                MaxPlaceable = 123,
+                UseIsolating = false,
+                TransformFunc = _transform,
+                FormatterFunc = _formatter,
+                Functions = new Dictionary<string, ExternalFunction>()
+                {
+                    ["zero"] = _zeroFunc,
+                    ["id"] = _idFunc,
+                }
+            };
+
+            // Assume FluentBundle object has DeepClone method
+            FluentBundle originalBundle = FluentBundle.MakeUnchecked(originalBundleOption);
+            FluentBundle clonedBundle = originalBundle.DeepClone();
+
+            // Assert that the original and cloned objects are not the same reference
+            Assert.That(originalBundle, Is.Not.SameAs(clonedBundle));
+
+            // Assert that the properties are copied properly
+            Assert.That(originalBundle, Is.EqualTo(clonedBundle));
+            
+            // Assert that if original property is changed, new property isn't.
+            originalBundle.AddFunctionOverriding("zero", _idFunc);
+            clonedBundle.TryGetFunction("zero", out var clonedZero);
+            Assert.That((FluentFunction) _zeroFunc, Is.EqualTo(clonedZero));
+            originalBundle.TryGetFunction("zero", out var originalZero);
+            Assert.That((FluentFunction) _idFunc, Is.EqualTo(originalZero));
         }
     }
 }

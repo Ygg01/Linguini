@@ -5,13 +5,13 @@
         <Nullable>enable</Nullable>
         <OutputType>Library</OutputType>
         <PackageVersion>0.7.0</PackageVersion>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="NUnit" Version="4.0.1" />
         <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.0" />
         <PackageReference Include="YamlDotNet" Version="11.0.1" />
     </ItemGroup>
 
