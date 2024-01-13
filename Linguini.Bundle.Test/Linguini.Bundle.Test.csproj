@@ -4,7 +4,7 @@
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
         <OutputType>Library</OutputType>
-        <PackageVersion>0.7.0</PackageVersion>
+        <PackageVersion>0.8.0</PackageVersion>
         <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     </PropertyGroup>
 
