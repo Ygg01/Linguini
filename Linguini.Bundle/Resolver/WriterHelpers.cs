@@ -100,11 +100,9 @@ namespace Linguini.Bundle.Resolver
                 for (var i = 0; i < selectExpression.Variants.Count; i++)
                 {
                     var variant = selectExpression.Variants[i];
-                    if (variant.IsDefault)
-                    {
-                        variant.Value.Write(writer, scope);
-                        return errors.Count == 0;
-                    }
+                    if (!variant.IsDefault) continue;
+                    variant.Value.Write(writer, scope);
+                    return errors.Count == 0;
                 }
 
                 errors.Add(ResolverFluentError.MissingDefault());

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using Linguini.Syntax.Parser.Error;
 
-
 namespace Linguini.Syntax.Ast
 {
     public record Resource
@@ -99,7 +98,17 @@ namespace Linguini.Syntax.Ast
 
     public class Junk : IEntry
     {
-        public ReadOnlyMemory<char> Content;
+        public readonly ReadOnlyMemory<char> Content;
+
+        public Junk()
+        {
+            Content = ReadOnlyMemory<char>.Empty;
+        }
+        
+        public Junk(ReadOnlyMemory<char> content)
+        {
+            Content = content;
+        }
 
         public string AsStr()
         {

@@ -225,7 +225,7 @@ namespace Linguini.Syntax.Ast
     public class SelectExpressionBuilder : IAddVariant
     {
         private readonly IInlineExpression _selector;
-        private List<Variant> _variants = new();
+        private readonly List<Variant> _variants = new();
 
         public SelectExpressionBuilder(IInlineExpression selector)
         {
@@ -249,7 +249,7 @@ namespace Linguini.Syntax.Ast
             var selector = defaultSelector is >= 0 && defaultSelector < _variants.Count
                 ? _variants.Count - 1
                 : defaultSelector!.Value;
-            _variants[selector].IsDefault = true;
+            _variants[selector].InternalDefault = true;
             return this;
         }
 
@@ -276,32 +276,35 @@ namespace Linguini.Syntax.Ast
     public class Variant
     {
         public readonly VariantType Type;
-        public ReadOnlyMemory<char> Key;
-        public Pattern Value;
-        public bool IsDefault;
+        public readonly ReadOnlyMemory<char> Key;
+        public Pattern Value => InternalValue;
+        public bool IsDefault => InternalDefault;
+       
+        protected internal bool InternalDefault;
+        protected internal Pattern InternalValue;
 
         public Variant(VariantType type, ReadOnlyMemory<char> key)
         {
             Type = type;
             Key = key;
-            Value = new Pattern();
-            IsDefault = false;
+            InternalValue = new Pattern();
+            InternalDefault = false;
         }
         
         public Variant(string key, PatternBuilder builder)
         {
             Type = VariantType.Identifier;
             Key = key.AsMemory();
-            Value = builder.Build();
-            IsDefault = false;
+            InternalValue = builder.Build();
+            InternalDefault = false;
         }
         
         public Variant(float key, PatternBuilder builder)
         {
             Type = VariantType.NumberLiteral;
             Key = key.ToString(CultureInfo.InvariantCulture).AsMemory();
-            Value = builder.Build();
-            IsDefault = false;
+            InternalValue = builder.Build();
+            InternalDefault = false;
         }
     }
 }
