@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,7 +13,63 @@ namespace Linguini.Serialization.Converters
     {
         public override Pattern Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            if (reader.TokenType != JsonTokenType.StartObject)
+            {
+                throw new JsonException();
+            }
+
+            var builder = new PatternBuilder();
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.EndObject)
+                {
+                    break;
+                }
+
+                if (reader.TokenType == JsonTokenType.PropertyName)
+                {
+                    string? propertyName = reader.GetString();
+
+                    reader.Read();
+
+                    switch (propertyName)
+                    {
+                        case "type":
+                            var typeField = reader.GetString();
+                            if (typeField != "Pattern")
+                            {
+                                throw new JsonException(
+                                    $"Invalid type: Expected 'Attribute' found {typeField} instead");
+                            }
+
+                            break;
+                        case "elements":
+                            AddElements(ref reader, builder, options);
+                            break;
+                    }
+                }
+            }
+
+            return builder.Build();
+        }
+
+        private static void AddElements(ref Utf8JsonReader reader, PatternBuilder builder,
+            JsonSerializerOptions options)
+        {
+            if (reader.TokenType != JsonTokenType.StartArray)
+            {
+                throw new JsonException();
+            }
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.EndArray) break;
+
+                if (reader.TokenType != JsonTokenType.StartObject) continue;
+
+                var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
+                builder.AddExpression(ResourceSerializer.ReadExpression(el, options));
+            }
         }
 
         public override void Write(Utf8JsonWriter writer, Pattern pattern, JsonSerializerOptions options)
@@ -54,6 +112,45 @@ namespace Linguini.Serialization.Converters
                 writer.WriteStringValue(textLiteralBuffer.ToString());
                 writer.WriteEndObject();
             }
+        }
+
+        public static bool TryReadPattern(JsonElement jsonValue, JsonSerializerOptions options,
+            [MaybeNullWhen(false)] out Pattern pattern)
+        {
+            if (!jsonValue.TryGetProperty("type", out var jsonType)
+                && "Placeable".Equals(jsonType.GetString()))
+            {
+                throw new JsonException("Placeable must have `type` equal to `Placeable`.");
+            }
+
+            if (!jsonValue.TryGetProperty("elements", out var elements)
+                && elements.ValueKind != JsonValueKind.Array)
+            {
+                throw new JsonException("Placeable must have an `elements` array.");
+            }
+
+            var patternElements = new List<IPatternElement>();
+            foreach (var element in elements.EnumerateArray())
+            {
+                var elementType = element.GetProperty("type").GetString();
+                switch (elementType)
+                {
+                    case "TextElement":
+                        var textValue = element.GetProperty("value").GetString() ?? "";
+                        patternElements.Add(new TextLiteral(textValue));
+                        break;
+                    case "Placeable":
+                        if (PlaceableSerializer.TryProcessPlaceable(element, options, out var placeable))
+                        {
+                            patternElements.Add(new Placeable(placeable));
+                        }
+
+                        break;
+                }
+            }
+
+            pattern = new Pattern(patternElements);
+            return true;
         }
     }
 }

@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linguini.Serialization", "L
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linguini.Bench", "Linguini.Bench\Linguini.Bench.csproj", "{464CC3E4-7259-4840-B342-B346F3533CED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linguini.Serialization.Test", "Linguini.Serialization.Test\Linguini.Serialization.Test.csproj", "{32A38C1D-CA5E-41DA-8FCB-07551D35D382}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,5 +66,9 @@ Global
 		{464CC3E4-7259-4840-B342-B346F3533CED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{464CC3E4-7259-4840-B342-B346F3533CED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{464CC3E4-7259-4840-B342-B346F3533CED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32A38C1D-CA5E-41DA-8FCB-07551D35D382}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32A38C1D-CA5E-41DA-8FCB-07551D35D382}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32A38C1D-CA5E-41DA-8FCB-07551D35D382}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32A38C1D-CA5E-41DA-8FCB-07551D35D382}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

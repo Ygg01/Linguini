@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
@@ -7,7 +8,8 @@ namespace Linguini.Serialization.Converters
 {
     public class FunctionReferenceSerializer : JsonConverter<FunctionReference>
     {
-        public override FunctionReference Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override FunctionReference Read(ref Utf8JsonReader reader, Type typeToConvert,
+            JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
@@ -22,6 +24,28 @@ namespace Linguini.Serialization.Converters
             writer.WritePropertyName("arguments");
             JsonSerializer.Serialize(writer, value.Arguments, options);
             writer.WriteEndObject();
+        }
+
+        public static FunctionReference ProcessFunctionReference(JsonElement el,
+            JsonSerializerOptions options)
+        {
+            Identifier? ident = null;
+            if (!el.TryGetProperty("id", out JsonElement value) &&
+                !IdentifierSerializer.TryGetIdentifier(value, options, out ident))
+            {
+                throw new JsonException("Function reference must contain `id` field");
+            }
+
+            CallArguments? arguments = null;
+
+            if (!el.TryGetProperty("arguments", out var jsonArguments) &&
+                CallArgumentsSerializer.TryGetCallArguments(jsonArguments, options, out arguments)
+               )
+            {
+                throw new JsonException("Function reference must contain `arguments` field");
+            }
+
+            return new FunctionReference(ident!, arguments!.Value);
         }
     }
 }

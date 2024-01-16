@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
@@ -26,6 +27,25 @@ namespace Linguini.Serialization.Converters
             }
 
             writer.WriteEndObject();
+        }
+
+        public static MessageReference ProcessMessageReference(JsonElement el,
+            JsonSerializerOptions options)
+        {
+            if (el.TryGetProperty("id", out var getProp) 
+                && IdentifierSerializer.TryGetIdentifier(getProp, options, out var ident))
+            {
+                Identifier? attr = null;
+                if (el.TryGetProperty("attribute", out var prop))
+                {
+                    IdentifierSerializer.TryGetIdentifier(prop, options, out attr);
+                }
+
+                return new MessageReference(ident, attr);
+            }
+        
+            throw new JsonException("MessageReference requires `id` field");
+           
         }
     }
 }

@@ -291,6 +291,14 @@ namespace Linguini.Syntax.Ast
             InternalDefault = false;
         }
         
+        public Variant(VariantType type, ReadOnlyMemory<char> key, Pattern pattern, bool isDefault = false)
+        {
+            Type = type;
+            Key = key;
+            InternalValue = pattern;
+            InternalDefault = isDefault;
+        }
+        
         public Variant(string key, PatternBuilder builder)
         {
             Type = VariantType.Identifier;

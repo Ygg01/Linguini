@@ -18,6 +18,12 @@ namespace Linguini.Syntax.Ast
             Id = id;
             Value = value;
         }
+        
+        public Attribute(string id, PatternBuilder builder)
+        {
+            Id = new Identifier(id);
+            Value = builder.Build();
+        }
 
         public void Deconstruct(out Identifier id, out Pattern value)
         {
@@ -50,6 +56,21 @@ namespace Linguini.Syntax.Ast
     {
         private readonly List<IPatternElement> _patternElements = new();
 
+        public PatternBuilder()
+        {
+            
+        }
+
+        public PatternBuilder(string text)
+        {
+            _patternElements.Add(new TextLiteral(text));
+        }
+
+        public PatternBuilder(float number)
+        {
+            _patternElements.Add(new Placeable(new NumberLiteral(number)));
+        }
+        
         public PatternBuilder AddText(string textLiteral)
         {
             _patternElements.Add(new TextLiteral(textLiteral));
@@ -101,6 +122,25 @@ namespace Linguini.Syntax.Ast
         public PatternBuilder AddSelectExpression(SelectExpressionBuilder selectExpressionBuilder)
         {
             _patternElements.Add(new Placeable(selectExpressionBuilder.Build()));
+            return this;
+        }
+        
+        public PatternBuilder AddExpression(IExpression expr)
+        {
+            if (expr is TextLiteral text)
+            {
+                _patternElements.Add(text);
+            }
+            else
+            {
+                _patternElements.Add(new Placeable(expr));
+            }
+            return this;
+        }
+        
+        public PatternBuilder AddPlaceable(Placeable placeable)
+        {
+            _patternElements.Add(placeable);
             return this;
         }
 
