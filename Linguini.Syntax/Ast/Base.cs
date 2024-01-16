@@ -8,7 +8,7 @@ using System.Text;
 namespace Linguini.Syntax.Ast
 {
 
-    public class Attribute
+    public class Attribute : IEquatable<Attribute>
     {
         public readonly Identifier Id;
         public readonly Pattern Value;
@@ -35,9 +35,29 @@ namespace Linguini.Syntax.Ast
         {
             return new Attribute(new Identifier(id), patternBuilder.Build());
         }
+
+        public bool Equals(Attribute? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Id.Equals(other.Id) && Value.Equals(other.Value);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Attribute)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, Value);
+        }
     }
 
-    public class Pattern
+    public class Pattern : IEquatable<Pattern>
     {
         public readonly List<IPatternElement> Elements;
 
@@ -49,6 +69,38 @@ namespace Linguini.Syntax.Ast
         public Pattern()
         {
             Elements = new List<IPatternElement>();
+        }
+
+        public bool Equals(Pattern? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            if (Elements.Count != other.Elements.Count)
+            {
+                return false;
+            }
+
+            for (var index = 0; index < Elements.Count; index++)
+            {
+                var patternElement = Elements[index];
+                var otherPatternElement = other.Elements[index];
+                if (!patternElement.Equals(otherPatternElement)) return false;
+            }
+
+            return true;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Pattern)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Elements.GetHashCode();
         }
     }
 
