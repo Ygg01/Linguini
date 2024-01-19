@@ -66,12 +66,6 @@ namespace Linguini.Syntax.Ast
             Value = num.ToString(CultureInfo.InvariantCulture).AsMemory();
         }
 
-
-        public bool Equals(IInlineExpression other)
-        {
-            throw new NotImplementedException();
-        }
-
         public override string ToString()
         {
             return Value.Span.ToString();
