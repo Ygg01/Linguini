@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using Linguini.Bundle.Errors;
@@ -310,46 +309,26 @@ namespace Linguini.Bundle.Resolver
 
         public static void WriteError(this IInlineExpression self, TextWriter writer)
         {
-            if (self is MessageReference msgRef)
+            switch (self)
             {
-                if (msgRef.Attribute == null)
-                {
-                    writer.Write($"{msgRef.Id}");
+                case MessageReference msgRef:
+                    writer.Write(msgRef.Attribute == null ? $"{msgRef.Id}" : $"{msgRef.Id}.{msgRef.Attribute}");
                     return;
-                }
-
-                writer.Write($"{msgRef.Id}.{msgRef.Attribute}");
-                return;
-            }
-
-            if (self is TermReference termRef)
-            {
-                if (termRef.Attribute == null)
-                {
-                    writer.Write($"-{termRef.Id}");
+                case TermReference termReference:
+                    writer.Write(termReference.Attribute == null ? $"-{termReference.Id}" : $"-{termReference.Id}.{termReference.Attribute}");
                     return;
-                }
-
-                writer.Write($"-{termRef.Id}.{termRef.Attribute}");
+                case FunctionReference funcRef:
+                    writer.Write($"{funcRef.Id}()");
+                    return;
+                case VariableReference varRef:
+                    writer.Write($"${varRef.Id}");
+                    return;
+                case DynamicReference dynamicReference:
+                    writer.Write($"$${dynamicReference.Id}");
+                    return;
+                default:
+                    throw new ArgumentException($"Unexpected inline expression `{self.GetType()}`!");
             }
-            else if (self is FunctionReference funcRef)
-            {
-                writer.Write($"{funcRef.Id}()");
-                return;
-            }
-            else if (self is VariableReference varRef)
-            {
-                writer.Write($"${varRef.Id}");
-                return;
-            }
-            else if (self is DynamicReference dynamicReference)
-            {
-                writer.Write($"$${dynamicReference.Id}");
-                return;
-            }
-
-
-            throw new ArgumentException($"Unexpected inline expression `{self.GetType()}`!");
         }
     }
 }
