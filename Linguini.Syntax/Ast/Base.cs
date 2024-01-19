@@ -212,7 +212,26 @@ namespace Linguini.Syntax.Ast
 
     public class Identifier : IEquatable<Identifier>
     {
+        public class IdentifierComparator : IEqualityComparer<Identifier>
+        {
+            public bool Equals(Identifier? x, Identifier? y)
+            {
+                if (ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, null)) return false;
+                if (ReferenceEquals(y, null)) return false;
+                if (x.GetType() != y.GetType()) return false;
+                return x.Name.Span.SequenceEqual(y.Name.Span);
+            }
+
+            public int GetHashCode(Identifier obj)
+            {
+                return obj.Name.GetHashCode();
+            }
+        }
+
         public readonly ReadOnlyMemory<char> Name;
+        
+        public static readonly IdentifierComparator Comparator= new ();
 
         public Identifier(ReadOnlyMemory<char> name)
         {
@@ -233,12 +252,12 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return ToString().Equals(other.ToString());
+            return Comparator.Equals(this, other);
         }
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode();
+            return Comparator.GetHashCode(this);
         }
     }
 
@@ -261,7 +280,7 @@ namespace Linguini.Syntax.Ast
 
     public interface IInlineExpression : IExpression
     {
-        public static InlineExpressionComparer Comparer = new();
+        public static readonly InlineExpressionComparer Comparer = new();
     }
 
     public class InlineExpressionComparer : IEqualityComparer<IInlineExpression>

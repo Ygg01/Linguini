@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using Linguini.Serialization.Converters;
 using Linguini.Syntax.Ast;
 using NUnit.Framework;
@@ -25,7 +26,7 @@ public class AttributeSerializerTest
         ""type"": ""Pattern"",
         ""elements"": [
             {
-                ""type"": ""TextLiteral"",
+                ""type"": ""TextElement"",
                 ""value"": ""description""
             }
         ]
@@ -34,5 +35,22 @@ public class AttributeSerializerTest
         Attribute expected = new Attribute("desc", new PatternBuilder("description"));
         Attribute? actual = JsonSerializer.Deserialize<Attribute>(attributeJson, TestUtil.Options);
         Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    [TestOf(typeof(AttributeSerializer))]
+    [Parallelizable]
+    public void RoundTrip()
+    {
+        Attribute start = new Attribute("desc", new PatternBuilder("d1"));
+        var text = "";
+        using (var memoryStream = new MemoryStream())
+        {
+            JsonSerializer.Serialize(memoryStream, start, TestUtil.Options);
+            text = Encoding.UTF8.GetString(memoryStream.ToArray());
+        }
+
+        Attribute deserialized = JsonSerializer.Deserialize<Attribute>(text, TestUtil.Options)!;
+        Assert.That(deserialized, Is.EqualTo(start));
     }
 }
