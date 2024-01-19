@@ -14,13 +14,12 @@ public class AttributeSerializerTest
     [Parallelizable]
     public void TestAttributeSerializer()
     {
-        Attribute expected = new Attribute("desc", new PatternBuilder("description"));
         string attributeJson = @"
 {
     ""type"": ""Attribute"",
     ""id"": {
         ""type"": ""Identifier"",
-        ""value"": ""desc""
+        ""name"": ""desc""
     },
     ""value"": {
         ""type"": ""Pattern"",
@@ -32,6 +31,7 @@ public class AttributeSerializerTest
         ]
     }
 }";
+        Attribute expected = new Attribute("desc", new PatternBuilder("description"));
         Attribute? actual = JsonSerializer.Deserialize<Attribute>(attributeJson, TestUtil.Options);
         Assert.That(actual, Is.EqualTo(expected));
     }

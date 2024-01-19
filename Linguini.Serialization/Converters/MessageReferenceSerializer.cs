@@ -36,7 +36,7 @@ namespace Linguini.Serialization.Converters
                 && IdentifierSerializer.TryGetIdentifier(getProp, options, out var ident))
             {
                 Identifier? attr = null;
-                if (el.TryGetProperty("attribute", out var prop))
+                if (el.TryGetProperty("attribute", out var prop) && prop.ValueKind != JsonValueKind.Null)
                 {
                     IdentifierSerializer.TryGetIdentifier(prop, options, out attr);
                 }

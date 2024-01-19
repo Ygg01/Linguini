@@ -18,10 +18,8 @@ namespace Linguini.Serialization.Converters
 
             string? id = null;
 
-            while (true)
+            while (reader.Read())
             {
-                reader.Read();
-
                 if (reader.TokenType == JsonTokenType.EndObject)
                 {
                     break;
@@ -44,7 +42,7 @@ namespace Linguini.Serialization.Converters
                             }
 
                             break;
-                        case "value":
+                        case "name":
                             id = reader.GetString();
                             break;
                         default:
@@ -74,7 +72,7 @@ namespace Linguini.Serialization.Converters
         public static bool TryGetIdentifier(JsonElement el, JsonSerializerOptions options,
             [MaybeNullWhen(false)] out Identifier ident)
         {
-            if (!el.TryGetProperty("value", out var valueElement) || valueElement.ValueKind != JsonValueKind.String)
+            if (!el.TryGetProperty("name", out var valueElement) || valueElement.ValueKind != JsonValueKind.String)
             {
                 ident = null;
                 return false;

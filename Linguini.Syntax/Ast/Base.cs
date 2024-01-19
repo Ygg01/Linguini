@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 // ReSharper disable ClassNeverInstantiated.Global
@@ -165,6 +166,12 @@ namespace Linguini.Syntax.Ast
             return this;
         }
         
+        public PatternBuilder AddFunctionReference(string functionName, CallArgumentsBuilder builder)
+        {
+            _patternElements.Add(new Placeable(new FunctionReference(functionName, builder.Build())));
+            return this;
+        }
+        
         public PatternBuilder AddMessageReference(string messageId, string? attribute = null)
         {
             _patternElements.Add(new Placeable(new MessageReference(messageId, attribute)));
@@ -254,6 +261,42 @@ namespace Linguini.Syntax.Ast
 
     public interface IInlineExpression : IExpression
     {
+        public static InlineExpressionComparer Comparer = new();
+    }
+
+    public class InlineExpressionComparer : IEqualityComparer<IInlineExpression>
+    {
+        public bool Equals(IInlineExpression? left, IInlineExpression? right)
+        {
+            return (left, right) switch
+            {
+                (DynamicReference l, DynamicReference r) => l.Equals(r),
+                (FunctionReference l, FunctionReference r) => l.Equals(r),
+                (MessageReference l, MessageReference r) => l.Equals(r),
+                (NumberLiteral l, NumberLiteral r) => l.Equals(r),
+                (Placeable l, Placeable r) => l.Equals(r),
+                (TermReference l, TermReference r) => l.Equals(r),
+                (TextLiteral l, TextLiteral r) => l.Equals(r),
+                (VariableReference l, VariableReference r) => l.Equals(r),
+                _ => false
+            };
+        }
+
+        public int GetHashCode(IInlineExpression obj)
+        {
+            return obj switch
+            {
+                DynamicReference dr => dr.GetHashCode(),
+                FunctionReference fr => fr.GetHashCode(),
+                MessageReference mr => mr.GetHashCode(),
+                NumberLiteral nl => nl.GetHashCode(),
+                Placeable p => p.GetHashCode(),
+                TermReference term => term.GetHashCode(),
+                TextLiteral tl => tl.GetHashCode(),
+                VariableReference vr => vr.GetHashCode(),
+                _ => throw new ArgumentOutOfRangeException(nameof(obj), obj, null)
+            };
+        }
     }
 
     public static class Base

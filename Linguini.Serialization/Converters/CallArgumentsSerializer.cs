@@ -13,7 +13,13 @@ namespace Linguini.Serialization.Converters
     {
         public override CallArguments Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
+            if (TryGetCallArguments(el, options, out var value))
+            {
+                return value.Value;
+            }
+
+            throw new JsonException("Invalid CallArguments");
         }
 
         public override void Write(Utf8JsonWriter writer, CallArguments value, JsonSerializerOptions options)
