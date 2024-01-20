@@ -280,7 +280,8 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Id.Equals(other.Id) && Equals(Attribute, other.Attribute) && Nullable.Equals(Arguments, other.Arguments);
+            return Id.Equals(other.Id) && Identifier.Comparator.Equals(Attribute, other.Attribute) &&
+                   Nullable.Equals(Arguments, other.Arguments);
         }
 
         public override bool Equals(object? obj)

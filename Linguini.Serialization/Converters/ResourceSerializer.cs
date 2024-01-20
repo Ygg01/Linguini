@@ -99,7 +99,13 @@ namespace Linguini.Serialization.Converters
         public static NumberLiteral ProcessNumberLiteral(JsonElement el,
             JsonSerializerOptions options)
         {
-            return new(el.GetProperty("value").GetDouble());
+            if (el.TryGetProperty("value", out var v) && v.ValueKind == JsonValueKind.String &&
+                !"".Equals(v.GetString()))
+            {
+                return new NumberLiteral(v.GetString().AsMemory());
+            }
+
+            throw new JsonException("Expected value to be a valid number");
         }
 
         public static IExpression ReadExpression(JsonElement el, JsonSerializerOptions options)
@@ -112,7 +118,7 @@ namespace Linguini.Serialization.Converters
                 "NumberLiteral" => ProcessNumberLiteral(el, options),
                 "Placeable" => PlaceableSerializer.ProcessPlaceable(el, options),
                 "TermReference" => TermReferenceSerializer.ProcessTermReference(el, options),
-                "TextLiteral" => ProcessTextLiteral(el, options),
+                "StringLiteral" or "TextElement" or "TextLiteral" => ProcessTextLiteral(el, options),
                 "VariableReference" => VariableReferenceSerializer.ProcessVariableReference(el, options),
                 "SelectExpression" => SelectExpressionSerializer.ProcessSelectExpression(el, options),
                 _ => throw new JsonException("Unexpected value")

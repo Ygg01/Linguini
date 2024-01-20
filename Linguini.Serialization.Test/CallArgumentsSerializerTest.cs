@@ -35,7 +35,7 @@ public class CallArgumentsSerializerTest
                 ""name"": ""y""
             },
             ""value"": {
-                ""value"": 3,
+                ""value"": ""3"",
                 ""type"": ""NumberLiteral""
             }
         }

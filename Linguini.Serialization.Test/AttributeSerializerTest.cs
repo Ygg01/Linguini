@@ -26,7 +26,7 @@ public class AttributeSerializerTest
         ""type"": ""Pattern"",
         ""elements"": [
             {
-                ""type"": ""TextElement"",
+                ""type"": ""StringLiteral"",
                 ""value"": ""description""
             }
         ]
