@@ -8,9 +8,10 @@ namespace Linguini.Serialization.Converters
 {
     public class MessageReferenceSerializer : JsonConverter<MessageReference>
     {
-        public override MessageReference Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override MessageReference Read(ref Utf8JsonReader reader, Type typeToConvert,
+            JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            return ProcessMessageReference(JsonSerializer.Deserialize<JsonElement>(ref reader, options), options);
         }
 
         public override void Write(Utf8JsonWriter writer, MessageReference msgRef, JsonSerializerOptions options)
@@ -32,7 +33,7 @@ namespace Linguini.Serialization.Converters
         public static MessageReference ProcessMessageReference(JsonElement el,
             JsonSerializerOptions options)
         {
-            if (el.TryGetProperty("id", out var getProp) 
+            if (el.TryGetProperty("id", out var getProp)
                 && IdentifierSerializer.TryGetIdentifier(getProp, options, out var ident))
             {
                 Identifier? attr = null;
@@ -43,9 +44,8 @@ namespace Linguini.Serialization.Converters
 
                 return new MessageReference(ident, attr);
             }
-        
+
             throw new JsonException("MessageReference requires `id` field");
-           
         }
     }
 }

@@ -68,8 +68,19 @@ namespace Linguini.Serialization.Converters
                 if (reader.TokenType != JsonTokenType.StartObject) continue;
 
                 var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
-                builder.AddExpression(ResourceSerializer.ReadExpression(el, options));
+                builder.AddExpression(ReadPatternExpression(el, options));
             }
+        }
+
+        private static IPatternElement ReadPatternExpression(JsonElement el, JsonSerializerOptions options)
+        {
+            var type = el.GetProperty("type").GetString();
+            return type switch
+            {
+                "TextElement" => ResourceSerializer.ProcessTextLiteral(el, options),
+                "Placeable" => PlaceableSerializer.ProcessPlaceable(el, options),
+                _ => throw new JsonException($"Unexpected type `{type}`")
+            };
         }
 
         public override void Write(Utf8JsonWriter writer, Pattern pattern, JsonSerializerOptions options)

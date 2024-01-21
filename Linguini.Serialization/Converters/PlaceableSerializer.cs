@@ -45,7 +45,7 @@ namespace Linguini.Serialization.Converters
             return true;
         }
 
-        public static IInlineExpression ProcessPlaceable(JsonElement el, JsonSerializerOptions options)
+        public static Placeable ProcessPlaceable(JsonElement el, JsonSerializerOptions options)
         {
             if (!TryProcessPlaceable(el, options, out var placeable)) throw new JsonException("Expected placeable!");
 

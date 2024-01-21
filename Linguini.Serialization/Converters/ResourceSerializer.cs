@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
 
@@ -110,7 +109,8 @@ namespace Linguini.Serialization.Converters
 
         public static IExpression ReadExpression(JsonElement el, JsonSerializerOptions options)
         {
-            IExpression x = el.GetProperty("type").GetString() switch
+            var type = el.GetProperty("type").GetString();
+            IExpression x = type switch
             {
                 "DynamicReference" => DynamicReferenceSerializer.ProcessDynamicReference(el, options),
                 "FunctionReference" => FunctionReferenceSerializer.ProcessFunctionReference(el, options),
@@ -121,7 +121,7 @@ namespace Linguini.Serialization.Converters
                 "StringLiteral" or "TextElement" or "TextLiteral" => ProcessTextLiteral(el, options),
                 "VariableReference" => VariableReferenceSerializer.ProcessVariableReference(el, options),
                 "SelectExpression" => SelectExpressionSerializer.ProcessSelectExpression(el, options),
-                _ => throw new JsonException("Unexpected value")
+                _ => throw new JsonException($"Unexpected type {type}")
             };
             return x;
         }

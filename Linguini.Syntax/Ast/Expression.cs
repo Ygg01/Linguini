@@ -416,7 +416,7 @@ namespace Linguini.Syntax.Ast
         }
     }
 
-    public struct NamedArgument : IEquatable<NamedArgument>
+    public readonly struct NamedArgument : IEquatable<NamedArgument>
     {
         public readonly Identifier Name;
         public readonly IInlineExpression Value;
@@ -548,7 +548,7 @@ namespace Linguini.Syntax.Ast
         {
             return new InlineExpressionBuilder(placeable);
         }
-        
+
         public static InlineExpressionBuilder CreatePlaceable(PlaceableBuilder placeable)
         {
             return new InlineExpressionBuilder(placeable.Build());
@@ -706,7 +706,8 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Type == other.Type && Key.Equals(other.Key) && InternalDefault == other.InternalDefault &&
+            return Type == other.Type && Key.Span.SequenceEqual(other.Key.Span) &&
+                   InternalDefault == other.InternalDefault &&
                    InternalValue.Equals(other.InternalValue);
         }
 

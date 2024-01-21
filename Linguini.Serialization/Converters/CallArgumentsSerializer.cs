@@ -67,7 +67,7 @@ namespace Linguini.Serialization.Converters
             var namedArgs = new List<NamedArgument>();
             foreach (var arg in named.EnumerateArray())
             {
-                if (TryReadNamedArguments(arg, options, out var namedArg))
+                if (NamedArgumentSerializer.TryReadNamedArguments(arg, options, out var namedArg))
                 {
                     namedArgs.Add(namedArg.Value);
                 }
@@ -75,23 +75,6 @@ namespace Linguini.Serialization.Converters
 
             callArguments = new CallArguments(positionalArgs, namedArgs);
             return true;
-        }
-
-
-        public static bool TryReadNamedArguments(JsonElement el, JsonSerializerOptions options,
-            [NotNullWhen(true)] out NamedArgument? o)
-        {
-            if (el.TryGetProperty("name", out var namedArg)
-                && IdentifierSerializer.TryGetIdentifier(namedArg, options, out var id)
-                && el.TryGetProperty("value", out var valueArg)
-                && ResourceSerializer.TryReadInlineExpression(valueArg, options, out var inline)
-               )
-            {
-                o = new NamedArgument(id, inline);
-                return true;
-            }
-
-            throw new JsonException("NamedArgument fields `name` and `value` properties are mandatory");
         }
     }
 }

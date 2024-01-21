@@ -37,6 +37,9 @@ public class SerializeAndDeserializeTest
             .Build()
         );
         yield return new Identifier("test");
+        yield return new MessageReference("message", "attribute");
+        yield return new PatternBuilder("text ").AddMessage("x").AddText(" more text").Build();
+
     }
 
     private static void SerializeDeserializeTest<T>(T expected)
