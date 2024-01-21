@@ -11,7 +11,7 @@ namespace Linguini.Serialization.Converters
     {
         public override Variant Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            return ReadVariant(JsonSerializer.Deserialize<JsonElement>(ref reader, options), options);
         }
 
         public override void Write(Utf8JsonWriter writer, Variant variant, JsonSerializerOptions options)

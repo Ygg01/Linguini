@@ -153,7 +153,7 @@ namespace Linguini.Serialization.Converters
                     case "Placeable":
                         if (PlaceableSerializer.TryProcessPlaceable(element, options, out var placeable))
                         {
-                            patternElements.Add(new Placeable(placeable));
+                            patternElements.Add(placeable);
                         }
 
                         break;

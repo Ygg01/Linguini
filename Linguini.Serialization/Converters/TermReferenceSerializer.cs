@@ -10,7 +10,7 @@ namespace Linguini.Serialization.Converters
     {
         public override TermReference Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            return ProcessTermReference(JsonSerializer.Deserialize<JsonElement>(ref reader, options), options);
         }
 
         public override void Write(Utf8JsonWriter writer, TermReference value, JsonSerializerOptions options)
