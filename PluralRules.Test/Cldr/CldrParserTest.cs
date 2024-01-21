@@ -60,8 +60,8 @@ namespace PluralRules.Test.Cldr
         [Parallelizable]
         [TestCase("n is 12 @integer 0, 5, 7~20", new[] {"0", "5", "7~20"}, new string[] { })]
         [TestCase("n is 12 @integer 0, 5, 7~20 @decimal 1, 3~6,...", new[] {"0", "5", "7~20"},
-            new string[] {"1", "3~6"})]
-        [TestCase("@integer 0, 11~25, 100, 1000,  …", new string[] {"0", "11~25", "100", "1000"}, new string[] { })]
+            new[] {"1", "3~6"})]
+        [TestCase("@integer 0, 11~25, 100, 1000,  …", new[] {"0", "11~25", "100", "1000"}, new string[] { })]
         public void ParseSamples(string input, string[] expIntRangeList, string[] expDecRangeList)
         {
             var rule = new CldrParser(input).ParseRule();

@@ -11,7 +11,8 @@ namespace Linguini.Serialization.Converters
         public override DynamicReference? Read(ref Utf8JsonReader reader, Type typeToConvert,
             JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
+            return ProcessDynamicReference(el, options);
         }
 
         public override void Write(Utf8JsonWriter writer, DynamicReference dynRef, JsonSerializerOptions options)
@@ -40,9 +41,8 @@ namespace Linguini.Serialization.Converters
         public static DynamicReference ProcessDynamicReference(JsonElement el,
             JsonSerializerOptions options)
         {
-            Identifier? identifier = null;
-            if (!el.TryGetProperty("id", out var jsonId) &&
-                !IdentifierSerializer.TryGetIdentifier(jsonId, options, out identifier))
+            if (!el.TryGetProperty("id", out var jsonId) ||
+                !IdentifierSerializer.TryGetIdentifier(jsonId, options, out var identifier))
             {
                 throw new JsonException("Dynamic reference must contain at least `id` field");
             }
@@ -59,7 +59,7 @@ namespace Linguini.Serialization.Converters
                 CallArgumentsSerializer.TryGetCallArguments(jsonArgs, options, out arguments);
             }
 
-            return new DynamicReference(identifier!, attribute, arguments);
+            return new DynamicReference(identifier, attribute, arguments);
         }
     }
 }

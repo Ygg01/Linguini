@@ -155,14 +155,14 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Id.Equals(other.Id) && Equals(Attribute, other.Attribute);
+            return Id.Equals(other.Id) && Identifier.Comparator.Equals(Attribute, other.Attribute);
         }
 
         public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((MessageReference)obj);
         }
 
@@ -217,7 +217,7 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Id.Equals(other.Id) && Equals(Attribute, other.Attribute) &&
+            return Id.Equals(other.Id) && Identifier.Comparator.Equals(Attribute, other.Attribute) &&
                    Nullable.Equals(Arguments, other.Arguments);
         }
 
@@ -340,16 +340,6 @@ namespace Linguini.Syntax.Ast
         public Placeable(IExpression expression)
         {
             Expression = expression;
-        }
-
-        public bool Equals(IPatternElement? other)
-        {
-            if (other is Placeable otherPlaceable)
-            {
-                return Expression == otherPlaceable.Expression;
-            }
-
-            return false;
         }
 
         public bool Equals(Placeable? other)
