@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Linguini.Syntax.Parser.Error;
 
@@ -63,7 +64,7 @@ namespace Linguini.Syntax.Ast
         }
     }
 
-    public class AstComment : IEntry
+    public class AstComment : IEntry, IEquatable<AstComment>
     {
         public readonly CommentLevel CommentLevel;
         public readonly List<ReadOnlyMemory<char>> Content;
@@ -93,6 +94,38 @@ namespace Linguini.Syntax.Ast
         public string GetId()
         {
             return "Comment";
+        }
+
+        public bool Equals(AstComment? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            if (CommentLevel != other.CommentLevel) return false;
+            if (Content.Count != other.Content.Count) return false;
+            for (int i = 0; i < Content.Count; i++)
+            {
+                var l = Content[i];
+                var r = other.Content[i];
+                if (!l.Span.SequenceEqual(r.Span))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((AstComment)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine((int)CommentLevel, Content);
         }
     }
 
