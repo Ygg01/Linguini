@@ -11,7 +11,7 @@ namespace Linguini.Serialization.Converters
         public override SelectExpression Read(ref Utf8JsonReader reader, Type typeToConvert,
             JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            return ProcessSelectExpression(JsonSerializer.Deserialize<JsonElement>(ref reader, options), options);
         }
 
         public override void Write(Utf8JsonWriter writer, SelectExpression value, JsonSerializerOptions options)
@@ -48,7 +48,7 @@ namespace Linguini.Serialization.Converters
             var variants = new List<Variant>();
             foreach (var variantEl in variantsProp.EnumerateArray())
             {
-                variants.Add(ResourceSerializer.ReadVariant(variantEl, options));
+                variants.Add(VariantSerializer.ReadVariant(variantEl, options));
             }
 
             return new SelectExpression(selector, variants);

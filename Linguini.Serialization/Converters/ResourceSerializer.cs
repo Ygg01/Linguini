@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -98,13 +99,26 @@ namespace Linguini.Serialization.Converters
         public static NumberLiteral ProcessNumberLiteral(JsonElement el,
             JsonSerializerOptions options)
         {
-            if (el.TryGetProperty("value", out var v) && v.ValueKind == JsonValueKind.String &&
-                !"".Equals(v.GetString()))
+            if (TryReadProcessNumberLiteral(el, options, out var numberLiteral))
             {
-                return new NumberLiteral(v.GetString().AsMemory());
+                return numberLiteral;
             }
 
             throw new JsonException("Expected value to be a valid number");
+        }
+
+        public static bool TryReadProcessNumberLiteral(JsonElement el, JsonSerializerOptions options,
+            [MaybeNullWhen(false)] out NumberLiteral numberLiteral)
+        {
+            if (el.TryGetProperty("value", out var v) && v.ValueKind == JsonValueKind.String &&
+                !"".Equals(v.GetString()))
+            {
+                numberLiteral = new NumberLiteral(v.GetString().AsMemory());
+                return true;
+            }
+
+            numberLiteral = null;
+            return false;
         }
 
         public static IExpression ReadExpression(JsonElement el, JsonSerializerOptions options)
@@ -127,44 +141,12 @@ namespace Linguini.Serialization.Converters
         }
 
 
-        public static Variant ReadVariant(JsonElement el, JsonSerializerOptions options)
-        {
-            if (!el.TryGetProperty("type", out var jsonType)
-                && "Variant".Equals(jsonType.GetString()))
-            {
-                throw new JsonException("Variant must have `type` equal to `Variant`.");
-            }
-
-            if (el.TryGetProperty("key", out var jsonKey)
-                && TryReadInlineExpression(jsonKey, options, out var key))
-            {
-                if (el.TryGetProperty("value", out var jsonValue)
-                    && PatternSerializer.TryReadPattern(jsonValue, options, out var pattern))
-                {
-                    var isDefault = false;
-                    if (el.TryGetProperty("default", out var jsonDefault))
-                    {
-                        isDefault = jsonDefault.ValueKind == JsonValueKind.True;
-                    }
-
-                    var (x, id) = key switch
-                    {
-                        NumberLiteral numberLiteral => (VariantType.NumberLiteral, numberLiteral.Value),
-                        TextLiteral identifier => (VariantType.Identifier, identifier.Value),
-                        _ => throw new JsonException("Variant can only be number or identifier.")
-                    };
-
-                    return new Variant(x, id, pattern, isDefault);
-                }
-            }
-
-            throw new NotImplementedException();
-        }
-
+       
         public static bool TryReadInlineExpression(JsonElement el, JsonSerializerOptions options,
             [MaybeNullWhen(false)] out IInlineExpression o)
         {
-            o = el.GetProperty("type").GetString() switch
+            var type = el.GetProperty("type").GetString();
+            o = type switch
             {
                 "DynamicReference" => DynamicReferenceSerializer.ProcessDynamicReference(el, options),
                 "FunctionReference" => FunctionReferenceSerializer.ProcessFunctionReference(el, options),
@@ -174,7 +156,7 @@ namespace Linguini.Serialization.Converters
                 "TermReference" => TermReferenceSerializer.ProcessTermReference(el, options),
                 "TextLiteral" => ProcessTextLiteral(el, options),
                 "VariableReference" => VariableReferenceSerializer.ProcessVariableReference(el, options),
-                _ => throw new JsonException("Unexpected value")
+                _ => throw new JsonException($"Unexpected value {type}")
             };
             return true;
         }
