@@ -40,7 +40,7 @@ public class AttributeSerializerTest
     [Test]
     [TestOf(typeof(AttributeSerializer))]
     [Parallelizable]
-    public void RoundTrip()
+    public void Serde()
     {
         Attribute start = new Attribute("desc", new PatternBuilder("d1"));
         var text = "";

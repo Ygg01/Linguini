@@ -52,7 +52,7 @@ public class CallArgumentsSerializerTest
     [Test]
     [TestOf(typeof(CallArgumentsSerializer))]
     [Parallelizable]
-    public void RoundTrip()
+    public void Serde()
     {
         var start = new CallArgumentsBuilder()
             .AddNamedArg("x", 3)

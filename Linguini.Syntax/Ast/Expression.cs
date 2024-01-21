@@ -554,9 +554,14 @@ namespace Linguini.Syntax.Ast
             return new InlineExpressionBuilder(new NumberLiteral(numberLiteral));
         }
 
-        public static InlineExpressionBuilder CreatePlaceable(Placeable builder)
+        public static InlineExpressionBuilder CreatePlaceable(Placeable placeable)
         {
-            return new InlineExpressionBuilder(builder);
+            return new InlineExpressionBuilder(placeable);
+        }
+        
+        public static InlineExpressionBuilder CreatePlaceable(PlaceableBuilder placeable)
+        {
+            return new InlineExpressionBuilder(placeable.Build());
         }
 
         public static InlineExpressionBuilder CreateTermReference(string id, string? attribute = null,
