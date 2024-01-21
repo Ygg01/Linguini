@@ -39,7 +39,16 @@ public class SerializeAndDeserializeTest
         yield return new Identifier("test");
         yield return new MessageReference("message", "attribute");
         yield return new PatternBuilder("text ").AddMessage("x").AddText(" more text").Build();
-
+        yield return new SelectExpressionBuilder(new VariableReference("x"))
+            .AddVariant("one", new PatternBuilder("select 1"))
+            .AddVariant("other", new PatternBuilder("select other"))
+            .SetDefault(1)
+            .Build();
+        yield return new TermReference("x", "y");
+        yield return new VariableReference("x");
+        yield return new Variant(2.0f, new PatternBuilder(3));
+        yield return new AstComment(CommentLevel.Comment, new() { "test".AsMemory() });
+        yield return new Junk("Test".AsMemory());
     }
 
     private static void SerializeDeserializeTest<T>(T expected)

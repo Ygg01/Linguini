@@ -316,7 +316,7 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Id.Equals(other.Id);
+            return Identifier.Comparator.Equals(Id , other.Id);
         }
 
         public override bool Equals(object? obj)
