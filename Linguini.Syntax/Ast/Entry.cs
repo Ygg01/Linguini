@@ -18,7 +18,7 @@ namespace Linguini.Syntax.Ast
         }
     }
 
-    public class AstMessage : IEntry
+    public class AstMessage : IEntry, IEquatable<AstMessage>
     {
         public readonly Identifier Id;
         public readonly Pattern? Value;
@@ -38,6 +38,28 @@ namespace Linguini.Syntax.Ast
         public string GetId()
         {
             return Id.ToString();
+        }
+
+        public bool Equals(AstMessage? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Identifier.Comparator.Equals(Id, other.Id) && Equals(Value, other.Value) &&
+                   Attributes.SequenceEqual(other.Attributes, Attribute.Comparer) &&
+                   Equals(InternalComment, other.InternalComment);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((AstMessage)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, Value, Attributes, InternalComment);
         }
     }
 
@@ -129,7 +151,7 @@ namespace Linguini.Syntax.Ast
         }
     }
 
-    public class Junk : IEntry
+    public class Junk : IEntry, IEquatable<Junk>
     {
         public readonly ReadOnlyMemory<char> Content;
 
@@ -137,10 +159,15 @@ namespace Linguini.Syntax.Ast
         {
             Content = ReadOnlyMemory<char>.Empty;
         }
-        
+
         public Junk(ReadOnlyMemory<char> content)
         {
             Content = content;
+        }
+
+        public Junk(string content)
+        {
+            Content = content.AsMemory();
         }
 
         public string AsStr()
@@ -151,6 +178,26 @@ namespace Linguini.Syntax.Ast
         public string GetId()
         {
             return Content.Span.ToString();
+        }
+
+        public bool Equals(Junk? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Content.Span.SequenceEqual(other.Content.Span);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Junk)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Content.GetHashCode();
         }
     }
 }

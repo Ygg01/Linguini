@@ -13,6 +13,26 @@ namespace Linguini.Syntax.Ast
         public readonly Identifier Id;
         public readonly Pattern Value;
 
+        public static AttributeComparer Comparer = new();
+
+        public class AttributeComparer : IEqualityComparer<Attribute>
+        {
+            public bool Equals(Attribute? x, Attribute? y)
+            {
+                if (ReferenceEquals(x, y)) return true;
+                if (ReferenceEquals(x, null)) return false;
+                if (ReferenceEquals(y, null)) return false;
+                if (x.GetType() != y.GetType()) return false;
+                return Identifier.Comparator.Equals(x.Id, y.Id) &&
+                       x.Value.Equals(y.Value);
+            }
+
+            public int GetHashCode(Attribute obj)
+            {
+                return HashCode.Combine(obj.Id, obj.Value);
+            }
+        }
+
         public Attribute(Identifier id, Pattern value)
         {
             Id = id;

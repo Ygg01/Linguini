@@ -16,18 +16,28 @@ public class SerializeAndDeserializeTest
     [Test]
     [TestCaseSource(nameof(AstExamples))]
     [Parallelizable]
-    public void SerializeDeserializeTest(object x)
+    public void RoundTripTest(object x)
     {
-        SerializeAndDeserializeTest.SerializeDeserializeTest(x);
+        // Serialize the object to JSON string.
+        var jsonString = JsonSerializer.Serialize(x, Options);
+
+        // Deserialize the JSON string back into an object.
+        Debug.Assert(x != null, nameof(x) + " != null");
+        var deserializedObject = JsonSerializer.Deserialize(jsonString, x.GetType(), Options);
+
+        // Now you have a 'deserializedObject' which should be equivalent to the original 'expected' object.
+        Assert.That(deserializedObject, Is.Not.Null);
+        Assert.That(deserializedObject, Is.EqualTo(x));
     }
 
     public static IEnumerable<object> AstExamples()
     {
+        yield return new Attribute("desc", new PatternBuilder("description"));
         yield return new CallArgumentsBuilder()
             .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
             .AddNamedArg("y", 3)
             .Build();
-        yield return new Attribute("desc", new PatternBuilder("description"));
+        yield return new AstComment(CommentLevel.Comment, new() { "test".AsMemory() });
         yield return new DynamicReference("dyn", "attr", new CallArgumentsBuilder()
             .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
             .AddNamedArg("y", 3));
@@ -37,7 +47,20 @@ public class SerializeAndDeserializeTest
             .Build()
         );
         yield return new Identifier("test");
+        yield return new Junk("Test".AsMemory());
         yield return new MessageReference("message", "attribute");
+        yield return new AstMessage(
+            new Identifier("x"), 
+            new PatternBuilder(3).Build(), 
+            new List<Attribute>()
+            {
+                new("attr1", new PatternBuilder("value1")),
+                new("attr2", new PatternBuilder("value2"))
+            }, 
+            new(CommentLevel.ResourceComment, new()
+            {
+                "test".AsMemory()
+            }));
         yield return new PatternBuilder("text ").AddMessage("x").AddText(" more text").Build();
         yield return new SelectExpressionBuilder(new VariableReference("x"))
             .AddVariant("one", new PatternBuilder("select 1"))
@@ -47,22 +70,6 @@ public class SerializeAndDeserializeTest
         yield return new TermReference("x", "y");
         yield return new VariableReference("x");
         yield return new Variant(2.0f, new PatternBuilder(3));
-        yield return new AstComment(CommentLevel.Comment, new() { "test".AsMemory() });
-        yield return new Junk("Test".AsMemory());
-    }
-
-    private static void SerializeDeserializeTest<T>(T expected)
-    {
-        // Serialize the object to JSON string.
-        var jsonString = JsonSerializer.Serialize(expected, Options);
-
-        // Deserialize the JSON string back into an object.
-        Debug.Assert(expected != null, nameof(expected) + " != null");
-        var deserializedObject = JsonSerializer.Deserialize(jsonString, expected.GetType(), Options);
-
-        // Now you have a 'deserializedObject' which should be equivalent to the original 'expected' object.
-        Assert.That(deserializedObject, Is.Not.Null);
-        Assert.That(deserializedObject, Is.EqualTo(expected));
     }
 
     private static readonly JsonSerializerOptions Options = new()
