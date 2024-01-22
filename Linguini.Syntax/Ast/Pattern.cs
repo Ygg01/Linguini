@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Linguini.Syntax.Ast
@@ -29,8 +30,35 @@ namespace Linguini.Syntax.Ast
     {
     }
 
-    public interface IPatternElement: IEquatable<IPatternElement>
-    {  
+    public interface IPatternElement
+    {
+        public static PatternComparer PatternComparer = new();
+    }
+
+    public class PatternComparer : IEqualityComparer<IPatternElement>
+    {
+        public bool Equals(IPatternElement? left, IPatternElement? right)
+        {
+            return (left, right) switch
+            {
+                (TextLiteral l, TextLiteral r) => l.Equals(r),
+                (Placeable l, Placeable r) => l.Equals(r),
+                _ => false,
+            };
+        }
+
+        public int GetHashCode(IPatternElement obj)
+        {
+            switch (obj)
+            {
+                case TextLiteral textLiteral:
+                    return textLiteral.GetHashCode();
+                case Placeable placeable:
+                    return placeable.GetHashCode();
+                default:
+                    throw new ArgumentException("Unexpected type", nameof(obj));
+            }
+        }
     }
 
     public class TextElementPlaceholder : IPatternElementPlaceholder

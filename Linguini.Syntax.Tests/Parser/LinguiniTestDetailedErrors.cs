@@ -1,8 +1,6 @@
 ﻿using System;
-using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace Linguini.Syntax.Tests.Parser
 {

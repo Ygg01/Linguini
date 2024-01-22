@@ -1,5 +1,4 @@
 ﻿using System;
-using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser.Error;
 
@@ -51,23 +50,23 @@ namespace Linguini.Bundle.Errors
 
     public record ResolverFluentError : FluentError
     {
-        private string Description;
-        private ErrorType Kind;
+        private readonly string _description;
+        private readonly ErrorType _kind;
 
         private ResolverFluentError(string desc, ErrorType kind)
         {
-            Description = desc;
-            Kind = kind;
+            _description = desc;
+            _kind = kind;
         }
 
         public override ErrorType ErrorKind()
         {
-            return Kind;
+            return _kind;
         }
 
         public override string ToString()
         {
-            return Description;
+            return _description;
         }
 
         public static ResolverFluentError NoValue(ReadOnlyMemory<char> idName)
