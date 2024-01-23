@@ -115,11 +115,13 @@ namespace Linguini.Bundle
             Functions = new Dictionary<string, FluentFunction>(bundle.GetFunctionDictionary());
         }
 #endif
+        /// <inheritdoc/>
         public bool HasMessage(string identifier)
         {
             return Messages.ContainsKey(identifier);
         }
 
+        /// <inheritdoc/>
         public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors)
         {
@@ -129,36 +131,43 @@ namespace Linguini.Bundle
             return value.AsString();
         }
 
+        /// <inheritdoc/>
         public bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message)
         {
             return Messages.TryGetValue(ident, out message);
         }
 
+        /// <inheritdoc/>
         public bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? term)
         {
             return Terms.TryGetValue(ident, out term);
         }
 
+        /// <inheritdoc/>
         public bool TryGetFunction(Identifier id, [NotNullWhen(true)] out FluentFunction? function)
         {
             return Functions.TryGetValue(id.ToString(), out function);
         }
 
+        /// <inheritdoc/>
         public bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
         {
             return Functions.TryGetValue(funcName, out function);
         }
 
+        /// <inheritdoc/>
         public IEnumerable<string> GetMessageEnumerable()
         {
             return Messages.Keys;
         }
 
+        /// <inheritdoc/>
         public IEnumerable<string> GetFuncEnumerable()
         {
             return Functions.Keys;
         }
 
+        /// <inheritdoc/>
         public IEnumerable<string> GetTermEnumerable()
         {
             return Terms.Keys;

@@ -12,28 +12,33 @@ using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle
 {
+    /// <summary>
+    /// Represents a non-concurrent Fluent bundle.
+    ///
+    /// Modification aren't thread-safe.
+    /// </summary>
     public sealed class NonConcurrentBundle : FluentBundle, IEquatable<NonConcurrentBundle>
     {
         internal Dictionary<string, FluentFunction> Functions = new();
-        private Dictionary<string, AstTerm> _terms = new();
-        private Dictionary<string, AstMessage> _messages = new();
+        internal Dictionary<string, AstTerm> Terms = new();
+        internal Dictionary<string, AstMessage> Messages = new();
 
         /// <inheritdoc />
         protected override void AddMessageOverriding(AstMessage message)
         {
-            _messages[message.GetId()] = message;
+            Messages[message.GetId()] = message;
         }
 
         /// <inheritdoc />
         protected override void AddTermOverriding(AstTerm term)
         {
-            _terms[term.GetId()] = term;
+            Terms[term.GetId()] = term;
         }
 
         /// <inheritdoc />
         protected override bool TryAddTerm(AstTerm term, List<FluentError>? errors)
         {
-            if (_terms.TryAdd(term.GetId(), term)) return true;
+            if (Terms.TryAdd(term.GetId(), term)) return true;
             errors ??= new List<FluentError>();
             errors.Add(new OverrideFluentError(term.GetId(), EntryKind.Term));
             return false;
@@ -42,7 +47,7 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         protected override bool TryAddMessage(AstMessage message, List<FluentError>? errors)
         {
-            if (_messages.TryAdd(message.GetId(), message)) return true;
+            if (Messages.TryAdd(message.GetId(), message)) return true;
             errors ??= new List<FluentError>();
             errors.Add(new OverrideFluentError(message.GetId(), EntryKind.Message));
             return false;
@@ -70,19 +75,19 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override bool HasMessage(string identifier)
         {
-            return _messages.ContainsKey(identifier);
+            return Messages.ContainsKey(identifier);
         }
 
         /// <inheritdoc />
         public override bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message)
         {
-            return _messages.TryGetValue(ident, out message);
+            return Messages.TryGetValue(ident, out message);
         }
 
         /// <inheritdoc />
         public override bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? term)
         {
-            return _terms.TryGetValue(ident, out term);
+            return Terms.TryGetValue(ident, out term);
         }
 
 
@@ -95,7 +100,7 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override IEnumerable<string> GetMessageEnumerable()
         {
-            return _messages.Keys.ToArray();
+            return Messages.Keys.ToArray();
         }
 
         /// <inheritdoc />
@@ -107,19 +112,22 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override IEnumerable<string> GetTermEnumerable()
         {
-            return _terms.Keys.ToArray();
+            return Terms.Keys.ToArray();
         }
 
+        /// <inheritdoc />
         internal override IDictionary<string, AstMessage> GetMessagesDictionary()
         {
-            return _messages;
+            return Messages;
         }
 
+        /// <inheritdoc />
         internal override IDictionary<string, AstTerm> GetTermsDictionary()
         {
-            return _terms;
+            return Terms;
         }
 
+        /// <inheritdoc />
         internal override IDictionary<string, FluentFunction> GetFunctionDictionary()
         {
             return Functions;
@@ -132,8 +140,8 @@ namespace Linguini.Bundle
             return new NonConcurrentBundle()
             {
                 Functions = new Dictionary<string, FluentFunction>(Functions),
-                _terms = new Dictionary<string, AstTerm>(_terms),
-                _messages = new Dictionary<string, AstMessage>(_messages),
+                Terms = new Dictionary<string, AstTerm>(Terms),
+                Messages = new Dictionary<string, AstMessage>(Messages),
                 Culture = (CultureInfo)Culture.Clone(),
                 Locales = new List<string>(Locales),
                 UseIsolating = UseIsolating,
@@ -143,40 +151,26 @@ namespace Linguini.Bundle
                 EnableExtensions = EnableExtensions,
             };
         }
-        
-        public static NonConcurrentBundle Thaw(FrozenBundle frozenBundle)
-        {
-            return new NonConcurrentBundle
-            {
-                _messages = new Dictionary<string, AstMessage>(frozenBundle.Messages),
-                Functions = new Dictionary<string, FluentFunction>(frozenBundle.Functions),
-                _terms = new Dictionary<string, AstTerm>(frozenBundle.Terms),
-                FormatterFunc = frozenBundle.FormatterFunc,
-                Locales = frozenBundle.Locales,
-                UseIsolating = frozenBundle.UseIsolating,
-                MaxPlaceable = frozenBundle.MaxPlaceable,
-                EnableExtensions = frozenBundle.EnableExtensions,
-                TransformFunc = frozenBundle.TransformFunc,
-                Culture = frozenBundle.Culture
-            };
-        }
 
+        /// <inheritdoc />
         public bool Equals(NonConcurrentBundle? other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return base.Equals(other) && Functions.SequenceEqual(other.Functions) && _terms.SequenceEqual(other._terms) &&
-                   _messages.SequenceEqual(other._messages);
+            return base.Equals(other) && Functions.SequenceEqual(other.Functions) && Terms.SequenceEqual(other.Terms) &&
+                   Messages.SequenceEqual(other.Messages);
         }
 
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             return ReferenceEquals(this, obj) || obj is NonConcurrentBundle other && Equals(other);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), Functions, _terms, _messages);
+            return HashCode.Combine(base.GetHashCode(), Functions, Terms, Messages);
         }
     }
 }

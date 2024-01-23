@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Linguini.Bundle.Errors;
@@ -8,6 +9,9 @@ using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle
 {
+    /// <summary>
+    /// Represents an interface for reading language bundles.
+    /// </summary>
     public interface IReadBundle
     {
         /// <summary>
@@ -197,8 +201,33 @@ namespace Linguini.Bundle
         }
     }
 
+    /// <summary>
+    /// Provides extension methods for working with bundles.
+    /// </summary>
     public static class ReadBundleExtensions
     {
+        /// <summary>
+        /// Thaws a frozen bundle and returns a new instance of a concurrent bundle.
+        /// </summary>
+        /// <param name="frozenBundle">The frozen bundle to thaw.</param>
+        /// <returns>A new instance of a concurrent bundle.</returns>
+        public static ConcurrentBundle Thaw(this FrozenBundle frozenBundle)
+        {
+            return new ConcurrentBundle
+            {
+                Messages = new ConcurrentDictionary<string, AstMessage>(frozenBundle.Messages),
+                Functions = new ConcurrentDictionary<string, FluentFunction>(frozenBundle.Functions),
+                Terms = new ConcurrentDictionary<string, AstTerm>(frozenBundle.Terms),
+                FormatterFunc = frozenBundle.FormatterFunc,
+                Locales = frozenBundle.Locales,
+                UseIsolating = frozenBundle.UseIsolating,
+                MaxPlaceable = frozenBundle.MaxPlaceable,
+                EnableExtensions = frozenBundle.EnableExtensions,
+                TransformFunc = frozenBundle.TransformFunc,
+                Culture = frozenBundle.Culture
+            };
+        }
+        
         /// <summary>
         /// Convenience method for <see cref="IReadBundle.HasAttrMessage"/>
         /// </summary>
@@ -251,8 +280,8 @@ namespace Linguini.Bundle
         /// <param name="bundle">The bundle to retrieve the message from.</param>
         /// <param name="msgWithAttr">The message with attribute</param>
         /// <param name="args">Optional arguments to be passed to the attribute message.</param>
-        /// <param name="errors">When this method returns, contains any errors that occured during retrieval, if any.</param>
-        /// <param name="message">When this method returns, contains the retrieved attribute message, if it exists.</param>
+        /// <param name="errors">When this method returns false, contains a list of errors that occurred while trying to retrieve the message; otherwise, null.</param>
+        /// <param name="message">When this method returns true, contains the retrieved message; otherwise, null.</param>
         /// <returns><c>true</c> if the attribute message was successfully retrieved; otherwise, <c>false</c>.</returns>
         public static bool TryGetAttrMessage(this IReadBundle bundle, string msgWithAttr,
             IDictionary<string, IFluentType>? args,
@@ -266,8 +295,8 @@ namespace Linguini.Bundle
         /// </summary>
         /// <param name="bundle">The bundle to retrieve the message from.</param>
         /// <param name="id">The identifier of the message.</param>
-        /// <param name="attribute">The attribute of the message (optional).</param>
-        /// <param name="args">The arguments for the message (optional).</param>
+        /// <param name="attribute">Optional attribute of the message.</param>
+        /// <param name="args">Optional arguments to be passed to the attribute message.</param>
         /// <param name="errors">When this method returns false, contains a list of errors that occurred while trying to retrieve the message; otherwise, null.</param>
         /// <param name="message">When this method returns true, contains the retrieved message; otherwise, null.</param>
         /// <returns>True if the message was successfully retrieved, otherwise false.</returns>
