@@ -178,6 +178,7 @@ version 0.8.0
 
 ## What's Changed
 * Remove `net5` or greater by 
+* Move to `net6` and/or `net8`.
 * Move to `NUnit 4.0.1`
 * Fix issue with Windows test not being fully run
 * `[Breaking change]` Refactor to use consistent naming
@@ -199,3 +200,9 @@ version 0.8.0
     ```
   * Adds `Equals` to most `Linguini.Syntax.Ast` types.
   * All serializers now have a `Read` method implementation.
+
+version 0.8.1
+========
+
+## What's changed 
+* Add `AddResourceOverriding(Resource res)`.
