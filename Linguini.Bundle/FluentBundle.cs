@@ -201,7 +201,33 @@ namespace Linguini.Bundle
         /// <param name="term">The term to be added.</param>
         protected abstract void AddTermOverriding(AstTerm term);
 
-        private void InternalResourceOverriding(Resource resource)
+
+
+        /// <summary>
+        /// Adds a <c>string</c> resource to the FluentBundle, overriding any existing messages and terms with the same identifiers.
+        /// </summary>
+        /// <param name="input">The resource content to add.</param>
+        public void AddResourceOverriding(string input)
+        {
+            var res = new LinguiniParser(input, EnableExtensions).Parse();
+            AddResourceOverriding(res);
+        }
+
+        /// <summary>
+        /// Adds a <see cref="TextReader"/> to the FluentBundle, overriding any existing messages and terms with the same identifiers.
+        /// </summary>
+        /// <param name="input">The text reader to be added to parsed and added to bundle.</param>
+        public void AddResourceOverriding(TextReader input)
+        {
+            var res = new LinguiniParser(input, EnableExtensions).Parse();
+            AddResourceOverriding(res);
+        }
+        
+        /// <summary>
+        /// Adds a <see cref="Resource"/> to the FluentBundle, overriding any existing messages and terms with the same identifiers.
+        /// </summary>
+        /// <param name="resource">The resource content to add.</param>
+        public void AddResourceOverriding(Resource resource)
         {
             for (var entryPos = 0; entryPos < resource.Entries.Count; entryPos++)
             {
@@ -220,24 +246,19 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        ///     Adds a resource.
-        ///     Any messages or terms in bundle will be overriden by the existing ones.
+        /// Tries to add a term to the bundle.
         /// </summary>
-        /// <param name="input">The input string containing the resource data.</param>
-        public void AddResourceOverriding(string input)
-        {
-            var res = new LinguiniParser(input, EnableExtensions).Parse();
-            InternalResourceOverriding(res);
-        }
-
-        public void AddResourceOverriding(TextReader input)
-        {
-            var res = new LinguiniParser(input, EnableExtensions).Parse();
-            InternalResourceOverriding(res);
-        }
-
+        /// <param name="term">The term to add.</param>
+        /// <param name="errors">A list to store any errors that occur during the <c>TryAdd</c> operation.</param>
+        /// <returns><see langword="true"/> if the term was added successfully, <see langword="false"/> otherwise.</returns>
         protected abstract bool TryAddTerm(AstTerm term, [NotNullWhen(false)] List<FluentError>? errors);
 
+        /// <summary>
+        /// Tries to add a message to the bundle.
+        /// </summary>
+        /// <param name="msg">The message to add.</param>
+        /// <param name="errors">A list to store any errors that occur during the <c>TryAdd</c> operation.</param>
+        /// <returns><see langword="true"/> if the message was added successfully, <see langword="false"/> otherwise.</returns>
         protected abstract bool TryAddMessage(AstMessage msg, [NotNullWhen(false)] List<FluentError>? errors);
 
 
