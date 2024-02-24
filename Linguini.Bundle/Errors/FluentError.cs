@@ -1,6 +1,7 @@
 ﻿using System;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser.Error;
+// ReSharper disable All
 
 namespace Linguini.Bundle.Errors
 {
@@ -28,13 +29,13 @@ namespace Linguini.Bundle.Errors
 
     public record OverrideFluentError : FluentError
     {
-        private readonly string _id;
-        private readonly EntryKind _kind;
+        public string Id { get; }
+        public EntryKind Kind { get; }
 
         public OverrideFluentError(string id, EntryKind kind)
         {
-            _id = id;
-            _kind = kind;
+            Id = id;
+            Kind = kind;
         }
 
         public override ErrorType ErrorKind()
@@ -44,29 +45,29 @@ namespace Linguini.Bundle.Errors
 
         public override string ToString()
         {
-            return $"For id:{_id} already exist entry of type: {_kind.ToString()}";
+            return $"For id:{Id} already exist entry of type: {Kind.ToString()}";
         }
     }
 
     public record ResolverFluentError : FluentError
     {
-        private readonly string _description;
-        private readonly ErrorType _kind;
+        public string Description { get; }
+        public ErrorType Kind { get; }
 
         private ResolverFluentError(string desc, ErrorType kind)
         {
-            _description = desc;
-            _kind = kind;
+            Description = desc;
+            Kind = kind;
         }
 
         public override ErrorType ErrorKind()
         {
-            return _kind;
+            return Kind;
         }
 
         public override string ToString()
         {
-            return _description;
+            return Description;
         }
 
         public static ResolverFluentError NoValue(ReadOnlyMemory<char> idName)
@@ -138,11 +139,11 @@ namespace Linguini.Bundle.Errors
 
     public record ParserFluentError : FluentError
     {
-        private readonly ParseError _error;
+        public ParseError Error { get; }
 
         private ParserFluentError(ParseError error)
         {
-            _error = error;
+            Error = error;
         }
 
         public static ParserFluentError ParseError(ParseError parseError)
@@ -157,16 +158,16 @@ namespace Linguini.Bundle.Errors
 
         public override string ToString()
         {
-            return _error.Message;
+            return Error.Message;
         }
 
         public override ErrorSpan? GetSpan()
         {
-            if (_error.Slice == null)
+            if (Error.Slice == null)
                 return null;
 
-            return new(_error.Row, _error.Slice.Value.Start.Value, _error.Slice.Value.End.Value,
-                _error.Position.Start.Value, _error.Position.End.Value);
+            return new(Error.Row, Error.Slice.Value.Start.Value, Error.Slice.Value.End.Value,
+                Error.Position.Start.Value, Error.Position.End.Value);
         }
     }
 
@@ -177,8 +178,10 @@ namespace Linguini.Bundle.Errors
         Func,
     }
 
+    [Obsolete]
     public static class EntryHelper
     {
+        [Obsolete]
         public static EntryKind ToKind(this IEntry self)
         {
             if (self is AstTerm)
