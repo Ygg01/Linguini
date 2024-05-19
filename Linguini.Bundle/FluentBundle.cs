@@ -15,6 +15,9 @@ using Linguini.Syntax.Parser;
 
 namespace Linguini.Bundle
 {
+    /// <summary>
+    /// Abstract base class for Fluent message bundles.
+    /// </summary>
     public abstract class FluentBundle : IEquatable<FluentBundle>, IReadBundle
     {
         /// <summary>
@@ -118,6 +121,18 @@ namespace Linguini.Bundle
         /// </returns>
         public abstract bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function);
 
+        /// <summary>
+        /// Formats a Fluent pattern using the provided arguments and returns the formatted string.
+        /// </summary>
+        /// <param name="pattern">The <see cref="Pattern"/> to be formatted.</param>
+        /// <param name="args">The dictionary of arguments to be used for formatting.</param>
+        /// <param name="errors">
+        /// When the formatting fails due to errors, this parameter is set to a list of FluentError instances
+        /// describing the encountered errors. Otherwise, it is set to null.
+        /// </param>
+        /// <returns>
+        /// The formatted string if the pattern is successfully resolved; otherwise, null.
+        /// </returns>
         public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors)
         {
@@ -147,26 +162,45 @@ namespace Linguini.Bundle
         /// <returns>An enumerable collection of terms.</returns>
         public abstract IEnumerable<string> GetTermEnumerable();
 
+        /// <summary>
+        ///  Parses a <see cref="string"/> input and adds the provided Resources to the bundle.
+        /// </summary>
+        /// <param name="input">The string input representing a Fluent template.</param>
+        /// <param name="errors">Upon method completion, contains a list of any errors that occurred during the resource addition. If no errors occurred, the value is null.</param>
+        /// <returns>True if the resource was added successfully; otherwise, false.</returns>
+        /// <seealso cref="AddResource(string,out System.Collections.Generic.List{Linguini.Bundle.Errors.FluentError}?)"/>
         public bool AddResource(string input, [NotNullWhen(false)] out List<FluentError>? errors)
         {
             var res = new LinguiniParser(input, EnableExtensions).Parse();
             return AddResource(res, out errors);
         }
 
+        /// <summary>
+        /// Parses a <see cref="TextReader"/> and adds it to the FluentBundle.
+        /// </summary>
+        /// <param name="reader">The <see cref="TextReader"/> representing the Fluent resource.</param>
+        /// <param name="errors">The list of Fluent errors, if any.</param>
+        /// <returns>True if the resource was added successfully; otherwise, false.</returns>
+        /// <seealso cref="AddResource(string,out System.Collections.Generic.List{Linguini.Bundle.Errors.FluentError}?)"/>
         public bool AddResource(TextReader reader, [NotNullWhen(false)] out List<FluentError>? errors)
         {
             var res = new LinguiniParser(reader, EnableExtensions).Parse();
             return AddResource(res, out errors);
         }
 
-        public bool AddResource(Resource res, [NotNullWhen(false)] out List<FluentError>? errors)
+        /// <summary>
+        /// Adds a resource to the FluentBundle.
+        /// </summary>
+        /// <param name="resource">The input string containing the resource.</param>
+        /// <param name="errors">The list of <see cref="FluentError"/>s encountered during parsing, if any.</param>
+        /// <returns>True if the resource was successfully added; otherwise, false.</returns>
+        public bool AddResource(Resource resource, [NotNullWhen(false)] out List<FluentError>? errors)
         {
             var innerErrors = new List<FluentError>();
-            foreach (var parseError in res.Errors) innerErrors.Add(ParserFluentError.ParseError(parseError));
+            foreach (var parseError in resource.Errors) innerErrors.Add(ParserFluentError.ParseError(parseError));
 
-            for (var entryPos = 0; entryPos < res.Entries.Count; entryPos++)
+            foreach (var entry in resource.Entries)
             {
-                var entry = res.Entries[entryPos];
                 switch (entry)
                 {
                     case AstMessage message:
@@ -262,10 +296,27 @@ namespace Linguini.Bundle
         protected abstract bool TryAddMessage(AstMessage msg, [NotNullWhen(false)] List<FluentError>? errors);
 
 
+        /// <summary>
+        /// Tries to add a custom function to the FluentBundle. If it fails, it will return false.
+        /// </summary>
+        /// <param name="funcName">The name by which FluentBundle can refer to it.</param>
+        /// <param name="fluentFunction">The <see cref="ExternalFunction"/> that will be added.</param>
+        /// <returns>True if the function was added successfully; otherwise, if for example function already exist, returns false.</returns>
         public abstract bool TryAddFunction(string funcName, ExternalFunction fluentFunction);
 
+        /// <summary>
+        /// Adds a function to fluent Bundle unlike <see cref="TryAddFunction"/> it will not fail, but
+        /// override existing function.
+        /// </summary>
+        /// <param name="funcName">The name of the function to insert or override.</param>
+        /// <param name="fluentFunction">The  <see cref="ExternalFunction"/> that will be inserted.</param>
         public abstract void AddFunctionOverriding(string funcName, ExternalFunction fluentFunction);
 
+        /// <summary>
+        /// Adds external function to the FluentBundle. If function already exist an exception will be raised.
+        /// </summary>
+        /// <param name="funcName">The name of the function.</param>
+        /// <param name="fluentFunction">The <see cref="ExternalFunction"/>  to add.</param>
         public abstract void AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction);
         
         internal abstract IDictionary<string, AstMessage> GetMessagesDictionary();
