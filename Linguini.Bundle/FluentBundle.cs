@@ -12,6 +12,7 @@ using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Linguini.Bundle
 {
@@ -73,7 +74,7 @@ namespace Linguini.Bundle
         /// <param name="identifier">The identifier to check.</param>
         /// <returns>True if the identifier has a message; otherwise, false.</returns>
         public abstract bool HasMessage(string identifier);
-        
+
         /// <summary>
         ///     Tries to get the AstMessage associated with the specified ident.
         /// </summary>
@@ -133,8 +134,8 @@ namespace Linguini.Bundle
         /// <returns>
         /// The formatted string if the pattern is successfully resolved; otherwise, null.
         /// </returns>
-        public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
-            [NotNullWhen(false)] out IList<FluentError>? errors)
+        public string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors)
         {
             var scope = new Scope(this, args);
             var value = pattern.Resolve(scope);

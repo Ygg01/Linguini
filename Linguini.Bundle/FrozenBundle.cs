@@ -122,8 +122,8 @@ namespace Linguini.Bundle
         }
 
         /// <inheritdoc/>
-        public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
-            [NotNullWhen(false)] out IList<FluentError>? errors)
+        public string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors)
         {
             var scope = new Scope(this, args);
             var value = pattern.Resolve(scope);

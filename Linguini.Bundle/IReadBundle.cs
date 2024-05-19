@@ -7,10 +7,12 @@ using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 
+// ReSharper disable UnusedMemberInSuper.Global
+
 namespace Linguini.Bundle
 {
     /// <summary>
-    /// Represents an interface for reading language bundles.
+    /// Represents an interface for reading language bundles. Read-only bundles only implement this interface.
     /// </summary>
     public interface IReadBundle
     {
@@ -21,8 +23,29 @@ namespace Linguini.Bundle
         /// 
         bool HasMessage(string identifier);
 
+        /// <summary>
+        /// Converts a <see cref="Pattern"/> to a string using given arguments.
+        /// </summary>
+        /// <param name="pattern">The pattern to format.</param>
+        /// <param name="args">The dictionary of arguments to replace the variables.</param>
+        /// <param name="errors">The list of FluentErrors, if any occurred during formatting.</param>
+        /// <returns>The formatted string.</returns>
         string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
-            [NotNullWhen(false)] out IList<FluentError>? errors);
+            [NotNullWhen(false)] out IList<FluentError>? errors)
+        {
+            errors = null;
+            return FormatPatternErrRef(pattern, args, ref errors);
+        }
+
+        /// <summary>
+        /// Converts a <see cref="Pattern"/> to a string using given arguments.
+        /// </summary>
+        /// <param name="pattern">The pattern to format.</param>
+        /// <param name="args">The dictionary of arguments to replace the variables.</param>
+        /// <param name="errors">The reference to a list of FluentErrors, will be full if any occurred during formatting.</param>
+        /// <returns>The formatted string.</returns>
+        string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors);
 
         /// <summary>
         /// Tries to get the AstMessage associated with the specified ident.
@@ -91,7 +114,8 @@ namespace Linguini.Bundle
         bool TryGetMessage(string id, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
         {
-            return TryGetMessage(id, null, args, out errors, out message);
+            errors = null;
+            return TryGetMessageErrRef(id, null, args, ref errors, out message);
         }
 
 
@@ -153,6 +177,21 @@ namespace Linguini.Bundle
         bool TryGetAttrMessage(string msgWithAttr, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
         {
+            errors = null;
+            return TryGetAttrMessageErrRef(msgWithAttr, args, ref errors, out message);
+        }
+
+        /// <summary>
+        /// Tries to retrieve an attribute message.
+        /// </summary>
+        /// <param name="msgWithAttr">The message with attribute.</param>
+        /// <param name="args">The arguments passed with the message.</param>
+        /// <param name="errors">The list of errors that occurred during the message retrieval process.</param>
+        /// <param name="message">The retrieved message.</param>
+        /// <returns>True if the attribute message is found; otherwise, false.</returns>
+        bool TryGetAttrMessageErrRef(string msgWithAttr, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+        {
             if (msgWithAttr.Contains("."))
             {
                 var split = msgWithAttr.Split('.');
@@ -173,6 +212,22 @@ namespace Linguini.Bundle
         /// <returns>True if the message was successfully retrieved, otherwise false.</returns>
         public bool TryGetMessage(string id, string? attribute, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+        {
+            errors = null;
+            return TryGetMessageErrRef(id, attribute, args, ref errors, out message);
+        }
+
+        /// <summary>
+        /// Tries to get a message based on the provided parameters.
+        /// </summary>
+        /// <param name="id">The identifier of the message.</param>
+        /// <param name="attribute">The attribute of the message.</param>
+        /// <param name="args">The arguments to format the message with.</param>
+        /// <param name="errors">The reference to list of errors that occurred during the message retrieval process.</param>
+        /// <param name="message">The retrieved message.</param>
+        /// <returns>True if the message was successfully retrieved, otherwise false.</returns>
+        public bool TryGetMessageErrRef(string id, string? attribute, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
         {
             errors = new List<FluentError>();
             var msg = attribute == null
