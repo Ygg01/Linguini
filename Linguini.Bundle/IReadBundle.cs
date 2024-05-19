@@ -174,30 +174,32 @@ namespace Linguini.Bundle
         public bool TryGetMessage(string id, string? attribute, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
         {
-            string? value = null;
             errors = new List<FluentError>();
+            var msg = attribute == null
+                ? id
+                : $"{id}.{attribute}";
 
-            if (TryGetAstMessage(id, out var astMessage))
+            if (!TryGetAstMessage(id, out var astMessage))
             {
-                var pattern = attribute != null
-                    ? astMessage.GetAttribute(attribute)?.Value
-                    : astMessage.Value;
-
-                if (pattern == null)
-                {
-                    var msg = attribute == null
-                        ? id
-                        : $"{id}.{attribute}";
-                    errors.Add(ResolverFluentError.NoValue($"{msg}"));
-                    message = FluentNone.None.ToString();
-                    return false;
-                }
-
-                value = FormatPattern(pattern, args, out errors);
+                errors.Add(ResolverFluentError.NoValue($"{msg}"));
+                message = null;
+                return false;
             }
 
-            message = value;
-            return message != null;
+            var pattern = attribute != null
+                ? astMessage.GetAttribute(attribute)?.Value
+                : astMessage.Value;
+
+            if (pattern == null)
+            {
+                errors.Add(ResolverFluentError.NoValue($"{msg}"));
+                message = FluentNone.None.ToString();
+                return false;
+            }
+
+            errors = null;
+            message = FormatPattern(pattern, args, out errors);
+            return true;
         }
     }
 
@@ -227,7 +229,7 @@ namespace Linguini.Bundle
                 Culture = frozenBundle.Culture
             };
         }
-        
+
         /// <summary>
         /// Convenience method for <see cref="IReadBundle.HasAttrMessage"/>
         /// </summary>
