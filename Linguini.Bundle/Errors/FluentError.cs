@@ -4,6 +4,9 @@ using Linguini.Syntax.Parser.Error;
 
 namespace Linguini.Bundle.Errors
 {
+    /// <summary>
+    /// Base record for Linguini Fluent errors.
+    /// </summary>
     public abstract record FluentError
     {
         /// <summary>
@@ -20,6 +23,12 @@ namespace Linguini.Bundle.Errors
         {
             return null;
         }
+
+        /// <summary>
+        /// String represntation of the error.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString() => $"Error (${ErrorKind()})";
     }
 
     /// <summary>
@@ -109,23 +118,20 @@ namespace Linguini.Bundle.Errors
 
         public static ResolverFluentError Reference(IInlineExpression self)
         {
-            switch (self)
+            return self switch
             {
-                case FunctionReference funcRef:
-                    return new($"Unknown function: {funcRef.Id}()", ErrorType.Reference);
-                case MessageReference msgRef when msgRef.Attribute == null:
-                    return new($"Unknown message: {msgRef.Id}", ErrorType.Reference);
-                case MessageReference msgRef:
-                    return new($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}", ErrorType.Reference);
-                case TermReference termReference when termReference.Attribute == null:
-                    return new($"Unknown term: -{termReference.Id}", ErrorType.Reference);
-                case TermReference termReference:
-                    return new($"Unknown attribute: -{termReference.Id}.{termReference.Attribute}", ErrorType.Reference);
-                case VariableReference varRef:
-                    return new($"Unknown variable: ${varRef.Id}", ErrorType.Reference);
-                default:
-                    throw new ArgumentException($"Expected reference got ${self.GetType()}");
-            }
+                FunctionReference funcRef => new($"Unknown function: {funcRef.Id}()", ErrorType.Reference),
+                MessageReference msgRef when msgRef.Attribute == null => new($"Unknown message: {msgRef.Id}",
+                    ErrorType.Reference),
+                MessageReference msgRef => new($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}",
+                    ErrorType.Reference),
+                TermReference termReference when termReference.Attribute == null => new(
+                    $"Unknown term: -{termReference.Id}", ErrorType.Reference),
+                TermReference termReference => new($"Unknown attribute: -{termReference.Id}.{termReference.Attribute}",
+                    ErrorType.Reference),
+                VariableReference varRef => new($"Unknown variable: ${varRef.Id}", ErrorType.Reference),
+                _ => throw new ArgumentException($"Expected reference got ${self.GetType()}")
+            };
         }
 
         public static ResolverFluentError Cyclic(Pattern pattern)
