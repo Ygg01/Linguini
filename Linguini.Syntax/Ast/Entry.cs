@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Linguini.Syntax.IO;
 using Linguini.Syntax.Parser.Error;
 
 namespace Linguini.Syntax.Ast
@@ -21,17 +22,20 @@ namespace Linguini.Syntax.Ast
     public class AstMessage : IEntry, IEquatable<AstMessage>
     {
         public readonly Identifier Id;
+        public readonly AstLocation Location;
         public readonly Pattern? Value;
         public readonly List<Attribute> Attributes;
 
         public AstComment? Comment => InternalComment;
         protected internal AstComment? InternalComment;
 
-        public AstMessage(Identifier id, Pattern? pattern, List<Attribute> attrs, AstComment? internalComment)
+        public AstMessage(Identifier id, Pattern? pattern, List<Attribute> attrs, AstLocation location,
+            AstComment? internalComment)
         {
             Id = id;
             Value = pattern;
             Attributes = attrs;
+            Location = location;
             InternalComment = internalComment;
         }
 
@@ -67,15 +71,18 @@ namespace Linguini.Syntax.Ast
     {
         public readonly Identifier Id;
         public readonly Pattern Value;
+        public readonly AstLocation Location;
         public readonly List<Attribute> Attributes;
         public AstComment? Comment => InternalComment;
         protected internal AstComment? InternalComment;
 
-        public AstTerm(Identifier id, Pattern value, List<Attribute> attributes, AstComment? comment)
+        public AstTerm(Identifier id, Pattern value, List<Attribute> attributes, AstLocation location,
+            AstComment? comment)
         {
             Id = id;
             Value = value;
             Attributes = attributes;
+            Location = location;
             InternalComment = comment;
         }
 
@@ -84,6 +91,32 @@ namespace Linguini.Syntax.Ast
         {
             return Id.ToString();
         }
+    }
+
+    public class AstLocation
+    {
+        public static readonly AstLocation EMPTY = new(-1, "???");
+
+        public AstLocation(int row, string fileName)
+        {
+            Row = row;
+            FileName = fileName;
+        }
+
+        public AstLocation(ZeroCopyReader reader)
+        {
+            Row = reader.Row;
+            FileName = reader.FileName;
+        }
+
+        public AstLocation FromReader(ZeroCopyReader reader)
+        {
+            return new(reader.Row, reader.FileName ?? "???");
+        }
+
+        public string FileName { get; }
+
+        public int Row { get; }
     }
 
     public class AstComment : IEntry, IEquatable<AstComment>

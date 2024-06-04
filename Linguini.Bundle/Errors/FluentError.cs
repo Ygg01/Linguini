@@ -27,8 +27,6 @@ namespace Linguini.Bundle.Errors
             return null;
         }
 
-
-
         /// <summary>
         /// String representation of the error.
         /// </summary>
@@ -134,7 +132,7 @@ namespace Linguini.Bundle.Errors
 
         public static ResolverFluentError TooManyPlaceables(string? location = null)
         {
-            return new("Too many placeables", ErrorType.TooManyPlaceables,  location);
+            return new("Too many placeables", ErrorType.TooManyPlaceables, location);
         }
 
         public static ResolverFluentError Reference(IInlineExpression self, string? location = null)
@@ -223,7 +221,7 @@ namespace Linguini.Bundle.Errors
             {
                 AstTerm => EntryKind.Term,
                 AstMessage => EntryKind.Message,
-                _ =>  EntryKind.Func
+                _ => EntryKind.Func
             };
         }
     }

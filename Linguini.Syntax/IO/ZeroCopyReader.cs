@@ -11,16 +11,18 @@ namespace Linguini.Syntax.IO
         private readonly ReadOnlyMemory<char> _unconsumedData;
         private int _position;
         private int _row;
+        private string? _fileName;
 
-        public ZeroCopyReader(string text) : this(text.AsMemory())
+        public ZeroCopyReader(string text, string? fileName = null) : this(text.AsMemory(), fileName)
         {
         }
 
-        private ZeroCopyReader(ReadOnlyMemory<char> memory)
+        private ZeroCopyReader(ReadOnlyMemory<char> memory, string? fileName = null)
         {
             _unconsumedData = memory;
             _position = 0;
             _row = 1;
+            _fileName = fileName;
         }
 
         public int Position
@@ -33,6 +35,11 @@ namespace Linguini.Syntax.IO
         {
             get => _row;
             set => _row = value;
+        }
+
+        public string? FileName
+        {
+            get => _fileName;
         }
 
         public bool IsNotEof => _position < _unconsumedData.Length;

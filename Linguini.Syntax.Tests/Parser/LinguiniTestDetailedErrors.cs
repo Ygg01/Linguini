@@ -12,8 +12,8 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestDetailedErrors(string input, int row, int startErr, int endErr,
             int startMark, int endMark)
         {
-            var parse = new LinguiniParser(input).Parse();
-            var parseWithComments = new LinguiniParser(input).ParseWithComments();
+            var parse = LinguiniParser.FromFragment(input).Parse();
+            var parseWithComments = LinguiniParser.FromFragment(input).ParseWithComments();
 
             Assert.That(1, Is.EqualTo(parse.Errors.Count));
             Assert.That(1, Is.EqualTo(parseWithComments.Errors.Count));
@@ -36,7 +36,7 @@ foo = {
 d = e
 ";
 
-            var parser = new LinguiniParser(code);
+            var parser = LinguiniParser.FromFragment(code, "TestLineOffset");
             var result = parser.Parse();
             var error = result.Errors[0];
 

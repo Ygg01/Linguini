@@ -21,29 +21,74 @@ namespace Linguini.Syntax.Parser
         private readonly bool _enableExperimental;
         private const string Cr = "\n";
 
-        /// <summary>
-        /// Set input to <c>string</c>
-        /// </summary>
-        /// <param name="input">Input to be parsed</param>
-        /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
-        public LinguiniParser(string input, bool enableExperimental = false)
+        private LinguiniParser(ZeroCopyReader zeroCopyReader, bool enableExperimental)
         {
-            _reader = new ZeroCopyReader(input);
+            _reader = zeroCopyReader;
             _enableExperimental = enableExperimental;
         }
 
         /// <summary>
-        /// Set input to <c>TextReader</c>
+        /// Create new parser for <c>string</c>.
+        /// </summary>
+        /// <param name="input">Input to be parsed</param>
+        /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
+        /// <param name="filename">Name for input to be used in error reporting</param>
+        [Obsolete("Consider using LinguiniParser.FromFile factory method instead")]
+        public LinguiniParser(string input, bool enableExperimental = false, string filename = "")
+        {
+            _reader = new ZeroCopyReader(input, filename);
+            _enableExperimental = enableExperimental;
+        }
+
+
+        /// <summary>
+        /// Create new parser for <c>TextReader</c>
         /// </summary>
         /// <param name="input">TextReader to be parsed to Fluent AST.</param>
         /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
-        public LinguiniParser(TextReader input, bool enableExperimental = false)
+        /// <param name="filename">Name for input to be used in error reporting</param>
+        [Obsolete("Consider using LinguiniParser.FromTextReader factory method instead")]
+        public LinguiniParser(TextReader input, bool enableExperimental = false, string filename = "")
         {
             using (input)
             {
-                _reader = new ZeroCopyReader(input.ReadToEnd());
+                _reader = new ZeroCopyReader(input.ReadToEnd(), filename);
                 _enableExperimental = enableExperimental;
             }
+        }
+
+        /// <summary>
+        /// Create new parser for<c>TextReader</c>
+        /// </summary>
+        /// <param name="input">Input text reader</param>
+        /// <param name="inputName">name of file to be parsed </param>
+        /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
+        public static LinguiniParser FromTextReader(TextReader input, string inputName, bool enableExperimental = false)
+        {
+            return new LinguiniParser(new ZeroCopyReader(input.ReadToEnd(), inputName), enableExperimental);
+        }
+
+        /// <summary>
+        /// Create new parser from filename.
+        /// </summary>
+        /// <param name="filename">name of file to be parsed </param>
+        /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
+        public static LinguiniParser FromFile(string filename, bool enableExperimental = false)
+        {
+            using StreamReader reader = File.OpenText(filename);
+            return new LinguiniParser(new ZeroCopyReader(reader.ReadToEnd(), filename), enableExperimental);
+        }
+
+        /// <summary>
+        /// Create new parser from string fragment.
+        /// </summary>
+        /// <param name="input">String to be parsed.</param>
+        /// <param name="fragmentName">Optional fragment name of the string. Defaults to `????`.</param>
+        /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
+        public static LinguiniParser FromFragment(string input, string fragmentName = "????",
+            bool enableExperimental = false)
+        {
+            return new LinguiniParser(new ZeroCopyReader(input, fragmentName), enableExperimental);
         }
 
         public ReadOnlyMemory<char> GetReadonlyData => _reader.GetData;
@@ -186,7 +231,7 @@ namespace Linguini.Syntax.Parser
             _reader.SkipToNextEntry();
             error.Slice = new Range(entryStart, _reader.Position);
             errors.Add(error);
-           
+
             var contentSpan = _reader.ReadSlice(entryStart, _reader.Position);
             Junk junk = new(contentSpan);
             body.Add(junk);
@@ -247,7 +292,7 @@ namespace Linguini.Syntax.Parser
 
             if (value != null)
             {
-                entry = new AstTerm(id, value, attribute, null);
+                entry = new AstTerm(id, value, attribute, new AstLocation(_reader), null);
                 return (entry, error);
             }
             else
@@ -285,7 +330,7 @@ namespace Linguini.Syntax.Parser
                 return (entry, ParseError.ExpectedMessageField(id.Name, entryStart, _reader.Position, _reader.Row));
             }
 
-            return (new AstMessage(id, pattern, attrs, null), null);
+            return (new AstMessage(id, pattern, attrs, new AstLocation(_reader), null), null);
         }
 
 
@@ -460,7 +505,8 @@ namespace Linguini.Syntax.Parser
                     elements.Add(new Placeable(exp));
                     textElementRole = TextElementPosition.Continuation;
                 }
-                else if (_enableExperimental && '-' == _reader.PeekChar() && textElementRole != TextElementPosition.LineStart)
+                else if (_enableExperimental && '-' == _reader.PeekChar() &&
+                         textElementRole != TextElementPosition.LineStart)
                 {
                     _reader.Position += 1;
                     if (_reader.TryPeekChar(out var c) && c.IsAsciiAlphabetic())
@@ -1127,6 +1173,7 @@ namespace Linguini.Syntax.Parser
                         return false;
                     }
                 }
+
                 if (_enableExperimental && '$' == peekChr && _reader.PeekChar(1) == '$')
                 {
                     _reader.Position += 3;
