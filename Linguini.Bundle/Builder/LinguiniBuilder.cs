@@ -79,13 +79,13 @@ namespace Linguini.Bundle.Builder
 
 
             IReadyStep AddResources(params (TextReader, string?)[] readerList);
-            
+
             IReadyStep AddResources(IEnumerable<(TextReader, string?)> readerList);
 
             IReadyStep AddFile(string path);
-            
-            IReadyStep AddFiles(params string[] path);
-            
+
+            IReadyStep AddFiles(params string[] paths);
+
             IReadyStep AddFiles(IEnumerable<string> path);
             IReadyStep AddResources(IEnumerable<Resource> resources);
             IReadyStep AddResources(params Resource[] resources);
@@ -312,39 +312,78 @@ namespace Linguini.Bundle.Builder
                 return this;
             }
 
+            /// <inheritdoc/>
             public IReadyStep AddResource(string resource, string? filename = null)
             {
-                throw new NotImplementedException();
+                var parsed = LinguiniParser.FromFragment(resource, filename, _enableExperimental).Parse();
+                _resources.Add(parsed);
+                return this;
             }
 
+            /// <inheritdoc/>
             public IReadyStep AddResource(TextReader resource, string? filename = null)
             {
-                throw new NotImplementedException();
+                var parsed = LinguiniParser.FromTextReader(resource, filename ?? "????", _enableExperimental).Parse();
+                _resources.Add(parsed);
+
+                return this;
             }
 
-            public IReadyStep AddResources(params (TextReader, string?)[] readerList)
+            /// <inheritdoc/>
+            public IReadyStep AddResources(params (TextReader, string?)[] unparsedStreamList)
             {
-                throw new NotImplementedException();
+                foreach (var (reader, inputName) in unparsedStreamList)
+                {
+                    var parsed = LinguiniParser.FromTextReader(reader, inputName ?? "???", _enableExperimental).Parse();
+                    _resources.Add(parsed);
+                }
+
+                return this;
             }
 
-            public IReadyStep AddResources(IEnumerable<(TextReader, string?)> readerList)
+            /// <inheritdoc/>
+            public IReadyStep AddResources(IEnumerable<(TextReader, string?)> unparsedStreamList)
             {
-                throw new NotImplementedException();
+                foreach (var (reader, inputName) in unparsedStreamList)
+                {
+                    var parsed = LinguiniParser.FromTextReader(reader, inputName ?? "???", _enableExperimental).Parse();
+                    _resources.Add(parsed);
+                }
+
+                return this;
             }
 
+            /// <inheritdoc/>
             public IReadyStep AddFile(string path)
             {
-                throw new NotImplementedException();
+                var parsed = LinguiniParser.FromFile(path, _enableExperimental).Parse();
+                _resources.Add(parsed);
+
+                return this;
             }
 
-            public IReadyStep AddFiles(params string[] path)
+            /// <inheritdoc/>
+            public IReadyStep AddFiles(params string[] paths)
             {
-                throw new NotImplementedException();
+                foreach (var path in paths)
+                {
+                    var parsed = LinguiniParser.FromFile(path).Parse();
+                    _resources.Add(parsed);
+                }
+
+                return this;
             }
 
-            public IReadyStep AddFiles(IEnumerable<string> path)
+            /// <inheritdoc/>
+            public IReadyStep AddFiles(IEnumerable<string> paths)
             {
-                throw new NotImplementedException();
+                foreach (var path in paths)
+                {
+                    var parsed = LinguiniParser.FromFile(path).Parse();
+                    _resources.Add(parsed);
+                }
+
+                return this;
             }
 
             /// <inheritdoc/>
