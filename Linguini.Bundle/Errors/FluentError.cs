@@ -6,8 +6,16 @@ namespace Linguini.Bundle.Errors
 {
     public abstract record FluentError
     {
+        /// <summary>
+        /// What type of error was encountered
+        /// </summary>
+        /// <returns>Enumeration describing error.</returns>
         public abstract ErrorType ErrorKind();
 
+        /// <summary>
+        /// Where in file was error encountered.
+        /// </summary>
+        /// <returns>Position of error in file</returns>
         public virtual ErrorSpan? GetSpan()
         {
             return null;
@@ -26,10 +34,18 @@ namespace Linguini.Bundle.Errors
     {
     }
 
+    /// <summary>
+    /// Represents an error that occurs when there is an attempt to override an existing entry in a FluentBundle.
+    /// </summary>
     public record OverrideFluentError : FluentError
     {
         private readonly string _id;
         private readonly EntryKind _kind;
+
+        /// <summary>
+        /// Id of term or message that was overriden.
+        /// </summary>
+        public string Id => _id;
 
         public OverrideFluentError(string id, EntryKind kind)
         {
@@ -37,11 +53,13 @@ namespace Linguini.Bundle.Errors
             _kind = kind;
         }
 
+        /// <inheritdoc/>
         public override ErrorType ErrorKind()
         {
             return ErrorType.Overriding;
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"For id:{_id} already exist entry of type: {_kind.ToString()}";
@@ -91,38 +109,23 @@ namespace Linguini.Bundle.Errors
 
         public static ResolverFluentError Reference(IInlineExpression self)
         {
-            // TODO only allow references here
-            if (self is FunctionReference funcRef)
+            switch (self)
             {
-                return new($"Unknown function: {funcRef.Id}()", ErrorType.Reference);
-            }
-
-            if (self is MessageReference msgRef)
-            {
-                if (msgRef.Attribute == null)
-                {
+                case FunctionReference funcRef:
+                    return new($"Unknown function: {funcRef.Id}()", ErrorType.Reference);
+                case MessageReference msgRef when msgRef.Attribute == null:
                     return new($"Unknown message: {msgRef.Id}", ErrorType.Reference);
-                }
-
-                return new($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}", ErrorType.Reference);
-            }
-
-            if (self is TermReference termReference)
-            {
-                if (termReference.Attribute == null)
-                {
+                case MessageReference msgRef:
+                    return new($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}", ErrorType.Reference);
+                case TermReference termReference when termReference.Attribute == null:
                     return new($"Unknown term: -{termReference.Id}", ErrorType.Reference);
-                }
-
-                return new($"Unknown attribute: -{termReference.Id}.{termReference.Attribute}", ErrorType.Reference);
+                case TermReference termReference:
+                    return new($"Unknown attribute: -{termReference.Id}.{termReference.Attribute}", ErrorType.Reference);
+                case VariableReference varRef:
+                    return new($"Unknown variable: ${varRef.Id}", ErrorType.Reference);
+                default:
+                    throw new ArgumentException($"Expected reference got ${self.GetType()}");
             }
-
-            if (self is VariableReference varRef)
-            {
-                return new($"Unknown variable: ${varRef.Id}", ErrorType.Reference);
-            }
-
-            throw new ArgumentException($"Expected reference got ${self.GetType()}");
         }
 
         public static ResolverFluentError Cyclic(Pattern pattern)

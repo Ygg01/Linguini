@@ -13,6 +13,10 @@ namespace Linguini.Bundle.Builder
 {
     public static class LinguiniBuilder
     {
+        /// <summary>
+        /// Builder class for constructing Fluent bundles.
+        /// </summary>
+        /// <param name="useExperimental">Sets the <see cref="FluentBundleOption.EnableExtensions"/> flag. Defaults to <c>false</c></param>
         public static ILocaleStep Builder(bool useExperimental = false)
         {
             return new StepBuilder(useExperimental);
@@ -147,9 +151,9 @@ namespace Linguini.Bundle.Builder
 
                 foreach (var resource in _resources)
                 {
-                    if (!bundle.AddResource(resource,out var resErr))
+                    if (!bundle.AddResource(resource, out var resErr))
                     {
-                        errors ??= new List<FluentError>(); 
+                        errors ??= new List<FluentError>();
                         errors.AddRange(resErr);
                     }
                 }
