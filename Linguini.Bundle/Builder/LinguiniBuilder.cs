@@ -198,23 +198,24 @@ namespace Linguini.Bundle.Builder
 
             public IReadyStep AddResource(string unparsed)
             {
-                var resource = new LinguiniParser(unparsed, _enableExperimental).Parse();
+                var resource = LinguiniParser.FromFragment(unparsed, enableExperimental: _enableExperimental).Parse();
                 _resources.Add(resource);
                 return this;
             }
 
             public IReadyStep AddResource(TextReader unparsed)
             {
-                var resource = new LinguiniParser(unparsed, _enableExperimental).Parse();
+                var resource = LinguiniParser.FromTextReader(unparsed,  "????", _enableExperimental).Parse();
                 _resources.Add(resource);
                 return this;
             }
 
+            [Obsolete]
             public IReadyStep AddResources(params TextReader[] unparsedStreamList)
             {
                 foreach (var unparsed in unparsedStreamList)
                 {
-                    var parsed = new LinguiniParser(unparsed, _enableExperimental).Parse();
+                    var parsed = LinguiniParser.FromTextReader(unparsed, "???", _enableExperimental).Parse();
                     _resources.Add(parsed);
                 }
 
@@ -225,7 +226,7 @@ namespace Linguini.Bundle.Builder
             {
                 foreach (var unparsed in unparsedResources)
                 {
-                    var parsed = new LinguiniParser(unparsed, _enableExperimental).Parse();
+                    var parsed = LinguiniParser.FromFragment(unparsed, enableExperimental: _enableExperimental).Parse();
                     _resources.Add(parsed);
                 }
 
@@ -236,7 +237,7 @@ namespace Linguini.Bundle.Builder
             {
                 foreach (var unparsed in unparsedResourceArray)
                 {
-                    var parsed = new LinguiniParser(unparsed, _enableExperimental).Parse();
+                    var parsed = LinguiniParser.FromFragment(unparsed, enableExperimental: _enableExperimental).Parse();
                     _resources.Add(parsed);
                 }
 
@@ -247,7 +248,7 @@ namespace Linguini.Bundle.Builder
             {
                 foreach (var unparsed in unparsedStream)
                 {
-                    var parsed = new LinguiniParser(unparsed, _enableExperimental).Parse();
+                    var parsed = LinguiniParser.FromTextReader(unparsed, "???", enableExperimental: _enableExperimental).Parse();
                     _resources.Add(parsed);
                 }
 

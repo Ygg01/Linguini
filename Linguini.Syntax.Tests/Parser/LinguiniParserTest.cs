@@ -28,7 +28,8 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestCommentParse(string input, CommentLevel expectedCommentLevel = CommentLevel.Comment,
             string expectedContent = "Comment")
         {
-            Resource parsed = new LinguiniParser(input).ParseWithComments();
+            Resource parsed = LinguiniParser.FromFragment(input).ParseWithComments();
+
             Assert.That(parsed.Entries.Count, Is.EqualTo(1));
             if (parsed.Entries[0] is AstComment comment)
             {
@@ -52,7 +53,7 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestErrorCommentParse(string input, ErrorType expErrType, string expMsg, int start, int end,
             int sliceStart, int sliceEnd)
         {
-            Resource parsed = new LinguiniParser(input).ParseWithComments();
+            var parsed = LinguiniParser.FromFragment(input).ParseWithComments();
             Assert.That(parsed.Errors.Count, Is.EqualTo(1));
             Assert.That(expErrType, Is.EqualTo(parsed.Errors[0].Kind));
             Assert.That(expMsg, Is.EqualTo(parsed.Errors[0].Message));
@@ -77,7 +78,7 @@ namespace Linguini.Syntax.Tests.Parser
         [TestCase("a=\n\n  bar\n  baz", "a", "bar\nbaz")]
         public void TestMessageParse(string input, string expName, string expValue)
         {
-            Resource parsed = new LinguiniParser(input).ParseWithComments();
+            var parsed = LinguiniParser.FromFragment(input).ParseWithComments();
             Assert.That(0, Is.EqualTo(parsed.Errors.Count), "Failed, with errors");
             Assert.That(1, Is.EqualTo(parsed.Entries.Count));
             if (parsed.Entries[0] is AstMessage { Value: { } } message)
@@ -100,7 +101,7 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestMessageComment(string input, bool inMessage, string expMsg, string expComment)
         {
             var expBodySize = inMessage ? 1 : 2;
-            Resource parsed = new LinguiniParser(input).ParseWithComments();
+            var parsed = LinguiniParser.FromFragment(input).ParseWithComments();
             Assert.That(parsed.Errors.Count, Is.EqualTo(0));
             Assert.That(parsed.Entries.Count, Is.EqualTo(expBodySize));
             if (inMessage)
@@ -138,7 +139,7 @@ namespace Linguini.Syntax.Tests.Parser
 
         {
             var expBodySize = inTerm ? 1 : 2;
-            Resource parsed = new LinguiniParser(input).ParseWithComments();
+            var parsed = LinguiniParser.FromFragment(input).ParseWithComments();
             Assert.That(0, Is.EqualTo(parsed.Errors.Count));
             Assert.That(expBodySize, Is.EqualTo(parsed.Entries.Count));
             if (inTerm)
@@ -174,16 +175,16 @@ namespace Linguini.Syntax.Tests.Parser
         [TestCase("num = {123}", "num", "123")]
         public void TestNumExpressions(string input, string identifier, string value)
         {
-            var res = new LinguiniParser(input).Parse();
+            var res = LinguiniParser.FromFragment(input).Parse();
 
             Assert.That(0, Is.EqualTo(res.Errors.Count));
             Assert.That(1, Is.EqualTo(res.Entries.Count));
             Assert.That(res.Entries[0], Is.InstanceOf<AstMessage>());
-            
+
             if (res.Entries[0] is not AstMessage message
                 || message.Value.Elements[0] is not Placeable placeable
                 || placeable.Expression is not NumberLiteral numberLiteral) return;
-            
+
             Assert.That(1, Is.EqualTo(message.Value.Elements.Count));
             Assert.That(message.Value.Elements[0], Is.InstanceOf<Placeable>());
             Assert.That(placeable, Is.Not.Null);
@@ -212,7 +213,7 @@ namespace Linguini.Syntax.Tests.Parser
         // [TestCase(CrEscape)]
         public void TestNewlinePreservation(string input)
         {
-            var parse = new LinguiniParser(input).Parse();
+            var parse = LinguiniParser.FromFragment(input, "TestNewLinePreservation").Parse();
 
             Assert.That(0, Is.EqualTo(parse.Errors.Count));
             var msg = parse.Entries[0];

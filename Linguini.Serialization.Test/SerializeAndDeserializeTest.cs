@@ -57,6 +57,7 @@ public class SerializeAndDeserializeTest
                 new("attr1", new PatternBuilder("value1")),
                 new("attr2", new PatternBuilder("value2"))
             }, 
+            AstLocation.EMPTY, 
             new(CommentLevel.ResourceComment, new()
             {
                 "test".AsMemory()

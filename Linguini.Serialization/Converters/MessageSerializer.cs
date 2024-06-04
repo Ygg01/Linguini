@@ -40,7 +40,7 @@ namespace Linguini.Serialization.Converters
                 }
             }
 
-            return new AstMessage(identifier, value, attrs, comment);
+            return new AstMessage(identifier, value, attrs, AstLocation.EMPTY, comment);
         }
 
         public override void Write(Utf8JsonWriter writer, AstMessage msg, JsonSerializerOptions options)

@@ -24,7 +24,7 @@ namespace Linguini.Bench
             LinguiniParser parser;
             for (int i = 0; i < N; i++)
             {
-                parser = new LinguiniParser(_largeFtl);
+                parser = LinguiniParser.FromFragment(_largeFtl, "bench_ftl/large.ftl");
                 parser.Parse();
             }
         }

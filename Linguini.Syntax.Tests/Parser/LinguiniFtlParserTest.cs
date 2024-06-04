@@ -78,23 +78,13 @@ namespace Linguini.Syntax.Tests.Parser
 
         private static Resource ParseFtlFile(string path, bool enableExtensions = false)
         {
-            LinguiniParser parser;
-            using (var reader = new StreamReader(path))
-            {
-                parser = new LinguiniParser(reader, enableExtensions);
-            }
-
+            LinguiniParser parser = LinguiniParser.FromFile(path, enableExtensions);
             return parser.ParseWithComments();
         }
 
         private static Resource ParseFtlFileFast(string path, bool enableExtensions = false)
         {
-            LinguiniParser parser;
-            using (var reader = new StreamReader(path))
-            {
-                parser = new LinguiniParser(reader, enableExtensions);
-            }
-
+            LinguiniParser parser = LinguiniParser.FromFile(path, enableExtensions);
             return parser.Parse();
         }
 
