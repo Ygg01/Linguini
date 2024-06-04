@@ -95,21 +95,20 @@ namespace Linguini.Syntax.Ast
 
     public class AstLocation
     {
-        public static readonly AstLocation EMPTY = new(-1, "???");
+        public static readonly AstLocation Empty = new(-1, "???");
 
-        public AstLocation(int row, string fileName)
+        private AstLocation(int row, string fileName)
         {
             Row = row;
             FileName = fileName;
         }
 
-        public AstLocation(ZeroCopyReader reader)
+        public static AstLocation FromRowAndFilename(int row, string fileName)
         {
-            Row = reader.Row;
-            FileName = reader.FileName;
+            return new AstLocation(row, fileName);
         }
 
-        public AstLocation FromReader(ZeroCopyReader reader)
+        public static AstLocation FromReader(ZeroCopyReader reader)
         {
             return new(reader.Row, reader.FileName ?? "???");
         }
