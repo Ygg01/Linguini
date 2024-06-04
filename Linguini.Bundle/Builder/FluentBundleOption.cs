@@ -73,7 +73,8 @@ namespace Linguini.Bundle.Builder
             new Dictionary<string, ExternalFunction>();
 
         /// <summary>
-        /// Gets or sets the formatter function that is used to format Fluent type values into strings.
+        /// Gets or sets the formatter function that is used to format Fluent type values into strings,
+        /// allowing for type specific formatting.
         /// </summary>
         /// <remarks>
         /// The formatter function takes an instance of <see cref="IFluentType"/> and returns the string representation of the value.
@@ -86,8 +87,10 @@ namespace Linguini.Bundle.Builder
         /// </value>
         public Func<IFluentType, string>? FormatterFunc { get; init; }
 
+        
+
         /// <summary>
-        /// Represents a function that transforms a string value before it is used in Fluent message formatting.
+        /// Represents a function that transforms all textual fragment during formatting.
         /// </summary>
         /// <value>The transformed string value.</value>
         public Func<string, string>? TransformFunc { get; init; }

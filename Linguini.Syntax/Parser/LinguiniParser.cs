@@ -292,7 +292,7 @@ namespace Linguini.Syntax.Parser
 
             if (value != null)
             {
-                entry = new AstTerm(id, value, attribute, new AstLocation(_reader), null);
+                entry = new AstTerm(id, value, attribute, AstLocation.FromReader(_reader), null);
                 return (entry, error);
             }
             else
@@ -330,7 +330,7 @@ namespace Linguini.Syntax.Parser
                 return (entry, ParseError.ExpectedMessageField(id.Name, entryStart, _reader.Position, _reader.Row));
             }
 
-            return (new AstMessage(id, pattern, attrs, new AstLocation(_reader), null), null);
+            return (new AstMessage(id, pattern, attrs, AstLocation.FromReader(_reader), null), null);
         }
 
 
