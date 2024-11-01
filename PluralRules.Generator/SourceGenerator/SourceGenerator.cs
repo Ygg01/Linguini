@@ -169,7 +169,7 @@ namespace PluralRulesGenerated.Test
                     if (ruleMap.Rule.Samples != null)
                     {
                         string category = $"PluralCategory.{ruleMap.Category.FirstCharToUpper()}";
-                        foreach (var integerSample in ruleMap.Rule.Samples.IntegerSamples)
+                        foreach (var integerSample in ruleMap.Rule.Samples.Value.IntegerSamples)
                         {
                             var upper = integerSample.Upper == null
                                 ? "null"
@@ -178,7 +178,7 @@ namespace PluralRulesGenerated.Test
             new object?[] {{""{ruleLangId}"", {ruleType}, false, ""{integerSample.Lower.Value}"", {upper}, {category}}},");
                         }
 
-                        foreach (var decimalSample in ruleMap.Rule.Samples.DecimalSamples)
+                        foreach (var decimalSample in ruleMap.Rule.Samples.Value.DecimalSamples)
                         {
                             var upper = decimalSample.Upper == null
                                 ? "null"

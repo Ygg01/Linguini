@@ -10,6 +10,7 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>linguini.jpg</PackageIcon>
         <PackageTags>sourcegen, plural rules, icu</PackageTags>
+        <LangVersion>12</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
