@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Linguini.Bundle.Errors;
@@ -6,8 +7,13 @@ using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 
+// ReSharper disable UnusedMemberInSuper.Global
+
 namespace Linguini.Bundle
 {
+    /// <summary>
+    /// Represents an interface for reading language bundles. Read-only bundles only implement this interface.
+    /// </summary>
     public interface IReadBundle
     {
         /// <summary>
@@ -17,8 +23,29 @@ namespace Linguini.Bundle
         /// 
         bool HasMessage(string identifier);
 
+        /// <summary>
+        /// Converts a <see cref="Pattern"/> to a string using given arguments.
+        /// </summary>
+        /// <param name="pattern">The pattern to format.</param>
+        /// <param name="args">The dictionary of arguments to replace the variables.</param>
+        /// <param name="errors">The list of FluentErrors, if any occurred during formatting.</param>
+        /// <returns>The formatted string.</returns>
         string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
-            [NotNullWhen(false)] out IList<FluentError>? errors);
+            [NotNullWhen(false)] out IList<FluentError>? errors)
+        {
+            errors = null;
+            return FormatPatternErrRef(pattern, args, ref errors);
+        }
+
+        /// <summary>
+        /// Converts a <see cref="Pattern"/> to a string using given arguments.
+        /// </summary>
+        /// <param name="pattern">The pattern to format.</param>
+        /// <param name="args">The dictionary of arguments to replace the variables.</param>
+        /// <param name="errors">The reference to a list of FluentErrors, will be full if any occurred during formatting.</param>
+        /// <returns>The formatted string.</returns>
+        string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors);
 
         /// <summary>
         /// Tries to get the AstMessage associated with the specified ident.
@@ -87,7 +114,8 @@ namespace Linguini.Bundle
         bool TryGetMessage(string id, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
         {
-            return TryGetMessage(id, null, args, out errors, out message);
+            errors = null;
+            return TryGetMessageErrRef(id, null, args, ref errors, out message);
         }
 
 
@@ -149,6 +177,21 @@ namespace Linguini.Bundle
         bool TryGetAttrMessage(string msgWithAttr, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
         {
+            errors = null;
+            return TryGetAttrMessageErrRef(msgWithAttr, args, ref errors, out message);
+        }
+
+        /// <summary>
+        /// Tries to retrieve an attribute message.
+        /// </summary>
+        /// <param name="msgWithAttr">The message with attribute.</param>
+        /// <param name="args">The arguments passed with the message.</param>
+        /// <param name="errors">The list of errors that occurred during the message retrieval process.</param>
+        /// <param name="message">The retrieved message.</param>
+        /// <returns>True if the attribute message is found; otherwise, false.</returns>
+        bool TryGetAttrMessageErrRef(string msgWithAttr, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+        {
             if (msgWithAttr.Contains("."))
             {
                 var split = msgWithAttr.Split('.');
@@ -170,35 +213,78 @@ namespace Linguini.Bundle
         public bool TryGetMessage(string id, string? attribute, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
         {
-            string? value = null;
+            errors = null;
+            return TryGetMessageErrRef(id, attribute, args, ref errors, out message);
+        }
+
+        /// <summary>
+        /// Tries to get a message based on the provided parameters.
+        /// </summary>
+        /// <param name="id">The identifier of the message.</param>
+        /// <param name="attribute">The attribute of the message.</param>
+        /// <param name="args">The arguments to format the message with.</param>
+        /// <param name="errors">The reference to list of errors that occurred during the message retrieval process.</param>
+        /// <param name="message">The retrieved message.</param>
+        /// <returns>True if the message was successfully retrieved, otherwise false.</returns>
+        public bool TryGetMessageErrRef(string id, string? attribute, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+        {
             errors = new List<FluentError>();
+            var msg = attribute == null
+                ? id
+                : $"{id}.{attribute}";
 
-            if (TryGetAstMessage(id, out var astMessage))
+            if (!TryGetAstMessage(id, out var astMessage))
             {
-                var pattern = attribute != null
-                    ? astMessage.GetAttribute(attribute)?.Value
-                    : astMessage.Value;
-
-                if (pattern == null)
-                {
-                    var msg = attribute == null
-                        ? id
-                        : $"{id}.{attribute}";
-                    errors.Add(ResolverFluentError.NoValue($"{msg}"));
-                    message = FluentNone.None.ToString();
-                    return false;
-                }
-
-                value = FormatPattern(pattern, args, out errors);
+                errors.Add(ResolverFluentError.NoValue($"{msg}"));
+                message = null;
+                return false;
             }
 
-            message = value;
-            return message != null;
+            var pattern = attribute != null
+                ? astMessage.GetAttribute(attribute)?.Value
+                : astMessage.Value;
+
+            if (pattern == null)
+            {
+                errors.Add(ResolverFluentError.NoValue($"{msg}"));
+                message = FluentNone.None.ToString();
+                return false;
+            }
+
+            errors = null;
+            message = FormatPattern(pattern, args, out errors);
+            return true;
         }
     }
 
+    /// <summary>
+    /// Provides extension methods for working with bundles.
+    /// </summary>
     public static class ReadBundleExtensions
     {
+        /// <summary>
+        /// Thaws a frozen bundle and returns a new instance of a concurrent bundle.
+        /// </summary>
+        /// <param name="frozenBundle">The frozen bundle to thaw.</param>
+        /// <returns>A new instance of a concurrent bundle.</returns>
+        public static ConcurrentBundle Thaw(this FrozenBundle frozenBundle)
+        {
+            return new ConcurrentBundle
+            {
+                Messages = new ConcurrentDictionary<string, AstMessage>(frozenBundle.Messages),
+                Functions = new ConcurrentDictionary<string, FluentFunction>(frozenBundle.Functions),
+                Terms = new ConcurrentDictionary<string, AstTerm>(frozenBundle.Terms),
+                FormatterFunc = frozenBundle.FormatterFunc,
+                Locales = frozenBundle.Locales,
+                UseIsolating = frozenBundle.UseIsolating,
+                MaxPlaceable = frozenBundle.MaxPlaceable,
+                EnableExtensions = frozenBundle.EnableExtensions,
+                TransformFunc = frozenBundle.TransformFunc,
+                Culture = frozenBundle.Culture
+            };
+        }
+
         /// <summary>
         /// Convenience method for <see cref="IReadBundle.HasAttrMessage"/>
         /// </summary>
@@ -251,8 +337,8 @@ namespace Linguini.Bundle
         /// <param name="bundle">The bundle to retrieve the message from.</param>
         /// <param name="msgWithAttr">The message with attribute</param>
         /// <param name="args">Optional arguments to be passed to the attribute message.</param>
-        /// <param name="errors">When this method returns, contains any errors that occured during retrieval, if any.</param>
-        /// <param name="message">When this method returns, contains the retrieved attribute message, if it exists.</param>
+        /// <param name="errors">When this method returns false, contains a list of errors that occurred while trying to retrieve the message; otherwise, null.</param>
+        /// <param name="message">When this method returns true, contains the retrieved message; otherwise, null.</param>
         /// <returns><c>true</c> if the attribute message was successfully retrieved; otherwise, <c>false</c>.</returns>
         public static bool TryGetAttrMessage(this IReadBundle bundle, string msgWithAttr,
             IDictionary<string, IFluentType>? args,
@@ -266,8 +352,8 @@ namespace Linguini.Bundle
         /// </summary>
         /// <param name="bundle">The bundle to retrieve the message from.</param>
         /// <param name="id">The identifier of the message.</param>
-        /// <param name="attribute">The attribute of the message (optional).</param>
-        /// <param name="args">The arguments for the message (optional).</param>
+        /// <param name="attribute">Optional attribute of the message.</param>
+        /// <param name="args">Optional arguments to be passed to the attribute message.</param>
         /// <param name="errors">When this method returns false, contains a list of errors that occurred while trying to retrieve the message; otherwise, null.</param>
         /// <param name="message">When this method returns true, contains the retrieved message; otherwise, null.</param>
         /// <returns>True if the message was successfully retrieved, otherwise false.</returns>

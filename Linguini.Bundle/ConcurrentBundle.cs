@@ -13,45 +13,33 @@ using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle
 {
+    /// <summary>
+    /// Represents a thread-safe implementation of the FluentBundle class.
+    ///
+    /// `ConcurrentBundle` implements the <see cref="IReadBundle"/> interface.
+    /// </summary>
     public sealed class ConcurrentBundle : FluentBundle, IEquatable<ConcurrentBundle>
     {
         internal ConcurrentDictionary<string, FluentFunction> Functions = new();
-        private ConcurrentDictionary<string, AstTerm> _terms = new();
-        private ConcurrentDictionary<string, AstMessage> _messages = new();
-
-        public static ConcurrentBundle Thaw(FrozenBundle frozenBundle)
-        {
-            return new ConcurrentBundle
-            {
-                _messages = new ConcurrentDictionary<string, AstMessage>(frozenBundle.Messages),
-                Functions = new ConcurrentDictionary<string, FluentFunction>(frozenBundle.Functions),
-                _terms = new ConcurrentDictionary<string, AstTerm>(frozenBundle.Terms),
-                FormatterFunc = frozenBundle.FormatterFunc,
-                Locales = frozenBundle.Locales,
-                UseIsolating = frozenBundle.UseIsolating,
-                MaxPlaceable = frozenBundle.MaxPlaceable,
-                EnableExtensions = frozenBundle.EnableExtensions,
-                TransformFunc = frozenBundle.TransformFunc,
-                Culture = frozenBundle.Culture
-            };
-        }
+        internal ConcurrentDictionary<string, AstTerm> Terms = new();
+        internal ConcurrentDictionary<string, AstMessage> Messages = new();
 
         /// <inheritdoc />
         protected override void AddMessageOverriding(AstMessage message)
         {
-            _messages[message.GetId()] = message;
+            Messages[message.GetId()] = message;
         }
 
         /// <inheritdoc />
         protected override void AddTermOverriding(AstTerm term)
         {
-            _terms[term.GetId()] = term;
+            Terms[term.GetId()] = term;
         }
 
         /// <inheritdoc />
         protected override bool TryAddTerm(AstTerm term, List<FluentError>? errors)
         {
-            if (_terms.TryAdd(term.GetId(), term)) return true;
+            if (Terms.TryAdd(term.GetId(), term)) return true;
             errors ??= new List<FluentError>();
             errors.Add(new OverrideFluentError(term.GetId(), EntryKind.Term));
             return false;
@@ -60,7 +48,7 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         protected override bool TryAddMessage(AstMessage message, List<FluentError>? errors)
         {
-            if (_messages.TryAdd(message.GetId(), message)) return true;
+            if (Messages.TryAdd(message.GetId(), message)) return true;
             errors ??= new List<FluentError>();
             errors.Add(new OverrideFluentError(message.GetId(), EntryKind.Message));
             return false;
@@ -89,19 +77,19 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override bool HasMessage(string identifier)
         {
-            return _messages.ContainsKey(identifier);
+            return Messages.ContainsKey(identifier);
         }
 
         /// <inheritdoc />
         public override bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message)
         {
-            return _messages.TryGetValue(ident, out message);
+            return Messages.TryGetValue(ident, out message);
         }
 
         /// <inheritdoc />
         public override bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? term)
         {
-            return _terms.TryGetValue(ident, out term);
+            return Terms.TryGetValue(ident, out term);
         }
 
 
@@ -114,7 +102,7 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override IEnumerable<string> GetMessageEnumerable()
         {
-            return _messages.Keys;
+            return Messages.Keys;
         }
 
         /// <inheritdoc />
@@ -126,19 +114,22 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public override IEnumerable<string> GetTermEnumerable()
         {
-            return _terms.Keys;
+            return Terms.Keys;
         }
 
+        /// <inheritdoc/>
         internal override IDictionary<string, AstMessage> GetMessagesDictionary()
         {
-            return _messages;
+            return Messages;
         }
 
+        /// <inheritdoc/>
         internal override IDictionary<string, AstTerm> GetTermsDictionary()
         {
-            return _terms;
+            return Terms;
         }
 
+        /// <inheritdoc/>
         internal override IDictionary<string, FluentFunction> GetFunctionDictionary()
         {
             return Functions;
@@ -150,8 +141,8 @@ namespace Linguini.Bundle
             return new ConcurrentBundle
             {
                 Functions = new ConcurrentDictionary<string, FluentFunction>(Functions),
-                _terms = new ConcurrentDictionary<string, AstTerm>(_terms),
-                _messages = new ConcurrentDictionary<string, AstMessage>(_messages),
+                Terms = new ConcurrentDictionary<string, AstTerm>(Terms),
+                Messages = new ConcurrentDictionary<string, AstMessage>(Messages),
                 Culture = (CultureInfo)Culture.Clone(),
                 Locales = new List<string>(Locales),
                 UseIsolating = UseIsolating,
@@ -167,8 +158,8 @@ namespace Linguini.Bundle
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return base.Equals(other) && Functions.SequenceEqual(other.Functions) && _terms.SequenceEqual(other._terms) &&
-                   _messages.SequenceEqual(other._messages);
+            return base.Equals(other) && Functions.SequenceEqual(other.Functions) && Terms.SequenceEqual(other.Terms) &&
+                   Messages.SequenceEqual(other.Messages);
         }
 
         /// <inheritdoc/>
@@ -180,7 +171,7 @@ namespace Linguini.Bundle
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return HashCode.Combine(base.GetHashCode(), Functions, _terms, _messages);
+            return HashCode.Combine(base.GetHashCode(), Functions, Terms, Messages);
         }
     }
 }

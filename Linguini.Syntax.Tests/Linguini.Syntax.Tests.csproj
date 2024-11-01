@@ -6,6 +6,7 @@
         <OutputType>Library</OutputType>
         <PackageIcon>linguini.jpg</PackageIcon>
         <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+        <PackageVersion>0.8.0</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>

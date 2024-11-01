@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
@@ -30,6 +31,25 @@ namespace Linguini.Serialization.Converters
             }
 
             writer.WriteEndObject();
+        }
+
+        public static bool TryProcessPlaceable(JsonElement el, JsonSerializerOptions options,
+            [MaybeNullWhen(false)] out Placeable placeable)
+        {
+            if (!el.TryGetProperty("expression", out var expr))
+            {
+                throw new JsonException("Placeable must have `expression` value.");
+            }
+
+            placeable = new Placeable(ResourceSerializer.ReadExpression(expr, options));
+            return true;
+        }
+
+        public static Placeable ProcessPlaceable(JsonElement el, JsonSerializerOptions options)
+        {
+            if (!TryProcessPlaceable(el, options, out var placeable)) throw new JsonException("Expected placeable!");
+
+            return placeable;
         }
     }
 }

@@ -1,10 +1,8 @@
-﻿#nullable enable
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using FluentAssertions.Execution;
 using FluentAssertions.Json;
 using Linguini.Serialization.Converters;
 using Linguini.Syntax.Ast;
@@ -37,9 +35,8 @@ namespace Linguini.Syntax.Tests.Parser
             }
         }
 
-        private static JsonSerializerOptions TestJsonOptions()
-        {
-            return new JsonSerializerOptions
+        private static JsonSerializerOptions TestJsonOptions =
+            new()
             {
                 IgnoreReadOnlyFields = false,
                 WriteIndented = true,
@@ -69,7 +66,6 @@ namespace Linguini.Syntax.Tests.Parser
                     new VariableReferenceSerializer(),
                 },
             };
-        }
 
         private static string GetFullPathFor(string file)
         {
@@ -117,7 +113,7 @@ namespace Linguini.Syntax.Tests.Parser
                 ? ParseFtlFileFast(@$"{path}.ftl")
                 : ParseFtlFile(@$"{path}.ftl");
 
-            var actual = WrapArray(JArray.Parse(JsonSerializer.Serialize(resource.Errors, TestJsonOptions())));
+            var actual = WrapArray(JArray.Parse(JsonSerializer.Serialize(resource.Errors, TestJsonOptions)));
             actual.Should().BeEquivalentTo(expected);
         }
 
@@ -171,7 +167,7 @@ namespace Linguini.Syntax.Tests.Parser
         {
             var path = GetFullPathFor(file);
             var res = ParseFtlFile(@$"{path}.ftl");
-            var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions());
+            var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions);
 
             var expected = JToken.Parse(File.ReadAllText($@"{path}.json"));
             var actual = JToken.Parse(ftlAstJson);
@@ -223,7 +219,7 @@ namespace Linguini.Syntax.Tests.Parser
         {
             var path = GetFullPathFor(file);
             var res = ParseFtlFile(@$"{path}.ftl", true);
-            var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions());
+            var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions);
         
             var expected = JToken.Parse(File.ReadAllText($@"{path}.json"));
             var actual = JToken.Parse(ftlAstJson);

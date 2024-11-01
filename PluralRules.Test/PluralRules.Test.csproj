@@ -6,6 +6,7 @@
         <RootNamespace>PluralRules.Test</RootNamespace>
         <OutputType>Library</OutputType>
         <TargetFramework>net6.0</TargetFramework>
+        <PackageVersion>0.8.0</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>

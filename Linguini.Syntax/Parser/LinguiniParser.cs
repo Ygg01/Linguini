@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -142,12 +141,12 @@ namespace Linguini.Syntax.Parser
                     if (entry is AstMessage message
                         && lastBlankCount < 2)
                     {
-                        message.Comment = lastComment;
+                        message.InternalComment = lastComment;
                     }
                     else if (entry is AstTerm term
                              && lastBlankCount < 2)
                     {
-                        term.Comment = lastComment;
+                        term.InternalComment = lastComment;
                     }
                     else
                     {
@@ -187,9 +186,9 @@ namespace Linguini.Syntax.Parser
             _reader.SkipToNextEntry();
             error.Slice = new Range(entryStart, _reader.Position);
             errors.Add(error);
-            Junk junk = new();
+           
             var contentSpan = _reader.ReadSlice(entryStart, _reader.Position);
-            junk.Content = contentSpan;
+            Junk junk = new(contentSpan);
             body.Add(junk);
         }
 
@@ -947,8 +946,8 @@ namespace Linguini.Syntax.Parser
 
                 if (value != null)
                 {
-                    variant.Value = value;
-                    variant.IsDefault = isDefault;
+                    variant.InternalValue = value;
+                    variant.InternalDefault = isDefault;
                     variants.Add(variant);
                     _reader.SkipBlank();
                 }

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageVersion>0.7.0</PackageVersion>
+        <PackageVersion>0.8.0</PackageVersion>
         <PackageIcon>linguini.jpg</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageTags>serialization, linguini, utility</PackageTags>
@@ -21,10 +21,6 @@
         <Link>linguini.jpg</Link>
       </None>
       <None Include="README.md" Pack="true" PackagePath="\"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="NUnit" Version="4.0.1" />
     </ItemGroup>
 
 </Project>

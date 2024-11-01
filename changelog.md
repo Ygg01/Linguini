@@ -172,3 +172,45 @@ version 0.7.0
     ```
     Usually when style isn't passed, it would to default `-ship.gender()` i.e. `neuter`, which would set `ship-gender` selector to neuter i.e. `It`.
     In above example if we set style variable to `chicago`, `-ship.gender()` it would evaluate `feminine`, so `ship-gender` would would evaluate to `She`.
+
+version 0.8.0
+========
+
+## What's Changed
+* Remove `net5` or greater by 
+* Move to `net6` and/or `net8`.
+* Move to `NUnit 4.0.1`
+* Fix issue with Windows test not being fully run
+* `[Breaking change]` Refactor to use consistent naming
+* Remove unnecessary `ContainsKey()` calls and split dictionaries by @ElectroJr
+
+* `[Breaking change]` Make `FluentBundle` abstract and do some API refactoring
+  * To fully resolve the issue reported by @ElectroJr  a common base for bundle is added `FluentBundle`.
+  * Extract read-only methods to `IReadBundle`
+  * Adds `FrozenBundle` as a read-only version of `FluentBundle`
+  * Most fields are read only.
+* `[Major change]` Refactor `Ast*` API 
+  * Adds builder for most `Ast*` types (`AstMessage`, `AstTerm` and `Junk`). E.g.
+    ```csharp
+    SelectExpressionBuilder(new VariableReference("x"))
+       .AddVariant("one", new PatternBuilder("select 1"))
+       .AddVariant("other", new PatternBuilder("select other"))
+       .SetDefault(1)
+       .Build();
+    ```
+  * Adds `Equals` to most `Linguini.Syntax.Ast` types.
+  * All serializers now have a `Read` method implementation.
+
+version 0.8.1
+========
+
+## What's changed 
+* Add `AddResourceOverriding(Resource res)`.
+
+version 0.8.2
+========
+
+## What's changed
+* `TryGetMessage` returns error if no message was found.
+* Adds methods `FormatPatternErrRef`, `TryGetMessageErrRef`, `TryGetAttrMessageErrRef`, `TryGetMessageErrRef` in `IReadBundle` and
+  associated classes.

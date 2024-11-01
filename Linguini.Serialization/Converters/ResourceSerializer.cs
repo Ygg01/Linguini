@@ -1,6 +1,6 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
@@ -89,6 +89,76 @@ namespace Linguini.Serialization.Converters
             {
                 JsonSerializer.Serialize(writer, dynamicReference, options);
             }
+        }
+
+        public static TextLiteral ProcessTextLiteral(JsonElement el, JsonSerializerOptions options)
+        {
+            return new(el.GetProperty("value").GetString() ?? "");
+        }
+
+        public static NumberLiteral ProcessNumberLiteral(JsonElement el,
+            JsonSerializerOptions options)
+        {
+            if (TryReadProcessNumberLiteral(el, options, out var numberLiteral))
+            {
+                return numberLiteral;
+            }
+
+            throw new JsonException("Expected value to be a valid number");
+        }
+
+        public static bool TryReadProcessNumberLiteral(JsonElement el, JsonSerializerOptions options,
+            [MaybeNullWhen(false)] out NumberLiteral numberLiteral)
+        {
+            if (el.TryGetProperty("value", out var v) && v.ValueKind == JsonValueKind.String &&
+                !"".Equals(v.GetString()))
+            {
+                numberLiteral = new NumberLiteral(v.GetString().AsMemory());
+                return true;
+            }
+
+            numberLiteral = null;
+            return false;
+        }
+
+        public static IExpression ReadExpression(JsonElement el, JsonSerializerOptions options)
+        {
+            var type = el.GetProperty("type").GetString();
+            IExpression x = type switch
+            {
+                "DynamicReference" => DynamicReferenceSerializer.ProcessDynamicReference(el, options),
+                "FunctionReference" => FunctionReferenceSerializer.ProcessFunctionReference(el, options),
+                "MessageReference" => MessageReferenceSerializer.ProcessMessageReference(el, options),
+                "NumberLiteral" => ProcessNumberLiteral(el, options),
+                "Placeable" => PlaceableSerializer.ProcessPlaceable(el, options),
+                "TermReference" => TermReferenceSerializer.ProcessTermReference(el, options),
+                "StringLiteral" or "TextElement" or "TextLiteral" => ProcessTextLiteral(el, options),
+                "VariableReference" => VariableReferenceSerializer.ProcessVariableReference(el, options),
+                "SelectExpression" => SelectExpressionSerializer.ProcessSelectExpression(el, options),
+                _ => throw new JsonException($"Unexpected type {type}")
+            };
+            return x;
+        }
+
+
+       
+        public static bool TryReadInlineExpression(JsonElement el, JsonSerializerOptions options,
+            [MaybeNullWhen(false)] out IInlineExpression o)
+        {
+            var type = el.GetProperty("type").GetString();
+            o = type switch
+            {
+                "DynamicReference" => DynamicReferenceSerializer.ProcessDynamicReference(el, options),
+                "FunctionReference" => FunctionReferenceSerializer.ProcessFunctionReference(el, options),
+                "MessageReference" => MessageReferenceSerializer.ProcessMessageReference(el, options),
+                "NumberLiteral" => ProcessNumberLiteral(el, options),
+                "Placeable" => PlaceableSerializer.ProcessPlaceable(el, options),
+                "TermReference" => TermReferenceSerializer.ProcessTermReference(el, options),
+                "TextLiteral" => ProcessTextLiteral(el, options),
+                "VariableReference" => VariableReferenceSerializer.ProcessVariableReference(el, options),
+                _ => throw new JsonException($"Unexpected value {type}")
+            };
+            return true;
         }
     }
 }

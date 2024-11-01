@@ -10,7 +10,18 @@ namespace Linguini.Serialization.Converters
     {
         public override Junk Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            return ProcessJunk(JsonSerializer.Deserialize<JsonElement>(ref reader, options), options);
+        }
+
+        private Junk ProcessJunk(JsonElement el, JsonSerializerOptions options)
+        {
+            if (el.TryGetProperty("content", out var content))
+            {
+                var str = content.GetString() ?? "";
+                return new Junk(str);
+            }
+
+            throw new JsonException("Junk must have content");
         }
 
         public override void Write(Utf8JsonWriter writer, Junk value, JsonSerializerOptions options)
