@@ -27,7 +27,7 @@ namespace Linguini.Syntax.Ast
         public readonly List<Attribute> Attributes;
 
         public AstComment? Comment => InternalComment;
-        protected internal AstComment? InternalComment;
+        internal readonly AstComment? InternalComment;
 
         public AstMessage(Identifier id, Pattern? pattern, List<Attribute> attrs, AstLocation location,
             AstComment? internalComment)
@@ -74,7 +74,7 @@ namespace Linguini.Syntax.Ast
         public readonly AstLocation Location;
         public readonly List<Attribute> Attributes;
         public AstComment? Comment => InternalComment;
-        protected internal AstComment? InternalComment;
+        internal readonly AstComment? InternalComment;
 
         public AstTerm(Identifier id, Pattern value, List<Attribute> attributes, AstLocation location,
             AstComment? comment)

@@ -185,7 +185,7 @@ namespace Linguini.Bundle
         /// <returns>True if the resource was added successfully; otherwise, false.</returns>
         /// <seealso cref="AddResource(string,out System.Collections.Generic.List{Linguini.Bundle.Errors.FluentError}?)"/>
         public bool AddResource(TextReader reader, [NotNullWhen(false)] out List<FluentError>? errors,
-            string? inputName = "????")
+            string inputName = "????")
         {
             var res = LinguiniParser.FromTextReader(reader, inputName, enableExperimental: EnableExtensions).Parse();
             return AddResource(res, out errors);
@@ -254,6 +254,7 @@ namespace Linguini.Bundle
         /// Adds a <see cref="TextReader"/> to the FluentBundle, overriding any existing messages and terms with the same identifiers.
         /// </summary>
         /// <param name="input">The text reader to be added to parsed and added to bundle.</param>
+        /// <param name="filename">name by which the text reader will be referenced</param>
         public void AddResourceOverriding(TextReader input, string filename = "????")
         {
             var res = LinguiniParser.FromTextReader(input, filename, enableExperimental: EnableExtensions).Parse();

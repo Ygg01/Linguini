@@ -45,7 +45,6 @@ namespace Linguini.Syntax.Parser
         /// </summary>
         /// <param name="input">TextReader to be parsed to Fluent AST.</param>
         /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
-        /// <param name="filename">Name for input to be used in error reporting</param>
         [Obsolete("Consider using LinguiniParser.FromTextReader factory method instead", true)]
         public LinguiniParser(TextReader input, bool enableExperimental = false) : this(input.ReadToEnd(),
             enableExperimental)
@@ -119,8 +118,8 @@ namespace Linguini.Syntax.Parser
             while (_reader.IsNotEof)
             {
                 var entryStart = _reader.Position;
-                (var entry, ParseError? error) = GetEntryRuntime(entryStart);
-                if (entry is { } and not Junk)
+                var (entry, error) = GetEntryRuntime(entryStart);
+                if (entry is not null and not Junk)
                 {
                     body.Add(entry);
                 }
@@ -153,21 +152,17 @@ namespace Linguini.Syntax.Parser
 
         private (IEntry?, ParseError?) GetEntryRuntime(int entryStart)
         {
-            if (_reader.TryPeekChar(out var c))
+            if (!_reader.TryPeekChar(out var c)) return GetMessage(entryStart);
+            switch (c)
             {
-                if (c == '#')
-                {
+                case '#':
                     SkipComment();
                     return (null, null);
-                }
-
-                if (c == '-')
-                {
+                case '-':
                     return GetTerm(entryStart);
-                }
+                default:
+                    return GetMessage(entryStart);
             }
-
-            return GetMessage(entryStart);
         }
 
         #endregion
@@ -193,19 +188,19 @@ namespace Linguini.Syntax.Parser
 
                 if (lastComment != null)
                 {
-                    if (entry is AstMessage message
-                        && lastBlankCount < 2)
+                    switch (entry)
                     {
-                        message.InternalComment = lastComment;
-                    }
-                    else if (entry is AstTerm term
-                             && lastBlankCount < 2)
-                    {
-                        term.InternalComment = lastComment;
-                    }
-                    else
-                    {
-                        body.Add(lastComment);
+                        case AstMessage message
+                            when lastBlankCount < 2:
+                            entry = new AstMessage(message.Id, message.Value, message.Attributes, message.Location, lastComment);
+                            break;
+                        case AstTerm term
+                            when lastBlankCount < 2:
+                            entry = new AstTerm(term.Id, term.Value, term.Attributes, term.Location, lastComment);
+                            break;
+                        default:
+                            body.Add(lastComment);
+                            break;
                     }
 
                     lastComment = null;
@@ -251,23 +246,23 @@ namespace Linguini.Syntax.Parser
         {
             var charSpan = _reader.PeekChar();
 
-            if ('#' == charSpan)
+            switch (charSpan)
             {
-                IEntry entry = new Junk();
-                if (TryGetComment(out var comment, out var error))
+                case '#':
                 {
-                    entry = comment;
+                    IEntry entry = new Junk();
+                    if (TryGetComment(out var comment, out var error))
+                    {
+                        entry = comment;
+                    }
+
+                    return (entry, error);
                 }
-
-                return (entry, error);
+                case '-':
+                    return GetTerm(entryStart);
+                default:
+                    return GetMessage(entryStart);
             }
-
-            if ('-' == charSpan)
-            {
-                return GetTerm(entryStart);
-            }
-
-            return GetMessage(entryStart);
         }
 
         private (IEntry, ParseError?) GetTerm(int entryStart)
@@ -305,11 +300,9 @@ namespace Linguini.Syntax.Parser
                 entry = new AstTerm(id, value, attribute, AstLocation.FromReader(_reader), null);
                 return (entry, error);
             }
-            else
-            {
-                error = ParseError.ExpectedTermField(id, entryStart, _reader.Position, _reader.Row);
-                return (entry, error);
-            }
+
+            error = ParseError.ExpectedTermField(id, entryStart, _reader.Position, _reader.Row);
+            return (entry, error);
         }
 
         private (IEntry, ParseError?) GetMessage(int entryStart)
@@ -1397,12 +1390,7 @@ namespace Linguini.Syntax.Parser
         {
             if (_reader.ReadCharIf('.'))
             {
-                if (!TryGetIdentifier(out id, out error))
-                {
-                    return false;
-                }
-
-                return true;
+                return TryGetIdentifier(out id, out error);
             }
 
             id = null;
@@ -1452,7 +1440,7 @@ namespace Linguini.Syntax.Parser
         private bool TrySkipUnicodeSequence(int length, out ParseError? error)
         {
             var start = _reader.Position;
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 if (_reader.TryPeekChar(out var c) && c.IsAsciiHexdigit())
                 {
