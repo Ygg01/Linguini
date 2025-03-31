@@ -61,33 +61,89 @@ namespace Linguini.Bundle.Builder
 
         public interface IResourceStep : IStep
         {
-            [Obsolete("Consider using IResourceStep.AddFiles(IEnumerable<string>)")]
+            /// <summary>
+            /// Adds <see cref="IEnumerable{T}"/> of fragments to a <see cref="FluentBundle"/>.
+            /// </summary>
+            /// <param name="unparsedResourceList">Enumerable of string fragments</param>
+            /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddResources(IEnumerable<string> unparsedResourceList);
 
-            [Obsolete("Consider using IResourceStep.AddFiles(IEnumerable<string>)")]
+            /// <summary>
+            /// Adds <see cref="IEnumerable{T}"/> of fragments to a <see cref="FluentBundle"/>.
+            /// </summary>
+            /// <param name="unparsedResourceArray">String array of string fragments</param>
+            /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddResources(params string[] unparsedResourceArray);
 
-            [Obsolete]
+            [Obsolete("Method is obsolete, please use IResourceStep.AddResources(IEnumerable<(TextReader, string?)>) instead.", true)]
             IReadyStep AddResources(IEnumerable<TextReader> unparsedStreamList);
 
-            [Obsolete]
+            [Obsolete("Method is obsolete, please use IResourceStep.AddResources(params (TextReader, string?)[]) instead.", true)]
             IReadyStep AddResources(params TextReader[] unparsedStreamList);
 
+            /// <summary>
+            /// Adds a fragments to a <see cref="FluentBundle"/>. 
+            /// </summary>
+            /// <param name="resource">Content of a resource</param>
+            /// <param name="filename">Quasi file name used to identify the fragment</param>
+            /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddResource(string resource, string? filename = null);
 
+            /// <summary>
+            /// Adds a fragments to a <see cref="FluentBundle"/>. 
+            /// </summary>
+            /// <param name="resource">TextReader content of a resource</param>
+            /// <param name="filename">Quasi file name used to identify the fragment</param>
+            /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddResource(TextReader resource, string? filename = null);
 
-
+            /// <summary>
+            /// Adds a <see cref="TextReader"/> to a <see cref="FluentBundle"/>. 
+            /// </summary>
+            /// <param name="readerList">Array of <see cref="TextReader"/> and an optional file name.</param>
+            /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddResources(params (TextReader, string?)[] readerList);
 
+            /// <summary>
+            /// Adds a <see cref="TextReader"/> to a <see cref="FluentBundle"/>. 
+            /// </summary>
+            /// <param name="readerList"><see cref="IEnumerable{T}"/> of <see cref="TextReader"/> and an optional file name.</param>
+            /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddResources(IEnumerable<(TextReader, string?)> readerList);
 
+            /// <summary>
+            /// Adds a file to a <see cref="FluentBundle"/>. 
+            /// </summary>
+            /// <param name="path">A file on a path.</param>
+            /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddFile(string path);
 
+            /// <summary>
+            /// Adds several files to a <see cref="FluentBundle"/>. 
+            /// </summary>
+            /// <param name="paths">An array of file paths.</param>
+            /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddFiles(params string[] paths);
 
-            IReadyStep AddFiles(IEnumerable<string> path);
+            /// <summary>
+            /// Adds several files to a <see cref="FluentBundle"/>. 
+            /// </summary>
+            /// <param name="paths">An <see cref="Enumerable"/> of file paths.</param>
+            /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
+            IReadyStep AddFiles(IEnumerable<string> paths);
+
+            /// <summary>
+            /// Adds several parsed resources to a <see cref="FluentBundle"/>. 
+            /// </summary>
+            /// <param name="resources">An <see cref="Enumerable"/> of <see cref="Resource"/> that are added to the bundle.</param>
+            /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddResources(IEnumerable<Resource> resources);
+            
+            /// <summary>
+            /// Adds several parsed resources to a <see cref="FluentBundle"/>. 
+            /// </summary>
+            /// <param name="resources">An array of <see cref="Resource"/> that are added to the bundle.</param>
+            /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddResources(params Resource[] resources);
 
             /// <summary>
