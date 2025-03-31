@@ -21,7 +21,8 @@ namespace Linguini.Syntax.Parser
         private readonly bool _enableExperimental;
         private const string Cr = "\n";
 
-        private LinguiniParser(ZeroCopyReader zeroCopyReader, bool enableExperimental)
+        [Obsolete("Consider using LinguiniParser.FromFile factory method instead", true)]
+        public LinguiniParser(ZeroCopyReader zeroCopyReader, bool enableExperimental)
         {
             _reader = zeroCopyReader;
             _enableExperimental = enableExperimental;
@@ -32,12 +33,10 @@ namespace Linguini.Syntax.Parser
         /// </summary>
         /// <param name="input">Input to be parsed</param>
         /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
-        /// <param name="filename">Name for input to be used in error reporting</param>
-        [Obsolete("Consider using LinguiniParser.FromFile factory method instead")]
-        public LinguiniParser(string input, bool enableExperimental = false, string filename = "")
+        [Obsolete("Consider using LinguiniParser.FromFragement factory method instead", true)]
+        public LinguiniParser(string input, bool enableExperimental = false) : this(new ZeroCopyReader(input),
+            enableExperimental)
         {
-            _reader = new ZeroCopyReader(input, filename);
-            _enableExperimental = enableExperimental;
         }
 
 
@@ -47,8 +46,19 @@ namespace Linguini.Syntax.Parser
         /// <param name="input">TextReader to be parsed to Fluent AST.</param>
         /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
         /// <param name="filename">Name for input to be used in error reporting</param>
-        [Obsolete("Consider using LinguiniParser.FromTextReader factory method instead")]
-        public LinguiniParser(TextReader input, bool enableExperimental = false, string filename = "")
+        [Obsolete("Consider using LinguiniParser.FromTextReader factory method instead", true)]
+        public LinguiniParser(TextReader input, bool enableExperimental = false) : this(input.ReadToEnd(),
+            enableExperimental)
+        {
+        }
+
+        /// <summary>
+        /// Create new parser for <c>TextReader</c>
+        /// </summary>
+        /// <param name="input">TextReader to be parsed to Fluent AST.</param>
+        /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
+        /// <param name="filename">Name for input to be used in error reporting</param>
+        private LinguiniParser(TextReader input, bool enableExperimental, string filename = "")
         {
             using (input)
             {
@@ -65,7 +75,7 @@ namespace Linguini.Syntax.Parser
         /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
         public static LinguiniParser FromTextReader(TextReader input, string inputName, bool enableExperimental = false)
         {
-            return new LinguiniParser(new ZeroCopyReader(input.ReadToEnd(), inputName), enableExperimental);
+            return new LinguiniParser(input, enableExperimental, inputName);
         }
 
         /// <summary>
@@ -75,8 +85,8 @@ namespace Linguini.Syntax.Parser
         /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
         public static LinguiniParser FromFile(string filename, bool enableExperimental = false)
         {
-            using StreamReader reader = File.OpenText(filename);
-            return new LinguiniParser(new ZeroCopyReader(reader.ReadToEnd(), filename), enableExperimental);
+            using var reader = File.OpenText(filename);
+            return new LinguiniParser(reader, enableExperimental, filename);
         }
 
         /// <summary>
@@ -88,7 +98,7 @@ namespace Linguini.Syntax.Parser
         public static LinguiniParser FromFragment(string input, string? fragmentName = null,
             bool enableExperimental = false)
         {
-            return new LinguiniParser(new ZeroCopyReader(input, fragmentName), enableExperimental);
+            return new LinguiniParser(new StringReader(input), enableExperimental, fragmentName);
         }
 
         public ReadOnlyMemory<char> GetReadonlyData => _reader.GetData;

@@ -63,7 +63,7 @@ namespace Linguini.Syntax.Ast
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, Value, Attributes, InternalComment);
+            return HashCode.Combine(Id, Value, Attributes, Comment);
         }
     }
 
