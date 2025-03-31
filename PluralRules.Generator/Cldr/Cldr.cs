@@ -4,98 +4,50 @@ using System.Collections.Generic;
 namespace PluralRules.Generator.Cldr
 {
     
-    public class CldrRule
+    public struct CldrRule(List<string> langIds, List<RuleMap> ruleList)
     {
-        public List<string> LangIds;
-        public List<RuleMap> Rules;
-
-        public CldrRule(List<string> langIds, List<RuleMap> ruleList)
-        {
-            LangIds = langIds;
-            Rules = ruleList;
-        }
+        public readonly List<string> LangIds = langIds;
+        public readonly List<RuleMap> Rules = ruleList;
     }
     
-    public class RuleMap
+    public struct RuleMap(string category, Rule rule)
     {
-        public string Category;
-        public Rule Rule;
-
-        public RuleMap(string category, Rule rule)
-        {
-            Category = category;
-            Rule = rule;
-        }
+        public readonly string Category = category;
+        public Rule Rule = rule;
     }
-    public class Rule
+    public struct Rule(Condition condition, Samples? samples)
     {
-        public Condition Condition;
-        public Samples? Samples;
-
-        public Rule(Condition condition, Samples? samples)
-        {
-            Condition = condition;
-            Samples = samples;
-        }
+        public readonly Condition Condition = condition;
+        public Samples? Samples = samples;
     }
 
-    public class Samples
+    public struct Samples(List<SampleRange> integerSamples, List<SampleRange> decimalSamples)
     {
-        public List<SampleRange> IntegerSamples;
-        public List<SampleRange> DecimalSamples;
-
-        public Samples(List<SampleRange> integerSamples, List<SampleRange> decimalSamples)
-        {
-            IntegerSamples = integerSamples;
-            DecimalSamples = decimalSamples;
-        }
+        public readonly List<SampleRange> IntegerSamples = integerSamples;
+        public readonly List<SampleRange> DecimalSamples = decimalSamples;
     }
 
-    public class SampleRange
+    public readonly struct SampleRange(DecimalValue lower, DecimalValue? upper)
     {
-        public DecimalValue Lower;
-        public DecimalValue? Upper;
-
-        public SampleRange(DecimalValue lower, DecimalValue? upper)
-        {
-            Lower = lower;
-            Upper = upper;
-        }
+        public readonly DecimalValue Lower = lower;
+        // ReSharper disable once MemberCanBePrivate.Global
+        public readonly DecimalValue? Upper = upper;
 
         public override string ToString()
         {
-            if (Upper != null)
-            {
-                return $"{Lower}~{Upper}";
-            }
-
-            return $"{Lower}";
+            return Upper != null ? $"{Lower}~{Upper}" : $"{Lower}";
         }
     }
 
-    public class DecimalValue : IRangeListItem, IEquatable<DecimalValue>
+    public readonly struct DecimalValue(string value) : IRangeListItem, IEquatable<DecimalValue>
     {
-        public string Value { get; }
+        public string Value { get; } = value;
 
-        public DecimalValue(string value)
+        public bool Equals(DecimalValue other)
         {
-            Value = value;
-        }
-
-        public bool Equals(DecimalValue? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
             return Value == other.Value;
         }
-
-        public override bool Equals(object? obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((DecimalValue) obj);
-        }
+        
 
         public override int GetHashCode()
         {
@@ -108,48 +60,32 @@ namespace PluralRules.Generator.Cldr
         }
     }
 
-    public record Condition 
+    public struct Condition(List<AndCondition> Conditions)
     {
-        public List<AndCondition> Conditions;
+        public List<AndCondition> Conditions = Conditions;
 
-        public Condition(List<AndCondition> conditions)
-        {
-            Conditions = conditions;
-        }
         public bool IsAny()
         {
             return Conditions.Count == 0;
         }
     }
 
-    public class AndCondition
+    public struct AndCondition(List<Relation> relations)
     {
-        public List<Relation> Relations;
-
-        public AndCondition(List<Relation> relations)
-        {
-            Relations = relations;
-        }
+        public readonly List<Relation> Relations = relations;
     }
 
-    public class Relation
+    public struct Relation(Expr expr, Op op, List<IRangeListItem> rangeList)
     {
-        public Expr Expr;
-        public Op Op;
-        public List<IRangeListItem> RangeListItems;
-
-        public Relation(Expr expr, Op op, List<IRangeListItem> rangeList)
-        {
-            Expr = expr;
-            Op = op;
-            RangeListItems = rangeList;
-        }
+        public readonly Expr Expr = expr;
+        public readonly Op Op = op;
+        public readonly List<IRangeListItem> RangeListItems = rangeList;
     }
 
-    public class Expr
+    public struct Expr(Operand operand, DecimalValue? modulus = null)
     {
-        public Operand Operand;
-        public DecimalValue? Modulus;
+        public Operand Operand = operand;
+        public DecimalValue? Modulus = modulus;
     }
 
     public enum Operand
@@ -244,7 +180,7 @@ namespace PluralRules.Generator.Cldr
     {
     }
 
-    public class RangeElem : IRangeListItem
+    public struct RangeElem : IRangeListItem
     {
         public DecimalValue LowerVal;
         public DecimalValue UpperVal;

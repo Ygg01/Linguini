@@ -7,16 +7,10 @@ using System.Text;
 
 namespace PluralRules.Generator.Cldr
 {
-    public class CldrParser
+    public struct CldrParser(string? input)
     {
-        private readonly string _input;
-        private int _pos;
-
-        public CldrParser(string? input)
-        {
-            _input = input ?? "";
-            _pos = 0;
-        }
+        private readonly string _input = input ?? "";
+        private int _pos = 0;
 
         public Rule ParseRule()
         {
@@ -62,7 +56,7 @@ namespace PluralRules.Generator.Cldr
                     return listSample;
                 }
 
-                listSample.Add(sampleRange);
+                listSample.Add(sampleRange.Value);
             }
 
             TryConsume(',');
@@ -96,7 +90,7 @@ namespace PluralRules.Generator.Cldr
             SkipWhitespace();
             if (!TryConsume('~'))
             {
-                o = new SampleRange(endValue!, null);
+                o = new SampleRange(endValue!.Value, null);
                 return true;
             }
 
@@ -107,7 +101,7 @@ namespace PluralRules.Generator.Cldr
                 return false;
             }
 
-            o = new SampleRange(endValue!, upperVal);
+            o = new SampleRange(endValue!.Value, upperVal);
             return true;
         }
 
@@ -198,7 +192,7 @@ namespace PluralRules.Generator.Cldr
             SkipWhitespace();
             while (TryParseAndCondition(out var andCondition))
             {
-                andConditions.Add(andCondition!);
+                andConditions.Add(andCondition!.Value);
                 SkipWhitespace();
                 if (!TryConsume("or"))
                 {
@@ -217,7 +211,7 @@ namespace PluralRules.Generator.Cldr
             SkipWhitespace();
             while (ParseRelation(out var relation))
             {
-                relations.Add(relation!);
+                relations.Add(relation!.Value);
                 SkipWhitespace();
                 if (!TryConsume("and"))
                 {
@@ -296,7 +290,7 @@ namespace PluralRules.Generator.Cldr
                 }
             }
 
-            relation = new Relation(expr!, type.GetOperator(negation), list);
+            relation = new Relation(expr!.Value, type.GetOperator(negation), list);
             return true;
         }
 
@@ -355,12 +349,11 @@ namespace PluralRules.Generator.Cldr
             if (TryOperand(out var operand))
             {
                 _pos += 1;
-                expr = new Expr { Operand = operand!.Value };
 
                 SkipWhitespace();
 
                 var modulus = ParseModulus();
-                expr.Modulus = modulus;
+                expr = new Expr { Operand = operand!.Value, Modulus = modulus };
                 return true;
             }
 
