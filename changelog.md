@@ -214,3 +214,27 @@ version 0.8.2
 * `TryGetMessage` returns error if no message was found.
 * Adds methods `FormatPatternErrRef`, `TryGetMessageErrRef`, `TryGetAttrMessageErrRef`, `TryGetMessageErrRef` in `IReadBundle` and
   associated classes.
+
+version 0.9.0
+========
+
+## What's changed
+Adds tracking of `AstLocation` through parser.
+
+### ZeroCopyReader
+- Adds tracking for `AstLocation` which tracks where the bundle came from.
+
+### Parser
+- Obsoletes `LinguiniParser` constructor. Introduce `FromFile`, `FromFragment`, `FromTextReader` factory method that deal with `AstLocation`.
+- Add `AstLocation` to all IEntry descendants.
+
+### Bundle
+- Propagate `AstLocation` throughout bundle.
+- Obsoletes `AddResources(IEnumerable<string>)` and `AddResources(params string[])` from `IResourceStep`.
+
+### Serialization
+- Propagate changes in Serialization from adding `AstLocation`.
+
+### SourceGenerator
+- Moved generator to Lang version 12.
+- Refactored CldrParser `class` -> `struct`.
