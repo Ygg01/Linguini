@@ -46,7 +46,7 @@ namespace Linguini.Bundle.Builder
             /// <summary>
             /// Sets the locale chain to given <c>params string[]</c> of locale string.
             /// </summary>
-            /// <param name="unparsedLocales">The variable argument string uost.</param>
+            /// <param name="unparsedLocales">The variable argument string list.</param>
             /// <returns>The <see cref="IResourceStep">next step (defining resources)</see> in the builder.</returns>
             IResourceStep Locales(params string[] unparsedLocales);
 
@@ -61,10 +61,10 @@ namespace Linguini.Bundle.Builder
 
         public interface IResourceStep : IStep
         {
-            [Obsolete]
+            [Obsolete("Consider using IResourceStep.AddFiles(IEnumerable<string>)")]
             IReadyStep AddResources(IEnumerable<string> unparsedResourceList);
 
-            [Obsolete]
+            [Obsolete("Consider using IResourceStep.AddFiles(IEnumerable<string>)")]
             IReadyStep AddResources(params string[] unparsedResourceArray);
 
             [Obsolete]
