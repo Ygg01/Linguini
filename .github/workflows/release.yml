@@ -76,8 +76,10 @@ jobs:
         dotnet-version: |
           6.0.x
           8.0.x
-    - name: Run tests
-      run: dotnet test --configuration Release
+    - name: Build
+      run: dotnet build --configuration Release
+    - name: Test
+      run: dotnet test --no-build
 
   deploy:
     # Publish only when creating a GitHub Release
