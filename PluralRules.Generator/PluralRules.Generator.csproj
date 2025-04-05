@@ -31,11 +31,5 @@
       </None>
       <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
-    
-    <!-- This ensures the library will be packaged as a source generator when we use `dotnet pack` -->
-    <ItemGroup>
-        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true"
-              PackagePath="analyzers/dotnet/cs" Visible="false" />
-    </ItemGroup>
 
 </Project>

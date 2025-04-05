@@ -219,7 +219,8 @@ version 0.9.0
 ========
 
 ## What's changed
-Adds tracking of `AstLocation` through parser.
+- Adds tracking of `AstLocation` through parser.
+- Fixes some build warnings.
 
 ### ZeroCopyReader
 - Adds tracking for `AstLocation` which tracks where the bundle came from.
