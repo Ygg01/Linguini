@@ -64,7 +64,7 @@ namespace PluralRules.Generator.Cldr
     {
         public List<AndCondition> Conditions = Conditions;
 
-        public bool IsAny()
+        public readonly bool IsAny()
         {
             return Conditions.Count == 0;
         }

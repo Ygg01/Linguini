@@ -1,8 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <!-- 👇 https://andrewlock.net/creating-a-source-generator-part-1-creating-an-incremental-source-generator/ -->
+        <!-- 👇 Source generators must target netstandard 2.0 -->
         <TargetFramework>netstandard2.0</TargetFramework>
-        <IncludeBuildOutput>true</IncludeBuildOutput>
+        <!-- 👇 We don't want to reference the source generator dll directly in consuming projects -->
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        
         <Title>Source Generator for Plural Rules</Title>
         <Description>Source generator that converts xml for plural rules into a compile time functions.</Description>
 
@@ -11,12 +15,13 @@
         <PackageIcon>linguini.jpg</PackageIcon>
         <PackageTags>sourcegen, plural rules, icu</PackageTags>
         <LangVersion>12</LangVersion>
-        <PackageVersion>0.8.0</PackageVersion>
+        <PackageVersion>0.9.0</PackageVersion>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.0.0" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
@@ -25,6 +30,12 @@
           <Link>linguini.jpg</Link>
       </None>
       <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+    
+    <!-- This ensures the library will be packaged as a source generator when we use `dotnet pack` -->
+    <ItemGroup>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true"
+              PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 
 </Project>
