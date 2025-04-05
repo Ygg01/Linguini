@@ -48,7 +48,7 @@ jobs:
     steps:
       # Install the .NET SDK indicated in the global.json file
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
 
       # Download the NuGet package created in the previous job
       - uses: actions/download-artifact@v4
@@ -73,7 +73,9 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-          dotnet-version: '8.0.x'
+        dotnet-version: |
+          6.0.x
+          8.0.x
     - name: Run tests
       run: dotnet test --configuration Release
 
@@ -93,7 +95,7 @@ jobs:
 
       # Install the .NET SDK indicated in the global.json file
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
 
       # Publish all NuGet packages to NuGet.org
       # Use --skip-duplicate to prevent errors if a package with the same version already exists.
