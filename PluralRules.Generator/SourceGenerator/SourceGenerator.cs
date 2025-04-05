@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -43,7 +41,7 @@ public class SourceGenerator : IIncrementalGenerator
             }
 
             var (sourceBuilder, testBuilder) = GenerateCode(ordinalRules, cardinalRules, debug);
-                
+
             context.AddSource("PluralRule.cs", SourceText.From(sourceBuilder, Encoding.UTF8));
             context.AddSource("PluralRuleTestTable.cs", SourceText.From(testBuilder, Encoding.UTF8));
         });
@@ -52,98 +50,117 @@ public class SourceGenerator : IIncrementalGenerator
     private (string, string) GenerateCode(List<CldrRule> ordinalRules, List<CldrRule> cardinalRules,
         string debug)
     {
-          
         // begin creating the source we'll inject into the users compilation
-        var sourceBuilder = new StringBuilder($@"
-using System;
-using Linguini.Shared.Util;
-using Linguini.Shared.Types;
-// ordinal {debug}
-namespace PluralRulesGenerated
-{{
-    public static partial class RuleTable
-    {{
-        private static Func<PluralOperands, PluralCategory>[] cardinalMap = 
-        {{");
+        var sourceBuilder = new StringBuilder($$"""
+
+                                                using System;
+                                                using Linguini.Shared.Util;
+                                                using Linguini.Shared.Types;
+                                                // ordinal {{debug}}
+                                                namespace PluralRulesGenerated
+                                                {
+                                                    public static partial class RuleTable
+                                                    {
+                                                        private static Func<PluralOperands, PluralCategory>[] cardinalMap = 
+                                                        {
+                                                """);
         WriteRules(sourceBuilder, cardinalRules);
-        sourceBuilder.Append($@"
-        }};
-
-        private static Func<PluralOperands, PluralCategory>[] ordinalMap = 
-        {{");
+        sourceBuilder.Append("""
+                             
+                                     };
+                             
+                                     private static Func<PluralOperands, PluralCategory>[] ordinalMap = 
+                                     {
+                             """);
         WriteRules(sourceBuilder, ordinalRules);
-        sourceBuilder.Append($@"
-        }};
-        
-        private static int GetCardinalIndex(string culture)
-        {{");
+        sourceBuilder.Append("""
+                             
+                                     };
+                                     
+                                     private static int GetCardinalIndex(string culture)
+                                     {
+                             """);
         WriteRulesIndex(sourceBuilder, cardinalRules);
-        sourceBuilder.Append($@"
-        }}
-
-        private static int GetOrdinalIndex(string culture)
-        {{");
+        sourceBuilder.Append("""
+                             
+                                     }
+                             
+                                     private static int GetOrdinalIndex(string culture)
+                                     {
+                             """);
         WriteRulesIndex(sourceBuilder, ordinalRules);
-        sourceBuilder.Append($@"
-        }}
-
-        public static Func<PluralOperands, PluralCategory> GetPluralFunc(string culture, RuleType type)
-        {{
-            switch (type)
-            {{
-                case RuleType.Cardinal:
-                    return cardinalMap[GetCardinalIndex(culture)];
-                case RuleType.Ordinal:
-                    return ordinalMap[GetOrdinalIndex(culture)];
-            }}
-
-            return _ => PluralCategory.Other;
-        }}
-
-        public static string[] SpecialCaseCardinal = {{");
+        sourceBuilder.Append("""
+                             
+                                     }
+                             
+                                     public static Func<PluralOperands, PluralCategory> GetPluralFunc(string culture, RuleType type)
+                                     {
+                                         switch (type)
+                                         {
+                                             case RuleType.Cardinal:
+                                                 return cardinalMap[GetCardinalIndex(culture)];
+                                             case RuleType.Ordinal:
+                                                 return ordinalMap[GetOrdinalIndex(culture)];
+                                         }
+                             
+                                         return _ => PluralCategory.Other;
+                                     }
+                             
+                                     public static string[] SpecialCaseCardinal = {
+                             """);
         WriteSpecialCase(sourceBuilder, cardinalRules);
-        sourceBuilder.Append($@"
-        }};
-
-        public static string[] SpecialCaseOrdinal = {{");
+        sourceBuilder.Append("""
+                             
+                                     };
+                             
+                                     public static string[] SpecialCaseOrdinal = {
+                             """);
         WriteSpecialCase(sourceBuilder, ordinalRules);
-        sourceBuilder.Append(@"
-        };
-        
-    }
-}
-");
-        var testBuilder = new StringBuilder($@"
-using System;
-using Linguini.Shared.Types;
+        sourceBuilder.Append("""
+                             
+                                     };
+                                     
+                                 }
+                             }
 
-namespace PluralRulesGenerated.Test
-{{
-    public static partial class RuleTableTest
-    {{
-        public static readonly object?[][] CardinalTestData = 
-        {{
-");
+                             """);
+        var testBuilder = new StringBuilder("""
+
+                                            using System;
+                                            using Linguini.Shared.Types;
+
+                                            namespace PluralRulesGenerated.Test
+                                            {
+                                                public static partial class RuleTableTest
+                                                {
+                                                    public static readonly object?[][] CardinalTestData = 
+                                                    {
+
+                                            """);
         foreach (var cardinalRule in cardinalRules)
         {
             WriteRuleTest(testBuilder, cardinalRule, true);
         }
 
-        testBuilder.Append($@"
-        }};
+        testBuilder.Append("""
+                           
+                                   };
+                           
+                                   public static readonly object?[][] OrdinalTestData = 
+                                   {
 
-        public static readonly object?[][] OrdinalTestData = 
-        {{
-");
+                           """);
         foreach (var ordinalRule in ordinalRules)
         {
             WriteRuleTest(testBuilder, ordinalRule, false);
         }
 
-        testBuilder.Append($@"
-        }};
-    }}
-}}");
+        testBuilder.Append("""
+                           
+                                   };
+                               }
+                           }
+                           """);
         return (sourceBuilder.ToString(), testBuilder.ToString());
     }
 
@@ -154,51 +171,54 @@ namespace PluralRulesGenerated.Test
         {
             foreach (var langId in cldr.LangIds)
             {
-                if (langId.Length > 4)
-                {
-                    var specCase = langId.Replace('_', '-');
-                    specialCases.Add(langId);
-                    specialCases.Add(specCase);
-                }
+                if (langId.Length <= 4) continue;
+                var specCase = langId.Replace('_', '-');
+                specialCases.Add(langId);
+                specialCases.Add(specCase);
             }
         }
 
-        if (specialCases.Count > 0)
+        if (specialCases.Count <= 0) return;
+        foreach (var specialCase in specialCases)
         {
-            foreach (var specialCase in specialCases)
-            {
-                sourceBuilder.Append($"\n            \"{specialCase}\",");
-            }
+            sourceBuilder.Append($"""
+                                  
+                                              "{specialCase}",
+                                  """);
         }
     }
 
     private void WriteRuleTest(StringBuilder testBuilder, CldrRule rule, bool isCardinal)
     {
-        string ruleType = isCardinal ? "RuleType.Cardinal" : "RuleType.Ordinal";
+        var ruleType = isCardinal ? "RuleType.Cardinal" : "RuleType.Ordinal";
         foreach (var ruleLangId in rule.LangIds)
         {
             foreach (var ruleMap in rule.Rules)
             {
-                if (ruleMap.Rule.Samples != null)
+                if (ruleMap.Rule.Samples == null) continue;
+                var category = $"PluralCategory.{ruleMap.Category.FirstCharToUpper()}";
+                foreach (var integerSample in ruleMap.Rule.Samples.Value.IntegerSamples)
                 {
-                    string category = $"PluralCategory.{ruleMap.Category.FirstCharToUpper()}";
-                    foreach (var integerSample in ruleMap.Rule.Samples.Value.IntegerSamples)
-                    {
-                        var upper = integerSample.Upper == null
-                            ? "null"
-                            : $"\"{integerSample.Upper.Value}\"";
-                        testBuilder.Append($@"
-            new object?[] {{""{ruleLangId}"", {ruleType}, false, ""{integerSample.Lower.Value}"", {upper}, {category}}},");
-                    }
+                    var upper = integerSample.Upper == null
+                        ? "null"
+                        : $"\"{integerSample.Upper.Value}\"";
+                    testBuilder.Append($$"""
+                                         
+                                                     new object?[] {"{{ruleLangId}}", {{ruleType}}, false, "{{integerSample.Lower.Value}}", {{upper}}, {{category}}},
+                                         """);
+                }
 
-                    foreach (var decimalSample in ruleMap.Rule.Samples.Value.DecimalSamples)
+                foreach (var decimalSample in ruleMap.Rule.Samples.Value.DecimalSamples)
+                {
+                    var upper = decimalSample.Upper switch
                     {
-                        var upper = decimalSample.Upper == null
-                            ? "null"
-                            : $"\"{decimalSample.Upper.Value}\"";
-                        testBuilder.Append($@"
-            new object?[] {{""{ruleLangId}"", {ruleType}, true, ""{decimalSample.Lower.Value}"", {upper}, {category}}},");
-                    }
+                        null => "null",
+                        _ => $"\"{decimalSample.Upper.Value}\""
+                    };
+                    testBuilder.Append($$"""
+                                         
+                                                     new object?[] {"{{ruleLangId}}", {{ruleType}}, true, "{{decimalSample.Lower.Value}}", {{upper}}, {{category}}},
+                                         """);
                 }
             }
         }
@@ -211,8 +231,10 @@ namespace PluralRulesGenerated.Test
             if (rule.Rules.Count == 1)
             {
                 var category = rule.Rules[0].Category.FirstCharToUpper();
-                stringBuilder.Append(@$"
-            _ => PluralCategory.{category},");
+                stringBuilder.Append($"""
+                                      
+                                                  _ => PluralCategory.{category},
+                                      """);
             }
             else
             {
@@ -223,35 +245,43 @@ namespace PluralRulesGenerated.Test
 
     private void WriteRuleMaps(StringBuilder stringBuilder, List<RuleMap> ruleMaps)
     {
-        stringBuilder.Append(@"
-            po =>
-            {");
+        stringBuilder.Append("""
+                             
+                                         po =>
+                                         {
+                             """);
         foreach (var ruleMap in ruleMaps)
         {
             WriteRuleMap(stringBuilder, ruleMap);
         }
 
-        stringBuilder.Append(@"
-            },");
+        stringBuilder.Append("""
+                             
+                                         },
+                             """);
     }
 
     private void WriteRuleMap(StringBuilder stringBuilder, RuleMap ruleMap)
     {
-        stringBuilder.Append(@"
-                ");
+        stringBuilder.Append("""
+                             
+                                             
+                             """);
         if (ruleMap.Rule.Condition.IsAny())
         {
-            stringBuilder.Append($"return PluralCategory.{ruleMap.Category.FirstCharToUpper()};");
+            stringBuilder.Append($"""return PluralCategory.{ruleMap.Category.FirstCharToUpper()};""");
         }
         else
         {
             stringBuilder.Append("if (");
             WriteCondition(stringBuilder, ruleMap.Rule.Condition);
             stringBuilder.Append(")");
-            stringBuilder.Append($@"
-                {{
-                    return PluralCategory.{ruleMap.Category.FirstCharToUpper()};
-                }}");
+            stringBuilder.Append($$"""
+                                   
+                                                   {
+                                                       return PluralCategory.{{ruleMap.Category.FirstCharToUpper()}};
+                                                   }
+                                   """);
         }
     }
 
@@ -270,7 +300,7 @@ namespace PluralRulesGenerated.Test
                 stringBuilder.Append(" || ");
             }
 
-            var andCondition = ruleCondition.Conditions[i]!;
+            var andCondition = ruleCondition.Conditions[i];
             if (andCondition.Relations.Count == 1)
             {
                 WriteRelation(stringBuilder, andCondition.Relations[0]);
@@ -330,13 +360,14 @@ namespace PluralRulesGenerated.Test
                 }
 
                 var rel = relation.RangeListItems[i]!;
-                if (rel is DecimalValue value)
+                switch (rel)
                 {
-                    stringBuilder.Append(sb).Append(" == ").Append(value);
-                }
-                else if (rel is RangeElem rangeElem)
-                {
-                    stringBuilder.Append($"({sb}).InRange({rangeElem.LowerVal}, {rangeElem.UpperVal})");
+                    case DecimalValue value:
+                        stringBuilder.Append(sb).Append(" == ").Append(value);
+                        break;
+                    case RangeElem rangeElem:
+                        stringBuilder.Append($"({sb}).InRange({rangeElem.LowerVal}, {rangeElem.UpperVal})");
+                        break;
                 }
             }
 
@@ -350,7 +381,7 @@ namespace PluralRulesGenerated.Test
             var sb = new StringBuilder();
             sb.Append("po.").Append(operand);
 
-            string op = relation.Op.IsNegated() ? " != " : " == ";
+            var op = relation.Op.IsNegated() ? " != " : " == ";
 
             if (brackets)
             {
@@ -365,14 +396,17 @@ namespace PluralRulesGenerated.Test
                 }
 
                 var rel = relation.RangeListItems[i]!;
-                if (rel is DecimalValue value)
+                switch (rel)
                 {
-                    stringBuilder.Append(sb).Append(op).Append(value);
-                }
-                else if (rel is RangeElem rangeElem)
-                {
-                    var negate = relation.Op.IsNegated() ? "!" : "";
-                    stringBuilder.Append($"{negate}{sb}.InRange({rangeElem.LowerVal}, {rangeElem.UpperVal}) ");
+                    case DecimalValue value:
+                        stringBuilder.Append(sb).Append(op).Append(value);
+                        break;
+                    case RangeElem rangeElem:
+                    {
+                        var negate = relation.Op.IsNegated() ? "!" : "";
+                        stringBuilder.Append($"{negate}{sb}.InRange({rangeElem.LowerVal}, {rangeElem.UpperVal}) ");
+                        break;
+                    }
                 }
             }
 
@@ -385,29 +419,37 @@ namespace PluralRulesGenerated.Test
 
     private void WriteRulesIndex(StringBuilder stringBuilder, List<CldrRule> rules)
     {
-        stringBuilder.Append(@"
-            switch (culture)
-            {");
-        for (int i = 0; i < rules.Count; i++)
+        stringBuilder.Append("""
+                             
+                                         switch (culture)
+                                         {
+                             """);
+        for (var i = 0; i < rules.Count; i++)
         {
             WriteRuleIndex(stringBuilder, rules[i], i);
         }
 
-        stringBuilder.Append(@"
-            }
-            return -1;");
+        stringBuilder.Append("""
+                             
+                                         }
+                                         return -1;
+                             """);
     }
 
     private void WriteRuleIndex(StringBuilder stringBuilder, CldrRule rule, int i)
     {
         foreach (var langId in rule.LangIds)
         {
-            stringBuilder.Append($@"
-                case ""{langId}"":");
+            stringBuilder.Append($"""
+                                  
+                                                  case "{langId}":
+                                  """);
         }
 
-        stringBuilder.Append($@"
-                    return {i};");
+        stringBuilder.Append($"""
+                              
+                                                  return {i};
+                              """);
     }
 
     private static List<CldrRule> ProcessXmlFile(string text)
@@ -428,6 +470,7 @@ namespace PluralRulesGenerated.Test
                 .Value.Split(' ')
                 .ToList();
             var rules = new List<RuleMap>();
+            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var element in pluralRule.Elements())
             {
                 var countTag = element.Attribute("count")?.Value;
