@@ -7,6 +7,7 @@ using NUnit.Framework;
 using PluralRulesGenerated.Test;
 using static Linguini.Bundle.Resolver.ResolverHelpers.PluralRules;
 
+#pragma warning disable 0436
 namespace Linguini.Bundle.Test.Unit
 {
     [TestFixture]

@@ -92,12 +92,12 @@ namespace Linguini.Syntax.Parser
         /// Create new parser from string fragment.
         /// </summary>
         /// <param name="input">String to be parsed.</param>
-        /// <param name="fragmentName">Optional fragment name of the string. Defaults to `????`.</param>
+        /// <param name="fragmentName">Optional fragment name of the string. Defaults to empty string.</param>
         /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
         public static LinguiniParser FromFragment(string input, string? fragmentName = null,
             bool enableExperimental = false)
         {
-            return new LinguiniParser(new StringReader(input), enableExperimental, fragmentName);
+            return new LinguiniParser(new StringReader(input), enableExperimental, fragmentName ?? "");
         }
 
         public ReadOnlyMemory<char> GetReadonlyData => _reader.GetData;
