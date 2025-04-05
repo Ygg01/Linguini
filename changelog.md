@@ -238,3 +238,4 @@ Adds tracking of `AstLocation` through parser.
 ### SourceGenerator
 - Moved generator to Lang version 12.
 - Refactored CldrParser `class` -> `struct`.
+- Changed `ISourceGenerator` -> `IncrementalGenerator`

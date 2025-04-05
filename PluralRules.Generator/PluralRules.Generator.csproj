@@ -15,7 +15,7 @@
         <PackageIcon>linguini.jpg</PackageIcon>
         <PackageTags>sourcegen, plural rules, icu</PackageTags>
         <LangVersion>12</LangVersion>
-        <PackageVersion>0.8.0</PackageVersion>
+        <PackageVersion>0.9.0</PackageVersion>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     </PropertyGroup>
 
