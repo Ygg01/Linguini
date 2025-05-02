@@ -85,7 +85,7 @@ namespace Linguini.Shared.Util
             return c == c1 || c == c2 || c == c3 || c == c4;
         }
 
-#if NETSTANDARD2_1
+#if !NETCOREAPP3_0_OR_GREATER
         // Polyfill for netstandard 2.1 until dotnet backports MemoryExtension
         public static ReadOnlyMemory<char> TrimEndPolyFill(this ReadOnlyMemory<char> memory)
             => memory.Slice(0, FindLastWhitespace(memory.Span));

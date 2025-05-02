@@ -670,10 +670,10 @@ namespace Linguini.Syntax.Parser
 
                             if (lastNonBlank == i)
                             {
-#if NETSTANDARD2_1
-                                value = value.TrimEndPolyFill();
-#else
+#if NETCOREAPP3_0_OR_GREATER
                                 value = value.TrimEnd();
+#else
+                                value = value.TrimEndPolyFill();
 #endif
                             }
 
