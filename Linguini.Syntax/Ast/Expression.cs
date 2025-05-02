@@ -401,7 +401,7 @@ namespace Linguini.Syntax.Ast
 
         public bool Equals(CallArguments other)
         {
-            return PositionalArgs.SequenceEqual(other.PositionalArgs, IInlineExpression.Comparer)
+            return PositionalArgs.SequenceEqual(other.PositionalArgs, InlineExpressionComparer.Instance)
                    && NamedArgs.SequenceEqual(other.NamedArgs);
         }
 
@@ -429,7 +429,7 @@ namespace Linguini.Syntax.Ast
 
         public bool Equals(NamedArgument other)
         {
-            return Name.Equals(other.Name) && IInlineExpression.Comparer.Equals(Value, other.Value);
+            return Name.Equals(other.Name) && InlineExpressionComparer.Instance.Equals(Value, other.Value);
         }
 
         public override bool Equals(object? obj)
@@ -591,7 +591,7 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return IInlineExpression.Comparer.Equals(Selector, other.Selector)
+            return InlineExpressionComparer.Instance.Equals(Selector, other.Selector)
                    && Variants.SequenceEqual(other.Variants);
         }
 

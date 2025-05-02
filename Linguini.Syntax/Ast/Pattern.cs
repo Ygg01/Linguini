@@ -32,11 +32,15 @@ namespace Linguini.Syntax.Ast
 
     public interface IPatternElement
     {
-        public static PatternComparer PatternComparer = new();
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER // keep ABI where default interface implementation is available
+        public static PatternComparer PatternComparer = PatternComparer.Instance;
+#endif
     }
 
     public class PatternComparer : IEqualityComparer<IPatternElement>
     {
+        public static readonly PatternComparer Instance = new();
+
         public bool Equals(IPatternElement? left, IPatternElement? right)
         {
             return (left, right) switch

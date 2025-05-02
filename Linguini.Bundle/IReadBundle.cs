@@ -32,10 +32,11 @@ namespace Linguini.Bundle
         /// <returns>The formatted string.</returns>
         string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors)
-        {
-            errors = null;
-            return FormatPatternErrRef(pattern, args, ref errors);
-        }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER // keep ABI where default interface implementation is available
+            => ReadBundleExtensions.BaseImplForFormatPattern(this, pattern, args, out errors);
+#else
+            ;
+#endif
 
         /// <summary>
         /// Converts a <see cref="Pattern"/> to a string using given arguments.
@@ -113,10 +114,11 @@ namespace Linguini.Bundle
         /// </returns>
         bool TryGetMessage(string id, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
-        {
-            errors = null;
-            return TryGetMessageErrRef(id, null, args, ref errors, out message);
-        }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER // keep ABI where default interface implementation is available
+            => ReadBundleExtensions.BaseImplForTryGetMessage(this, id: id, attribute: null, args, out errors, out message);
+#else
+            ;
+#endif
 
 
         /// <summary>
@@ -125,22 +127,11 @@ namespace Linguini.Bundle
         /// <param name="idWithAttr">The identifier with attribute.</param>
         /// <returns>True if the identifier with attribute has a message; otherwise, false.</returns>
         bool HasAttrMessage(string idWithAttr)
-        {
-            var attributes = idWithAttr.IndexOf('.');
-            if (attributes < 0)
-            {
-                return HasMessage(idWithAttr);
-            }
-
-            var id = idWithAttr.AsSpan(0, attributes).ToString();
-            var attr = idWithAttr.AsSpan(attributes + 1).ToString();
-            if (TryGetAstMessage(id, out var astMessage))
-            {
-                return astMessage.GetAttribute(attr) != null;
-            }
-
-            return false;
-        }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER // keep ABI where default interface implementation is available
+            => ReadBundleExtensions.BaseImplForHasAttrMessage(this, idWithAttr);
+#else
+            ;
+#endif
 
         /// <summary>
         /// Retrieves the attribute message by processing the given message template with the provided arguments.
@@ -150,21 +141,11 @@ namespace Linguini.Bundle
         /// <returns>The processed message.</returns>
         /// <exception cref="LinguiniException">Thrown when there are errors encountered during attribute substitution.</exception>
         string? GetAttrMessage(string msgWithAttr, params (string, IFluentType)[] args)
-        {
-            var dictionary = new Dictionary<string, IFluentType>(args.Length);
-            foreach (var (key, val) in args)
-            {
-                dictionary.Add(key, val);
-            }
-
-            TryGetAttrMessage(msgWithAttr, dictionary, out var errors, out var message);
-            if (errors is { Count: > 0 })
-            {
-                throw new LinguiniException(errors);
-            }
-
-            return message;
-        }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER // keep ABI where default interface implementation is available
+            => ReadBundleExtensions.BaseImplForGetAttrMessage(this, msgWithAttr, args: args);
+#else
+            ;
+#endif
 
         /// <summary>
         /// Tries to retrieve an attribute message.
@@ -176,10 +157,11 @@ namespace Linguini.Bundle
         /// <returns>True if the attribute message is found; otherwise, false.</returns>
         bool TryGetAttrMessage(string msgWithAttr, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
-        {
-            errors = null;
-            return TryGetAttrMessageErrRef(msgWithAttr, args, ref errors, out message);
-        }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER // keep ABI where default interface implementation is available
+            => ReadBundleExtensions.BaseImplForTryGetAttrMessage(this, msgWithAttr, args, out errors, out message);
+#else
+            ;
+#endif
 
         /// <summary>
         /// Tries to retrieve an attribute message.
@@ -191,15 +173,11 @@ namespace Linguini.Bundle
         /// <returns>True if the attribute message is found; otherwise, false.</returns>
         bool TryGetAttrMessageErrRef(string msgWithAttr, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] ref IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
-        {
-            if (msgWithAttr.Contains("."))
-            {
-                var split = msgWithAttr.Split('.');
-                return TryGetMessage(split[0], split[1], args, out errors, out message);
-            }
-
-            return TryGetMessage(msgWithAttr, null, args, out errors, out message);
-        }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER // keep ABI where default interface implementation is available
+            => ReadBundleExtensions.BaseImplForTryGetAttrMessageErrRef(this, msgWithAttr, args, ref errors, out message);
+#else
+            ;
+#endif
 
         /// <summary>
         /// Tries to get a message based on the provided parameters.
@@ -212,10 +190,11 @@ namespace Linguini.Bundle
         /// <returns>True if the message was successfully retrieved, otherwise false.</returns>
         public bool TryGetMessage(string id, string? attribute, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
-        {
-            errors = null;
-            return TryGetMessageErrRef(id, attribute, args, ref errors, out message);
-        }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER // keep ABI where default interface implementation is available
+            => ReadBundleExtensions.BaseImplForTryGetMessage(this, id: id, attribute: attribute, args, out errors, out message);
+#else
+            ;
+#endif
 
         /// <summary>
         /// Tries to get a message based on the provided parameters.
@@ -228,34 +207,11 @@ namespace Linguini.Bundle
         /// <returns>True if the message was successfully retrieved, otherwise false.</returns>
         public bool TryGetMessageErrRef(string id, string? attribute, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] ref IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
-        {
-            errors = new List<FluentError>();
-            var msg = attribute == null
-                ? id
-                : $"{id}.{attribute}";
-
-            if (!TryGetAstMessage(id, out var astMessage))
-            {
-                errors.Add(ResolverFluentError.NoValue($"{msg}"));
-                message = null;
-                return false;
-            }
-
-            var pattern = attribute != null
-                ? astMessage.GetAttribute(attribute)?.Value
-                : astMessage.Value;
-
-            if (pattern == null)
-            {
-                errors.Add(ResolverFluentError.NoValue($"{msg}"));
-                message = FluentNone.None.ToString();
-                return false;
-            }
-
-            errors = null;
-            message = FormatPattern(pattern, args, out errors);
-            return true;
-        }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER // keep ABI where default interface implementation is available
+            => ReadBundleExtensions.BaseImplForTryGetMessageErrRef(this, id: id, attribute: attribute, args, ref errors, out message);
+#else
+            ;
+#endif
     }
 
     /// <summary>
@@ -378,6 +334,105 @@ namespace Linguini.Bundle
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
         {
             return bundle.TryGetMessage(id, null, args, out errors, out message);
+        }
+
+        internal static string BaseImplForFormatPattern(IReadBundle impl, Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors)
+        {
+            errors = null;
+            return impl.FormatPatternErrRef(pattern, args, ref errors);
+        }
+
+        internal static string? BaseImplForGetAttrMessage(IReadBundle impl, string msgWithAttr, params (string, IFluentType)[] args)
+        {
+            var dictionary = new Dictionary<string, IFluentType>(args.Length);
+            foreach (var (key, val) in args)
+            {
+                dictionary.Add(key, val);
+            }
+
+            impl.TryGetAttrMessage(msgWithAttr, dictionary, out var errors, out var message);
+            if (errors is { Count: > 0 })
+            {
+                throw new LinguiniException(errors);
+            }
+
+            return message;
+        }
+
+        internal static bool BaseImplForHasAttrMessage(IReadBundle impl, string idWithAttr)
+        {
+            var attributes = idWithAttr.IndexOf('.');
+            if (attributes < 0)
+            {
+                return impl.HasMessage(idWithAttr);
+            }
+
+            var id = idWithAttr.AsSpan(0, attributes).ToString();
+            var attr = idWithAttr.AsSpan(attributes + 1).ToString();
+            if (impl.TryGetAstMessage(id, out var astMessage))
+            {
+                return astMessage.GetAttribute(attr) != null;
+            }
+
+            return false;
+        }
+
+        internal static bool BaseImplForTryGetAttrMessage(IReadBundle impl, string msgWithAttr, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+        {
+            errors = null;
+            return impl.TryGetAttrMessageErrRef(msgWithAttr, args, ref errors, out message);
+        }
+
+        internal static bool BaseImplForTryGetAttrMessageErrRef(IReadBundle impl, string msgWithAttr, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+        {
+            if (msgWithAttr.Contains("."))
+            {
+                var split = msgWithAttr.Split('.');
+                return impl.TryGetMessage(split[0], split[1], args, out errors, out message);
+            }
+
+            return impl.TryGetMessage(msgWithAttr, null, args, out errors, out message);
+        }
+
+        internal static bool BaseImplForTryGetMessage(IReadBundle impl, string id, string? attribute, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+        {
+            errors = null;
+            return impl.TryGetMessageErrRef(id, attribute, args, ref errors, out message);
+        }
+
+        internal static bool BaseImplForTryGetMessageErrRef(IReadBundle impl, string id, string? attribute, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+        {
+            errors = new List<FluentError>();
+            var msg = attribute == null
+                ? id
+                : $"{id}.{attribute}";
+
+            if (!impl.TryGetAstMessage(id, out var astMessage))
+            {
+                errors.Add(ResolverFluentError.NoValue($"{msg}"));
+                message = null;
+                return false;
+            }
+
+            var pattern = attribute != null
+                ? astMessage.GetAttribute(attribute)?.Value
+                : astMessage.Value;
+
+            if (pattern == null)
+            {
+                errors.Add(ResolverFluentError.NoValue($"{msg}"));
+                message = FluentNone.None.ToString();
+                return false;
+            }
+
+            errors = null;
+            message = impl.FormatPattern(pattern, args, out errors);
+            return true;
         }
     }
 }
