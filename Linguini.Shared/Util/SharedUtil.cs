@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Linguini.Shared.Types.Bundle;
 
@@ -6,6 +7,15 @@ namespace Linguini.Shared.Util
 {
     public static class SharedUtil
     {
+#if !(NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_0_OR_GREATER)
+        public static bool TryAdd<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, TValue value)
+        {
+            if (dict.ContainsKey(key)) return false;
+            dict[key] = value;
+            return true;
+        }
+#endif
+
         /// <summary>
         /// Method for matching Fluent types.
         /// 

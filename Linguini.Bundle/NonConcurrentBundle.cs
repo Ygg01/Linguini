@@ -6,6 +6,9 @@ using System.Linq;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
+#if !(NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_0_OR_GREATER)
+using Linguini.Shared.Util;
+#endif
 using Linguini.Syntax.Ast;
 
 // ReSharper disable UnusedType.Global
