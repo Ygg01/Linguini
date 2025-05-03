@@ -31,7 +31,7 @@ namespace Linguini.Shared.Util
 
                 if (start != ptr)
                 {
-                    writer.Write(Encoding.UTF8.GetChars(bytes[start..ptr]));
+                    writer.Write(Encoding.UTF8.GetChars(bytes, index: start, count: ptr - start));
                 }
                 // With this we skip double `\\`
                 ptr += 1;
@@ -62,7 +62,7 @@ namespace Linguini.Shared.Util
 
             if (start != ptr)
             {
-                writer.Write(Encoding.UTF8.GetChars(bytes[start..ptr]));
+                writer.Write(Encoding.UTF8.GetChars(bytes, index: start, count: ptr - start));
             }
         }
 
@@ -76,7 +76,7 @@ namespace Linguini.Shared.Util
                 return UnknownChar;
 
             // this slices `004F` out of `\u004F`
-            var codePointStr = Encoding.UTF8.GetString(bytes[start..end]);
+            var codePointStr = Encoding.UTF8.GetString(bytes, index: start, count: end - start);
             
             // Convert a value (e.g. `004F`) from hexadecimal to int to get approximate codepoint
             // convert codepoint to string (because it can be more than one UTF16 char)

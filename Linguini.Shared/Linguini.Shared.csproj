@@ -10,13 +10,15 @@
         <PackageTags>fluent, i18n, internationalization, l10n, l20n, globalization, translation</PackageTags>
         <IncludeSymbols>false</IncludeSymbols>
         <PackageVersion>0.9.0</PackageVersion>
-        <TargetFrameworks>net6.0;netstandard2.1;net8.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net8.0</TargetFrameworks>
         <PackageIcon>linguini.jpg</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
     
     
     <ItemGroup>
+      <PackageReference Include="PolySharp" Version="1.15.0" PrivateAssets="all" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) " />
+      <PackageReference Include="System.Memory" Version="4.6.3" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) " />
       <None Include="..\linguini.jpg" PackagePath="">
         <Pack>True</Pack>
           <Link>linguini.jpg</Link>

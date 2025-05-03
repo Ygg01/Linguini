@@ -423,5 +423,37 @@ namespace Linguini.Bundle
             return HashCode.Combine(Culture, Locales, UseIsolating, TransformFunc, FormatterFunc, MaxPlaceable,
                 EnableExtensions);
         }
+
+#if !(NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER) // default interface implementation not available
+        public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors)
+            => ReadBundleExtensions.BaseImplForFormatPattern(this, pattern, args, out errors);
+
+        public bool TryGetMessage(string id, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+            => ReadBundleExtensions.BaseImplForTryGetMessage(this, id: id, attribute: null, args, out errors, out message);
+
+        public bool HasAttrMessage(string idWithAttr)
+            => ReadBundleExtensions.BaseImplForHasAttrMessage(this, idWithAttr);
+
+        public string? GetAttrMessage(string msgWithAttr, params (string, IFluentType)[] args)
+            => ReadBundleExtensions.BaseImplForGetAttrMessage(this, msgWithAttr, args);
+
+        public bool TryGetAttrMessage(string msgWithAttr, IDictionary<string, IFluentType>? args,
+           [NotNullWhen(false)]  out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+            => ReadBundleExtensions.BaseImplForTryGetAttrMessage(this, msgWithAttr, args, out errors, out message);
+
+        public bool TryGetAttrMessageErrRef(string msgWithAttr, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+            => ReadBundleExtensions.BaseImplForTryGetAttrMessageErrRef(this, msgWithAttr, args, ref errors, out message);
+
+        public bool TryGetMessage(string id, string? attribute, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+            => ReadBundleExtensions.BaseImplForTryGetMessage(this, id: id, attribute: attribute, args, out errors, out message);
+
+        public bool TryGetMessageErrRef(string id, string? attribute, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] ref IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+            => ReadBundleExtensions.BaseImplForTryGetMessageErrRef(this, id: id, attribute: attribute, args, ref errors, out message);
+#endif
     }
 }

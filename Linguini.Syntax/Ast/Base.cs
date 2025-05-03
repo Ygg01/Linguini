@@ -105,7 +105,7 @@ namespace Linguini.Syntax.Ast
             {
                 var patternElement = Elements[index];
                 var otherPatternElement = other.Elements[index];
-                if (!IPatternElement.PatternComparer.Equals(patternElement, otherPatternElement))
+                if (!PatternComparer.Instance.Equals(patternElement, otherPatternElement))
                 {
                     return false;
                 }
@@ -296,11 +296,15 @@ namespace Linguini.Syntax.Ast
 
     public interface IInlineExpression : IExpression
     {
-        public static readonly InlineExpressionComparer Comparer = new();
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER // keep ABI where default interface implementation is available
+        public static readonly InlineExpressionComparer Comparer = InlineExpressionComparer.Instance;
+#endif
     }
 
     public class InlineExpressionComparer : IEqualityComparer<IInlineExpression>
     {
+        public static readonly InlineExpressionComparer Instance = new();
+
         public bool Equals(IInlineExpression? left, IInlineExpression? right)
         {
             return (left, right) switch
