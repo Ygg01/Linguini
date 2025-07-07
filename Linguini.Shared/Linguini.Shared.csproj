@@ -13,6 +13,7 @@
         <TargetFrameworks>net6.0;netstandard2.1;net8.0</TargetFrameworks>
         <PackageIcon>linguini.jpg</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
     
     

@@ -7,6 +7,7 @@
         <PackageTags>serialization, linguini, utility</PackageTags>
         <Description>Optional serialization library for Linguini</Description>
         <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>

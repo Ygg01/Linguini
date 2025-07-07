@@ -22,6 +22,7 @@ It provides easy to use and extend system for describing translations.</Descript
         <TargetFrameworks>net8.0;netstandard2.1;net6.0</TargetFrameworks>
         <PackageIcon>linguini.jpg</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
