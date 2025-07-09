@@ -15,6 +15,9 @@
         PluralCategory GetPluralRules(RuleType type, FluentNumber number);
     }
 
+    /// <summary>
+    /// A static helper class for operations involving Fluent Bundle scopes.
+    /// </summary>
     public static class ScopeHelper
     {
         /// <summary>

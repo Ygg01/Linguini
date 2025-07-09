@@ -5,15 +5,18 @@ using System.Text;
 
 namespace Linguini.Shared.Util
 {
+    /// <summary>
+    /// Provides utility methods for processing Unicode strings. Mainly escaping and unescaping strings.
+    /// </summary>
     public static class UnicodeUtil
     {
         const string UnknownChar = "�";
 
         /// <summary>
-        /// Method to unescape a given memory from string literal
+        /// Method to unescape a given memory from a string literal
         /// and write its converted content to a given writer.
         /// </summary>
-        /// <param name="value">Read only memory containing escaped strings</param>
+        /// <param name="value">Read-only memory containing escaped strings</param>
         /// <param name="writer">Writer to which we write the results of escaping</param>
         public static void WriteUnescapedUnicode(ReadOnlyMemory<char> value, TextWriter writer)
         {
@@ -68,7 +71,7 @@ namespace Linguini.Shared.Util
 
         private static string EncodeUnicode(byte[] bytes, int start, int end)
         {
-            // Start is inclusive end is exclusive
+            // Start is inclusive, end is exclusive
             // for bytes = {b, c, a} and start = 1 end = 2
             // we get {c, a}
             // if out of are out of range just return Replacement character

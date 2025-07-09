@@ -7,20 +7,41 @@ namespace Linguini.Shared.Types
     /// </summary>
     public enum PluralCategory : byte
     {
+        /// <summary>
+        /// Denotes a zero plurality.
+        /// </summary>
         Zero,
+        /// <summary>
+        /// Denotes a single element plurality.
+        /// </summary>
         One,
+        /// <summary>
+        /// Denotes a two-element plurality.
+        /// </summary>
         Two,
+        /// <summary>
+        /// Denotes a small number of element pluralities.
+        /// </summary>
         Few,
+        /// <summary>
+        /// Denotes a big number of element pluralities.
+        /// </summary>
         Many,
+        /// <summary>
+        /// Denotes other pluralities.
+        /// </summary>
         Other,
     }
 
+    /// <summary>
+    /// Provides helper methods for working with the <see cref="PluralCategory"/> enumeration.
+    /// </summary>
     public static class PluralCategoryHelper
     {
         /// <summary>
-        /// Try to convert a string to to a Plural category. 
+        /// Try to convert a string to a Plural category. 
         /// </summary>
-        /// <param name="input">Case insensitive name of the Plural category</param>
+        /// <param name="input">Case-insensitive name of the Plural category</param>
         /// <param name="pluralCategory">found Plural category if returns <c>true</c>, or <c>false</c> otherwise.</param>
         /// <returns><c>true</c> if it matches the <c>pluralCategory</c> value</returns>
         public static bool TryPluralCategory(this string? input, [NotNullWhen(true)] out PluralCategory? pluralCategory)

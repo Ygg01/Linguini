@@ -1,9 +1,11 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using Linguini.Shared.Types.Bundle;
 
 namespace Linguini.Shared.Util
 {
+    /// <summary>
+    /// Shared utils used by PluralRules and FluentBundle, exported to avoid circular dependencies.
+    /// </summary>
     public static class SharedUtil
     {
         /// <summary>
@@ -28,21 +30,49 @@ namespace Linguini.Shared.Util
             };
         }
         
+        /// <summary>
+        /// Returns if the integer is in the range of <see cref="int"/>s provided. Range is inclusive on both sides.
+        /// </summary>
+        /// <param name="self">number being checked for being in range</param>
+        /// <param name="start">start of range</param>
+        /// <param name="end">end of range</param>
+        /// <returns>true if <c>self</c> is in range of <c>start</c> and <c>end</c> (both inclusive); false otherwise</returns>
         public static bool InRange(this int self, int start, int end)
         {
             return self >= start && self <= end;
         }
 
+        /// <summary>
+        /// Returns if the <see cref="ulong"/> is in the range of <see cref="int"/>s provided. Range is inclusive on both sides.
+        /// </summary>
+        /// <param name="self">number being checked for being in range</param>
+        /// <param name="start">start of range</param>
+        /// <param name="end">end of range</param>
+        /// <returns>true if <c>self</c> is in range of <c>start</c> and <c>end</c> (both inclusive); false otherwise</returns>
         public static bool InRange(this ulong self, int start, int end)
         {
             return self >= (ulong) start && self <= (ulong) end;
         }
         
+        /// <summary>
+        /// Returns if the <see cref="long"/> is in the range of <see cref="int"/>s provided. Range is inclusive on both sides.
+        /// </summary>
+        /// <param name="self">number being checked for being in range</param>
+        /// <param name="start">start of range</param>
+        /// <param name="end">end of range</param>
+        /// <returns>true if <c>self</c> is in range of <c>start</c> and <c>end</c> (both inclusive); false otherwise</returns>
         public static bool InRange(this long self, int start, int end)
         {
             return self >= start && self <= end;
         }
 
+        /// <summary>
+        /// Returns if the <see cref="double"/> is in the range of <see cref="int"/>s provided. Range is inclusive on both sides.
+        /// </summary>
+        /// <param name="value">number being checked for being in range</param>
+        /// <param name="start">start of range</param>
+        /// <param name="end">end of range</param>
+        /// <returns>true if <c>self</c> is in range of <c>start</c> and <c>end</c> (both inclusive); false otherwise</returns>
         public static bool InRange(this double value, int start, int end)
         {
             for (var x = Convert.ToDouble(start); x <= end; x++)

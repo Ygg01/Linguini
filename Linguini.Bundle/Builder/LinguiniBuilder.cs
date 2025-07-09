@@ -11,6 +11,9 @@ using Linguini.Syntax.Parser;
 
 namespace Linguini.Bundle.Builder
 {
+    /// <summary>
+    /// Static class providing a builder for creating Fluent bundles.
+    /// </summary>
     public static class LinguiniBuilder
     {
         /// <summary>
@@ -23,14 +26,20 @@ namespace Linguini.Bundle.Builder
             return new StepBuilder(useExperimental);
         }
 
+        /// <summary>
+        /// Common interface used in Fluent bundle builder.
+        /// </summary>
         public interface IStep
         {
         }
 
+        /// <summary>
+        /// First step in building Fluent Bundle, adding Locale.
+        /// </summary>
         public interface ILocaleStep : IStep
         {
             /// <summary>
-            /// Sets the locale to given string.
+            /// Sets the locale to a given string.
             /// </summary>
             /// <param name="unparsedLocale">The locale string.</param>
             /// <returns>The <see cref="IResourceStep">next step (defining resources)</see> in the builder.</returns>
@@ -59,6 +68,11 @@ namespace Linguini.Bundle.Builder
             IResourceStep CultureInfo(CultureInfo culture);
         }
 
+        /// <summary>
+        /// Usually the second step in building a Fluent bundle. It adds `Resourse` which
+        /// are files or strings that will be parsed, converted to Abstract Syntax Tree(AST),
+        /// and added to the Bundle.
+        /// </summary>
         public interface IResourceStep : IStep
         {
             /// <summary>
@@ -75,10 +89,22 @@ namespace Linguini.Bundle.Builder
             /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddResources(params string[] unparsedResourceArray);
 
+            /// <summary>
+            /// Adds an enumerable list of <see cref="TextReader"/> to the builder.
+            /// </summary>
+            /// <param name="unparsedStreamList">An enumerable collection of unparsed resources.</param>
+            /// <returns>An instance of <see cref="IReadyStep"/> representing the next step in the builder.</returns>
             [Obsolete("Method is obsolete, please use IResourceStep.AddResources(IEnumerable<(TextReader, string?)>) instead.", true)]
             IReadyStep AddResources(IEnumerable<TextReader> unparsedStreamList);
 
-            [Obsolete("Method is obsolete, please use IResourceStep.AddResources(params (TextReader, string?)[]) instead.", true)]
+            /// <summary>
+            /// Adds an array  of <see cref="TextReader"/> to the builder.
+            /// </summary>
+            /// <param name="unparsedStreamList">An array of unparsed text in <see cref="TextReader"/>s.</param>
+            /// <returns>An instance of <see cref="IReadyStep"/> representing the next step in the builder.</returns>
+            [Obsolete(
+                "Method is obsolete, please use IResourceStep.AddResources(params (TextReader, string?)[]) instead.",
+                true)]
             IReadyStep AddResources(params TextReader[] unparsedStreamList);
 
             /// <summary>
@@ -154,6 +180,11 @@ namespace Linguini.Bundle.Builder
         }
 
 
+        /// <summary>
+        /// Usually the second step in building a Fluent bundle. It adds `Resourse` which
+        /// are files or strings that will be parsed, converted to Abstract Syntax Tree(AST),
+        /// and added to the Bundle.
+        /// </summary>
         public interface IReadyStep : IBuildStep
         {
             /// <summary>

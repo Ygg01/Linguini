@@ -17,6 +17,12 @@ namespace Linguini.Shared.Types.Bundle
         {
         }
 
+        /// <summary>
+        /// Method that for a given scope and 
+        /// </summary>
+        /// <param name="other"></param>
+        /// <param name="scope"></param>
+        /// <returns></returns>
         public bool Matches(IFluentType other, IScope scope)
         {
             return SharedUtil.Matches(this, other, scope);
@@ -34,6 +40,10 @@ namespace Linguini.Shared.Types.Bundle
             return "{???}";
         }
 
+        /// <summary>
+        /// Determines if type is an error. Fluent None isn't an error.
+        /// </summary>
+        /// <returns>false</returns>
         public bool IsError()
         {
             return false;

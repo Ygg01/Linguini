@@ -40,6 +40,7 @@
     /// </summary>
     public record FluentErrType : IFluentType
     {
+        /// <inheritdoc/>
         public bool Matches(IFluentType other, IScope scope)
         {
             return false;
