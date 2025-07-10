@@ -7,13 +7,31 @@ using Linguini.Syntax.Ast;
 
 namespace Linguini.Serialization.Converters
 {
+    /// <summary>
+    /// A serializer for the <see cref="Resource"/> class, used for handling JSON serialization and deserialization
+    /// of Fluent resource objects. It extends <see cref="System.Text.Json.Serialization.JsonConverter{T}"/>.
+    /// </summary>
+    /// <remarks>
+    /// This class provides implementations for reading and writing JSON representations of Fluent resources.
+    /// It includes utilities for handling expressions, literals, and inline elements during serialization.
+    /// </remarks>
     public class ResourceSerializer : JsonConverter<Resource>
     {
+
+        /// <summary>
+        /// Read and convert the JSON to ResourceSerializer. NOT IMPLEMENTED!
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="typeToConvert"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         public override Resource Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public override void Write(Utf8JsonWriter writer, Resource value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
@@ -44,6 +62,12 @@ namespace Linguini.Serialization.Converters
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Writes an inline expression to a JSON writer.
+        /// </summary>
+        /// <param name="writer">The Utf8JsonWriter to which the inline expression will be written.</param>
+        /// <param name="value">The inline expression to write, implementing <see cref="IInlineExpression"/>.</param>
+        /// <param name="options">The JSON serializer options to use during serialization.</param>
         public static void WriteInlineExpression(Utf8JsonWriter writer, IInlineExpression value,
             JsonSerializerOptions options)
         {
@@ -91,11 +115,30 @@ namespace Linguini.Serialization.Converters
             }
         }
 
+        /// <summary>
+        /// Processes a JSON element to create a <see cref="TextLiteral"/> object.
+        /// </summary>
+        /// <param name="el">
+        /// The JSON element containing the "value" property to be deserialized into a <see cref="TextLiteral"/>.
+        /// </param>
+        /// <param name="options">
+        /// The JSON serializer options to use during processing.
+        /// </param>
+        /// <returns>
+        /// A <see cref="TextLiteral"/> instance populated with the value extracted from the JSON element.
+        /// </returns>
         public static TextLiteral ProcessTextLiteral(JsonElement el, JsonSerializerOptions options)
         {
             return new(el.GetProperty("value").GetString() ?? "");
         }
 
+        /// <summary>
+        /// Processes a JSON element to extract a <see cref="NumberLiteral"/> object.
+        /// </summary>
+        /// <param name="el">The JSON element containing the number literal to process.</param>
+        /// <param name="options">Serialization options that influence how the processing is performed.</param>
+        /// <returns>A <see cref="NumberLiteral"/> object extracted from the input JSON element.</returns>
+        /// <exception cref="JsonException">Thrown if the input JSON element is not a valid number literal.</exception>
         public static NumberLiteral ProcessNumberLiteral(JsonElement el,
             JsonSerializerOptions options)
         {
@@ -107,6 +150,13 @@ namespace Linguini.Serialization.Converters
             throw new JsonException("Expected value to be a valid number");
         }
 
+        /// <summary>
+        /// Attempts to read and process a JSON number literal from the given JSON element.
+        /// </summary>
+        /// <param name="el">The JSON element to read the number literal from.</param>
+        /// <param name="options">The JSON serializer options to use during processing.</param>
+        /// <param name="numberLiteral">When this method returns, contains the processed number literal if successful, or null if the operation failed.</param>
+        /// <returns>True if the number literal is successfully read and processed; otherwise, false.</returns>
         public static bool TryReadProcessNumberLiteral(JsonElement el, JsonSerializerOptions options,
             [MaybeNullWhen(false)] out NumberLiteral numberLiteral)
         {
@@ -121,6 +171,13 @@ namespace Linguini.Serialization.Converters
             return false;
         }
 
+        /// <summary>
+        /// Reads and deserializes a JSON element into an implementation of the <see cref="IExpression"/> interface
+        /// based on the specified "type" property in the JSON.
+        /// </summary>
+        /// <param name="el">The JSON element containing data for deserialization.</param>
+        /// <param name="options">The options used to customize the JSON serialization and deserialization behavior.</param>
+        /// <returns>An instance of an <see cref="IExpression"/> implementation corresponding to the type specified in the JSON.</returns>
         public static IExpression ReadExpression(JsonElement el, JsonSerializerOptions options)
         {
             var type = el.GetProperty("type").GetString();
@@ -140,8 +197,15 @@ namespace Linguini.Serialization.Converters
             return x;
         }
 
-
-       
+        /// <summary>
+        /// Attempts to read an inline expression from the provided JSON element.
+        /// </summary>
+        /// <param name="el">The JSON element containing the data for the inline expression.</param>
+        /// <param name="options">The JSON serializer options to customize reading behavior.</param>
+        /// <param name="o">When this method returns, contains the parsed inline expression if the read operation is successful,
+        /// or null if the read fails. This parameter is passed uninitialized.</param>
+        /// <returns>True if the inline expression is successfully read; otherwise, false.</returns>
+        /// <exception cref="JsonException">Thrown when the JSON data is invalid or contains unexpected types.</exception>
         public static bool TryReadInlineExpression(JsonElement el, JsonSerializerOptions options,
             [MaybeNullWhen(false)] out IInlineExpression o)
         {

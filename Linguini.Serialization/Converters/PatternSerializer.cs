@@ -8,9 +8,13 @@ using Linguini.Syntax.Ast;
 
 namespace Linguini.Serialization.Converters
 {
+    /// <summary>
+    /// Provides custom serialization and deserialization for the `Pattern` class.
+    /// </summary>
     public class PatternSerializer : JsonConverter<Pattern>
 
     {
+        /// <inheritdoc />
         public override Pattern Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
@@ -83,6 +87,7 @@ namespace Linguini.Serialization.Converters
             };
         }
 
+        /// <inheritdoc />
         public override void Write(Utf8JsonWriter writer, Pattern pattern, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
@@ -125,6 +130,19 @@ namespace Linguini.Serialization.Converters
             }
         }
 
+        /// <summary>
+        /// Attempts to deserialize a JSON element into a <see cref="Pattern"/> object based on a specific structure.
+        /// </summary>
+        /// <param name="jsonValue">The JSON element to be deserialized.</param>
+        /// <param name="options">The JSON serialization options used for deserialization.</param>
+        /// <param name="pattern">
+        /// When this method returns, contains the deserialized <see cref="Pattern"/> object,
+        /// if the deserialization is successful; otherwise, null.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the JSON element was successfully deserialized into a <see cref="Pattern"/> object;
+        /// otherwise, <c>false</c>.
+        /// </returns>
         public static bool TryReadPattern(JsonElement jsonValue, JsonSerializerOptions options,
             [MaybeNullWhen(false)] out Pattern pattern)
         {

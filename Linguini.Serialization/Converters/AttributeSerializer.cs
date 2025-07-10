@@ -6,8 +6,12 @@ using Attribute = Linguini.Syntax.Ast.Attribute;
 
 namespace Linguini.Serialization.Converters
 {
+    /// <summary>
+    /// Provides a custom JSON converter for serializing and deserializing instances of the <see cref="Attribute"/> class.
+    /// </summary>
     public class AttributeSerializer : JsonConverter<Attribute>
     {
+        /// <inheritdoc />
         public override Attribute Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
@@ -58,6 +62,7 @@ namespace Linguini.Serialization.Converters
             return new Attribute(id!, value!);
         }
 
+        /// <inheritdoc />
         public override void Write(Utf8JsonWriter writer, Attribute attribute, JsonSerializerOptions options)
         {
             writer.WriteStartObject();

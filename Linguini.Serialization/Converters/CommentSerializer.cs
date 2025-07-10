@@ -8,8 +8,17 @@ using Linguini.Syntax.Ast;
 
 namespace Linguini.Serialization.Converters
 {
+    /// <summary>
+    /// Provides a custom JSON converter for the <see cref="AstComment"/> type.
+    /// </summary>
+    /// <remarks>
+    /// This class is used to serialize and deserialize comments within the Fluent resource syntax
+    /// represented by <see cref="AstComment"/>. It distinguishes between different
+    /// comment levels such as Comment, GroupComment, and ResourceComment.
+    /// </remarks>
     public class CommentSerializer : JsonConverter<AstComment>
     {
+        /// <inheritdoc />
         public override AstComment Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
@@ -66,6 +75,7 @@ namespace Linguini.Serialization.Converters
             return new AstComment(commentLevel, content);
         }
 
+        /// <inheritdoc />
         public override void Write(Utf8JsonWriter writer, AstComment comment, JsonSerializerOptions options)
         {
             writer.WriteStartObject();

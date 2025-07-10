@@ -5,13 +5,18 @@ using Linguini.Syntax.Parser.Error;
 
 namespace Linguini.Serialization.Converters
 {
+    /// <summary>
+    /// A JSON converter for serializing and deserializing instances of the <see cref="ParseError"/> class.
+    /// </summary>
     public class ParseErrorSerializer : JsonConverter<ParseError>
     {
+        /// <inheritdoc />
         public override ParseError? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public override void Write(Utf8JsonWriter writer, ParseError error, JsonSerializerOptions options)
         {
             writer.WriteStartObject();

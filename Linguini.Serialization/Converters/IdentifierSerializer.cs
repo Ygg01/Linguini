@@ -7,6 +7,9 @@ using Linguini.Syntax.Ast;
 namespace Linguini.Serialization.Converters
 
 {
+    /// <summary>
+    /// A JSON converter for serializing and deserializing instances of the <see cref="Identifier"/> class.
+    /// </summary>
     public class IdentifierSerializer : JsonConverter<Identifier>
     {
         /// <inheritdoc/>
@@ -71,6 +74,13 @@ namespace Linguini.Serialization.Converters
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Attempts to extract an <see cref="Identifier"/> from a JSON element.
+        /// </summary>
+        /// <param name="el">The JSON element to process.</param>
+        /// <param name="options">The JSON serializer options to be applied.</param>
+        /// <param name="ident">When the method returns, contains the extracted <see cref="Identifier"/>, if successful.</param>
+        /// <returns><c>true</c> if the <see cref="Identifier"/> was successfully extracted; otherwise, <c>false</c>.</returns>
         public static bool TryGetIdentifier(JsonElement el, JsonSerializerOptions options,
             [MaybeNullWhen(false)] out Identifier ident)
         {

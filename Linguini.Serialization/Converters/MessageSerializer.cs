@@ -7,8 +7,15 @@ using Attribute = Linguini.Syntax.Ast.Attribute;
 
 namespace Linguini.Serialization.Converters
 {
+    /// <summary>
+    /// Provides custom JSON serialization and deserialization logic for the <see cref="AstMessage"/> class.
+    /// </summary>
+    /// <remarks>
+    /// This class is used to handle the conversion of <see cref="AstMessage"/> objects to and from their JSON representation.
+    /// </remarks>
     public class MessageSerializer : JsonConverter<AstMessage>
     {
+        /// <inheritdoc />
         public override AstMessage Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
@@ -43,6 +50,7 @@ namespace Linguini.Serialization.Converters
             return new AstMessage(identifier, value, attrs, AstLocation.Empty, comment);
         }
 
+        /// <inheritdoc />
         public override void Write(Utf8JsonWriter writer, AstMessage msg, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
