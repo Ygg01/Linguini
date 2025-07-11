@@ -4,39 +4,93 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Linguini.Syntax.Ast
 {
+    /// <summary>
+    /// Shows which position text element takes.
+    /// </summary>
     public enum TextElementPosition : byte
     {
+        /// <summary>
+        /// Element at start of the first line.
+        /// </summary>
         InitialLineStart,
+        
+        /// <summary>
+        /// Text element at line start.
+        /// </summary>
         LineStart,
+        
+        /// <summary>
+        /// Text element continues on line.
+        /// </summary>
         Continuation,
     }
 
+    /// <summary>
+    /// Determines how text elements ends.
+    /// </summary>
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     public enum TextElementTermination : byte
     {
+        /// <summary>
+        /// Newline text termination.
+        /// </summary>
         LF,
+        /// <summary>
+        /// Carriage and Newline text termination.
+        /// </summary>
         CRLF,
+        /// <summary>
+        /// Placeable ends text.
+        /// </summary>
         PlaceableStart,
+        
+        /// <summary>
+        /// End of file text termination.
+        /// </summary>
         EndOfFile
     }
 
+    /// <summary>
+    /// Determines if text element is blank or not.
+    /// </summary>
     public enum TextElementType : byte
     {
+        /// <summary>
+        /// Blank text element.
+        /// </summary>
         Blank,
+        
+        /// <summary>
+        /// Non-blank text element.
+        /// </summary>
         NonBlank,
     }
 
+    /// <summary>
+    /// Common interface for Placeable text
+    /// </summary>
+    /// <seealso cref="TextElementPlaceholder"/>
+    /// <seealso cref="Placeable"/>
     public interface IPatternElementPlaceholder
     {
     }
 
+    /// <summary>
+    /// Interface for elements used in <see cref="Pattern"/>
+    /// </summary>
     public interface IPatternElement
     {
+        /// <summary>
+        /// Provides a default instance of <see cref="PatternComparer"/> for comparing
+        /// two <see cref="Pattern"/> instances based on their equality logic.
+        /// </summary>
         public static PatternComparer PatternComparer = new();
     }
 
+    /// <inheritdoc />
     public class PatternComparer : IEqualityComparer<IPatternElement>
     {
+        /// <inheritdoc />
         public bool Equals(IPatternElement? left, IPatternElement? right)
         {
             return (left, right) switch
@@ -47,6 +101,7 @@ namespace Linguini.Syntax.Ast
             };
         }
 
+        /// <inheritdoc />
         public int GetHashCode(IPatternElement obj)
         {
             switch (obj)
@@ -61,6 +116,7 @@ namespace Linguini.Syntax.Ast
         }
     }
 
+    /// <inheritdoc />
     public class TextElementPlaceholder : IPatternElementPlaceholder
     {
         /// <summary>
@@ -87,6 +143,14 @@ namespace Linguini.Syntax.Ast
         /// </summary>
         public bool MissingEol { get; } 
 
+        /// <summary>
+        /// Constructs a text element placeholder
+        /// </summary>
+        /// <param name="start">Start of text.</param>
+        /// <param name="end">End of text.</param>
+        /// <param name="indent">Current indent of text.</param>
+        /// <param name="role">Text position on a line.</param>
+        /// <param name="missingEol">Is the element missing End-of-line.</param>
         public TextElementPlaceholder(int start, int end, int indent, TextElementPosition role, bool missingEol)
         {
             Start = start;

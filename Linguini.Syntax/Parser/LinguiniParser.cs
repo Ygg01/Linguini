@@ -21,6 +21,12 @@ namespace Linguini.Syntax.Parser
         private readonly bool _enableExperimental;
         private const string Cr = "\n";
 
+        /// <summary>
+        /// Parses Fluent resources using a zero copy reader.
+        /// </summary>
+        /// <remarks>Obsoleted, use <see cref="FromFile"/></remarks>
+        /// <param name="zeroCopyReader">Zero-copy reader</param>
+        /// <param name="enableExperimental">Whether to use experimental features.</param>
         [Obsolete("Consider using LinguiniParser.FromFile factory method instead", true)]
         public LinguiniParser(ZeroCopyReader zeroCopyReader, bool enableExperimental)
         {
@@ -100,6 +106,9 @@ namespace Linguini.Syntax.Parser
             return new LinguiniParser(new StringReader(input), enableExperimental, fragmentName ?? "");
         }
 
+        /// <summary>
+        /// Gets the read-only memory containing the parsed data from the zero-copy reader.
+        /// </summary>
         public ReadOnlyMemory<char> GetReadonlyData => _reader.GetData;
 
         #region FastParse
@@ -1467,13 +1476,48 @@ namespace Linguini.Syntax.Parser
         #endregion
     }
 
+    /// <summary>
+    /// A struct representing a slice of text with metadata about its location,
+    /// type, and termination reason within a parsed text document.
+    /// </summary>
     public class TextSlice
     {
+        /// <summary>
+        /// Gets the starting position of the text slice within the input source.
+        /// </summary>
         public int Start { get; }
+
+        /// <summary>
+        /// Gets the ending position of the text slice within the parsed text document.
+        /// </summary>
         public int End { get; }
+
+        /// <summary>
+        /// Gets the type of the text element within a parsed text document, indicating
+        /// whether the slice represents blank or non-blank content.
+        /// </summary>
         public TextElementType ElementType { get; }
+
+        /// <summary>
+        /// Gets the termination reason for the text element, indicating what caused the end
+        /// of this particular slice of text during parsing. This can include reasons such as a
+        /// line feed (LF), a carriage return with line feed (CRLF), the start of a placeable,
+        /// or the end of the file.
+        /// </summary>
         public TextElementTermination TerminationReason { get; }
 
+        /// <summary>
+        /// Constructor representing a slice of text with associated metadata.
+        /// </summary>
+        /// <remarks>
+        /// The <see cref="TextSlice"/> class is used to store information
+        /// about a segment of text, including its start and end positions,
+        /// its type, and the reason for its termination within a parsed text structure.
+        /// </remarks>
+        /// <param name="start">The starting position of the text slice in the source document.</param>
+        /// <param name="end">The ending position of the text slice in the source document.</param>
+        /// <param name="elementType">The type of the text element (e.g., blank, non-blank).</param>
+        /// <param name="terminationReason">The reason for the termination of the text slice (e.g., line feed, end of file).</param>
         public TextSlice(int start, int end, TextElementType elementType, TextElementTermination terminationReason)
         {
             Start = start;

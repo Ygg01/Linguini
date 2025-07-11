@@ -240,3 +240,7 @@ version 0.9.0
 - Moved generator to Lang version 12.
 - Refactored CldrParser `class` -> `struct`.
 - Changed `ISourceGenerator` -> `IIncrementalGenerator`
+
+version 0.9.1
+========
+- Added docs to public API and ensure they are in Nuget package.
