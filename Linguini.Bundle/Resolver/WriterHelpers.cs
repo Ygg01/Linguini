@@ -8,8 +8,18 @@ using Linguini.Syntax.Ast;
 
 namespace Linguini.Bundle.Resolver
 {
+    /// <summary>
+    /// A static utility class that provides helper methods for writing
+    /// linguistic patterns and expressions to a <see cref="TextWriter"/> stream.
+    /// </summary>
     public static class WriterHelpers
     {
+        /// <summary>
+        /// Writes the content of the given <see cref="Pattern"/> to the specified <see cref="TextWriter"/>.
+        /// </summary>
+        /// <param name="pattern">The pattern containing elements to be written.</param>
+        /// <param name="writer">The text writer to output the content of the pattern.</param>
+        /// <param name="scope">The scope used to manage context and transformations during writing.</param>
         public static void Write(this Pattern pattern, TextWriter writer, Scope scope)
         {
             var len = pattern.Elements.Count;
@@ -63,6 +73,14 @@ namespace Linguini.Bundle.Resolver
             }
         }
 
+        /// <summary>
+        /// Attempts to write the content of the given <see cref="IExpression"/> to the specified <see cref="TextWriter"/>.
+        /// </summary>
+        /// <param name="expression">The expression to be written out.</param>
+        /// <param name="writer">The text writer used to output the content of the expression.</param>
+        /// <param name="scope">The scope used to resolve and manage context during writing.</param>
+        /// <param name="pos">The optional position parameter used in specific resolution contexts.</param>
+        /// <returns>A boolean value indicating whether the writing process was successful.</returns>
         public static bool TryWrite(this IExpression expression, TextWriter writer, Scope scope, int? pos = null)
         {
             var errors = new List<FluentError>();
@@ -295,6 +313,11 @@ namespace Linguini.Bundle.Resolver
             scope.ClearLocalArgs();
         }
 
+        /// <summary>
+        /// Writes an error representation of the specified <see cref="IExpression"/> to the provided <see cref="TextWriter"/>.
+        /// </summary>
+        /// <param name="self">The expression to write the error representation of.</param>
+        /// <param name="writer">The text writer to output the error representation.</param>
         public static void WriteError(this IExpression self, TextWriter writer)
         {
             if (self is IInlineExpression expr)
@@ -307,6 +330,11 @@ namespace Linguini.Bundle.Resolver
             }
         }
 
+        /// <summary>
+        /// Writes a representation of the given <see cref="IInlineExpression"/> to the specified <see cref="TextWriter"/> based on its type.
+        /// </summary>
+        /// <param name="self">The inline expression to be written, such as a message reference, term reference, or other expression types.</param>
+        /// <param name="writer">The text writer used to output the representation of the inline expression.</param>
         public static void WriteError(this IInlineExpression self, TextWriter writer)
         {
             switch (self)
