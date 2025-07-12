@@ -243,4 +243,5 @@ version 0.9.0
 
 version 0.9.1
 ========
-- Added docs to public API and ensure they are in Nuget package.
+## What's changed
+- Added docs to public API and ensure they are in the Nuget package.
