@@ -68,6 +68,19 @@ namespace Linguini.Bundle.Resolver
                 return new FluentErrType();
             }
 
+            if (self is FunctionReference funcRef)
+            {
+                var (resolvedPosArgs, resolvedNamedArgs) = scope.GetArguments(funcRef.Arguments);
+
+                if (scope.Bundle.TryGetFunction(funcRef.Id, out var func))
+                {
+                    return func.Function(resolvedPosArgs, resolvedNamedArgs);
+                }
+
+                scope.AddError(ResolverFluentError.Reference(funcRef));
+                return new FluentErrType();
+            }
+
             var writer = new StringWriter();
             self.TryWrite(writer, scope);
             return (FluentString)writer.ToString();
