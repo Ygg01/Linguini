@@ -43,47 +43,50 @@ namespace Linguini.Bundle.Resolver
         /// <return>An IFluentType instance representing the resolved IInlineExpression, or an error type if resolution fails.</return>
         public static IFluentType Resolve(this IInlineExpression self, Scope scope, int? pos = null)
         {
-            if (self is TextLiteral textLiteral)
+            switch (self)
             {
-                StringWriter stringWriter = new();
-                UnicodeUtil.WriteUnescapedUnicode(textLiteral.Value, stringWriter);
-                return (FluentString)stringWriter.ToString();
-            }
-
-            if (self is NumberLiteral numberLiteral) return FluentNumber.TryNumber(numberLiteral.Value.Span);
-
-            if (self is VariableReference varRef)
-            {
-                var args = scope.LocalNameArgs ?? scope.Args;
-                if (args != null
-                    && args.TryGetValue(varRef.Id.ToString(), out var arg))
-                    return arg.Copy();
-
-                if (scope.LocalPosArgs != null && pos != null
-                                               && pos < scope.LocalPosArgs.Count)
-                    return scope.LocalPosArgs[pos.Value];
-
-                if (scope.LocalNameArgs == null) scope.AddError(ResolverFluentError.UnknownVariable(varRef));
-
-                return new FluentErrType();
-            }
-
-            if (self is FunctionReference funcRef)
-            {
-                var (resolvedPosArgs, resolvedNamedArgs) = scope.GetArguments(funcRef.Arguments);
-
-                if (scope.Bundle.TryGetFunction(funcRef.Id, out var func))
+                case TextLiteral textLiteral:
                 {
-                    return func.Function(resolvedPosArgs, resolvedNamedArgs);
+                    StringWriter stringWriter = new();
+                    UnicodeUtil.WriteUnescapedUnicode(textLiteral.Value, stringWriter);
+                    return (FluentString)stringWriter.ToString();
                 }
+                case NumberLiteral numberLiteral:
+                    return FluentNumber.TryNumber(numberLiteral.Value.Span);
+                case VariableReference varRef:
+                {
+                    var args = scope.LocalNameArgs ?? scope.Args;
+                    if (args != null
+                        && args.TryGetValue(varRef.Id.ToString(), out var arg))
+                        return arg.Copy();
 
-                scope.AddError(ResolverFluentError.Reference(funcRef));
-                return new FluentErrType();
+                    if (scope.LocalPosArgs != null && pos != null
+                                                   && pos < scope.LocalPosArgs.Count)
+                        return scope.LocalPosArgs[pos.Value];
+
+                    if (scope.LocalNameArgs == null) scope.AddError(ResolverFluentError.UnknownVariable(varRef));
+
+                    return new FluentErrType();
+                }
+                case FunctionReference funcRef:
+                {
+                    var (resolvedPosArgs, resolvedNamedArgs) = scope.GetArguments(funcRef.Arguments);
+
+                    if (scope.Bundle.TryGetFunction(funcRef.Id, out var func))
+                    {
+                        return func.Function(resolvedPosArgs, resolvedNamedArgs);
+                    }
+
+                    scope.AddError(ResolverFluentError.Reference(funcRef));
+                    return new FluentErrType();
+                }
+                default:
+                {
+                    var writer = new StringWriter();
+                    self.TryWrite(writer, scope);
+                    return (FluentString)writer.ToString();
+                }
             }
-
-            var writer = new StringWriter();
-            self.TryWrite(writer, scope);
-            return (FluentString)writer.ToString();
         }
 
         private static FluentString GetFluentString(string str, Func<string, string>? transformFunc)
