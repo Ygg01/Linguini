@@ -30,6 +30,21 @@ namespace Linguini.Bundle.Test.Yaml
             }
         }
 
+        static IEnumerable<TestCaseData> SingleTestCase(string path)
+        {
+            var defaultPath = GetFullPathFor("fixtures/defaults.yaml");
+            var defaultBuilder = ParseDefault(defaultPath);
+
+            var (testSuites, suiteName) = ParseTest(GetFullPathFor(path));
+            foreach (var testCase in testSuites)
+            {
+                TestCaseData testCaseData = new(testCase, defaultBuilder);
+                testCaseData.SetCategory(path);
+                testCaseData.SetName($"({path}) {suiteName} {testCase.Name}");
+                yield return testCaseData;
+            }
+        }
+
         static IEnumerable<TestCaseData> YamlTestCases()
         {
             var defaultPath = GetFullPathFor("fixtures/defaults.yaml");
@@ -80,6 +95,7 @@ namespace Linguini.Bundle.Test.Yaml
 
         [TestCaseSource(nameof(YamlTestCases))]
         [TestCaseSource(nameof(LinguiniExtTestCases))]
+        // [TestCaseSource(nameof(SingleTestCase), new object[] { "linguini_ext/linguini_func_ref.yaml" })]
         [Parallelizable]
         public void YamlTestSuiteMethod(ResolverTestSuite parsedTestSuite, LinguiniBuilder.IReadyStep builder)
         {

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Linguini.Bundle.Errors;
-using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 
 namespace Linguini.Bundle.Test.Yaml

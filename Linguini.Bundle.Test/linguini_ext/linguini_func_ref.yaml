@@ -1,0 +1,75 @@
+
+suites:
+-
+    name: Functions References
+    suites:
+    -
+        name: missing
+        resources:
+        -
+            source: |-
+                  emails = Number of unread emails { $unreadEmails }.
+                  
+                  emails2 = Number of unread emails { NUMBER($unreadEmails) }.
+            
+                  liked-count = { $num ->
+                    [0]     No likes yet.
+                    [one]   One person liked your message
+                    *[other] { $num } people liked your message
+                  }
+
+                  liked-count2 = { NUMBER($num) ->
+                    [0]     No likes yet.
+                    [one]   One person liked your message
+                    *[other] { $num } people liked your message
+                  }
+        bundles:
+        -   functions:
+            - NUMBER
+        tests:
+        -
+            name: Simple number usage
+            asserts:
+            -
+                id: emails
+                args:
+                    unreadEmails: 3
+                value:  Number of unread emails 3.
+            -   id: emails2
+                args:
+                    unreadEmails: 3
+                value: Number of unread emails 3.
+        -
+            name: Complex number usage
+            asserts:
+            -
+                id: liked-count
+                args:
+                    num: 0
+                value:  No likes yet.
+            -
+                id: liked-count
+                args:
+                    num: 1
+                value:  One person liked your message
+            -   id: liked-count
+                args:
+                    num: 4
+                value: 4 people liked your message
+        -
+            name: Complex number usage with NUMBER()
+            asserts:
+            -
+                id: liked-count2
+                args:
+                    num: 0
+                value:  No likes yet.
+            -
+                id: liked-count2
+                args:
+                    num: 1
+                value:  One person liked your message
+            -   id: liked-count2
+                args:
+                    num: 4
+                value: 4 people liked your message

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
+using Linguini.Bundle.Function;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 using NUnit.Framework;
@@ -348,6 +349,69 @@ you-see = You see { $$object.StartsWith ->
     *[consonant] a { $$object }
 }.
 "; 
+        
+        private const string FuncRefs = @"
+emails = Number of unread emails { $unreadEmails }.
+emails2 = Number of unread emails { NUMBER($unreadEmails) }.
+liked-count = { $num ->
+    [0]     No likes yet.
+    [one]   One person liked your message.
+    *[other] { $num } people liked your message.
+}
+
+liked-count2 = { NUMBER($num) ->
+    [0]     No likes yet.
+    [one]   One person liked your message.
+    *[other] { $num } people liked your message.
+}
+";
+
+        [Test]
+        [Parallelizable]
+        public void TestFunctionReferences()
+        {
+            var (bundle, err) = LinguiniBuilder.Builder(useExperimental: true)
+                .Locale("en-US")
+                .AddResource(FuncRefs)
+                .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
+                .Build();
+            Assert.That(err, Is.Null.Or.Empty);
+            var args = new Dictionary<string, IFluentType>
+            {
+                ["unreadEmails"] = (FluentNumber)3,
+            };
+            Assert.That(bundle.TryGetMessage("emails", args, out _, out var message1));
+            Assert.That(message1, Is.EqualTo("Number of unread emails 3."));
+            Assert.That(bundle.TryGetMessage("emails2", args, out _, out var message2));
+            Assert.That(message2, Is.EqualTo("Number of unread emails 3."));
+            
+            var likedArg0 = new Dictionary<string, IFluentType>
+            {
+                ["num"] = (FluentNumber)0
+            };
+            var likedArg1 = new Dictionary<string, IFluentType>
+            {
+                ["num"] = (FluentNumber)1
+            };
+            var likedArg2 = new Dictionary<string, IFluentType>
+            {
+                ["num"] = (FluentNumber)2
+            };
+            Assert.That(bundle.TryGetMessage("liked-count", likedArg0, out _, out var likedMessage0));
+            Assert.That(bundle.TryGetMessage("liked-count", likedArg1, out _, out var likedMessage1));
+            Assert.That(bundle.TryGetMessage("liked-count", likedArg2, out _, out var likedMessage2));
+            Assert.That(likedMessage0, Is.EqualTo("No likes yet."));
+            Assert.That(likedMessage1, Is.EqualTo("One person liked your message."));
+            Assert.That(likedMessage2, Is.EqualTo("2 people liked your message."));
+            
+            Assert.That(bundle.TryGetMessage("liked-count2", likedArg0, out _, out var likedMessage2_0));
+            Assert.That(bundle.TryGetMessage("liked-count2", likedArg1, out _, out var likedMessage2_1));
+            Assert.That(bundle.TryGetMessage("liked-count2", likedArg2, out _, out var likedMessage2_2));
+            Assert.That(likedMessage2_0, Is.EqualTo("No likes yet."));
+            Assert.That(likedMessage2_1, Is.EqualTo("One person liked your message."));
+            Assert.That(likedMessage2_2, Is.EqualTo("2 people liked your message."));
+        }
+        
         
         [Test]
         [Parallelizable]
