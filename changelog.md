@@ -245,3 +245,10 @@ version 0.9.1
 ========
 ## What's changed
 - Added docs to public API and ensure they are in the Nuget package.
+
+version 0.9.2
+========
+## What's changed
+
+### Bundle
+- Fixed issue with `Functions` not being properly passed to selectors for evaluation. (Thanks to @sowelipililimute)
