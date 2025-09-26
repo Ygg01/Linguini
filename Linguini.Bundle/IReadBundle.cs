@@ -17,6 +17,19 @@ namespace Linguini.Bundle
     public interface IReadBundle
     {
         /// <summary>
+        /// Whether experimental features are enabled.
+        ///
+        /// When `true` experimental features are enabled. Experimental features include stuff like:
+        /// <list type="bullet">
+        /// <item>dynamic reference</item>
+        /// <item>dynamic reference attributes</item>
+        /// <item>term reference as parameters</item>
+        /// </list>
+        /// </summary>
+        // ReSharper disable once MemberCanBeProtected.Global
+        public bool EnableExtensions { get; init; }
+        
+        /// <summary>
         /// Determines if the provided identifier has a message associated with it. </summary>
         /// <param name="identifier">The identifier to check.</param>
         /// <returns>True if the identifier has a message; otherwise, false.</returns>

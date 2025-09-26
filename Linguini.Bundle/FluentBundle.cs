@@ -56,16 +56,7 @@ namespace Linguini.Bundle
         /// </summary>
         public byte MaxPlaceable { get; internal init; } = 100;
 
-        /// <summary>
-        ///     Whether experimental features are enabled.
-        ///     When `true` experimental features are enabled. Experimental features include stuff like:
-        ///     <list type="bullet">
-        ///         <item>dynamic reference</item>
-        ///         <item>dynamic reference attributes</item>
-        ///         <item>term reference as parameters</item>
-        ///     </list>
-        /// </summary>
-        // ReSharper disable once MemberCanBeProtected.Global
+        /// <inheritdoc />
         public bool EnableExtensions { get; init; }
 
         /// <summary>
