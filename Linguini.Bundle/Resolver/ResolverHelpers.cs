@@ -73,11 +73,34 @@ namespace Linguini.Bundle.Resolver
                     var (resolvedPosArgs, resolvedNamedArgs) = scope.GetArguments(funcRef.Arguments);
 
                     if (scope.Bundle.TryGetFunction(funcRef.Id, out var func))
-                    {
                         return func.Function(resolvedPosArgs, resolvedNamedArgs);
-                    }
 
                     scope.AddError(ResolverFluentError.Reference(funcRef));
+                    return new FluentErrType();
+                }
+                case TermReference termRef:
+                {
+                    var (posArgs, resolveArgs) = scope.GetArguments(termRef.Arguments);
+
+                    if (scope.Bundle.EnableExtensions && scope.Bundle.TryGetAstTerm(termRef.Id.ToString(), out var term))
+                    {
+                        if (termRef.Attribute != null)
+                        {
+                            foreach (var arg in term.Attributes)
+                            {
+                                if (termRef.Attribute.Equals(arg.Id))
+                                {
+                                    return arg.Value.Resolve(scope);
+                                }
+                            }
+                            
+                            return new FluentErrType();
+                        }
+
+                        return term.Value.Resolve(scope);
+                    }
+
+
                     return new FluentErrType();
                 }
                 default:
@@ -95,9 +118,9 @@ namespace Linguini.Bundle.Resolver
         }
 
         /// <summary>
-        /// Provides methods to handle pluralization rules for different languages and cultures.
-        /// This includes determining the plural category of a number based on the given culture
-        /// and rule type (e.g., cardinal or ordinal), as well as handling special cases for specific locales.
+        ///     Provides methods to handle pluralization rules for different languages and cultures.
+        ///     This includes determining the plural category of a number based on the given culture
+        ///     and rule type (e.g., cardinal or ordinal), as well as handling special cases for specific locales.
         /// </summary>
         public static class PluralRules
         {
@@ -117,7 +140,7 @@ namespace Linguini.Bundle.Resolver
             }
 
             /// <summary>
-            /// Special language identifier, that goes over 4 ISO language code.
+            ///     Special language identifier, that goes over 4 ISO language code.
             /// </summary>
             /// <param name="info">language code</param>
             /// <param name="ruleType">Is it ordinal or cardinal rule type.</param>

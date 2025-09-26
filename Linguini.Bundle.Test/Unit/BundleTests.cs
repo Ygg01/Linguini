@@ -412,6 +412,32 @@ liked-count2 = { NUMBER($num) ->
             Assert.That(likedMessage2_2, Is.EqualTo("2 people liked your message."));
         }
         
+        private const string TermRefs = @"
+-ship = Ship
+    .zero = {NUMBER(0)}
+    .one = {NUMBER(1)}
+
+liked-count = { -ship.zero() ->
+    [0]     No likes yet.
+    [one]   One person liked your message.
+    *[other] { $num } people liked your message.
+}
+";
+
+        [Test]
+        [Parallelizable]
+        public void TestTermReferences()
+        {
+            var (bundle, err) = LinguiniBuilder.Builder(useExperimental: true)
+                .Locale("en-US")
+                .AddResource(TermRefs)
+                .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
+                .Build();
+            Assert.That(err, Is.Null.Or.Empty);
+            var args = new Dictionary<string, IFluentType>();
+            Assert.That(bundle.TryGetMessage("liked-count", args, out _, out var message1));
+            Assert.That(message1, Is.EqualTo("One person liked your message."));
+        }
         
         [Test]
         [Parallelizable]
