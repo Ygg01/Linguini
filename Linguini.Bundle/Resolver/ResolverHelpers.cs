@@ -25,6 +25,7 @@ namespace Linguini.Bundle.Resolver
         {
             var len = self.Elements.Count;
 
+            // A single value can be a number or a string, but in a complex pattern it will be stringified.
             if (len == 1)
                 if (self.Elements[0] is TextLiteral textLiteral)
                     return GetFluentString(textLiteral.ToString(), scope.TransformFunc);
@@ -33,6 +34,7 @@ namespace Linguini.Bundle.Resolver
             self.Write(stringWriter, scope);
             return (FluentString)stringWriter.ToString();
         }
+
 
         /// Resolves the current IInlineExpression instance into an
         /// <see cref="IFluentType" />
@@ -54,55 +56,11 @@ namespace Linguini.Bundle.Resolver
                 case NumberLiteral numberLiteral:
                     return FluentNumber.TryNumber(numberLiteral.Value.Span);
                 case VariableReference varRef:
-                {
-                    var args = scope.LocalNameArgs ?? scope.Args;
-                    if (args != null
-                        && args.TryGetValue(varRef.Id.ToString(), out var arg))
-                        return arg.Copy();
-
-                    if (scope.LocalPosArgs != null && pos != null
-                                                   && pos < scope.LocalPosArgs.Count)
-                        return scope.LocalPosArgs[pos.Value];
-
-                    if (scope.LocalNameArgs == null) scope.AddError(ResolverFluentError.UnknownVariable(varRef));
-
-                    return new FluentErrType();
-                }
+                    return varRef.ResolveRef(scope, pos);
                 case FunctionReference funcRef:
-                {
-                    var (resolvedPosArgs, resolvedNamedArgs) = scope.GetArguments(funcRef.Arguments);
-
-                    if (scope.Bundle.TryGetFunction(funcRef.Id, out var func))
-                        return func.Function(resolvedPosArgs, resolvedNamedArgs);
-
-                    scope.AddError(ResolverFluentError.Reference(funcRef));
-                    return new FluentErrType();
-                }
+                    return funcRef.ResolveRef(scope);
                 case TermReference termRef:
-                {
-                    var (posArgs, resolveArgs) = scope.GetArguments(termRef.Arguments);
-
-                    if (scope.Bundle.EnableExtensions && scope.Bundle.TryGetAstTerm(termRef.Id.ToString(), out var term))
-                    {
-                        if (termRef.Attribute != null)
-                        {
-                            foreach (var arg in term.Attributes)
-                            {
-                                if (termRef.Attribute.Equals(arg.Id))
-                                {
-                                    return arg.Value.Resolve(scope);
-                                }
-                            }
-                            
-                            return new FluentErrType();
-                        }
-
-                        return term.Value.Resolve(scope);
-                    }
-
-
-                    return new FluentErrType();
-                }
+                    return termRef.ResolveRef(scope, pos);
                 default:
                 {
                     var writer = new StringWriter();
@@ -111,6 +69,121 @@ namespace Linguini.Bundle.Resolver
                 }
             }
         }
+
+        private static IFluentType ResolveRef(this IPatternElement self, Scope scope, int? pos = null)
+        {
+            switch (self)
+            {
+                case Placeable placeable:
+                    return placeable.ResolvePlace(scope, pos);
+                case TextLiteral textLiteral:
+                    return textLiteral.ResolveRef(scope);
+                default:
+                    throw new ArgumentException("Unexpected expression!");
+            }
+        }
+
+        private static IFluentType ResolvePlace(this Placeable self, Scope scope, int? pos = null)
+        {
+            switch (self.Expression)
+            {
+                case SelectExpression selectExpression:
+                    return selectExpression.ResolveRef(scope, pos);
+                case IInlineExpression inlineExpression:
+                    return inlineExpression.Resolve(scope, pos);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private static IFluentType ResolveRef(this FunctionReference funcRef, Scope scope)
+        {
+            var (resolvedPosArgs, resolvedNamedArgs) = scope.GetArguments(funcRef.Arguments);
+
+            if (scope.Bundle.TryGetFunction(funcRef.Id, out var func))
+                return func.Function(resolvedPosArgs, resolvedNamedArgs);
+
+            scope.AddError(ResolverFluentError.Reference(funcRef));
+            return new FluentErrType();
+        }
+
+        
+        private static IFluentType ResolveRef(this SelectExpression selectExpression, Scope scope, int? pos)
+        {
+            var selector = selectExpression.Selector.Resolve(scope, pos);
+            var variant = GetVariant(selectExpression, scope, selector);
+            return variant != null 
+                ? variant.Value.Resolve(scope) 
+                : new FluentErrType();
+        }
+
+        public static Variant? GetVariant(SelectExpression selectExpression, Scope scope, IFluentType selector)
+        {
+            Variant? retVal = null;
+            if (selector is FluentString or FluentNumber)
+            {
+                foreach (var variant in selectExpression.Variants)
+                {
+                    // If we have a default and no match set default.
+                    if (retVal == null && variant.IsDefault)
+                    {
+                        retVal = variant;
+                    }
+                    IFluentType key;
+                    switch (variant.Type)
+                    {
+                        case VariantType.NumberLiteral:
+                            key = FluentNumber.TryNumber(variant.Key.Span);
+                            break;
+                        default:
+                            key = new FluentString(variant.Key.Span);
+                            break;
+                    }
+
+                    if (key.Matches(selector, scope))
+                    {
+                        return variant;
+                    }
+                }
+            }
+
+            return retVal;
+        }
+
+        private static IFluentType ResolveRef(this TermReference termRef, Scope scope, int? pos = null)
+        {
+            var (posArgs, resolveArgs) = scope.GetArguments(termRef.Arguments);
+
+            if (!scope.Bundle.EnableExtensions || !scope.Bundle.TryGetAstTerm(termRef.Id.ToString(), out var term))
+                return new FluentErrType();
+
+            if (termRef.Attribute == null) 
+                return term.Value.Resolve(scope);
+            
+            foreach (var arg in term.Attributes)
+                if (termRef.Attribute.Equals(arg.Id) && arg.Value.Elements.Count == 1)
+                    return arg.Value.Elements[0].ResolveRef(scope, pos);
+
+            return new FluentErrType();
+
+        }
+
+        private static IFluentType ResolveRef(this VariableReference varRef, Scope scope, int? pos = null)
+        {
+            var args = scope.LocalNameArgs ?? scope.Args;
+            if (args != null
+                && args.TryGetValue(varRef.Id.ToString(), out var arg))
+                return arg.Copy();
+
+            if (scope.LocalPosArgs != null && pos != null
+                                           && pos < scope.LocalPosArgs.Count)
+                return scope.LocalPosArgs[pos.Value];
+
+            if (scope.LocalNameArgs == null) scope.AddError(ResolverFluentError.UnknownVariable(varRef));
+
+            return new FluentErrType();
+        }
+
 
         private static FluentString GetFluentString(string str, Func<string, string>? transformFunc)
         {

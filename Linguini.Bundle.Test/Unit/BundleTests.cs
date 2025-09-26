@@ -312,7 +312,7 @@ attack-log = { $$attacker } attacked {$$defender}.
         *[traditional] neuter
           [chicago] feminine
     }
-call-attr-no-args = {-ship.gender() ->
+call-attr-no-args = {-ship.gender()  ->
     *[masculine] He
       [feminine] She
       [neuter] It
@@ -323,7 +323,7 @@ call-attr-no-args = {-ship.gender() ->
         [Parallelizable]
         public void TestExtensionsWork()
         {
-            var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
+            var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: false).Locale("en-US")
                 .AddResource(Macros)
                 .Build();
             Assert.That(err, Is.Null);
@@ -436,7 +436,7 @@ liked-count = { -ship.zero() ->
             Assert.That(err, Is.Null.Or.Empty);
             var args = new Dictionary<string, IFluentType>();
             Assert.That(bundle.TryGetMessage("liked-count", args, out _, out var message1));
-            Assert.That(message1, Is.EqualTo("One person liked your message."));
+            Assert.That(message1, Is.EqualTo("No likes yet."));
         }
         
         [Test]
