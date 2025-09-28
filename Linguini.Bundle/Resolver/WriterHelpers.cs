@@ -23,7 +23,7 @@ namespace Linguini.Bundle.Resolver
         public static void Write(this Pattern pattern, TextWriter writer, Scope scope)
         {
             var len = pattern.Elements.Count;
-            var transformFunc = scope.TransformFunc;
+            var transformFunc = scope.TransformFunc ?? (Func<string, string>) (s => s);
             var placeablePos = 0;
             for (var i = 0; i < len; i++)
             {

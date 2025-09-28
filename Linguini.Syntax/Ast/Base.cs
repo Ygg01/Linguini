@@ -9,54 +9,128 @@ using System.Text;
 namespace Linguini.Syntax.Ast
 {
     /// <summary>
-    /// Represents an attribute within the syntax abstract syntax tree (AST),
-    /// encapsulating an identifier and a pattern value.
+    ///     Represents an attribute within the syntax abstract syntax tree (AST),
+    ///     encapsulating an identifier and a pattern value.
     /// </summary>
     /// <remarks>
-    /// An <see cref="Attribute"/> consists of an identifier that uniquely identifies it
-    /// and a pattern, which represents the content associated with the attribute.
+    ///     An <see cref="Attribute" /> consists of an identifier that uniquely identifies it
+    ///     and a pattern, which represents the content associated with the attribute.
     /// </remarks>
-    /// <seealso cref="Linguini.Syntax.Ast.Identifier"/>
-    /// <seealso cref="Linguini.Syntax.Ast.Pattern"/>
+    /// <seealso cref="Linguini.Syntax.Ast.Identifier" />
+    /// <seealso cref="Linguini.Syntax.Ast.Pattern" />
     public class Attribute : IEquatable<Attribute>
     {
         /// <summary>
-        /// Represents the identifier name for an <see cref="Attribute"/> within the Fluent template.
-        /// <example>
-        /// For example,
-        /// <code>
+        ///     Provides a default instance of <see cref="Attribute.AttributeComparer" /> for comparing
+        ///     two <see cref="Attribute" /> instances based on their equality logic.
+        /// </summary>
+        /// <remarks>
+        ///     The <see cref="Comparer" /> is used to compare attributes for equality in scenarios
+        ///     where attributes are part of collections or need to be evaluated for sameness.
+        ///     It leverages the <see cref="AttributeComparer" /> implementation to perform custom
+        ///     equality checks.
+        /// </remarks>
+        public static AttributeComparer Comparer = new();
+
+        /// <summary>
+        ///     Represents the identifier name for an <see cref="Attribute" /> within the Fluent template.
+        ///     <example>
+        ///         For example,
+        ///         <code>
         ///   term
         ///     .AttributeId = test
         /// </code>
-        /// </example>
+        ///     </example>
         /// </summary>
         /// <remarks>
-        /// The <see cref="Id"/> is used to uniquely identify an <see cref="Attribute"/> within a <see cref="AstTerm"/> is
-        /// implemented through the <see cref="Identifier"/> class. It encapsulates
-        /// the symbolic name of the attribute.
+        ///     The <see cref="Id" /> is used to uniquely identify an <see cref="Attribute" /> within a <see cref="AstTerm" /> is
+        ///     implemented through the <see cref="Identifier" /> class. It encapsulates
+        ///     the symbolic name of the attribute.
         /// </remarks>
         public readonly Identifier Id;
 
         /// <summary>
-        /// Represents the value of an <see cref="Attribute"/> in a Fluent template.
+        ///     Represents the value of an <see cref="Attribute" /> in a Fluent template.
         /// </summary>
         /// <remarks>
-        /// The <see cref="Value"/> is  a <see cref="Pattern"/> that can be resolved to a string within a Fluent message context.
-        /// The <see cref="Value"/> is used extensively during serialization, evaluation, and formatting of Fluent resources.
+        ///     The <see cref="Value" /> is  a <see cref="Pattern" /> that can be resolved to a string within a Fluent message
+        ///     context.
+        ///     The <see cref="Value" /> is used extensively during serialization, evaluation, and formatting of Fluent resources.
         /// </remarks>
         public readonly Pattern Value;
 
         /// <summary>
-        /// Provides a default instance of <see cref="Attribute.AttributeComparer"/> for comparing
-        /// two <see cref="Attribute"/> instances based on their equality logic.
+        ///     Constructs an attribute from <see cref="Identifier" /> and a <see cref="Pattern" />.
         /// </summary>
-        /// <remarks>
-        /// The <see cref="Comparer"/> is used to compare attributes for equality in scenarios
-        /// where attributes are part of collections or need to be evaluated for sameness.
-        /// It leverages the <see cref="AttributeComparer"/> implementation to perform custom
-        /// equality checks.
-        /// </remarks>
-        public static AttributeComparer Comparer = new();
+        /// <param name="id"><see cref="Identifier" /> of the attribute</param>
+        /// <param name="value">pattern of the attribute</param>
+        public Attribute(Identifier id, Pattern value)
+        {
+            Id = id;
+            Value = value;
+        }
+
+        /// <summary>
+        ///     Constructs an attribute from a <see cref="string" /> and a <see cref="PatternBuilder" />.
+        /// </summary>
+        /// <param name="id">string identifier of the attribute</param>
+        /// <param name="builder"><see cref="PatternBuilder" /> that can be used to create a pattern programatically.</param>
+        public Attribute(string id, PatternBuilder builder)
+        {
+            Id = new Identifier(id);
+            Value = builder.Build();
+        }
+
+        /// <inheritdoc />
+        public bool Equals(Attribute? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Id.Equals(other.Id) && Value.Equals(other.Value);
+        }
+
+        /// <summary>
+        ///     Deconstructs the current instance into its component parts.
+        /// </summary>
+        /// <param name="id">The identifier associated with this attribute.</param>
+        /// <param name="value">The pattern value associated with this attribute.</param>
+        public void Deconstruct(out Identifier id, out Pattern value)
+        {
+            id = Id;
+            value = Value;
+        }
+
+        /// <summary>
+        ///     Factory method for constructing an <see cref="Attribute" /> from the provided identifier and pattern builder.
+        /// </summary>
+        /// <param name="id">
+        ///     The string identifier used to initialize the <see cref="Identifier" /> of the <see cref="Attribute" />
+        ///     .
+        /// </param>
+        /// <param name="patternBuilder">
+        ///     The <see cref="PatternBuilder" /> used to construct the <see cref="Pattern" /> of the
+        ///     <see cref="Attribute" />.
+        /// </param>
+        /// <returns>A newly constructed <see cref="Attribute" /> instance.</returns>
+        public static Attribute From(string id, PatternBuilder patternBuilder)
+        {
+            return new Attribute(new Identifier(id), patternBuilder.Build());
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((Attribute)obj);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, Value);
+        }
 
         /// <inheritdoc />
         public class AttributeComparer : IEqualityComparer<Attribute>
@@ -78,101 +152,34 @@ namespace Linguini.Syntax.Ast
                 return HashCode.Combine(obj.Id, obj.Value);
             }
         }
-
-        /// <summary>
-        /// Constructs an attribute from <see cref="Identifier"/> and a <see cref="Pattern"/>.
-        /// </summary>
-        /// <param name="id"><see cref="Identifier"/> of the attribute</param>
-        /// <param name="value">pattern of the attribute</param>
-        public Attribute(Identifier id, Pattern value)
-        {
-            Id = id;
-            Value = value;
-        }
-
-        /// <summary>
-        /// Constructs an attribute from a <see cref="string"/> and a <see cref="PatternBuilder"/>.
-        /// </summary>
-        /// <param name="id">string identifier of the attribute</param>
-        /// <param name="builder"><see cref="PatternBuilder"/> that can be used to create a pattern programatically.</param>
-        public Attribute(string id, PatternBuilder builder)
-        {
-            Id = new Identifier(id);
-            Value = builder.Build();
-        }
-
-        /// <summary>
-        /// Deconstructs the current instance into its component parts.
-        /// </summary>
-        /// <param name="id">The identifier associated with this attribute.</param>
-        /// <param name="value">The pattern value associated with this attribute.</param>
-        public void Deconstruct(out Identifier id, out Pattern value)
-        {
-            id = Id;
-            value = Value;
-        }
-
-        /// <summary>
-        /// Factory method for constructing an <see cref="Attribute"/> from the provided identifier and pattern builder.
-        /// </summary>
-        /// <param name="id">The string identifier used to initialize the <see cref="Identifier"/> of the <see cref="Attribute"/>.</param>
-        /// <param name="patternBuilder">The <see cref="PatternBuilder"/> used to construct the <see cref="Pattern"/> of the <see cref="Attribute"/>.</param>
-        /// <returns>A newly constructed <see cref="Attribute"/> instance.</returns>
-        public static Attribute From(string id, PatternBuilder patternBuilder)
-        {
-            return new Attribute(new Identifier(id), patternBuilder.Build());
-        }
-
-        /// <inheritdoc />
-        public bool Equals(Attribute? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Id.Equals(other.Id) && Value.Equals(other.Value);
-        }
-
-        /// <inheritdoc />
-        public override bool Equals(object? obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((Attribute)obj);
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Id, Value);
-        }
     }
 
     /// <summary>
-    /// Represents a pattern in the abstract syntax tree (AST),
-    /// which is composed of multiple pattern elements.
+    ///     Represents a pattern in the abstract syntax tree (AST),
+    ///     which is composed of multiple pattern elements.
     /// </summary>
     /// <remarks>
-    /// A <see cref="Pattern"/> contains a list of elements implementing the <see cref="IPatternElement"/> interface.
-    /// It can be used for both parsing and constructing localized textual content.
+    ///     A <see cref="Pattern" /> contains a list of elements implementing the <see cref="IPatternElement" /> interface.
+    ///     It can be used for both parsing and constructing localized textual content.
     /// </remarks>
-    /// <seealso cref="IPatternElement"/>
+    /// <seealso cref="IPatternElement" />
     public class Pattern : IEquatable<Pattern>
     {
         /// <summary>
-        /// Represents the collection of <see cref="IPatternElement"/> that form the structure
-        /// of a <see cref="Pattern"/> in the abstract syntax tree (AST).
+        ///     Represents the collection of <see cref="IPatternElement" /> that form the structure
+        ///     of a <see cref="Pattern" /> in the abstract syntax tree (AST).
         /// </summary>
         /// <remarks>
-        /// The <see cref="Elements"/> is a readonly list storing elements that implement
-        /// the <see cref="IPatternElement"/> interface. These elements can be used
-        /// during pattern parsing, localization, and text generation processes. Each element
-        /// serves a specific role in the representation of a structured pattern, which can
-        /// include <see cref="TextLiteral"/>, <see cref="Placeable"/>, and other supported pattern components.
+        ///     The <see cref="Elements" /> is a readonly list storing elements that implement
+        ///     the <see cref="IPatternElement" /> interface. These elements can be used
+        ///     during pattern parsing, localization, and text generation processes. Each element
+        ///     serves a specific role in the representation of a structured pattern, which can
+        ///     include <see cref="TextLiteral" />, <see cref="Placeable" />, and other supported pattern components.
         /// </remarks>
         public readonly List<IPatternElement> Elements;
 
         /// <summary>
-        /// Basic constructor that takes a list of <see cref="IPatternElement"/> elements.
+        ///     Basic constructor that takes a list of <see cref="IPatternElement" /> elements.
         /// </summary>
         public Pattern(List<IPatternElement> elements)
         {
@@ -180,7 +187,7 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Default constructor for <see cref="Pattern"/>
+        ///     Default constructor for <see cref="Pattern" />
         /// </summary>
         public Pattern()
         {
@@ -192,19 +199,13 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            if (Elements.Count != other.Elements.Count)
-            {
-                return false;
-            }
+            if (Elements.Count != other.Elements.Count) return false;
 
             for (var index = 0; index < Elements.Count; index++)
             {
                 var patternElement = Elements[index];
                 var otherPatternElement = other.Elements[index];
-                if (!IPatternElement.PatternComparer.Equals(patternElement, otherPatternElement))
-                {
-                    return false;
-                }
+                if (!IPatternElement.PatternComparer.Equals(patternElement, otherPatternElement)) return false;
             }
 
             return true;
@@ -215,7 +216,7 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((Pattern)obj);
         }
 
@@ -224,24 +225,34 @@ namespace Linguini.Syntax.Ast
         {
             return Elements.GetHashCode();
         }
+
+        public bool IsTriviallyResolveable()
+        {
+            return Elements.Count == 1 && Elements[0] switch
+            {
+                TextLiteral _ => true,
+                Placeable placeable => placeable.IsTriviallyResolvable(),
+                _ => false
+            };
+        }
     }
 
     /// <summary>
-    /// Builder for <see cref="Pattern"/>. Used to construct Patterns programmatically.
+    ///     Builder for <see cref="Pattern" />. Used to construct Patterns programmatically.
     /// </summary>
     public class PatternBuilder
     {
         private readonly List<IPatternElement> _patternElements = new();
 
         /// <summary>
-        /// Default constructor.
+        ///     Default constructor.
         /// </summary>
         public PatternBuilder()
         {
         }
 
         /// <summary>
-        /// Simple constructor that creates a <see cref="Pattern"/> with <see cref="TextLiteral"/>.
+        ///     Simple constructor that creates a <see cref="Pattern" /> with <see cref="TextLiteral" />.
         /// </summary>
         public PatternBuilder(string text)
         {
@@ -249,7 +260,7 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Simple constructor that creates a <see cref="Pattern"/> with <see cref="NumberLiteral"/>.
+        ///     Simple constructor that creates a <see cref="Pattern" /> with <see cref="NumberLiteral" />.
         /// </summary>
         public PatternBuilder(float number)
         {
@@ -257,10 +268,10 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds <c>textLiteral</c> to the pattern.
+        ///     Adds <c>textLiteral</c> to the pattern.
         /// </summary>
-        /// <param name="textLiteral">string to be converted to <see cref="TextLiteral"/></param>
-        /// <returns><see cref="PatternBuilder"/> instance with the added <see cref="TextLiteral"/>.</returns>
+        /// <param name="textLiteral">string to be converted to <see cref="TextLiteral" /></param>
+        /// <returns><see cref="PatternBuilder" /> instance with the added <see cref="TextLiteral" />.</returns>
         public PatternBuilder AddText(string textLiteral)
         {
             _patternElements.Add(new TextLiteral(textLiteral));
@@ -268,10 +279,10 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds <c>number</c> to the pattern.
+        ///     Adds <c>number</c> to the pattern.
         /// </summary>
-        /// <param name="number">string to be converted to <see cref="NumberLiteral"/></param>
-        /// <returns><see cref="PatternBuilder"/> instance with the added <see cref="NumberLiteral"/>.</returns>
+        /// <param name="number">string to be converted to <see cref="NumberLiteral" /></param>
+        /// <returns><see cref="PatternBuilder" /> instance with the added <see cref="NumberLiteral" />.</returns>
         public PatternBuilder AddNumberLiteral(float number)
         {
             _patternElements.Add(new Placeable(new NumberLiteral(number)));
@@ -279,10 +290,10 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds <c>number</c> to the pattern builder.
+        ///     Adds <c>number</c> to the pattern builder.
         /// </summary>
-        /// <param name="number">string to be converted to <see cref="NumberLiteral"/></param>
-        /// <returns><see cref="PatternBuilder"/> instance with the added <see cref="NumberLiteral"/>.</returns>
+        /// <param name="number">string to be converted to <see cref="NumberLiteral" /></param>
+        /// <returns><see cref="PatternBuilder" /> instance with the added <see cref="NumberLiteral" />.</returns>
         public PatternBuilder AddNumberLiteral(double number)
         {
             _patternElements.Add(new Placeable(new NumberLiteral(number)));
@@ -290,11 +301,11 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds a message reference to the pattern builder.
+        ///     Adds a message reference to the pattern builder.
         /// </summary>
         /// <param name="id">The identifier of the message to be referenced.</param>
         /// <param name="attribute">The optional attribute of the message to be referenced.</param>
-        /// <returns>A <see cref="PatternBuilder"/> instance with the added message reference.</returns>
+        /// <returns>A <see cref="PatternBuilder" /> instance with the added message reference.</returns>
         public PatternBuilder AddMessage(string id, string? attribute = null)
         {
             _patternElements.Add(new Placeable(new MessageReference(id, attribute)));
@@ -302,12 +313,12 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds a term reference to the pattern builder.
+        ///     Adds a term reference to the pattern builder.
         /// </summary>
         /// <param name="id">The identifier of the term to be referenced.</param>
         /// <param name="attribute">The optional attribute of the message to be referenced.</param>
         /// <param name="callArguments">The optional call arguments for a term.</param>
-        /// <returns>A <see cref="PatternBuilder"/> instance with the added term reference.</returns>
+        /// <returns>A <see cref="PatternBuilder" /> instance with the added term reference.</returns>
         public PatternBuilder AddTermReference(string id, string? attribute = null, CallArguments? callArguments = null)
         {
             _patternElements.Add(new Placeable(new TermReference(id, attribute, callArguments)));
@@ -315,12 +326,12 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds a dynamic reference to the pattern builder.
+        ///     Adds a dynamic reference to the pattern builder.
         /// </summary>
         /// <param name="id">The identifier of the dynamic reference.</param>
         /// <param name="attribute">The optional attribute of the dynamic reference.</param>
         /// <param name="callArguments">The optional call arguments for dynamic reference.</param>
-        /// <returns>A <see cref="PatternBuilder"/> instance with the added term reference.</returns>
+        /// <returns>A <see cref="PatternBuilder" /> instance with the added term reference.</returns>
         public PatternBuilder AddDynamicReference(string id, string? attribute = null,
             CallArguments? callArguments = null)
         {
@@ -329,11 +340,11 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds a function reference to the pattern builder.
+        ///     Adds a function reference to the pattern builder.
         /// </summary>
         /// <param name="functionName">The name of the function reference.</param>
         /// <param name="funcArgs">The arguments of the function reference.</param>
-        /// <returns>A <see cref="PatternBuilder"/> instance with the added function reference.</returns>
+        /// <returns>A <see cref="PatternBuilder" /> instance with the added function reference.</returns>
         public PatternBuilder AddFunctionReference(string functionName, CallArguments funcArgs = default)
         {
             _patternElements.Add(new Placeable(new FunctionReference(functionName, funcArgs)));
@@ -341,11 +352,11 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds a function reference to the pattern builder.
+        ///     Adds a function reference to the pattern builder.
         /// </summary>
         /// <param name="functionName">The name of the function reference.</param>
-        /// <param name="builder">A <see cref="CallArgumentsBuilder"/> that constructs the function arguments.</param>
-        /// <returns>A <see cref="PatternBuilder"/> instance with the added function reference.</returns>
+        /// <param name="builder">A <see cref="CallArgumentsBuilder" /> that constructs the function arguments.</param>
+        /// <returns>A <see cref="PatternBuilder" /> instance with the added function reference.</returns>
         public PatternBuilder AddFunctionReference(string functionName, CallArgumentsBuilder builder)
         {
             _patternElements.Add(new Placeable(new FunctionReference(functionName, builder.Build())));
@@ -353,11 +364,11 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds a message reference to the pattern builder.
+        ///     Adds a message reference to the pattern builder.
         /// </summary>
         /// <param name="messageId">The identifier of the message to be referenced.</param>
         /// <param name="attribute">The optional attribute of the message to be referenced.</param>
-        /// <returns>A <see cref="PatternBuilder"/> instance with the added message reference.</returns>
+        /// <returns>A <see cref="PatternBuilder" /> instance with the added message reference.</returns>
         public PatternBuilder AddMessageReference(string messageId, string? attribute = null)
         {
             _patternElements.Add(new Placeable(new MessageReference(messageId, attribute)));
@@ -365,10 +376,10 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds a <see cref="SelectExpressionBuilder"/>.
+        ///     Adds a <see cref="SelectExpressionBuilder" />.
         /// </summary>
-        /// <param name="selectExpressionBuilder">The <see cref="SelectExpressionBuilder"/> .</param>
-        /// <returns>A <see cref="PatternBuilder"/> instance with the added selection expression.</returns>
+        /// <param name="selectExpressionBuilder">The <see cref="SelectExpressionBuilder" /> .</param>
+        /// <returns>A <see cref="PatternBuilder" /> instance with the added selection expression.</returns>
         public PatternBuilder AddSelectExpression(SelectExpressionBuilder selectExpressionBuilder)
         {
             _patternElements.Add(new Placeable(selectExpressionBuilder.Build()));
@@ -376,10 +387,10 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds a pattern element to the pattern.
+        ///     Adds a pattern element to the pattern.
         /// </summary>
         /// <param name="expr">The pattern element to be added to the pattern.</param>
-        /// <returns>A <see cref="PatternBuilder"/> instance with the added <see cref="IPatternElement"/>.</returns>
+        /// <returns>A <see cref="PatternBuilder" /> instance with the added <see cref="IPatternElement" />.</returns>
         public PatternBuilder AddExpression(IPatternElement expr)
         {
             _patternElements.Add(expr);
@@ -387,10 +398,10 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Adds a specified <see cref="Placeable"/> to the pattern elements in the builder.
+        ///     Adds a specified <see cref="Placeable" /> to the pattern elements in the builder.
         /// </summary>
-        /// <param name="placeable">The <see cref="Placeable"/> to be added.</param>
-        /// <returns>A <see cref="PatternBuilder"/> instance with the added <see cref="Placeable"/>.</returns>
+        /// <param name="placeable">The <see cref="Placeable" /> to be added.</param>
+        /// <returns>A <see cref="PatternBuilder" /> instance with the added <see cref="Placeable" />.</returns>
         public PatternBuilder AddPlaceable(Placeable placeable)
         {
             _patternElements.Add(placeable);
@@ -407,23 +418,86 @@ namespace Linguini.Syntax.Ast
 
 
     /// <summary>
-    /// Represents a unique identifier used within the abstract syntax tree (AST).
+    ///     Represents a unique identifier used within the abstract syntax tree (AST).
     /// </summary>
     /// <remarks>
-    /// The <see cref="Identifier"/> encapsulates a sequence of characters that serves as
-    /// a distinct name or label in the AST. It supports comparison and equality checks
-    /// to ensure uniqueness and consistency when identifiers are used across various
-    /// structures within the syntax.
+    ///     The <see cref="Identifier" /> encapsulates a sequence of characters that serves as
+    ///     a distinct name or label in the AST. It supports comparison and equality checks
+    ///     to ensure uniqueness and consistency when identifiers are used across various
+    ///     structures within the syntax.
     /// </remarks>
     /// <threadsafety>
-    /// This class is immutable and thread-safe.
+    ///     This class is immutable and thread-safe.
     /// </threadsafety>
-    /// <seealso cref="Linguini.Syntax.Ast.Attribute"/>
-    /// <seealso cref="Linguini.Syntax.Ast.Pattern"/>
-    /// <seealso cref="Linguini.Syntax.Ast.AstMessage"/>
-    /// <seealso cref="Linguini.Syntax.Ast.AstTerm"/>
+    /// <seealso cref="Linguini.Syntax.Ast.Attribute" />
+    /// <seealso cref="Linguini.Syntax.Ast.Pattern" />
+    /// <seealso cref="Linguini.Syntax.Ast.AstMessage" />
+    /// <seealso cref="Linguini.Syntax.Ast.AstTerm" />
     public class Identifier : IEquatable<Identifier>
     {
+        /// <summary>
+        ///     Provides a default instance of <see cref="Identifier.IdentifierComparer" /> for comparing
+        ///     two <see cref="Identifier" /> instances based on their contents.
+        /// </summary>
+        /// <remarks>
+        ///     The <see cref="Comparer{T}" /> is used to compare attributes for equality in scenarios
+        ///     where attributes are part of collections or need to be evaluated for sameness.
+        ///     It leverages the <see cref="IdentifierComparer" /> implementation to perform custom
+        ///     equality checks.
+        /// </remarks>
+        public static readonly IdentifierComparer Comparer = new();
+
+        /// <summary>
+        ///     Reference to an <see cref="Identifier" /> in the Fluent resource.
+        /// </summary>
+        /// <remarks>
+        ///     The <see cref="Name" /> property encapsulates the primary textual representation of an identifier.
+        ///     It is used for comparing and resolving the name of an <see cref="Identifier" /> across different contexts,
+        ///     such as parsing and processing Fluent syntax elements. The comparison logic for the <see cref="Name" /> field
+        ///     is implemented in the <see cref="IdentifierComparer" /> which ensures accurate equality checks.
+        ///     The <see cref="Name" /> is a read-only value, stored as <see cref="ReadOnlyMemory{T}" /> to improve memory
+        ///     efficiency.
+        /// </remarks>
+        public readonly ReadOnlyMemory<char> Name;
+
+        /// <summary>
+        ///     Constructs an Identifier from a <see cref="ReadOnlyMemory{T}" />
+        /// </summary>
+        /// <param name="name">identifier name</param>
+        public Identifier(ReadOnlyMemory<char> name)
+        {
+            Name = name;
+        }
+
+        /// <summary>
+        ///     Constructs an Identifier from a <see cref="ReadOnlyMemory{T}" />
+        /// </summary>
+        /// <param name="id">identifier name</param>
+        public Identifier(string id)
+        {
+            Name = id.AsMemory();
+        }
+
+        /// <inheritdoc />
+        public bool Equals(Identifier? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Comparer.Equals(this, other);
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return Name.Span.ToString();
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return Comparer.GetHashCode(this);
+        }
+
         /// <inheritdoc />
         public class IdentifierComparer : IEqualityComparer<Identifier>
         {
@@ -443,151 +517,103 @@ namespace Linguini.Syntax.Ast
                 return obj.Name.GetHashCode();
             }
         }
-
-        /// <summary>
-        /// Reference to an <see cref="Identifier"/> in the Fluent resource.
-        /// </summary>
-        /// <remarks>
-        /// The <see cref="Name"/> property encapsulates the primary textual representation of an identifier.
-        /// It is used for comparing and resolving the name of an <see cref="Identifier"/> across different contexts,
-        /// such as parsing and processing Fluent syntax elements. The comparison logic for the <see cref="Name"/> field
-        /// is implemented in the <see cref="IdentifierComparer"/> which ensures accurate equality checks.
-        /// The <see cref="Name"/> is a read-only value, stored as <see cref="ReadOnlyMemory{T}"/> to improve memory efficiency.
-        /// </remarks>
-        public readonly ReadOnlyMemory<char> Name;
-
-        /// <summary>
-        /// Provides a default instance of <see cref="Identifier.IdentifierComparer"/> for comparing
-        /// two <see cref="Identifier"/> instances based on their contents.
-        /// </summary>
-        /// <remarks>
-        /// The <see cref="Comparer{T}"/> is used to compare attributes for equality in scenarios
-        /// where attributes are part of collections or need to be evaluated for sameness.
-        /// It leverages the <see cref="IdentifierComparer"/> implementation to perform custom
-        /// equality checks.
-        /// </remarks>
-        public static readonly IdentifierComparer Comparer = new();
-
-        /// <summary>
-        /// Constructs an Identifier from a <see cref="ReadOnlyMemory{T}"/>
-        /// </summary>
-        /// <param name="name">identifier name</param>
-        public Identifier(ReadOnlyMemory<char> name)
-        {
-            Name = name;
-        }
-
-        /// <summary>
-        /// Constructs an Identifier from a <see cref="ReadOnlyMemory{T}"/>
-        /// </summary>
-        /// <param name="id">identifier name</param>
-        public Identifier(string id)
-        {
-            Name = id.AsMemory();
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            return Name.Span.ToString();
-        }
-
-        /// <inheritdoc />
-        public bool Equals(Identifier? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Comparer.Equals(this, other);
-        }
-
-        /// <inheritdoc />
-
-        public override int GetHashCode()
-        {
-            return Comparer.GetHashCode(this);
-        }
     }
 
     /// <summary>
-    /// Represents the base interface for syntax expression nodes within the
-    /// abstract syntax tree (AST) structure.
+    ///     Represents the base interface for syntax expression nodes within the
+    ///     abstract syntax tree (AST) structure.
     /// </summary>
     /// <remarks>
-    /// The <see cref="IExpression"/> is the fundamental contract for all expression
-    /// types, providing a unified abstraction for constructs such as <see cref="Placeable"/>,
-    /// <see cref="IInlineExpression"/>, and <see cref="SelectExpression"/>
+    ///     The <see cref="IExpression" /> is the fundamental contract for all expression
+    ///     types, providing a unified abstraction for constructs such as <see cref="Placeable" />,
+    ///     <see cref="IInlineExpression" />, and <see cref="SelectExpression" />
     /// </remarks>
     public interface IExpression
     {
+        /// <summary>
+        ///     Returns if the element is trivially resolvable.
+        ///     For example: <see cref="TextLiteral" /> and <see cref="NumberLiteral" /> are simple while variable
+        ///     reference needs additional resolving.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsTriviallyResolvable()
+        {
+            return false;
+        }
     }
 
     /// <summary>
-    /// Represents the various levels of comments in Fluent syntax.
+    ///     Represents the various levels of comments in Fluent syntax.
     /// </summary>
     /// <remarks>
-    /// The <see cref="CommentLevel"/> enum defines the categorization of comments based on their context
-    /// and significance in the resource, ranging from no comment to high-level resource descriptions.
+    ///     The <see cref="CommentLevel" /> enum defines the categorization of comments based on their context
+    ///     and significance in the resource, ranging from no comment to high-level resource descriptions.
     /// </remarks>
-    /// <seealso cref="Linguini.Syntax.Ast.AstComment"/>
-    /// <seealso cref="Linguini.Syntax.Parser.LinguiniParser"/>
+    /// <seealso cref="Linguini.Syntax.Ast.AstComment" />
+    /// <seealso cref="Linguini.Syntax.Parser.LinguiniParser" />
     public enum CommentLevel : byte
     {
         /// <summary>
-        /// No comment exists.
+        ///     No comment exists.
         /// </summary>
         None = 0,
+
         /// <summary>
-        /// Basic comment
-        /// <code>
+        ///     Basic comment
+        ///     <code>
         /// # Comment
         /// </code>
         /// </summary>
         Comment = 1,
+
         /// <summary>
-        /// Group comment
-        /// <code>
+        ///     Group comment
+        ///     <code>
         /// ## GroupComment
         /// </code>
         /// </summary>
         GroupComment = 2,
+
         /// <summary>
-        /// Resource comment
-        /// <code>
+        ///     Resource comment
+        ///     <code>
         /// ### Resource Comment
         /// </code>
         /// </summary>
-        ResourceComment = 3,
+        ResourceComment = 3
     }
 
     /// <summary>
-    /// Represents an entry in the Fluent syntax abstract syntax tree (AST).
+    ///     Represents an entry in the Fluent syntax abstract syntax tree (AST).
     /// </summary>
     /// <remarks>
-    /// An <see cref="IEntry"/> serves as a generic representation for objects
-    /// that can exist as structural components within the Fluent AST. Examples include
-    /// <see cref="AstMessage"/>, <see cref="AstTerm"/>, <see cref="AstComment"/>, or a<see cref="Junk"/> elements that conform to the Fluent syntax.
+    ///     An <see cref="IEntry" /> serves as a generic representation for objects
+    ///     that can exist as structural components within the Fluent AST. Examples include
+    ///     <see cref="AstMessage" />, <see cref="AstTerm" />, <see cref="AstComment" />, or a<see cref="Junk" /> elements that
+    ///     conform to the Fluent syntax.
     /// </remarks>
     public interface IEntry
     {
         /// <summary>
-        /// Gets id of the entry
+        ///     Gets id of the entry
         /// </summary>
-        /// <returns>Identity of the <see cref="IEntry"/></returns>
+        /// <returns>Identity of the <see cref="IEntry" /></returns>
         string GetId();
     }
 
     /// <summary>
-    /// Expression which can be placed inline and evaluated.
+    ///     Expression which can be placed inline and evaluated.
     /// </summary>
     public interface IInlineExpression : IExpression
     {
         /// <summary>
-        /// Provides a static instance of <see cref="InlineExpressionComparer"/> to compare instances of <see cref="IInlineExpression"/>.
+        ///     Provides a static instance of <see cref="InlineExpressionComparer" /> to compare instances of
+        ///     <see cref="IInlineExpression" />.
         /// </summary>
         /// <remarks>
-        /// The <see cref="Comparer"/> is used to evaluate equality between two <see cref="IInlineExpression"/> objects.
-        /// It is particularly useful in scenarios where <see cref="IInlineExpression"/> instances are to be stored in
-        /// collections that require equality comparisons, such as dictionaries or sets.
+        ///     The <see cref="Comparer" /> is used to evaluate equality between two <see cref="IInlineExpression" /> objects.
+        ///     It is particularly useful in scenarios where <see cref="IInlineExpression" /> instances are to be stored in
+        ///     collections that require equality comparisons, such as dictionaries or sets.
         /// </remarks>
         public static readonly InlineExpressionComparer Comparer = new();
     }
@@ -632,24 +658,21 @@ namespace Linguini.Syntax.Ast
     }
 
     /// <summary>
-    /// Provides extension methods for working with the <see cref="Pattern"/> class.
+    ///     Provides extension methods for working with the <see cref="Pattern" /> class.
     /// </summary>
-    /// <seealso cref="Pattern"/>
+    /// <seealso cref="Pattern" />
     public static class Base
     {
         /// <summary>
-        /// Converts a <see cref="Pattern"/> to a string without any context provided. This is used for debugging purposes.
+        ///     Converts a <see cref="Pattern" /> to a string without any context provided. This is used for debugging purposes.
         /// </summary>
-        /// <param name="pattern">The <see cref="Pattern"/> to be converted.</param>
-        /// <returns>A string representation of the <see cref="Pattern"/>.</returns>
+        /// <param name="pattern">The <see cref="Pattern" /> to be converted.</param>
+        /// <returns>A string representation of the <see cref="Pattern" />.</returns>
         public static string Stringify(this Pattern? pattern)
         {
             var sb = new StringBuilder();
             if (pattern == null || pattern.Elements.Count <= 0) return sb.ToString();
-            for (var i = 0; i < pattern.Elements.Count; i++)
-            {
-                sb.Append(pattern.Elements[i]);
-            }
+            for (var i = 0; i < pattern.Elements.Count; i++) sb.Append(pattern.Elements[i]);
 
             return sb.ToString();
         }

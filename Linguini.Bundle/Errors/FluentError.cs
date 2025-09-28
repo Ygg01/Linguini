@@ -32,7 +32,10 @@ namespace Linguini.Bundle.Errors
         /// String representation of the error.
         /// </summary>
         /// <returns>Error represented as string</returns>
-        public override string ToString() => $"Error (${ErrorKind()})";
+        public override string ToString()
+        {
+            return $"Error (${ErrorKind()})";
+        }
     }
 
     /// <summary>
@@ -124,7 +127,7 @@ namespace Linguini.Bundle.Errors
         /// <returns>A ResolverFluentError representing the "No Value" error.</returns>
         public static ResolverFluentError NoValue(ReadOnlyMemory<char> idName, string? location = null)
         {
-            return new($"No value: {idName.Span.ToString()}", ErrorType.NoValue, location);
+            return new ResolverFluentError($"No value: {idName.Span.ToString()}", ErrorType.NoValue, location);
         }
 
         /// <summary>
@@ -133,7 +136,7 @@ namespace Linguini.Bundle.Errors
         /// <returns>An enumeration indicating an error caused by the absence of a value.</returns>
         public static ResolverFluentError NoValue(string pattern, string? location = null)
         {
-            return new($"No value: {pattern}", ErrorType.NoValue, location);
+            return new ResolverFluentError($"No value: {pattern}", ErrorType.NoValue, location);
         }
 
         /// <summary>
@@ -144,7 +147,7 @@ namespace Linguini.Bundle.Errors
         /// <returns>A ResolverFluentError describing the unknown variable error.</returns>
         public static ResolverFluentError UnknownVariable(VariableReference outType, string? location = null)
         {
-            return new($"Unknown variable: ${outType.Id}", ErrorType.Reference, location);
+            return new ResolverFluentError($"Unknown variable: ${outType.Id}", ErrorType.Reference, location);
         }
 
         /// <summary>
@@ -155,7 +158,20 @@ namespace Linguini.Bundle.Errors
         /// <returns>A ResolverFluentError representing the "Too Many Placeables" error.</returns>
         public static ResolverFluentError TooManyPlaceables(string? location = null)
         {
-            return new("Too many placeables", ErrorType.TooManyPlaceables, location);
+            return new ResolverFluentError("Too many placeables", ErrorType.TooManyPlaceables, location);
+        }
+
+        /// <summary>
+        /// Creates a new ResolverFluentError indicating that there are too many placeable expressions
+        /// in the resolved pattern, which exceeds the allowed limit.
+        /// </summary>
+        /// <param name="location">Optional location where the error occurred.</param>
+        /// <returns>A ResolverFluentError representing the "Too Many Placeables" error.</returns>
+        public static ResolverFluentError TooManyPlaceables(int placeables, int maxPlaceable, string? location = null)
+        {
+            return new ResolverFluentError(
+                string.Format("Too many placeables expanded: {placeables}, \nmax allowed is {maxPlaceable}`"),
+                ErrorType.TooManyPlaceables, location);
         }
 
         /// <summary>
@@ -169,16 +185,20 @@ namespace Linguini.Bundle.Errors
         {
             return self switch
             {
-                FunctionReference funcRef => new($"Unknown function: {funcRef.Id}()", ErrorType.Reference, location),
-                MessageReference msgRef when msgRef.Attribute == null => new($"Unknown message: {msgRef.Id}",
+                FunctionReference funcRef => new ResolverFluentError($"Unknown function: {funcRef.Id}()",
                     ErrorType.Reference, location),
-                MessageReference msgRef => new($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}",
+                MessageReference msgRef when msgRef.Attribute == null => new ResolverFluentError(
+                    $"Unknown message: {msgRef.Id}",
                     ErrorType.Reference, location),
-                TermReference termReference when termReference.Attribute == null => new(
+                MessageReference msgRef => new ResolverFluentError($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}",
+                    ErrorType.Reference, location),
+                TermReference termReference when termReference.Attribute == null => new ResolverFluentError(
                     $"Unknown term: -{termReference.Id}", ErrorType.Reference, location),
-                TermReference termReference => new($"Unknown attribute: -{termReference.Id}.{termReference.Attribute}",
+                TermReference termReference => new ResolverFluentError(
+                    $"Unknown attribute: -{termReference.Id}.{termReference.Attribute}",
                     ErrorType.Reference, location),
-                VariableReference varRef => new($"Unknown variable: ${varRef.Id}", ErrorType.Reference, location),
+                VariableReference varRef => new ResolverFluentError($"Unknown variable: ${varRef.Id}",
+                    ErrorType.Reference, location),
                 _ => throw new ArgumentException($"Expected reference got ${self.GetType()}")
             };
         }
@@ -191,7 +211,8 @@ namespace Linguini.Bundle.Errors
         /// <returns>A <see cref="ResolverFluentError"/> indicating a cyclic reference error.</returns>
         public static ResolverFluentError Cyclic(Pattern pattern, string? location = null)
         {
-            return new($"Cyclic reference in {pattern.Stringify()} detected!", ErrorType.Cyclic, location);
+            return new ResolverFluentError($"Cyclic reference in {pattern.Stringify()} detected!", ErrorType.Cyclic,
+                location);
         }
 
         /// <summary>
@@ -201,7 +222,7 @@ namespace Linguini.Bundle.Errors
         /// <returns>An instance of the <see cref="ResolverFluentError"/> representing a missing default error.</returns>
         public static ResolverFluentError MissingDefault(string? location = null)
         {
-            return new("No default", ErrorType.MissingDefault, location);
+            return new ResolverFluentError("No default", ErrorType.MissingDefault, location);
         }
     }
 
@@ -226,7 +247,7 @@ namespace Linguini.Bundle.Errors
         /// <returns>An instance of <see cref="ParserFluentError"/> encapsulating the specified parse error.</returns>
         public static ParserFluentError ParseError(ParseError parseError)
         {
-            return new(parseError);
+            return new ParserFluentError(parseError);
         }
 
         /// <inheritdoc/>
@@ -247,7 +268,7 @@ namespace Linguini.Bundle.Errors
             if (_error.Slice == null)
                 return null;
 
-            return new(_error.Row, _error.Slice.Value.Start.Value, _error.Slice.Value.End.Value,
+            return new ErrorSpan(_error.Row, _error.Slice.Value.Start.Value, _error.Slice.Value.End.Value,
                 _error.Position.Start.Value, _error.Position.End.Value);
         }
     }
@@ -261,14 +282,16 @@ namespace Linguini.Bundle.Errors
         /// Simple message that starts with ASCII character e.g. <c>message-id</c>
         /// </summary>
         Message,
+
         /// <summary>
         /// Referencable message that starts with <c>'-'</c> e.g. <c>-term-id</c>
         /// </summary>
         Term,
+
         /// <summary>
         /// Callable functions
         /// </summary>
-        Func,
+        Func
     }
 
     /// <summary>
@@ -301,18 +324,22 @@ namespace Linguini.Bundle.Errors
         /// Error during parsing
         /// </summary>
         Parser,
+
         /// <summary>
         /// Call to unknown Reference.
         /// </summary>
         Reference,
+
         /// <summary>
         /// Cyclic calls. Prohibited in Fluent.
         /// </summary>
         Cyclic,
+
         /// <summary>
         /// No Value was found with that id.
         /// </summary>
         NoValue,
+
         /// <summary>
         /// Too many <see cref="Placeable"/>. 
         /// </summary>
@@ -322,6 +349,7 @@ namespace Linguini.Bundle.Errors
         /// To change the maximum number of Placeables see <see cref="FluentBundleOption.MaxPlaceable"/>
         /// </remarks>
         TooManyPlaceables,
+
         /// <summary>
         /// A value added to <see cref="FluentBundle"/> is overriding an existing one.
         /// </summary>
@@ -330,6 +358,7 @@ namespace Linguini.Bundle.Errors
         /// To change this, use <see cref="FluentBundle.AddResourceOverriding(string)"/>
         /// </remarks>
         Overriding,
+
         /// <summary>
         /// Selector without a default mark.
         /// </summary>

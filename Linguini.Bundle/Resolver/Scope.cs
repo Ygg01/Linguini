@@ -20,7 +20,8 @@ namespace Linguini.Bundle.Resolver
         private readonly Dictionary<string, IFluentType>? _args;
         private readonly CultureInfo _culture;
         private readonly List<FluentError> _errors;
-        private readonly int _maxPlaceable;
+        internal readonly int MaxPlaceable;
+        internal readonly int MaxRecursion;
         private readonly List<Pattern> _travelled;
 
         /// <summary>
@@ -44,7 +45,8 @@ namespace Linguini.Bundle.Resolver
         {
             Placeable = 0;
             Bundle = fluentBundle;
-            _maxPlaceable = fluentBundle.MaxPlaceable;
+            MaxPlaceable = fluentBundle.MaxPlaceable;
+            MaxRecursion = fluentBundle.MaxRecursion;
             _culture = fluentBundle.Culture;
             TransformFunc = fluentBundle.TransformFunc;
             FormatterFunc = fluentBundle.FormatterFunc;
@@ -70,7 +72,7 @@ namespace Linguini.Bundle.Resolver
         {
             Placeable = 0;
             Bundle = frozenBundle;
-            _maxPlaceable = frozenBundle.MaxPlaceable;
+            MaxPlaceable = frozenBundle.MaxPlaceable;
             _culture = frozenBundle.Culture;
             TransformFunc = frozenBundle.TransformFunc;
             FormatterFunc = frozenBundle.FormatterFunc;
@@ -93,9 +95,11 @@ namespace Linguini.Bundle.Resolver
         ///     the maximum number of allowable placeables or encountering invalid patterns or expressions. This is done
         ///     to signal that this entry will be formatted differently.
         /// </summary>
-        public bool Dirty { get; set; }
+        internal bool Dirty { get; set; }
 
-        private short Placeable { get; set; }
+        internal short Placeable { get; set; }
+
+        internal short Recursion { get; set; }
 
         /// <summary>
         ///     Provides access to the collection of <see cref="FluentError" /> instances encountered during processing.
@@ -142,23 +146,23 @@ namespace Linguini.Bundle.Resolver
         public Func<IFluentType, string>? FormatterFunc { get; }
 
         /// <summary>
-        /// Represents a transformation function that can modify or process strings within the current scope.
-        /// The <c>TransformFunc</c> property allows custom logic to be applied to all string values, enabling
-        /// functionalities such as text normalization or custom transformations during string resolution and
-        /// formatting.
+        ///     Represents a transformation function that can modify or process strings within the current scope.
+        ///     The <c>TransformFunc</c> property allows custom logic to be applied to all string values, enabling
+        ///     functionalities such as text normalization or custom transformations during string resolution and
+        ///     formatting.
         /// </summary>
         public Func<string, string>? TransformFunc { get; }
 
 
         /// <summary>
-        /// Indicates whether to apply Unicode isolation marks around interpolated content
-        /// during formatting. This property helps prevent unintended interaction between
-        /// bidirectional text or other adjacent content outside the current scope.
+        ///     Indicates whether to apply Unicode isolation marks around interpolated content
+        ///     during formatting. This property helps prevent unintended interaction between
+        ///     bidirectional text or other adjacent content outside the current scope.
         /// </summary>
         public bool UseIsolating { get; init; }
 
         /// <summary>
-        /// Retrieves the plural category based on the provided rule type and number.
+        ///     Retrieves the plural category based on the provided rule type and number.
         /// </summary>
         /// <param name="type">The rule type (e.g., Cardinal or Ordinal) for determining the plural category.</param>
         /// <param name="number">The number used to resolve the plural category.</param>
@@ -170,19 +174,19 @@ namespace Linguini.Bundle.Resolver
 
 
         /// <summary>
-        /// Increments the current count of placeable objects within the scope.
-        /// Ensures the count does not exceed the maximum allowable placeable objects.
+        ///     Increments the current count of placeable objects within the scope.
+        ///     Ensures the count does not exceed the maximum allowable placeable objects.
         /// </summary>
         /// <returns>
-        /// <c>true</c> if the incremented placeable count is within the maximum limit; otherwise, <c>false</c>.
+        ///     <c>true</c> if the incremented placeable count is within the maximum limit; otherwise, <c>false</c>.
         /// </returns>
         public bool IncrPlaceable()
         {
-            return ++Placeable <= _maxPlaceable;
+            return ++Placeable <= MaxPlaceable;
         }
 
         /// <summary>
-        /// Adds a new error to the <see cref="Scope" /> error collection.
+        ///     Adds a new error to the <see cref="Scope" /> error collection.
         /// </summary>
         /// <param name="resolverFluentError">The error to be added to the collection.</param>
         public void AddError(ResolverFluentError resolverFluentError)
@@ -191,11 +195,11 @@ namespace Linguini.Bundle.Resolver
         }
 
         /// <summary>
-        /// Tracks the evaluation of an expression in a pattern and writes the output to a writer.
+        ///     Tracks the evaluation of an expression in a pattern and writes the output to a writer.
         /// </summary>
-        /// <param name="writer">The <see cref="TextWriter"/> used to write the output.</param>
-        /// <param name="pattern">The <see cref="Pattern"/> being evaluated, used to track recursion.</param>
-        /// <param name="expr">The <see cref="IExpression"/> to be evaluated and written.</param>
+        /// <param name="writer">The <see cref="TextWriter" /> used to write the output.</param>
+        /// <param name="pattern">The <see cref="Pattern" /> being evaluated, used to track recursion.</param>
+        /// <param name="expr">The <see cref="IExpression" /> to be evaluated and written.</param>
         /// <param name="pos">The position of the current expression in the pattern.</param>
         public void MaybeTrack(TextWriter writer, Pattern pattern, IExpression expr, int pos)
         {
@@ -211,9 +215,14 @@ namespace Linguini.Bundle.Resolver
             }
         }
 
+        internal bool Contains(Pattern pattern)
+        {
+            return _travelled.Contains(pattern);
+        }
+
         /// <summary>
-        /// Tracks the traversal of a pattern within the scope and writes its resolved output.
-        /// Handles cyclic references by logging errors and writing error output for the expression.
+        ///     Tracks the traversal of a pattern within the scope and writes its resolved output.
+        ///     Handles cyclic references by logging errors and writing error output for the expression.
         /// </summary>
         /// <param name="writer">The text writer used to output the resolved pattern or error.</param>
         /// <param name="pattern">The pattern being traversed and resolved.</param>
@@ -241,15 +250,15 @@ namespace Linguini.Bundle.Resolver
         }
 
         /// <summary>
-        /// Writes a reference error to the specified <see cref="TextWriter" />.
-        /// Tracks the error and attempts to write an error representation for the
-        /// provided inline expression.
+        ///     Writes a reference error to the specified <see cref="TextWriter" />.
+        ///     Tracks the error and attempts to write an error representation for the
+        ///     provided inline expression.
         /// </summary>
         /// <param name="writer">The <see cref="TextWriter" /> used to write the error.</param>
         /// <param name="exp">The <see cref="IInlineExpression" /> causing the reference error.</param>
         /// <returns>
-        /// Returns <c>true</c> if the error was successfully written; otherwise, returns <c>false</c>
-        /// if an exception occurred while writing.
+        ///     Returns <c>true</c> if the error was successfully written; otherwise, returns <c>false</c>
+        ///     if an exception occurred while writing.
         /// </returns>
         public bool WriteRefError(TextWriter writer, IInlineExpression exp)
         {
@@ -269,16 +278,18 @@ namespace Linguini.Bundle.Resolver
 
 
         /// <summary>
-        /// Attempts to retrieve a reference of type <see cref="FluentReference"/> associated with the specified argument.
+        ///     Attempts to retrieve a reference of type <see cref="FluentReference" /> associated with the specified argument.
         /// </summary>
         /// <param name="argument">The name of the argument to look up.</param>
         /// <param name="reference">
-        /// When this method returns, contains the <see cref="FluentReference"/> associated with the specified argument if the argument exists
-        /// and is of the correct type; otherwise, contains <c>null</c>.
+        ///     When this method returns, contains the <see cref="FluentReference" /> associated with the specified argument if the
+        ///     argument exists
+        ///     and is of the correct type; otherwise, contains <c>null</c>.
         /// </param>
         /// <returns>
-        /// <c>true</c> if a reference associated with the specified argument exists and is of type <see cref="FluentReference"/>;
-        /// otherwise, <c>false</c>.
+        ///     <c>true</c> if a reference associated with the specified argument exists and is of type
+        ///     <see cref="FluentReference" />;
+        ///     otherwise, <c>false</c>.
         /// </returns>
         public bool TryGetReference(string argument, [NotNullWhen(true)] out FluentReference? reference)
         {
@@ -293,10 +304,10 @@ namespace Linguini.Bundle.Resolver
         }
 
         /// <summary>
-        /// Resolves positional and named arguments from the provided call arguments.
+        ///     Resolves positional and named arguments from the provided call arguments.
         /// </summary>
         /// <param name="callArguments">The call arguments containing positional and named arguments.</param>
-        /// <returns>A <see cref="ResolvedArgs"/> object containing the resolved positional and named arguments.</returns>
+        /// <returns>A <see cref="ResolvedArgs" /> object containing the resolved positional and named arguments.</returns>
         public ResolvedArgs GetArguments(CallArguments? callArguments)
         {
             var positionalArgs = new List<IFluentType>();
@@ -322,10 +333,10 @@ namespace Linguini.Bundle.Resolver
         }
 
         /// <summary>
-        /// Sets the local named arguments within the <see cref="Scope"/>.
+        ///     Sets the local named arguments within the <see cref="Scope" />.
         /// </summary>
         /// <param name="resNamed">The dictionary of named arguments to set; if null, clears the local named arguments.</param>
-        /// <seealso cref="SetLocalArgs(ResolvedArgs)"/>
+        /// <seealso cref="SetLocalArgs(ResolvedArgs)" />
         public void SetLocalArgs(IDictionary<string, IFluentType>? resNamed)
         {
             _localNameArgs = resNamed != null
@@ -334,10 +345,10 @@ namespace Linguini.Bundle.Resolver
         }
 
         /// <summary>
-        /// Sets the local arguments for the scope, updating named and positional arguments.
+        ///     Sets the local arguments for the scope, updating named and positional arguments.
         /// </summary>
         /// <param name="resNamed">Resolved arguments containing named and positional arguments to set locally.</param>
-        /// <seealso cref="SetLocalArgs(System.Collections.Generic.IDictionary{string,Linguini.Shared.Types.Bundle.IFluentType}?)"/>
+        /// <seealso cref="SetLocalArgs(System.Collections.Generic.IDictionary{string,Linguini.Shared.Types.Bundle.IFluentType}?)" />
         public void SetLocalArgs(ResolvedArgs resNamed)
         {
             _localNameArgs = (Dictionary<string, IFluentType>?)resNamed.Named;
@@ -345,7 +356,7 @@ namespace Linguini.Bundle.Resolver
         }
 
         /// <summary>
-        /// Clears local arguments from scope.
+        ///     Clears local arguments from scope.
         /// </summary>
         public void ClearLocalArgs()
         {
@@ -354,11 +365,11 @@ namespace Linguini.Bundle.Resolver
         }
 
         /// <summary>
-        /// Resolves a reference to a string value based on the provided identifier.
+        ///     Resolves a reference to a string value based on the provided identifier.
         /// </summary>
         /// <param name="refId">The identifier to resolve into a string reference.</param>
         /// <returns>
-        /// A string representation of the resolved reference, either from local or dynamic context.
+        ///     A string representation of the resolved reference, either from local or dynamic context.
         /// </returns>
         public string ResolveReference(Identifier refId)
         {
@@ -382,9 +393,9 @@ namespace Linguini.Bundle.Resolver
     }
 
     /// <summary>
-    /// Represents the resolved arguments used within the Fluent localization system.
-    /// It encapsulates positional and named arguments that are extracted and prepared
-    /// for use in runtime operations involving message resolution and formatting.
+    ///     Represents the resolved arguments used within the Fluent localization system.
+    ///     It encapsulates positional and named arguments that are extracted and prepared
+    ///     for use in runtime operations involving message resolution and formatting.
     /// </summary>
     public record ResolvedArgs(IList<IFluentType> Positional, IDictionary<string, IFluentType> Named);
 }

@@ -67,6 +67,12 @@ namespace Linguini.Syntax.Ast
         {
             return Value.GetHashCode();
         }
+
+        /// <inheritdoc />
+        public bool IsTriviallyResolvable()
+        {
+            return true;
+        }
     }
 
 
@@ -136,6 +142,12 @@ namespace Linguini.Syntax.Ast
         public override int GetHashCode()
         {
             return Value.GetHashCode();
+        }
+        
+        /// <inheritdoc />
+        public bool IsTriviallyResolvable()
+        {
+            return true;
         }
     }
 
@@ -562,6 +574,12 @@ namespace Linguini.Syntax.Ast
         public override int GetHashCode()
         {
             return Expression.GetHashCode();
+        }
+        
+        /// <inheritdoc />
+        public bool IsTriviallyResolvable()
+        {
+            return Expression.IsTriviallyResolvable();
         }
     }
 
