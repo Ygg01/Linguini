@@ -22,7 +22,7 @@ namespace Linguini.Bundle.Resolver
         private readonly List<FluentError> _errors;
         internal readonly int MaxPlaceable;
         internal readonly int MaxRecursion;
-        private readonly List<Pattern> _travelled;
+        internal readonly List<Pattern> Travelled;
 
         /// <summary>
         ///     Represents the primary bundle associated with the current scope.
@@ -55,7 +55,7 @@ namespace Linguini.Bundle.Resolver
             Dirty = false;
 
             _errors = new List<FluentError>();
-            _travelled = new List<Pattern>();
+            Travelled = new List<Pattern>();
             _args = args != null ? new Dictionary<string, IFluentType>(args) : null;
 
             _localNameArgs = null;
@@ -80,7 +80,7 @@ namespace Linguini.Bundle.Resolver
             Dirty = false;
 
             _errors = new List<FluentError>();
-            _travelled = new List<Pattern>();
+            Travelled = new List<Pattern>();
             _args = args != null ? new Dictionary<string, IFluentType>(args) : null;
 
             _localNameArgs = null;
@@ -203,7 +203,7 @@ namespace Linguini.Bundle.Resolver
         /// <param name="pos">The position of the current expression in the pattern.</param>
         public void MaybeTrack(TextWriter writer, Pattern pattern, IExpression expr, int pos)
         {
-            if (_travelled.Count == 0) _travelled.Add(pattern);
+            if (Travelled.Count == 0) Travelled.Add(pattern);
 
             expr.TryWrite(writer, this, pos);
 
@@ -217,7 +217,7 @@ namespace Linguini.Bundle.Resolver
 
         internal bool Contains(Pattern pattern)
         {
-            return _travelled.Contains(pattern);
+            return Travelled.Contains(pattern);
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace Linguini.Bundle.Resolver
         /// <param name="exp">The inline expression to write an error message if a cyclic reference is detected.</param>
         public void Track(TextWriter writer, Pattern pattern, IInlineExpression exp)
         {
-            if (_travelled.Contains(pattern))
+            if (Travelled.Contains(pattern))
             {
                 AddError(ResolverFluentError.Cyclic(pattern));
                 writer.Write('{');
@@ -238,7 +238,7 @@ namespace Linguini.Bundle.Resolver
             }
             else
             {
-                _travelled.Add(pattern);
+                Travelled.Add(pattern);
                 pattern.Write(writer, this);
                 PopTraveled();
             }
@@ -246,7 +246,7 @@ namespace Linguini.Bundle.Resolver
 
         private void PopTraveled()
         {
-            if (_travelled.Count > 0) _travelled.RemoveAt(_travelled.Count - 1);
+            if (Travelled.Count > 0) Travelled.RemoveAt(Travelled.Count - 1);
         }
 
         /// <summary>

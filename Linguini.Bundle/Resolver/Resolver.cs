@@ -24,6 +24,8 @@ namespace Linguini.Bundle.Resolver
                 return FluentNone.None;
             }
 
+            writingScope.AddTravelled(pattern);
+
             foreach (var element in pattern.Elements)
             {
                 if (writingScope.Dirty)
@@ -45,13 +47,10 @@ namespace Linguini.Bundle.Resolver
 
                         var needsIsolating = writingScope.UseIsolating
                                              && pattern.Elements.Count > 1;
-                        if (needsIsolating)
-                        {
-                            writingScope.Write('\u2068');
-                            ;
-                        }
+                        if (needsIsolating) writingScope.Write('\u2068');
 
                         placeable.Resolve(writingScope);
+
                         if (needsIsolating) writingScope.Write('\u2069');
                         break;
                     }
@@ -89,6 +88,8 @@ namespace Linguini.Bundle.Resolver
             get => scope.Dirty;
             set => scope.Dirty = value;
         }
+
+        public bool UseIsolating => scope.UseIsolating;
 
         public static WriterScope Create(Scope scope)
         {
@@ -144,6 +145,11 @@ namespace Linguini.Bundle.Resolver
         public bool IncrPlaceable()
         {
             return scope.IncrPlaceable();
+        }
+
+        public void AddTravelled(Pattern pattern)
+        {
+            scope.Travelled.Add(pattern);
         }
     }
 }
