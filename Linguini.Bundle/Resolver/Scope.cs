@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Linguini.Bundle.Errors;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
+using PluralRulesGenerated;
 
 namespace Linguini.Bundle.Resolver
 {
@@ -169,9 +171,43 @@ namespace Linguini.Bundle.Resolver
         /// <returns>The plural category corresponding to the given rule type and number.</returns>
         public PluralCategory GetPluralRules(RuleType type, FluentNumber number)
         {
-            return ResolverHelpers.PluralRules.GetPluralCategory(_culture, type, number);
+            var specialCase = IsSpecialCase(_culture.Name, type);
+            var langStr = GetPluralRuleLang(_culture, specialCase);
+            var func = RuleTable.GetPluralFunc(langStr, type);
+            return number.TryPluralOperands(out var op) ? func(op) : PluralCategory.Other;
         }
 
+        /// <summary>
+        ///     Special language identifier, that goes over 4 ISO language code.
+        /// </summary>
+        /// <param name="info">language code</param>
+        /// <param name="ruleType">Is it ordinal or cardinal rule type.</param>
+        /// <returns><c>true</c> when its not standard language code; <c>false</c> otherwise.</returns>
+        private static bool IsSpecialCase(string info, RuleType ruleType)
+        {
+            if (info.Length < 4)
+                return false;
+
+            var specialCaseTable = ruleType switch
+            {
+                RuleType.Ordinal => RuleTable.SpecialCaseOrdinal,
+                _ => RuleTable.SpecialCaseCardinal
+            };
+            return specialCaseTable.Contains(info);
+        }
+
+        private static string GetPluralRuleLang(CultureInfo info, bool specialCase)
+        {
+            if (CultureInfo.InvariantCulture.Equals(info))
+                // When culture info is uncertain we default to common 
+                // language behavior
+                return "root";
+
+            var langStr = specialCase
+                ? info.Name.Replace('-', '_')
+                : info.TwoLetterISOLanguageName;
+            return langStr;
+        }
 
         /// <summary>
         ///     Increments the current count of placeable objects within the scope.

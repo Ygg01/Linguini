@@ -107,13 +107,13 @@ namespace Linguini.Bundle.Resolver
             return new FluentErrType();
         }
 
-        
+
         private static IFluentType ResolveRef(this SelectExpression selectExpression, Scope scope, int? pos)
         {
             var selector = selectExpression.Selector.Resolve(scope, pos);
             var variant = GetVariant(selectExpression, scope, selector);
-            return variant != null 
-                ? variant.Value.Resolve(scope) 
+            return variant != null
+                ? variant.Value.Resolve(scope)
                 : new FluentErrType();
         }
 
@@ -121,14 +121,10 @@ namespace Linguini.Bundle.Resolver
         {
             Variant? retVal = null;
             if (selector is FluentString or FluentNumber)
-            {
                 foreach (var variant in selectExpression.Variants)
                 {
                     // If we have a default and no match set default.
-                    if (retVal == null && variant.IsDefault)
-                    {
-                        retVal = variant;
-                    }
+                    if (retVal == null && variant.IsDefault) retVal = variant;
                     IFluentType key;
                     switch (variant.Type)
                     {
@@ -140,12 +136,8 @@ namespace Linguini.Bundle.Resolver
                             break;
                     }
 
-                    if (key.Matches(selector, scope))
-                    {
-                        return variant;
-                    }
+                    if (key.Matches(selector, scope)) return variant;
                 }
-            }
 
             return retVal;
         }
@@ -157,15 +149,14 @@ namespace Linguini.Bundle.Resolver
             if (!scope.Bundle.EnableExtensions || !scope.Bundle.TryGetAstTerm(termRef.Id.ToString(), out var term))
                 return new FluentErrType();
 
-            if (termRef.Attribute == null) 
+            if (termRef.Attribute == null)
                 return term.Value.Resolve(scope);
-            
+
             foreach (var arg in term.Attributes)
                 if (termRef.Attribute.Equals(arg.Id) && arg.Value.Elements.Count == 1)
                     return arg.Value.Elements[0].ResolveRef(scope, pos);
 
             return new FluentErrType();
-
         }
 
         private static IFluentType ResolveRef(this VariableReference varRef, Scope scope, int? pos = null)
