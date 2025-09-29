@@ -83,22 +83,25 @@ namespace Linguini.Bundle.Resolver
             };
         }
 
+        private static IFluentType ResolveSelect(this SelectExpression selectExpression, WriterScope scope)
+        {
+            return FluentNone.None;
+        }
 
-        private static IFluentType ResolveInlineExpr(this IInlineExpression expr, WriterScope scope)
+
+        private static IFluentType ResolveInlineExpr(this IInlineExpression expr, WriterScope scope,
+            IFluentType? localPosArg = null)
         {
             return expr switch
             {
                 NumberLiteral numberLiteral => numberLiteral.ResolveNumber(scope),
                 TextLiteral textLiteral => textLiteral.ResolveText(scope),
                 FunctionReference functionReference => functionReference.ResolveFuncRef(scope),
+                VariableReference variableReference => variableReference.ResolveVarRef(scope, localPosArg),
                 _ => FluentNone.None
             };
         }
 
-        private static IFluentType ResolveSelect(this SelectExpression selectExpression, WriterScope scope)
-        {
-            return FluentNone.None;
-        }
 
         private static IFluentType ResolveText(this TextLiteral self, WriterScope scope)
         {
@@ -121,9 +124,20 @@ namespace Linguini.Bundle.Resolver
             return new FluentErrType();
         }
 
-        private static IFluentType Resolve(this VariableReference selectExpression, WriterScope scope)
+        private static IFluentType ResolveVarRef(this VariableReference varRef, WriterScope scope,
+            IFluentType? localContextArg = null)
         {
-            return FluentNone.None;
+            var args = scope.LocalNameArgs ?? scope.Args;
+            if (args != null
+                && args.TryGetValue(varRef.Id.ToString(), out var arg))
+                return arg.Copy();
+
+            if (localContextArg != null)
+                return localContextArg;
+
+            if (scope.LocalNameArgs == null) scope.AddUnknownVariableError(varRef);
+
+            return new FluentErrType();
         }
 
         private static ResolvedArgs ResolveArgs(
@@ -136,7 +150,8 @@ namespace Linguini.Bundle.Resolver
                 var listPositional = callArguments.Value.PositionalArgs;
                 for (var i = 0; i < listPositional.Count; i++)
                 {
-                    var expr = listPositional[i].ResolveInlineExpr(scope);
+                    var locaPosArg = scope.LocalPosArgs?.GetAt(i);
+                    var expr = listPositional[i].ResolveInlineExpr(scope, locaPosArg);
                     positionalArgs.Add(expr);
                 }
 
@@ -150,6 +165,13 @@ namespace Linguini.Bundle.Resolver
 
             return new ResolvedArgs(positionalArgs,
                 namedArgs);
+        }
+
+        private static IFluentType? GetAt(this IReadOnlyList<IFluentType> list, int index)
+        {
+            if (index < 0 || index >= list.Count)
+                return null;
+            return list[index];
         }
 
         private static IFluentType Resolve(this IPatternElement self, WriterScope scope)
@@ -177,7 +199,10 @@ namespace Linguini.Bundle.Resolver
         }
 
         public bool UseIsolating => scope.UseIsolating;
-        public IReadOnlyList<IFluentType>? LocalPosArgs => scope.LocalPosArgs;
+        internal IReadOnlyList<IFluentType>? LocalPosArgs => scope.LocalPosArgs;
+        internal IReadOnlyDictionary<string, IFluentType>? LocalNameArgs => scope.LocalNameArgs;
+        internal IReadOnlyDictionary<string, IFluentType>? Args => scope.Args;
+
 
         public static WriterScope Create(Scope scope)
         {
@@ -253,6 +278,11 @@ namespace Linguini.Bundle.Resolver
         internal bool TryGetFunction(Identifier id, [NotNullWhen(true)] out FluentFunction? func)
         {
             return scope.Bundle.TryGetFunction(id, out func);
+        }
+
+        internal void AddUnknownVariableError(VariableReference varRef)
+        {
+            scope.AddError(ResolverFluentError.UnknownVariable(varRef));
         }
     }
 }
