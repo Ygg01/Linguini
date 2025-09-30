@@ -22,9 +22,6 @@ namespace Linguini.Bundle.Resolver
         private readonly Dictionary<string, IFluentType>? _args;
         private readonly CultureInfo _culture;
         private readonly List<FluentError> _errors;
-        internal readonly int MaxPlaceable;
-        internal readonly int MaxRecursion;
-        internal readonly List<Pattern> Travelled;
 
         /// <summary>
         ///     Represents the primary bundle associated with the current scope.
@@ -33,6 +30,10 @@ namespace Linguini.Bundle.Resolver
         ///     It is utilized in message resolution, formatting, and retrieving required elements such as terms or attributes.
         /// </summary>
         public readonly IReadBundle Bundle;
+
+        internal readonly int MaxPlaceable;
+        internal readonly int MaxRecursion;
+        internal readonly List<Pattern> Travelled;
 
         private Dictionary<string, IFluentType>? _localNameArgs;
         private List<IFluentType>? _localPosArgs;
@@ -327,6 +328,7 @@ namespace Linguini.Bundle.Resolver
         ///     <see cref="FluentReference" />;
         ///     otherwise, <c>false</c>.
         /// </returns>
+        // [Obsolete("Will be removed in 1.0 release. Use TryResolveReference instead.")]
         public bool TryGetReference(string argument, [NotNullWhen(true)] out FluentReference? reference)
         {
             if (_args != null && _args.TryGetValue(argument, out var fluentType) && fluentType is FluentReference refs)
@@ -336,6 +338,33 @@ namespace Linguini.Bundle.Resolver
             }
 
             reference = null;
+            return false;
+        }
+
+        /// <summary>
+        ///     Attempts to resolve a reference of type <see cref="FluentReference" /> associated with the specified argument.
+        /// </summary>
+        /// <param name="argument">The name of the argument to look up.</param>
+        /// <param name="reference">
+        ///     When this method returns, contains the <see cref="FluentReference" /> associated with the specified argument if the
+        ///     argument exists
+        ///     and is of the correct type; otherwise, contains <c>null</c>.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if a reference associated with the specified argument exists and is of type
+        ///     <see cref="FluentReference" />;
+        ///     otherwise, <c>false</c>.
+        /// </returns>
+        public bool TryResolveReference(string argument, [NotNullWhen(true)] out IFluentType? value)
+        {
+            if (_args != null && _args.TryGetValue(argument, out var fluentType)
+                              && fluentType is FluentReference refs && _args.TryGetValue(refs.AsString(), out var val))
+            {
+                value = val;
+                return true;
+            }
+
+            value = null;
             return false;
         }
 
