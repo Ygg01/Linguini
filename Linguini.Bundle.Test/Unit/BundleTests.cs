@@ -312,7 +312,7 @@ attack-log = { $$attacker } attacked {$$defender}.
         *[traditional] neuter
           [chicago] feminine
     }
-call-attr-no-args = {-ship.gender()  ->
+call-attr-no-args = { -ship.gender()  ->
     *[masculine] He
       [feminine] She
       [neuter] It
@@ -323,7 +323,7 @@ call-attr-no-args = {-ship.gender()  ->
         [Parallelizable]
         public void TestExtensionsWork()
         {
-            var (bundle, err) = LinguiniBuilder.Builder(false).Locale("en-US")
+            var (bundle, err) = LinguiniBuilder.Builder(true).Locale("en-US")
                 .AddResource(Macros)
                 .Build();
             Assert.That(err, Is.Null);
@@ -332,7 +332,9 @@ call-attr-no-args = {-ship.gender()  ->
                 ["style"] = (FluentString)"chicago"
             };
             Assert.That(bundle.TryGetMessage("call-attr-no-args", args, out _, out var message));
-            Assert.That("It", Is.EqualTo(message));
+            // Logic goes like this: given that term reference has no args. Resolver will ignore `$style` in `-ship.gender()` selector
+            // and default to neuter. This will then resolve `call-attr-no-args` to `It`.
+            Assert.That(message, Is.EqualTo("It"));
 
             // Check Frozen bundle behaves similarly
             var frozenBundle = bundle.ToFrozenBundle();

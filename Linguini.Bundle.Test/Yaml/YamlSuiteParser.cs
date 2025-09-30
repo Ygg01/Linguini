@@ -186,7 +186,7 @@ namespace Linguini.Bundle.Test.Yaml
                         testBundle.TryGetMessage(assert.Id, assert.Attribute, assert.Args,
                             out var errs,
                             out var actualValue);
-                        Assert.That(assert.ExpectedValue, Is.EqualTo(actualValue), test.TestName);
+                        Assert.That(actualValue, Is.EqualTo(assert.ExpectedValue), test.TestName);
                         AssertErrorCases(assert.ExpectedErrors, errs, test.TestName);
                     }
                 }
