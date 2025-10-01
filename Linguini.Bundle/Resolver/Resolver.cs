@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Text;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 using ArgumentException = System.ArgumentException;
 using ArgumentOutOfRangeException = System.ArgumentOutOfRangeException;
@@ -126,8 +128,8 @@ namespace Linguini.Bundle.Resolver
         {
             return expr switch
             {
-                NumberLiteral numberLiteral => numberLiteral.ResolveNumber(scope),
-                TextLiteral textLiteral => textLiteral.ResolveText(scope),
+                NumberLiteral numberLiteral => numberLiteral.ResolveNumber(),
+                TextLiteral textLiteral => textLiteral.ResolveText(),
                 FunctionReference functionReference => functionReference.ResolveFuncRef(scope),
                 VariableReference variableReference => variableReference.ResolveVarRef(scope, localPosArg),
                 TermReference termReference => termReference.ResolveTermRef(scope),
@@ -138,12 +140,14 @@ namespace Linguini.Bundle.Resolver
             };
         }
 
-        private static IFluentType ResolveText(this TextLiteral self, WriterScope scope)
+        private static IFluentType ResolveText(this TextLiteral self)
         {
-            return new FluentString(self.Value.Span);
+            var str = new StringWriter();
+            UnicodeUtil.WriteUnescapedUnicode(self.Value, str);
+            return new FluentString(str.ToString());
         }
 
-        private static IFluentType ResolveNumber(this NumberLiteral numberLiteral, WriterScope scope)
+        private static IFluentType ResolveNumber(this NumberLiteral numberLiteral)
         {
             return FluentNumber.TryNumber(numberLiteral.Value.Span);
         }
@@ -155,8 +159,7 @@ namespace Linguini.Bundle.Resolver
             if (scope.TryGetFunction(funcRef.Id, out var func))
                 return func.Function(resolvedPosArgs, resolvedNamedArgs);
 
-            scope.AddReferenceError(funcRef);
-            return new FluentErrType();
+            return scope.AddReferenceError(funcRef);
         }
 
         private static IFluentType ResolveVarRef(this VariableReference varRef, WriterScope scope,
@@ -169,15 +172,15 @@ namespace Linguini.Bundle.Resolver
 
             if (localContextArg != null)
                 return localContextArg;
-            
+
 
             return scope.AddReferenceError(varRef);
         }
 
         private static IFluentType ResolveTermRef(this TermReference termRef, WriterScope scope)
         {
-            if (!scope.EnableExtensions || !scope.TryGetAstTerm(termRef.Id.ToString(), out var term))
-                return new FluentErrType();
+            if (!scope.TryGetAstTerm(termRef.Id.ToString(), out var term))
+                return scope.AddReferenceError(termRef);
 
             if (termRef.Attribute == null)
                 return term.Value.ResolvePattern(scope.Scope);

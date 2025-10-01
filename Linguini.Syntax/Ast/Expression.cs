@@ -210,6 +210,12 @@ namespace Linguini.Syntax.Ast
         {
             return HashCode.Combine(Id, Arguments);
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return Id + "()";
+        }
     }
 
     /// <summary>
