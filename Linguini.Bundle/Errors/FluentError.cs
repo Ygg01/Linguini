@@ -59,11 +59,6 @@ namespace Linguini.Bundle.Errors
         private readonly string? _location;
 
         /// <summary>
-        /// Id of term or message that was overriden.
-        /// </summary>
-        public string Id { get; }
-
-        /// <summary>
         ///     Constructs an <see cref="OverrideFluentError" />
         /// </summary>
         /// <param name="id">Duplicated identifier</param>
@@ -76,14 +71,19 @@ namespace Linguini.Bundle.Errors
             _location = location;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Id of term or message that was overriden.
+        /// </summary>
+        public string Id { get; }
+
+        /// <inheritdoc />
         public override ErrorType ErrorKind()
         {
             return ErrorType.Overriding;
         }
 
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"For id:{Id} already exist entry of type: {_kind.ToString()}";
@@ -91,7 +91,6 @@ namespace Linguini.Bundle.Errors
     }
 
     /// <summary>
-    /// 
     /// </summary>
     public record ResolverFluentError : FluentError
     {
@@ -199,6 +198,8 @@ namespace Linguini.Bundle.Errors
                     ErrorType.Reference, location),
                 VariableReference varRef => new ResolverFluentError($"Unknown variable: ${varRef.Id}",
                     ErrorType.Reference, location),
+                DynamicReference dynamicReference => new ResolverFluentError(
+                    $"Unknown dynamic: $${dynamicReference.Id}", ErrorType.Reference, location),
                 _ => throw new ArgumentException($"Expected reference got ${self.GetType()}")
             };
         }

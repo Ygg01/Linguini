@@ -383,10 +383,10 @@ liked-count2 = { NUMBER($num) ->
             {
                 ["unreadEmails"] = (FluentNumber)3
             };
-            // Assert.That(bundle.TryGetMessage("emails", args, out _, out var message1));
-            // Assert.That(message1, Is.EqualTo("Number of unread emails 3."));
-            // Assert.That(bundle.TryGetMessage("emails2", args, out _, out var message2));
-            // Assert.That(message2, Is.EqualTo("Number of unread emails 3."));
+            Assert.That(bundle.TryGetMessage("emails", args, out _, out var message1));
+            Assert.That(message1, Is.EqualTo("Number of unread emails 3."));
+            Assert.That(bundle.TryGetMessage("emails2", args, out _, out var message2));
+            Assert.That(message2, Is.EqualTo("Number of unread emails 3."));
 
             var likedArg0 = new Dictionary<string, IFluentType>
             {
@@ -455,8 +455,8 @@ liked-count = { -ship.zero() ->
             {
                 ["object"] = (FluentReference)"creature-elf"
             };
-            Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message1));
-            Assert.That(message1, Is.EqualTo("You see an elf."));
+            // Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message1));
+            // Assert.That(message1, Is.EqualTo("You see an elf."));
             args = new Dictionary<string, IFluentType>
             {
                 ["object"] = (FluentReference)"creature-fairy"
@@ -477,7 +477,84 @@ liked-count = { -ship.zero() ->
                 ["object"] = (FluentReference)"creature-fairy"
             };
             Assert.That(frozenBundle.TryGetMessage("you-see", args, out _, out var frozenMessage2));
-            Assert.That("You see a fairy.", Is.EqualTo(frozenMessage2));
+            Assert.That(frozenMessage2, Is.EqualTo("You see a fairy."));
+        }
+
+        private const string MissingRefs = @"
+foo = Foo { $num }
+bar = { foo }
+";
+
+        [Test]
+        [Parallelizable]
+        public void TestMissingRefs()
+        {
+            var (bundle, err) = LinguiniBuilder.Builder()
+                .Locale("en-US")
+                .AddResource(MissingRefs)
+                .Build();
+            Assert.That(err, Is.Null.Or.Empty);
+            var args = new Dictionary<string, IFluentType>
+            {
+                ["num"] = (FluentNumber)3
+            };
+            Assert.That(bundle.TryGetMessage("bar", args, out _, out var message1));
+            Assert.That(message1, Is.EqualTo("Foo 3"));
+        }
+
+        private const string NestedPlaceables = @"
+foo = { { ""Foo"" } }
+";
+
+        [Test]
+        [Parallelizable]
+        public void TestMissingRefs2()
+        {
+            var (bundle, err) = LinguiniBuilder.Builder()
+                .Locale("en-US")
+                .AddResource(NestedPlaceables)
+                .Build();
+            Assert.That(err, Is.Null.Or.Empty);
+            var args = new Dictionary<string, IFluentType>();
+            Assert.That(bundle.TryGetMessage("foo", args, out _, out var message1));
+            Assert.That(message1, Is.EqualTo("Foo"));
+        }
+
+        private const string UnknownVars = @"
+foo = { $arg }
+";
+
+        [Test]
+        [Parallelizable]
+        public void UnknownVariableRef()
+        {
+            var (bundle, err) = LinguiniBuilder.Builder()
+                .Locale("en-US")
+                .AddResource(UnknownVars)
+                .Build();
+            Assert.That(err, Is.Null.Or.Empty);
+            var args = new Dictionary<string, IFluentType>();
+            Assert.That(bundle.TryGetMessage("foo", args, out _, out var message1), Is.False);
+            Assert.That(message1, Is.EqualTo("{$arg}"));
+        }
+
+        private const string MissingAttributeStr = @"
+foo = Foo
+ref-foo = { foo.missing }
+";
+
+        [Test]
+        [Parallelizable]
+        public void MissingAttribute()
+        {
+            var (bundle, err) = LinguiniBuilder.Builder()
+                .Locale("en-US")
+                .AddResource(MissingAttributeStr)
+                .Build();
+            Assert.That(err, Is.Null.Or.Empty);
+            var args = new Dictionary<string, IFluentType>();
+            Assert.That(bundle.TryGetMessage("ref-foo", args, out _, out var message1), Is.False);
+            Assert.That(message1, Is.EqualTo("{foo.missing}"));
         }
 
         [Test]

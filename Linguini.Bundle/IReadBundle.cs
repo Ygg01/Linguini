@@ -27,7 +27,7 @@ namespace Linguini.Bundle
         /// </summary>
         // ReSharper disable once MemberCanBeProtected.Global
         public bool EnableExtensions { get; init; }
-        
+
         /// <summary>
         ///     Determines if the provided identifier has a message associated with it.
         /// </summary>
@@ -177,10 +177,7 @@ namespace Linguini.Bundle
             foreach (var (key, val) in args) dictionary.Add(key, val);
 
             TryGetAttrMessage(msgWithAttr, dictionary, out var errors, out var message);
-            if (errors is { Count: > 0 })
-            {
-                throw new LinguiniException(errors);
-            }
+            if (errors is { Count: > 0 }) throw new LinguiniException(errors);
 
             return message;
         }
@@ -271,9 +268,8 @@ namespace Linguini.Bundle
                 return false;
             }
 
-            errors = null;
             message = FormatPattern(pattern, args, out errors);
-            return true;
+            return errors == null || errors.Count == 0;
         }
     }
 
@@ -342,10 +338,7 @@ namespace Linguini.Bundle
             IDictionary<string, IFluentType>? args = null)
         {
             bundle.TryGetMessage(id, attribute, args, out var errors, out var message);
-            if (errors is { Count: > 0 })
-            {
-                throw new LinguiniException(errors);
-            }
+            if (errors is { Count: > 0 }) throw new LinguiniException(errors);
 
             return message;
         }

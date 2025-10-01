@@ -39,7 +39,14 @@
     /// </summary>
     public record FluentErrType : IFluentType
     {
-        /// <inheritdoc/>
+        private readonly string _error;
+
+        public FluentErrType(string error = "")
+        {
+            _error = error;
+        }
+
+        /// <inheritdoc />
         public bool Matches(IFluentType other, IScope scope)
         {
             return false;
@@ -57,7 +64,7 @@
         /// <returns>A constant string value.</returns>
         public string AsString()
         {
-            return "FluentErrType";
+            return _error;
         }
 
         /// <inheritdoc />
