@@ -557,6 +557,27 @@ ref-foo = { foo.missing }
             Assert.That(message1, Is.EqualTo("{foo.missing}"));
         }
 
+        private const string PlaceableRefs = @"
+foo = Foo
+bar = Bar
+    .attr = { foo } Attribute
+ref-bar = { bar.attr }
+";
+        
+        [Test]
+        [Parallelizable]
+        public void PlaceableRefsTest()
+        {
+            var (bundle, err) = LinguiniBuilder.Builder()
+                .Locale("en-US")
+                .AddResource(PlaceableRefs)
+                .Build();
+            Assert.That(err, Is.Null);
+            var args = new Dictionary<string, IFluentType>();
+            Assert.That(bundle.TryGetMessage("ref-bar", args, out _, out var message1), Is.True);
+            Assert.That(message1, Is.EqualTo("Foo Attribute"));
+        }
+
         [Test]
         public void TestDeepClone()
         {
