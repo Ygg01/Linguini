@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Function;
 using Linguini.Shared.Types.Bundle;
@@ -11,19 +10,6 @@ namespace Linguini.Bundle.Test.Unit
     [TestOf(typeof(FluentBundle))]
     public class QuickTests
     {
-        private const string DynRef = @"
-cat = {$number ->
-  *[one] Cat
-  [other] Cats
-}
-dog = {$number ->
-  *[one] Dog
-  [other] Dogs
-}
-attack-log = { $$attacker } attacked {$$defender}.
-";
-
-
         [Test]
         [TestCase(DynRef)]
         public void TestDynamicReference(string input)
@@ -88,68 +74,6 @@ you-see = You see { $$object.StartsWith ->
 }.
 ";
 
-        private const string FuncRefs = @"
-emails = Number of unread emails { $unreadEmails }.
-emails2 = Number of unread emails { NUMBER($unreadEmails) }.
-liked-count = { $num ->
-    [0]     No likes yet.
-    [one]   One person liked your message.
-    *[other] { $num } people liked your message.
-}
-
-liked-count2 = { NUMBER($num) ->
-    [0]     No likes yet.
-    [one]   One person liked your message.
-    *[other] { $num } people liked your message.
-}
-";
-
-        [Test]
-        [Parallelizable]
-        public void TestFunctionReferences()
-        {
-            var (bundle, err) = LinguiniBuilder.Builder(true)
-                .Locale("en-US")
-                .AddResource(FuncRefs)
-                .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
-                .Build();
-            Assert.That(err, Is.Null.Or.Empty);
-            var args = new Dictionary<string, IFluentType>
-            {
-                ["unreadEmails"] = (FluentNumber)3
-            };
-            Assert.That(bundle.TryGetMessage("emails", args, out _, out var message1));
-            Assert.That(message1, Is.EqualTo("Number of unread emails 3."));
-            Assert.That(bundle.TryGetMessage("emails2", args, out _, out var message2));
-            Assert.That(message2, Is.EqualTo("Number of unread emails 3."));
-
-            var likedArg0 = new Dictionary<string, IFluentType>
-            {
-                ["num"] = (FluentNumber)0
-            };
-            var likedArg1 = new Dictionary<string, IFluentType>
-            {
-                ["num"] = (FluentNumber)1
-            };
-            var likedArg2 = new Dictionary<string, IFluentType>
-            {
-                ["num"] = (FluentNumber)2
-            };
-            Assert.That(bundle.TryGetMessage("liked-count", likedArg0, out _, out var likedMessage0));
-            Assert.That(bundle.TryGetMessage("liked-count", likedArg1, out _, out var likedMessage1));
-            Assert.That(bundle.TryGetMessage("liked-count", likedArg2, out _, out var likedMessage2));
-            Assert.That(likedMessage0, Is.EqualTo("No likes yet."));
-            Assert.That(likedMessage1, Is.EqualTo("One person liked your message."));
-            Assert.That(likedMessage2, Is.EqualTo("2 people liked your message."));
-
-            Assert.That(bundle.TryGetMessage("liked-count2", likedArg0, out _, out var likedMessage2_0));
-            Assert.That(bundle.TryGetMessage("liked-count2", likedArg1, out _, out var likedMessage2_1));
-            Assert.That(bundle.TryGetMessage("liked-count2", likedArg2, out _, out var likedMessage2_2));
-            Assert.That(likedMessage2_0, Is.EqualTo("No likes yet."));
-            Assert.That(likedMessage2_1, Is.EqualTo("One person liked your message."));
-            Assert.That(likedMessage2_2, Is.EqualTo("2 people liked your message."));
-        }
-
         private static readonly Dictionary<string, IFluentType> UnreadEmail2 = new()
         {
             ["unreadEmails"] = (FluentNumber)2
@@ -169,18 +93,6 @@ liked-count = { NUMBER($num) ->
     *[other] { $num } people liked your message.
 }";
 
-        private const string TermRefs = @"
--ship = Ship
-    .zero = {NUMBER(0)}
-    .one = {NUMBER(1)}
-
-liked-count = { -ship.zero() ->
-    [0]     No likes yet.
-    [one]   One person liked your message.
-    *[other] { $num } people liked your message.
-}
-";
-
         private const string TermReferences = @"
 foo = Foo { $num }
 bar = { foo }
@@ -190,7 +102,7 @@ bar = { foo }
 foo = Foo
 ref-foo = { foo.missing }
 ";
-        
+
         private const string PlaceableRefs = @"
 foo = Foo
 bar = Bar
@@ -198,6 +110,22 @@ bar = Bar
 ref-bar = { bar.attr }
 ";
 
+        private const string PlaceableMacros = @"
+foo = Foo {$arg}
+-bar = {foo}
+ref-bar = {-bar}
+";
+        private const string PlaceableMacros2 = @"
+-foo = Foo {$arg}
+-qux = {-foo(arg: 1)}
+ref-qux = {-qux}
+";
+
+        private const string PlaceableMacros3 = @"
+foo =
+    .attr = Foo Attr
+bar = { foo } Bar";
+        
         private static IEnumerable<TestCaseData> TestDataFunc()
         {
             yield return new TestCaseData(
@@ -287,6 +215,41 @@ ref-bar = { bar.attr }
                     "", (FluentString)"")
                 .SetName("Entry mismatch isn't leaked")
                 .Returns(false);
+            yield return new TestCaseData(
+                    PlaceableMacros,
+                    "ref-bar",
+                    "Foo {$arg}",
+                    "", (FluentString)"")
+                .SetName("Nesting message reference part")
+                .Returns(true);
+            yield return new TestCaseData(
+                    PlaceableMacros,
+                    "ref-bar",
+                    "Foo {$arg}",
+                    "arg", (FluentNumber)3)
+                .SetName("Ignore args of term references")
+                .Returns(true);
+            yield return new TestCaseData(
+                    PlaceableMacros2,
+                    "ref-qux",
+                    "Foo 1",
+                    "arg", (FluentNumber)3)
+                .SetName("Use args of term references, rather than arguments")
+                .Returns(true);
+            yield return new TestCaseData(
+                    PlaceableMacros3,
+                    "foo",
+                    "{???}",
+                    "", (FluentString)"")
+                .SetName("Message reference that is null")
+                .Returns(false);
+            yield return new TestCaseData(
+                    PlaceableMacros3,
+                    "bar",
+                    "{foo} Bar",
+                    "", (FluentString)"")
+                .SetName("Message reference that is 1")
+                .Returns(false);
         }
 
         [Test]
@@ -295,7 +258,7 @@ ref-bar = { bar.attr }
         public bool TestSimple(string resource, string message,
             string expected, string argName, object argValue)
         {
-            var (bundle, err) = LinguiniBuilder.Builder()
+            var (bundle, _) = LinguiniBuilder.Builder()
                 .Locale("en-US")
                 .AddResource(resource)
                 .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
@@ -310,6 +273,17 @@ ref-bar = { bar.attr }
             return isCorrect;
         }
 
+        private const string TermRefs = @"
+-ship = Ship
+    .zero = {NUMBER(0)}
+    .one = {NUMBER(1)}
+
+liked-count = { -ship.zero() ->
+    [0]     No likes yet.
+    [one]   One person liked your message.
+    *[other] { $num } people liked your message.
+}
+";
 
         [Test]
         [Parallelizable]
@@ -325,6 +299,18 @@ ref-bar = { bar.attr }
             Assert.That(bundle.TryGetMessage("liked-count", args, out _, out var message1));
             Assert.That(message1, Is.EqualTo("No likes yet."));
         }
+
+        private const string DynRef = @"
+cat = {$number ->
+  *[one] Cat
+  [other] Cats
+}
+dog = {$number ->
+  *[one] Dog
+  [other] Dogs
+}
+attack-log = { $$attacker } attacked {$$defender}.
+";
 
         [Test]
         [Parallelizable]

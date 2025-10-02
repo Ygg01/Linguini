@@ -19,7 +19,7 @@ namespace Linguini.Bundle.Resolver
     /// </summary>
     public class Scope : IScope
     {
-        private readonly Dictionary<string, IFluentType>? _args;
+        internal readonly Dictionary<string, IFluentType>? _args;
         private readonly CultureInfo _culture;
         private readonly List<FluentError> _errors;
 
@@ -35,8 +35,8 @@ namespace Linguini.Bundle.Resolver
         internal readonly int MaxRecursion;
         internal readonly List<Pattern> Travelled;
 
-        private Dictionary<string, IFluentType>? _localNameArgs;
-        private List<IFluentType>? _localPosArgs;
+        internal Dictionary<string, IFluentType>? _localNameArgs;
+        internal List<IFluentType>? _localPosArgs;
 
 
         /// <summary>

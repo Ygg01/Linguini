@@ -197,9 +197,9 @@ namespace Linguini.Bundle.Test.Yaml
                 var actualError = errs[i];
                 var expectedError = expectedErrors[i];
 
-                Assert.That(expectedError.Type, Is.EqualTo(actualError.ErrorKind()));
+                Assert.That(actualError.ErrorKind(), Is.EqualTo(expectedError.Type));
                 if (expectedError.Description != null)
-                    Assert.That(expectedError.Description, Is.EqualTo(actualError.ToString()));
+                    Assert.That(actualError.ToString(), Is.EqualTo(expectedError.Description));
             }
         }
 
