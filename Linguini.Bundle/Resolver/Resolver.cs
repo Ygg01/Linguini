@@ -195,7 +195,7 @@ namespace Linguini.Bundle.Resolver
         private static IFluentType ResolveMessageRef(this MessageReference messageRef, WriterScope scope)
         {
             if (!scope.TryGetAstMessage(messageRef.Id.ToString(), out var message))
-                return new FluentErrType();
+                return scope.AddReferenceError(messageRef);
 
             if (messageRef.Attribute == null && message.Value != null)
                 return message.Value.ResolvePattern(scope.Scope);

@@ -280,6 +280,13 @@ ref-bar = { bar.attr }
                     "num", (FluentNumber)3)
                 .SetName("Term attribute reference")
                 .Returns(true);
+            yield return new TestCaseData(
+                    "-foo = Bar\nbaz = { foo }",
+                    "baz",
+                    "{foo}",
+                    "", (FluentString)"")
+                .SetName("Entry mismatch isn't leaked")
+                .Returns(false);
         }
 
         [Test]
