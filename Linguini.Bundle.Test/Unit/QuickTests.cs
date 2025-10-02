@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Function;
 using Linguini.Shared.Types.Bundle;
@@ -10,7 +11,7 @@ namespace Linguini.Bundle.Test.Unit
     [TestOf(typeof(FluentBundle))]
     public class QuickTests
     {
-private const string DynRef = @"
+        private const string DynRef = @"
 cat = {$number ->
   *[one] Cat
   [other] Cats
@@ -149,6 +150,25 @@ liked-count2 = { NUMBER($num) ->
             Assert.That(likedMessage2_2, Is.EqualTo("2 people liked your message."));
         }
 
+        private static readonly Dictionary<string, IFluentType> UnreadEmail2 = new()
+        {
+            ["unreadEmails"] = (FluentNumber)2
+        };
+
+        private const string SelectorVarRef = @"
+liked-count = { $num ->
+    [0]     No likes yet.
+    [one]   One person liked your message.
+    *[other] { $num } people liked your message.
+}";
+
+        private const string SelectorFuncRef = @"
+liked-count = { NUMBER($num) ->
+    [0]     No likes yet.
+    [one]   One person liked your message.
+    *[other] { $num } people liked your message.
+}";
+
         private const string TermRefs = @"
 -ship = Ship
     .zero = {NUMBER(0)}
@@ -160,6 +180,129 @@ liked-count = { -ship.zero() ->
     *[other] { $num } people liked your message.
 }
 ";
+
+        private const string TermReferences = @"
+foo = Foo { $num }
+bar = { foo }
+";
+
+        private const string MissingAttributeStr = @"
+foo = Foo
+ref-foo = { foo.missing }
+";
+        
+        private const string PlaceableRefs = @"
+foo = Foo
+bar = Bar
+    .attr = { foo } Attribute
+ref-bar = { bar.attr }
+";
+
+        private static IEnumerable<TestCaseData> TestDataFunc()
+        {
+            yield return new TestCaseData(
+                    "emails = Number of unread emails { $unreadEmails }.",
+                    "emails",
+                    "Number of unread emails 2.",
+                    "unreadEmails", (FluentNumber)2)
+                .SetName("Placeable reference")
+                .Returns(true);
+            yield return new TestCaseData(
+                    "emails2 = Number of unread emails { NUMBER($unreadEmails) }.",
+                    "emails2",
+                    "Number of unread emails 2.",
+                    "unreadEmails", (FluentNumber)2)
+                .SetName("Function reference")
+                .Returns(true);
+            yield return new TestCaseData(
+                    SelectorVarRef,
+                    "liked-count",
+                    "2 people liked your message.",
+                    "num", (FluentNumber)2)
+                .SetName("Selector placeable var reference two")
+                .Returns(true);
+            yield return new TestCaseData(
+                    SelectorVarRef,
+                    "liked-count",
+                    "One person liked your message.",
+                    "num", (FluentNumber)1)
+                .SetName("Selector placeable var reference one")
+                .Returns(true);
+            yield return new TestCaseData(
+                    SelectorFuncRef,
+                    "liked-count",
+                    "One person liked your message.",
+                    "num", (FluentNumber)1)
+                .SetName("Selector placeable func reference one")
+                .Returns(true);
+            yield return new TestCaseData(
+                    SelectorFuncRef,
+                    "liked-count",
+                    "No likes yet.",
+                    "num", (FluentNumber)0)
+                .SetName("Selector placeable func reference zero")
+                .Returns(true);
+            yield return new TestCaseData(
+                    TermReferences,
+                    "bar",
+                    "Foo 3",
+                    "num", (FluentNumber)3)
+                .SetName("Term reference")
+                .Returns(true);
+            yield return new TestCaseData(
+                    @"foo = { { ""Foo"" } }",
+                    "foo",
+                    "Foo",
+                    "", (FluentString)""
+                )
+                .SetName("Nested placeable")
+                .Returns(true);
+            yield return new TestCaseData(
+                    "foo = { $arg }",
+                    "foo",
+                    "{$arg}",
+                    "", (FluentString)""
+                )
+                .SetName("Missing variable reference")
+                .Returns(false);
+            yield return new TestCaseData(
+                    MissingAttributeStr,
+                    "ref-foo",
+                    "{foo.missing}",
+                    "", (FluentString)""
+                )
+                .SetName("Missing term reference")
+                .Returns(false);
+            yield return new TestCaseData(
+                    PlaceableRefs,
+                    "ref-bar",
+                    "Foo Attribute",
+                    "num", (FluentNumber)3)
+                .SetName("Term attribute reference")
+                .Returns(true);
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(TestDataFunc))]
+        public bool TestSimple(string resource, string message,
+            string expected, string argName, object argValue)
+        {
+            var (bundle, err) = LinguiniBuilder.Builder()
+                .Locale("en-US")
+                .AddResource(resource)
+                .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
+                .AddFunction("IDENTITY", LinguiniFluentFunctions.Identity)
+                .Build();
+
+            var a = new Dictionary<string, IFluentType>();
+            a.Add(argName, (IFluentType)argValue);
+
+            var isCorrect = bundle.TryGetMessage(message, a, out _, out var result);
+            Assert.That(result, Is.EqualTo(expected));
+            return isCorrect;
+        }
+
 
         [Test]
         [Parallelizable]
@@ -189,8 +332,8 @@ liked-count = { -ship.zero() ->
             {
                 ["object"] = (FluentReference)"creature-elf"
             };
-            // Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message1));
-            // Assert.That(message1, Is.EqualTo("You see an elf."));
+            Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message1));
+            Assert.That(message1, Is.EqualTo("You see an elf."));
             args = new Dictionary<string, IFluentType>
             {
                 ["object"] = (FluentReference)"creature-fairy"
@@ -212,104 +355,6 @@ liked-count = { -ship.zero() ->
             };
             Assert.That(frozenBundle.TryGetMessage("you-see", args, out _, out var frozenMessage2));
             Assert.That(frozenMessage2, Is.EqualTo("You see a fairy."));
-        }
-
-        private const string MissingRefs = @"
-foo = Foo { $num }
-bar = { foo }
-";
-
-        [Test]
-        [Parallelizable]
-        public void TestMissingRefs()
-        {
-            var (bundle, err) = LinguiniBuilder.Builder()
-                .Locale("en-US")
-                .AddResource(MissingRefs)
-                .Build();
-            Assert.That(err, Is.Null.Or.Empty);
-            var args = new Dictionary<string, IFluentType>
-            {
-                ["num"] = (FluentNumber)3
-            };
-            Assert.That(bundle.TryGetMessage("bar", args, out _, out var message1));
-            Assert.That(message1, Is.EqualTo("Foo 3"));
-        }
-
-        private const string NestedPlaceables = @"
-foo = { { ""Foo"" } }
-";
-
-        [Test]
-        [Parallelizable]
-        public void TestMissingRefs2()
-        {
-            var (bundle, err) = LinguiniBuilder.Builder()
-                .Locale("en-US")
-                .AddResource(NestedPlaceables)
-                .Build();
-            Assert.That(err, Is.Null.Or.Empty);
-            var args = new Dictionary<string, IFluentType>();
-            Assert.That(bundle.TryGetMessage("foo", args, out _, out var message1));
-            Assert.That(message1, Is.EqualTo("Foo"));
-        }
-
-        private const string UnknownVars = @"
-foo = { $arg }
-";
-
-        [Test]
-        [Parallelizable]
-        public void UnknownVariableRef()
-        {
-            var (bundle, err) = LinguiniBuilder.Builder()
-                .Locale("en-US")
-                .AddResource(UnknownVars)
-                .Build();
-            Assert.That(err, Is.Null.Or.Empty);
-            var args = new Dictionary<string, IFluentType>();
-            Assert.That(bundle.TryGetMessage("foo", args, out _, out var message1), Is.False);
-            Assert.That(message1, Is.EqualTo("{$arg}"));
-        }
-
-        private const string MissingAttributeStr = @"
-foo = Foo
-ref-foo = { foo.missing }
-";
-
-        [Test]
-        [Parallelizable]
-        public void MissingAttribute()
-        {
-            var (bundle, err) = LinguiniBuilder.Builder()
-                .Locale("en-US")
-                .AddResource(MissingAttributeStr)
-                .Build();
-            Assert.That(err, Is.Null.Or.Empty);
-            var args = new Dictionary<string, IFluentType>();
-            Assert.That(bundle.TryGetMessage("ref-foo", args, out _, out var message1), Is.False);
-            Assert.That(message1, Is.EqualTo("{foo.missing}"));
-        }
-
-        private const string PlaceableRefs = @"
-foo = Foo
-bar = Bar
-    .attr = { foo } Attribute
-ref-bar = { bar.attr }
-";
-        
-        [Test]
-        [Parallelizable]
-        public void PlaceableRefsTest()
-        {
-            var (bundle, err) = LinguiniBuilder.Builder()
-                .Locale("en-US")
-                .AddResource(PlaceableRefs)
-                .Build();
-            Assert.That(err, Is.Null);
-            var args = new Dictionary<string, IFluentType>();
-            Assert.That(bundle.TryGetMessage("ref-bar", args, out _, out var message1), Is.True);
-            Assert.That(message1, Is.EqualTo("Foo Attribute"));
         }
     }
 }
