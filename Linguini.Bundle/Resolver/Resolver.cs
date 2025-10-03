@@ -16,22 +16,31 @@ namespace Linguini.Bundle.Resolver
     {
         public static string FormatPattern(this Pattern pattern, Scope scope)
         {
-            return pattern.ResolvePattern(WriterScope.FromScope(scope)).AsString();
+            return pattern.ResolvePattern(scope).AsString();
+        }
+
+        private static IFluentType ResolvePattern(this Pattern pattern, Scope scope)
+        {
+            return pattern.ResolvePatternInternal(WriterScope.FromScope(scope));
         }
 
         private static IFluentType ResolvePattern(this Pattern pattern, WriterScope scope)
         {
-            var writingScope = WriterScope.FromScope(scope.Scope, scope._areArgsInacessible);
+            return pattern.ResolvePatternInternal(WriterScope.CreateTermScope(scope));
+        }
+
+        private static IFluentType ResolvePatternInternal(this Pattern pattern, WriterScope writingScope)
+        {
             if (writingScope.Contains(pattern))
             {
                 writingScope.AddCyclicError(pattern);
                 return FluentNone.None;
             }
 
-            writingScope.AddTravelledError(pattern);
+            writingScope.AddTravelledPattern(pattern);
             var needsIsolating = writingScope.UseIsolating
                                  && pattern.Elements.Count > 1;
-            
+
             if (pattern.Elements.Count == 1)
                 return pattern.Elements[0] switch
                 {
@@ -126,6 +135,7 @@ namespace Linguini.Bundle.Resolver
         private static IFluentType ResolveInlineExpr(this IInlineExpression expr, WriterScope scope,
             IFluentType? localPosArg = null)
         {
+            scope.PrevExpression = expr;
             return expr switch
             {
                 NumberLiteral numberLiteral => numberLiteral.ResolveNumber(),
@@ -181,10 +191,10 @@ namespace Linguini.Bundle.Resolver
             if (!scope.TryGetAstTerm(termRef.Id.ToString(), out var term))
                 return scope.AddReferenceError(termRef);
 
-            var (pos,named) = ResolveArgs(termRef.Arguments, scope);
-            scope.Scope._localNameArgs = (Dictionary<string, IFluentType>?) named;
-            scope.Scope._localPosArgs = (List<IFluentType>?) pos;
-            
+            var (pos, named) = ResolveArgs(termRef.Arguments, scope);
+            scope.Scope._localNameArgs = (Dictionary<string, IFluentType>?)named;
+            scope.Scope._localPosArgs = (List<IFluentType>?)pos;
+
             if (termRef.Attribute == null)
                 return term.Value.ResolvePattern(WriterScope.CreateTermScope(scope));
 
@@ -201,11 +211,9 @@ namespace Linguini.Bundle.Resolver
                 return scope.AddReferenceError(messageRef);
 
             if (messageRef.Attribute == null)
-            {
-                return message.Value == null 
-                    ? scope.AddNoValueError(messageRef.Id) 
+                return message.Value == null
+                    ? scope.AddNoValueError(messageRef.Id)
                     : message.Value.ResolvePattern(scope);
-            } 
 
             foreach (var arg in message.Attributes)
                 if (messageRef.Attribute.Equals(arg.Id))
@@ -268,7 +276,8 @@ namespace Linguini.Bundle.Resolver
     public ref struct WriterScope
     {
         private StringBuilder? _writer;
-        internal bool _areArgsInacessible;
+        internal bool AreArgsInaccessible;
+        internal IInlineExpression? PrevExpression;
 
         internal bool Dirty
         {
@@ -280,28 +289,18 @@ namespace Linguini.Bundle.Resolver
         internal IReadOnlyList<IFluentType>? LocalPosArgs => Scope.LocalPosArgs;
 
 
-
         internal Scope Scope { get; private set; }
 
         internal bool EnableExtensions => Scope.Bundle.EnableExtensions;
 
-        public static WriterScope FromScope(Scope scope, bool isTermScoped = false)
-        {
-            return new WriterScope
-            {
-                _writer = new StringBuilder(),
-                Scope = scope,
-                _areArgsInacessible = isTermScoped
-            };
-        }
-        
         public static WriterScope CreateTermScope(WriterScope scope)
         {
             return new WriterScope
             {
                 _writer = new StringBuilder(),
                 Scope = scope.Scope,
-                _areArgsInacessible = true,
+                PrevExpression = scope.PrevExpression,
+                AreArgsInaccessible = true
             };
         }
 
@@ -311,7 +310,20 @@ namespace Linguini.Bundle.Resolver
             {
                 _writer = null,
                 Scope = writerScope.Scope,
-                _areArgsInacessible = writerScope._areArgsInacessible,
+                PrevExpression = writerScope.PrevExpression,
+                AreArgsInaccessible = writerScope.AreArgsInaccessible
+            };
+        }
+        
+        
+        internal static WriterScope FromScope(Scope scope)
+        {
+            return new WriterScope
+            {
+                _writer = new StringBuilder(),
+                Scope = scope,
+                AreArgsInaccessible = false,
+                PrevExpression = null,
             };
         }
 
@@ -348,9 +360,11 @@ namespace Linguini.Bundle.Resolver
             _writer?.Append(fluentType.AsString());
         }
 
-        internal void AddCyclicError(Pattern pattern)
+        internal IFluentType AddCyclicError(Pattern pattern)
         {
             Scope.AddError(ResolverFluentError.Cyclic(pattern));
+            var _lastExpr = PrevExpression == null ? "???" : PrevExpression.ToString();
+            return new FluentErrType($"{{{_lastExpr}}}");
         }
 
         internal void AddTooManyPlaceablesError()
@@ -358,17 +372,14 @@ namespace Linguini.Bundle.Resolver
             Scope.AddError(ResolverFluentError.TooManyPlaceables(Scope.Placeable, Scope.MaxPlaceable));
         }
 
-        internal void AddTravelledError(Pattern pattern)
+        internal void AddTravelledPattern(Pattern pattern)
         {
             Scope.Travelled.Add(pattern);
         }
 
         internal FluentErrType AddReferenceError(IInlineExpression reference)
         {
-            if (!_areArgsInacessible)
-            {
-                Scope.AddError(ResolverFluentError.Reference(reference));
-            }
+            if (!AreArgsInaccessible) Scope.AddError(ResolverFluentError.Reference(reference));
             return new FluentErrType($"{{{reference}}}");
         }
 
@@ -420,5 +431,6 @@ namespace Linguini.Bundle.Resolver
             Scope.AddError(ResolverFluentError.NoValue(id.Name));
             return new FluentErrType($"{{{id}}}");
         }
+
     }
 }

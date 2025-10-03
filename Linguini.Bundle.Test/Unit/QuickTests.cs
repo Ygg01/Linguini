@@ -115,6 +115,7 @@ foo = Foo {$arg}
 -bar = {foo}
 ref-bar = {-bar}
 ";
+
         private const string PlaceableMacros2 = @"
 -foo = Foo {$arg}
 -qux = {-foo(arg: 1)}
@@ -125,7 +126,7 @@ ref-qux = {-qux}
 foo =
     .attr = Foo Attr
 bar = { foo } Bar";
-        
+
         private static IEnumerable<TestCaseData> TestDataFunc()
         {
             yield return new TestCaseData(
@@ -248,7 +249,14 @@ bar = { foo } Bar";
                     "bar",
                     "{foo} Bar",
                     "", (FluentString)"")
-                .SetName("Message reference that is 1")
+                .SetName("Message reference to non-existent message")
+                .Returns(false);
+            yield return new TestCaseData(
+                    "foo = { foo }",
+                    "foo",
+                    "{foo}",
+                    "", (FluentString)"")
+                .SetName("Cyclic self-reference")
                 .Returns(false);
         }
 

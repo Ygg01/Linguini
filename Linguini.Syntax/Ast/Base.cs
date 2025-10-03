@@ -232,7 +232,7 @@ namespace Linguini.Syntax.Ast
         ///     reference needs additional resolving.
         /// </summary>
         /// <returns>true for numbers and strings; false otherwise</returns>
-        public bool IsTriviallyResolveable()
+        public bool IsTriviallyResolvable()
         {
             return Elements.Count == 1 && Elements[0] switch
             {
