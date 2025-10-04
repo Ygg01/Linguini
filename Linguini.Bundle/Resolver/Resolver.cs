@@ -94,7 +94,7 @@ namespace Linguini.Bundle.Resolver
         private static IFluentType ResolveSelect(this SelectExpression selectExpression, WriterScope writerScope)
         {
             var selector = selectExpression.Selector.ResolveInlineExpr(WriterScope.Dummy(writerScope), FluentNone.None);
-            if (selector is FluentNone && !writerScope.IsTermScoped)
+            if (selector is FluentNone && !writerScope.IsTermScoped && selectExpression.Selector is not DynamicReference)
             {
                 writerScope.UnknownVariable(selectExpression.Selector);
             }
@@ -146,7 +146,7 @@ namespace Linguini.Bundle.Resolver
                 VariableReference variableReference => variableReference.ResolveVarRef(scope, localPosArg),
                 TermReference termReference => termReference.ResolveTermRef(scope),
                 MessageReference messageReference => messageReference.ResolveMessageRef(scope),
-                DynamicReference dynamicReference => dynamicReference.ResolveDynamicRef(scope, localPosArg),
+                DynamicReference dynamicReference when scope.EnableExtensions => dynamicReference.ResolveDynamicRef(scope, localPosArg),
                 Placeable placeable => placeable.ResolvePlaceable(scope),
                 _ => throw new ArgumentException($"Unexpected expression! {expr}")
             };

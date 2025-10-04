@@ -308,6 +308,7 @@ namespace Linguini.Syntax.Ast
         /// </summary>
         public readonly Identifier Id;
 
+
         /// <summary>
         ///     Constructs a dynamic reference in Fluent to reference
         ///     another term with possible call arguments and optional attribute.
