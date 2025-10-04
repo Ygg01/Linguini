@@ -127,6 +127,23 @@ foo =
     .attr = Foo Attr
 bar = { foo } Bar";
 
+        private const string SelectorMissing = @"
+select = {$none ->
+    [a] A
+    *[b] B
+}";
+
+        private const string PlaceableMacros4 = @"
+-ship = Ship
+    .gender = {$style ->
+      *[traditional] neuter
+        [chicago] feminine
+    }
+ref-attr = {-ship.gender ->
+  *[masculine] He
+    [feminine] She
+    [neuter] It
+}";
         private static IEnumerable<TestCaseData> TestDataFunc()
         {
             yield return new TestCaseData(
@@ -258,6 +275,20 @@ bar = { foo } Bar";
                     "", (FluentString)"")
                 .SetName("Cyclic self-reference")
                 .Returns(false);
+            yield return new TestCaseData(
+                    SelectorMissing,
+                    "select",
+                    "B",
+                    "", (FluentString)"")
+                .SetName("Selector missing")
+                .Returns(false);
+            yield return new TestCaseData(
+                    PlaceableMacros4,
+                    "ref-attr",
+                    "It",
+                    "style", (FluentString)"")
+                .SetName("Parameterized term attributes")
+                .Returns(true);
         }
 
         [Test]
@@ -356,6 +387,28 @@ attack-log = { $$attacker } attacked {$$defender}.
             };
             Assert.That(frozenBundle.TryGetMessage("you-see", args, out _, out var frozenMessage2));
             Assert.That(frozenMessage2, Is.EqualTo("You see a fairy."));
+        }
+
+        private const string TransformFunc = @"
+foo = Faa
+    .bar = Bar {foo} Baz
+bar = Bar {""Baz""}
+";        
+        
+        [Test]
+        [Parallelizable]
+        public void TestTransformFunc()
+        {
+            var (bundle, err) = LinguiniBuilder.Builder(true)
+                .Locale("en-US")
+                .AddResource(TransformFunc)
+                .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
+                .SetTransformFunc(s => s.Replace('a', 'A'))
+                .Build();
+            Assert.That(err, Is.Null.Or.Empty);
+            var args = new Dictionary<string, IFluentType>();
+            Assert.That(bundle.TryGetMessage("foo", args, out _, out var actual));
+            Assert.That(actual, Is.EqualTo("FAA"));
         }
     }
 }

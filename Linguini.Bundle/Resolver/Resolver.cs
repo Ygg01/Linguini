@@ -43,7 +43,7 @@ namespace Linguini.Bundle.Resolver
             if (pattern.Elements.Count == 1)
                 return pattern.Elements[0] switch
                 {
-                    TextLiteral textLiteral => new FluentString(textLiteral.Value.Span),
+                    TextLiteral textLiteral => writingScope.Write(textLiteral),
                     Placeable placeable => placeable.ResolvePlaceable(writingScope),
                     _ => throw new ArgumentOutOfRangeException()
                 };
@@ -81,7 +81,6 @@ namespace Linguini.Bundle.Resolver
             return writingScope.AsString();
         }
 
-        // TODO use Scope instead of WriterScope
         private static IFluentType ResolvePlaceable(this Placeable placeable, WriterScope scope)
         {
             return placeable.Expression switch
@@ -95,6 +94,10 @@ namespace Linguini.Bundle.Resolver
         private static IFluentType ResolveSelect(this SelectExpression selectExpression, WriterScope writerScope)
         {
             var selector = selectExpression.Selector.ResolveInlineExpr(WriterScope.Dummy(writerScope), FluentNone.None);
+            if (selector is FluentNone && !writerScope.IsTermScoped)
+            {
+                writerScope.UnknownVariable(selectExpression.Selector);
+            }
             var retVal = selectExpression.GetDefault(writerScope);
 
             foreach (var variant in selectExpression.Variants)
@@ -275,7 +278,7 @@ namespace Linguini.Bundle.Resolver
     public ref struct WriterScope
     {
         private StringBuilder? _writer;
-        internal bool AreArgsInaccessible;
+        internal bool IsTermScoped;
         internal IInlineExpression? PrevExpression;
 
         internal bool Dirty
@@ -299,7 +302,7 @@ namespace Linguini.Bundle.Resolver
                 _writer = new StringBuilder(),
                 Scope = scope.Scope,
                 PrevExpression = scope.PrevExpression,
-                AreArgsInaccessible = true
+                IsTermScoped = true
             };
         }
 
@@ -310,7 +313,7 @@ namespace Linguini.Bundle.Resolver
                 _writer = null,
                 Scope = writerScope.Scope,
                 PrevExpression = writerScope.PrevExpression,
-                AreArgsInaccessible = writerScope.AreArgsInaccessible
+                IsTermScoped = writerScope.IsTermScoped
             };
         }
         
@@ -321,17 +324,18 @@ namespace Linguini.Bundle.Resolver
             {
                 _writer = new StringBuilder(),
                 Scope = scope,
-                AreArgsInaccessible = false,
+                IsTermScoped = false,
                 PrevExpression = null,
             };
         }
 
-        internal void Write(TextLiteral textLiteral)
+        internal IFluentType Write(TextLiteral textLiteral)
         {
-            _writer?.Append(Scope.TransformFunc == null
-                ? textLiteral.Value
-                : Scope.TransformFunc(textLiteral.Value.ToString()));
-            ;
+            var str = Scope.TransformFunc == null
+                ? textLiteral.Value.ToString()
+                : Scope.TransformFunc(textLiteral.Value.ToString()); 
+            _writer?.Append(str);
+            return new FluentString(str);
         }
 
         internal void Write(char textLiteral)
@@ -378,8 +382,13 @@ namespace Linguini.Bundle.Resolver
 
         internal FluentErrType AddReferenceError(IInlineExpression reference)
         {
-            if (!AreArgsInaccessible) Scope.AddError(ResolverFluentError.Reference(reference));
+            if (!IsTermScoped) Scope.AddError(ResolverFluentError.Reference(reference));
             return new FluentErrType($"{{{reference}}}");
+        }
+        
+        internal void UnknownVariable(IInlineExpression reference)
+        {
+            Scope.AddError(ResolverFluentError.Reference(reference));
         }
 
         internal bool TryGetFunction(Identifier id, [NotNullWhen(true)] out FluentFunction? func)

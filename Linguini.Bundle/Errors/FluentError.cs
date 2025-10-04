@@ -199,7 +199,7 @@ namespace Linguini.Bundle.Errors
                 VariableReference varRef => new ResolverFluentError($"Unknown variable: ${varRef.Id}",
                     ErrorType.Reference, location),
                 DynamicReference dynamicReference => new ResolverFluentError(
-                    $"Unknown dynamic: $${dynamicReference.Id}", ErrorType.Reference, location),
+                    $"Unknown dynamic reference: $${dynamicReference.Id}", ErrorType.Reference, location),
                 _ => throw new ArgumentException($"Expected reference got ${self.GetType()}")
             };
         }
