@@ -33,8 +33,7 @@ namespace Linguini.Bundle.Resolver
         {
             if (writingScope.Contains(pattern))
             {
-                writingScope.AddCyclicError(pattern);
-                return FluentNone.None;
+                return writingScope.AddCyclicError(pattern);;
             }
 
             writingScope.AddTravelledPattern(pattern);
