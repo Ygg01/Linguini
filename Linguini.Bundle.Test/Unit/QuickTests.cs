@@ -10,6 +10,19 @@ namespace Linguini.Bundle.Test.Unit
     [TestOf(typeof(FluentBundle))]
     public class QuickTests
     {
+        private const string DynRef = @"
+cat = {$number ->
+    *[one] Cat
+    [other] Cats
+}
+dog = {$number ->
+    *[one] Dog
+    [other] Dogs
+}
+attack-log1 = { $$attacker() } attacked {$$defender($def_num)}.
+attack-log2 = { $$attacker(number: $atk_num) } attacked {$$defender(number: $def_num)}.
+";
+
         [Test]
         [TestCase(DynRef)]
         public void TestDynamicReference(string input)
@@ -21,10 +34,12 @@ namespace Linguini.Bundle.Test.Unit
             var args = new Dictionary<string, IFluentType>
             {
                 ["attacker"] = (FluentReference)"cat",
-                ["defender"] = (FluentReference)"dog"
+                ["defender"] = (FluentString)"dog",
+                ["atk_num"] = (FluentNumber)1,
+                ["def_num"] = (FluentNumber)2
             };
-            Assert.That(bundle.TryGetMessage("attack-log", args, out _, out var message));
-            Assert.That("Cat attacked Dog.", Is.EqualTo(message));
+            Assert.That(bundle.TryGetMessage("attack-log2", args, out _, out var message));
+            Assert.That(message, Is.EqualTo("Cat attacked Dogs."));
         }
 
         private const string Macros = @"
@@ -63,7 +78,7 @@ call-attr-no-args = { -ship.gender()  ->
             Assert.That(frozenMessage, Is.EqualTo("It"));
         }
 
-   
+
         private static readonly Dictionary<string, IFluentType> UnreadEmail2 = new()
         {
             ["unreadEmails"] = (FluentNumber)2
@@ -134,6 +149,7 @@ ref-attr = {-ship.gender ->
     [feminine] She
     [neuter] It
 }";
+
         private static IEnumerable<TestCaseData> TestDataFunc()
         {
             yield return new TestCaseData(
@@ -329,17 +345,6 @@ liked-count = { -ship.zero() ->
             Assert.That(message1, Is.EqualTo("No likes yet."));
         }
 
-        private const string DynRef = @"
-cat = {$number ->
-  *[one] Cat
-  [other] Cats
-}
-dog = {$number ->
-  *[one] Dog
-  [other] Dogs
-}
-attack-log = { $$attacker } attacked {$$defender}.
-";
 
         private const string DynamicSelectors = @"
 -creature-fairy = fairy
@@ -351,8 +356,8 @@ you-see = You see { $$object.StartsWith ->
     *[consonant] a { $$object }
 }.
 ";
-        
-        
+
+
         [Test]
         [Parallelizable]
         public void TestDynamicSelectors()
@@ -380,8 +385,8 @@ you-see = You see { $$object.StartsWith ->
 foo = Faa
     .bar = Bar {foo} Baz
 bar = Bar {""Baz""}
-";        
-        
+";
+
         [Test]
         [Parallelizable]
         public void TestTransformFunc()

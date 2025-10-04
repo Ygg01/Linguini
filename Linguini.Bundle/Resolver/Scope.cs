@@ -331,11 +331,16 @@ namespace Linguini.Bundle.Resolver
         // [Obsolete("Will be removed in 1.0 release. Use TryResolveReference instead.")]
         public bool TryGetReference(string argument, [NotNullWhen(true)] out FluentReference? reference)
         {
-            if (_args != null && _args.TryGetValue(argument, out var fluentType) && fluentType is FluentReference refs)
-            {
-                reference = refs;
-                return true;
-            }
+            if (_args != null && _args.TryGetValue(argument, out var fluentType))
+                switch (fluentType)
+                {
+                    case FluentReference refs:
+                        reference = refs;
+                        return true;
+                    case FluentString fs:
+                        reference = new FluentReference(fs);
+                        return true;
+                }
 
             reference = null;
             return false;
