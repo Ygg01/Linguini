@@ -116,9 +116,9 @@ namespace Linguini.Bundle
             [NotNullWhen(false)] ref IList<FluentError>? errors)
         {
             var scope = new Scope(this, args);
-            var value = pattern.Resolve(scope);
+            var value = pattern.FormatPattern(scope);
             errors = scope.Errors;
-            return value.AsString();
+            return value;
         }
 
         /// <inheritdoc/>
