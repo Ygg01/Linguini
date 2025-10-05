@@ -35,7 +35,6 @@ namespace Linguini.Bundle.Resolver
             if (writingScope.Contains(pattern))
             {
                 return writingScope.AddCyclicError(pattern);
-                ;
             }
 
             writingScope.AddTravelledPattern(pattern);
@@ -267,9 +266,8 @@ namespace Linguini.Bundle.Resolver
         private static IFluentType NestArguments(this IInlineExpression expr, CallArguments? callArguments,
             WriterScope scope, IFluentType? localContextArg = null)
         {
-            var (pos, named) = ResolveArgs(callArguments, scope);
-            scope.Scope._localNameArgs = (Dictionary<string, IFluentType>?)named;
-            scope.Scope._localPosArgs = (List<IFluentType>?)pos;
+            var args = ResolveArgs(callArguments, scope);
+            scope.Scope.SetLocalArgs(args);
 
             var x = expr switch
             {
@@ -277,8 +275,7 @@ namespace Linguini.Bundle.Resolver
                 TermReference termReference => termReference.ResolveTermRef(scope),
                 _ => new FluentErrType($"Expected dynamic reference got {nameof(expr)} instead")
             };
-            scope.Scope._localNameArgs = null;
-            scope.Scope._localPosArgs = null;
+            scope.Scope.ClearLocalArgs();
 
             return x;
         }
@@ -434,8 +431,8 @@ namespace Linguini.Bundle.Resolver
         internal IFluentType AddCyclicError(Pattern pattern)
         {
             Scope.AddError(ResolverFluentError.Cyclic(pattern));
-            var _lastExpr = PrevExpression == null ? "???" : PrevExpression.ToString();
-            return new FluentErrType($"{{{_lastExpr}}}");
+            var lastExpr = PrevExpression == null ? "???" : PrevExpression.ToString();
+            return new FluentErrType($"{{{lastExpr}}}");
         }
 
         internal void AddTooManyPlaceablesError()

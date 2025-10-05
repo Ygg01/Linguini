@@ -150,6 +150,19 @@ ref-attr = {-ship.gender ->
     [neuter] It
 }";
 
+        private const string LaBomba = @"
+lol0 = LOL
+lol1 = {lol0} {lol0} {lol0} {lol0} {lol0} {lol0} {lol0} {lol0} {lol0} {lol0}
+lol2 = {lol1} {lol1} {lol1} {lol1} {lol1} {lol1} {lol1} {lol1} {lol1} {lol1}
+lol3 = {lol2} {lol2} {lol2} {lol2} {lol2} {lol2} {lol2} {lol2} {lol2} {lol2}
+lol4 = {lol3} {lol3} {lol3} {lol3} {lol3} {lol3} {lol3} {lol3} {lol3} {lol3}
+lol5 = {lol4} {lol4} {lol4} {lol4} {lol4} {lol4} {lol4} {lol4} {lol4} {lol4}
+lol6 = {lol5} {lol5} {lol5} {lol5} {lol5} {lol5} {lol5} {lol5} {lol5} {lol5}
+lol7 = {lol6} {lol6} {lol6} {lol6} {lol6} {lol6} {lol6} {lol6} {lol6} {lol6}
+lol8 = {lol7} {lol7} {lol7} {lol7} {lol7} {lol7} {lol7} {lol7} {lol7} {lol7}
+lol9 = {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8}
+lolz = {lol9}";
+
         private static IEnumerable<TestCaseData> TestDataFunc()
         {
             yield return new TestCaseData(
@@ -294,6 +307,11 @@ ref-attr = {-ship.gender ->
                     "It",
                     "style", (FluentString)"")
                 .SetName("Parameterized term attributes")
+                .Returns(true);
+            yield return new TestCaseData(
+                    LaBomba,
+                    "lol1", "", "", (FluentString)"")
+                .SetName("La Bomba")
                 .Returns(true);
         }
 

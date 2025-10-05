@@ -29,9 +29,13 @@
         /// <returns></returns>
         public static bool MatchByPluralCategory(this IScope scope, FluentString fs1, FluentNumber fn2)
         {
-            if (!fs1.TryGetPluralCategory(out var strCategory)) return false;
+            if (!fs1.TryGetPluralCategory(out var strCategory))
+            {
+                return false;
+            }
+
             var numCategory = scope.GetPluralRules(RuleType.Cardinal, fn2);
-        
+
             return numCategory == strCategory;
         }
     }

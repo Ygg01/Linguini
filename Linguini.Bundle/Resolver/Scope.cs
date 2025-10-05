@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using Linguini.Bundle.Errors;
 using Linguini.Shared.Types;
@@ -32,7 +31,6 @@ namespace Linguini.Bundle.Resolver
         public readonly IReadBundle Bundle;
 
         internal readonly int MaxPlaceable;
-        internal readonly int MaxRecursion;
         internal readonly List<Pattern> Travelled;
 
         internal Dictionary<string, IFluentType>? _localNameArgs;
@@ -49,7 +47,6 @@ namespace Linguini.Bundle.Resolver
             Placeable = 0;
             Bundle = fluentBundle;
             MaxPlaceable = fluentBundle.MaxPlaceable;
-            MaxRecursion = fluentBundle.MaxRecursion;
             _culture = fluentBundle.Culture;
             TransformFunc = fluentBundle.TransformFunc;
             FormatterFunc = fluentBundle.FormatterFunc;
@@ -101,9 +98,7 @@ namespace Linguini.Bundle.Resolver
         internal bool Dirty { get; set; }
 
         internal short Placeable { get; set; }
-
-        internal short Recursion { get; set; }
-
+        
         /// <summary>
         ///     Provides access to the collection of <see cref="FluentError" /> instances encountered during processing.
         ///     The <c>Errors</c> property is used to track and retrieve any errors that occur while resolving patterns or
@@ -187,12 +182,14 @@ namespace Linguini.Bundle.Resolver
         private static bool IsSpecialCase(string info, RuleType ruleType)
         {
             if (info.Length < 4)
+            {
                 return false;
+            }
 
             var specialCaseTable = ruleType switch
             {
                 RuleType.Ordinal => RuleTable.SpecialCaseOrdinal,
-                _ => RuleTable.SpecialCaseCardinal
+                _                => RuleTable.SpecialCaseCardinal
             };
             return specialCaseTable.Contains(info);
         }
@@ -202,7 +199,9 @@ namespace Linguini.Bundle.Resolver
             if (CultureInfo.InvariantCulture.Equals(info))
                 // When culture info is uncertain we default to common 
                 // language behavior
+            {
                 return "root";
+            }
 
             var langStr = specialCase
                 ? info.Name.Replace('-', '_')
@@ -231,85 +230,16 @@ namespace Linguini.Bundle.Resolver
             _errors.Add(resolverFluentError);
         }
 
-        /// <summary>
-        ///     Tracks the evaluation of an expression in a pattern and writes the output to a writer.
-        /// </summary>
-        /// <param name="writer">The <see cref="TextWriter" /> used to write the output.</param>
-        /// <param name="pattern">The <see cref="Pattern" /> being evaluated, used to track recursion.</param>
-        /// <param name="expr">The <see cref="IExpression" /> to be evaluated and written.</param>
-        /// <param name="pos">The position of the current expression in the pattern.</param>
-        public void MaybeTrack(TextWriter writer, Pattern pattern, IExpression expr, int pos)
-        {
-            if (Travelled.Count == 0) Travelled.Add(pattern);
-
-            expr.TryWrite(writer, this, pos);
-
-            if (Dirty)
-            {
-                writer.Write('{');
-                expr.WriteError(writer);
-                writer.Write('}');
-            }
-        }
-
         internal bool Contains(Pattern pattern)
         {
             return Travelled.Contains(pattern);
         }
 
-        /// <summary>
-        ///     Tracks the traversal of a pattern within the scope and writes its resolved output.
-        ///     Handles cyclic references by logging errors and writing error output for the expression.
-        /// </summary>
-        /// <param name="writer">The text writer used to output the resolved pattern or error.</param>
-        /// <param name="pattern">The pattern being traversed and resolved.</param>
-        /// <param name="exp">The inline expression to write an error message if a cyclic reference is detected.</param>
-        public void Track(TextWriter writer, Pattern pattern, IInlineExpression exp)
+        internal void PopTraveled()
         {
-            if (Travelled.Contains(pattern))
+            if (Travelled.Count > 0)
             {
-                AddError(ResolverFluentError.Cyclic(pattern));
-                writer.Write('{');
-                exp.WriteError(writer);
-                writer.Write('}');
-            }
-            else
-            {
-                Travelled.Add(pattern);
-                pattern.Write(writer, this);
-                PopTraveled();
-            }
-        }
-
-        private void PopTraveled()
-        {
-            if (Travelled.Count > 0) Travelled.RemoveAt(Travelled.Count - 1);
-        }
-
-        /// <summary>
-        ///     Writes a reference error to the specified <see cref="TextWriter" />.
-        ///     Tracks the error and attempts to write an error representation for the
-        ///     provided inline expression.
-        /// </summary>
-        /// <param name="writer">The <see cref="TextWriter" /> used to write the error.</param>
-        /// <param name="exp">The <see cref="IInlineExpression" /> causing the reference error.</param>
-        /// <returns>
-        ///     Returns <c>true</c> if the error was successfully written; otherwise, returns <c>false</c>
-        ///     if an exception occurred while writing.
-        /// </returns>
-        public bool WriteRefError(TextWriter writer, IInlineExpression exp)
-        {
-            AddError(ResolverFluentError.Reference(exp));
-            try
-            {
-                writer.Write('{');
-                exp.WriteError(writer);
-                writer.Write('}');
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
+                Travelled.RemoveAt(Travelled.Count - 1);
             }
         }
 
@@ -332,6 +262,7 @@ namespace Linguini.Bundle.Resolver
         public bool TryGetReference(string argument, [NotNullWhen(true)] out FluentReference? reference)
         {
             if (_args != null && _args.TryGetValue(argument, out var fluentType))
+            {
                 switch (fluentType)
                 {
                     case FluentReference refs:
@@ -341,84 +272,16 @@ namespace Linguini.Bundle.Resolver
                         reference = new FluentReference(fs);
                         return true;
                 }
+            }
 
             reference = null;
             return false;
         }
 
         /// <summary>
-        ///     Attempts to resolve a reference of type <see cref="FluentReference" /> associated with the specified argument.
-        /// </summary>
-        /// <param name="argument">The name of the argument to look up.</param>
-        /// <param name="reference">
-        ///     When this method returns, contains the <see cref="FluentReference" /> associated with the specified argument if the
-        ///     argument exists
-        ///     and is of the correct type; otherwise, contains <c>null</c>.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if a reference associated with the specified argument exists and is of type
-        ///     <see cref="FluentReference" />;
-        ///     otherwise, <c>false</c>.
-        /// </returns>
-        public bool TryResolveReference(string argument, [NotNullWhen(true)] out IFluentType? value)
-        {
-            if (_args != null && _args.TryGetValue(argument, out var fluentType)
-                              && fluentType is FluentReference refs && _args.TryGetValue(refs.AsString(), out var val))
-            {
-                value = val;
-                return true;
-            }
-
-            value = null;
-            return false;
-        }
-
-        /// <summary>
-        ///     Resolves positional and named arguments from the provided call arguments.
-        /// </summary>
-        /// <param name="callArguments">The call arguments containing positional and named arguments.</param>
-        /// <returns>A <see cref="ResolvedArgs" /> object containing the resolved positional and named arguments.</returns>
-        public ResolvedArgs GetArguments(CallArguments? callArguments)
-        {
-            var positionalArgs = new List<IFluentType>();
-            var namedArgs = new Dictionary<string, IFluentType>();
-            if (callArguments != null)
-            {
-                var listPositional = callArguments.Value.PositionalArgs;
-                for (var i = 0; i < listPositional.Count; i++)
-                {
-                    var expr = listPositional[i].Resolve(this);
-                    positionalArgs.Add(expr);
-                }
-
-                var listNamed = callArguments.Value.NamedArgs;
-                for (var i = 0; i < listNamed.Count; i++)
-                {
-                    var arg = listNamed[i];
-                    namedArgs.Add(arg.Name.ToString(), arg.Value.Resolve(this));
-                }
-            }
-
-            return new ResolvedArgs(positionalArgs, namedArgs);
-        }
-
-        /// <summary>
-        ///     Sets the local named arguments within the <see cref="Scope" />.
-        /// </summary>
-        /// <param name="resNamed">The dictionary of named arguments to set; if null, clears the local named arguments.</param>
-        /// <seealso cref="SetLocalArgs(ResolvedArgs)" />
-        public void SetLocalArgs(IDictionary<string, IFluentType>? resNamed)
-        {
-            _localNameArgs = resNamed != null
-                ? new Dictionary<string, IFluentType>(resNamed)
-                : null;
-        }
-
-        /// <summary>
         ///     Sets the local arguments for the scope, updating named and positional arguments.
         /// </summary>
         /// <param name="resNamed">Resolved arguments containing named and positional arguments to set locally.</param>
-        /// <seealso cref="SetLocalArgs(System.Collections.Generic.IDictionary{string,Linguini.Shared.Types.Bundle.IFluentType}?)" />
         public void SetLocalArgs(ResolvedArgs resNamed)
         {
             _localNameArgs = (Dictionary<string, IFluentType>?)resNamed.Named;
@@ -433,32 +296,67 @@ namespace Linguini.Bundle.Resolver
             _localNameArgs = null;
             _localPosArgs = null;
         }
+    }
+
+    /// <summary>
+    ///     Provides methods to handle pluralization rules for different languages and cultures.
+    ///     This includes determining the plural category of a number based on the given culture
+    ///     and rule type (e.g., cardinal or ordinal), as well as handling special cases for specific locales.
+    /// </summary>
+    public static class PluralRules
+    {
+        /// <summary>Determines the plural category of a given number based on the specified culture and rule type.</summary>
+        /// <param name="info">The CultureInfo representing the cultural context to determine the plural category.</param>
+        /// <param name="ruleType">The type of pluralization rule (e.g., Cardinal or Ordinal) to apply.</param>
+        /// <param name="number">The FluentNumber to evaluate for determining the plural category.</param>
+        /// <return>A PluralCategory enumerating the plural classification of the provided number.</return>
+        public static PluralCategory GetPluralCategory(CultureInfo info, RuleType ruleType, FluentNumber number)
+        {
+            var specialCase = IsSpecialCase(info.Name, ruleType);
+            var langStr = GetPluralRuleLang(info, specialCase);
+            var func = RuleTable.GetPluralFunc(langStr, ruleType);
+            if (number.TryPluralOperands(out var op))
+            {
+                return func(op);
+            }
+
+            return PluralCategory.Other;
+        }
 
         /// <summary>
-        ///     Resolves a reference to a string value based on the provided identifier.
+        ///     Special language identifier, that goes over 4 ISO language code.
         /// </summary>
-        /// <param name="refId">The identifier to resolve into a string reference.</param>
-        /// <returns>
-        ///     A string representation of the resolved reference, either from local or dynamic context.
-        /// </returns>
-        public string ResolveReference(Identifier refId)
+        /// <param name="info">language code</param>
+        /// <param name="ruleType">Is it ordinal or cardinal rule type.</param>
+        /// <returns><c>true</c> when its not standard language code; <c>false</c> otherwise.</returns>
+        public static bool IsSpecialCase(string info, RuleType ruleType)
         {
-            var refArg = refId.ToString();
-            while (true)
+            if (info.Length < 4)
             {
-                if (IncrPlaceable() && _args != null && _args.TryGetValue(refArg, out var fluentType))
-                {
-                    if (fluentType is FluentReference dynamicReference)
-                    {
-                        refArg = dynamicReference.AsString();
-                        continue;
-                    }
-
-                    return fluentType.AsString();
-                }
-
-                return refArg;
+                return false;
             }
+
+            var specialCaseTable = ruleType switch
+            {
+                RuleType.Ordinal => RuleTable.SpecialCaseOrdinal,
+                _                => RuleTable.SpecialCaseCardinal
+            };
+            return specialCaseTable.Contains(info);
+        }
+
+        private static string GetPluralRuleLang(CultureInfo info, bool specialCase)
+        {
+            if (CultureInfo.InvariantCulture.Equals(info))
+                // When culture info is uncertain we default to common 
+                // language behavior
+            {
+                return "root";
+            }
+
+            var langStr = specialCase
+                ? info.Name.Replace('-', '_')
+                : info.TwoLetterISOLanguageName;
+            return langStr;
         }
     }
 

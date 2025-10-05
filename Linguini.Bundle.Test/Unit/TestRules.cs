@@ -5,7 +5,7 @@ using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using NUnit.Framework;
 using PluralRulesGenerated.Test;
-using static Linguini.Bundle.Resolver.ResolverHelpers.PluralRules;
+using static Linguini.Bundle.Resolver.PluralRules;
 
 #pragma warning disable 0436
 namespace Linguini.Bundle.Test.Unit
@@ -51,7 +51,9 @@ namespace Linguini.Bundle.Test.Unit
             PluralCategory expected)
         {
             if (!TryGetCultureInfo(cultureStr, type, out var info))
+            {
                 return;
+            }
 
             // If upper limit exist, we probe the range a bit
             if (upper != null)
