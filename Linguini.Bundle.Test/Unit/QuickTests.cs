@@ -161,7 +161,8 @@ lol6 = {lol5} {lol5} {lol5} {lol5} {lol5} {lol5} {lol5} {lol5} {lol5} {lol5}
 lol7 = {lol6} {lol6} {lol6} {lol6} {lol6} {lol6} {lol6} {lol6} {lol6} {lol6}
 lol8 = {lol7} {lol7} {lol7} {lol7} {lol7} {lol7} {lol7} {lol7} {lol7} {lol7}
 lol9 = {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8}
-lolz = {lol9}";
+lolz = {lol9}
+";
 
         private static IEnumerable<TestCaseData> TestDataFunc()
         {
@@ -310,9 +311,15 @@ lolz = {lol9}";
                 .Returns(true);
             yield return new TestCaseData(
                     LaBomba,
-                    "lol1", "", "", (FluentString)"")
-                .SetName("La Bomba")
+                    "lol1", "LOL LOL LOL LOL LOL LOL LOL LOL LOL LOL",
+                    "", (FluentString)"")
+                .SetName("La Bomba 1")
                 .Returns(true);
+            yield return new TestCaseData(
+                    LaBomba,
+                    "lolz", "{???}", "", (FluentString)"")
+                .SetName("La Bomba Final")
+                .Returns(false);
         }
 
         [Test]
@@ -389,8 +396,8 @@ you-see = You see { $$object.StartsWith ->
             {
                 ["object"] = (FluentReference)"creature-elf"
             };
-            // Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message1));
-            // Assert.That(message1, Is.EqualTo("You see an elf."));
+            Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message1));
+            Assert.That(message1, Is.EqualTo("You see an elf."));
             args = new Dictionary<string, IFluentType>
             {
                 ["object"] = (FluentReference)"creature-fairy"

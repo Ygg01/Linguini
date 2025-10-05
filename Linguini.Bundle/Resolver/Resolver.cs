@@ -69,7 +69,7 @@ namespace Linguini.Bundle.Resolver
                         {
                             writingScope.Dirty = true;
                             writingScope.AddTooManyPlaceablesError();
-                            return new FluentErrType();
+                            return new FluentErrType("{???}");
                         }
 
                         if (needsIsolating)
@@ -78,7 +78,12 @@ namespace Linguini.Bundle.Resolver
                         }
 
                         var plc = placeable.ResolvePlaceable(writingScope);
-                        writingScope.Write(plc);
+                        if (writingScope.Dirty)
+                        {
+                            writingScope._writer = new StringBuilder();
+                            return new FluentErrType("{???}");
+                        }
+                        writingScope.WritePlaceable(plc);
 
                         if (needsIsolating)
                         {
@@ -342,7 +347,7 @@ namespace Linguini.Bundle.Resolver
 
     public ref struct WriterScope
     {
-        private StringBuilder? _writer;
+        internal StringBuilder? _writer;
         internal bool IsTermScoped;
         internal IInlineExpression? PrevExpression;
 
@@ -423,10 +428,12 @@ namespace Linguini.Bundle.Resolver
             return Scope.IncrPlaceable();
         }
 
-        internal void Write(IFluentType fluentType)
+        internal void WritePlaceable(IFluentType fluentType)
         {
+            Scope.PopTraveled();
             _writer?.Append(fluentType.AsString());
         }
+
 
         internal IFluentType AddCyclicError(Pattern pattern)
         {
