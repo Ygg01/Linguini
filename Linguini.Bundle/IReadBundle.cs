@@ -12,19 +12,31 @@ using Linguini.Syntax.Ast;
 namespace Linguini.Bundle
 {
     /// <summary>
-    /// Represents an interface for reading language bundles. Read-only bundles only implement this interface.
+    ///     Represents an interface for reading language bundles. Read-only bundles only implement this interface.
     /// </summary>
     public interface IReadBundle
     {
         /// <summary>
-        /// Determines if the provided identifier has a message associated with it. </summary>
+        ///     Whether experimental features are enabled.
+        ///     When `true` experimental features are enabled. Experimental features include stuff like:
+        ///     <list type="bullet">
+        ///         <item>dynamic reference</item>
+        ///         <item>dynamic reference attributes</item>
+        ///         <item>term reference as parameters</item>
+        ///     </list>
+        /// </summary>
+        // ReSharper disable once MemberCanBeProtected.Global
+        public bool EnableExtensions { get; init; }
+
+        /// <summary>
+        ///     Determines if the provided identifier has a message associated with it.
+        /// </summary>
         /// <param name="identifier">The identifier to check.</param>
         /// <returns>True if the identifier has a message; otherwise, false.</returns>
-        /// 
         bool HasMessage(string identifier);
 
         /// <summary>
-        /// Converts a <see cref="Pattern"/> to a string using given arguments.
+        ///     Converts a <see cref="Pattern" /> to a string using given arguments.
         /// </summary>
         /// <param name="pattern">The pattern to format.</param>
         /// <param name="args">The dictionary of arguments to replace the variables.</param>
@@ -38,7 +50,7 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Converts a <see cref="Pattern"/> to a string using given arguments.
+        ///     Converts a <see cref="Pattern" /> to a string using given arguments.
         /// </summary>
         /// <param name="pattern">The pattern to format.</param>
         /// <param name="args">The dictionary of arguments to replace the variables.</param>
@@ -48,68 +60,84 @@ namespace Linguini.Bundle
             [NotNullWhen(false)] ref IList<FluentError>? errors);
 
         /// <summary>
-        /// Tries to get the AstMessage associated with the specified ident.
+        ///     Tries to get the AstMessage associated with the specified ident.
         /// </summary>
         /// <param name="ident">The identifier to look for.</param>
-        /// <param name="message">When this method returns, contains the AstMessage associated with the specified ident, if found; otherwise, null.</param>
+        /// <param name="message">
+        ///     When this method returns, contains the AstMessage associated with the specified ident, if found;
+        ///     otherwise, null.
+        /// </param>
         /// <returns>True if an AstMessage was found for the specified ident; otherwise, false.</returns>
         bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message);
 
         /// <summary>
-        /// Tries to get a term by its identifier.
+        ///     Tries to get a term by its identifier.
         /// </summary>
         /// <param name="ident">The identifier of the AST term.</param>
-        /// <param name="term">When this method returns, contains the AST term associated with the specified identifier, if the identifier is found; otherwise, null. This parameter is passed uninitialized.</param>
+        /// <param name="term">
+        ///     When this method returns, contains the AST term associated with the specified identifier, if the
+        ///     identifier is found; otherwise, null. This parameter is passed uninitialized.
+        /// </param>
         /// <returns>true if the identifier is found and the corresponding AST term is retrieved; otherwise, false.</returns>
         bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? term);
 
         /// <summary>
-        /// Tries to get the FluentFunction associated with the specified Identifier.
+        ///     Tries to get the FluentFunction associated with the specified Identifier.
         /// </summary>
         /// <param name="id">The Identifier used to identify the FluentFunction.</param>
-        /// <param name="function">When the method returns, contains the FluentFunction associated with the Identifier, if the Identifier is found; otherwise, null. This parameter is passed uninitialized.</param>
+        /// <param name="function">
+        ///     When the method returns, contains the FluentFunction associated with the Identifier, if the
+        ///     Identifier is found; otherwise, null. This parameter is passed uninitialized.
+        /// </param>
         /// <returns>true if the FluentFunction associated with the Identifier is found; otherwise, false.</returns>
         bool TryGetFunction(Identifier id, [NotNullWhen(true)] out FluentFunction? function);
 
         /// <summary>
-        /// Tries to retrieve a FluentFunction object by the given function name.
+        ///     Tries to retrieve a FluentFunction object by the given function name.
         /// </summary>
         /// <param name="funcName">The name of the function to retrieve.</param>
         /// <param name="function">An output parameter that will hold the retrieved FluentFunction object, if found.</param>
         /// <returns>
-        /// True if a FluentFunction object with the specified name was found and assigned to the function output parameter.
-        /// False if a FluentFunction object with the specified name was not found.
+        ///     True if a FluentFunction object with the specified name was found and assigned to the function output parameter.
+        ///     False if a FluentFunction object with the specified name was not found.
         /// </returns>
         bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function);
 
         /// <summary>
-        /// This method retrieves an enumerable collection of all message identifiers. </summary>
+        ///     This method retrieves an enumerable collection of all message identifiers.
+        /// </summary>
         /// <returns>
-        /// An enumerable collection of message identifiers. </returns>
+        ///     An enumerable collection of message identifiers.
+        /// </returns>
         IEnumerable<string> GetMessageEnumerable();
 
         /// <summary>
-        /// Retrieves an enumerable collection of string function names.
+        ///     Retrieves an enumerable collection of string function names.
         /// </summary>
         /// <returns>An enumerable collection of functions names.</returns>
         IEnumerable<string> GetFuncEnumerable();
 
         /// <summary>
-        /// Retrieves an enumerable collection of terms.
+        ///     Retrieves an enumerable collection of terms.
         /// </summary>
         /// <returns>An enumerable collection of terms.</returns>
         IEnumerable<string> GetTermEnumerable();
 
         /// <summary>
-        /// Tries to retrieve a message based on the provided ID and arguments.
-        /// A convenience method for <see cref="TryGetMessage(string, string?, System.Collections.Generic.IDictionary{string,Linguini.Shared.Types.Bundle.IFluentType}?,out System.Collections.Generic.IList{Linguini.Bundle.Errors.FluentError}?,out string?)"/>
+        ///     Tries to retrieve a message based on the provided ID and arguments.
+        ///     A convenience method for
+        ///     <see
+        ///         cref="TryGetMessage(string, string?, System.Collections.Generic.IDictionary{string,Linguini.Shared.Types.Bundle.IFluentType}?,out System.Collections.Generic.IList{Linguini.Bundle.Errors.FluentError}?,out string?)" />
         /// </summary>
         /// <param name="id">The ID of the message to retrieve.</param>
         /// <param name="args">Optional. A dictionary of arguments to be inserted into the message.</param>
-        /// <param name="errors">Optional. When the method returns false, a list of errors encountered during the retrieval process.</param>
+        /// <param name="errors">
+        ///     Optional. When the method returns false, a list of errors encountered during the retrieval
+        ///     process.
+        /// </param>
         /// <param name="message">Optional. When the method returns true, the retrieved message. Null if no message is found.</param>
         /// <returns>
-        /// True if the message was successfully retrieved. False otherwise.
+        ///     True if the message was successfully retrieved. False otherwise.
         /// </returns>
         bool TryGetMessage(string id, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
@@ -120,30 +148,24 @@ namespace Linguini.Bundle
 
 
         /// <summary>
-        /// Determines whether the given identifier with attribute has a message.
+        ///     Determines whether the given identifier with attribute has a message.
         /// </summary>
         /// <param name="idWithAttr">The identifier with attribute.</param>
         /// <returns>True if the identifier with attribute has a message; otherwise, false.</returns>
         bool HasAttrMessage(string idWithAttr)
         {
             var attributes = idWithAttr.IndexOf('.');
-            if (attributes < 0)
-            {
-                return HasMessage(idWithAttr);
-            }
+            if (attributes < 0) return HasMessage(idWithAttr);
 
             var id = idWithAttr.AsSpan(0, attributes).ToString();
             var attr = idWithAttr.AsSpan(attributes + 1).ToString();
-            if (TryGetAstMessage(id, out var astMessage))
-            {
-                return astMessage.GetAttribute(attr) != null;
-            }
+            if (TryGetAstMessage(id, out var astMessage)) return astMessage.GetAttribute(attr) != null;
 
             return false;
         }
 
         /// <summary>
-        /// Retrieves the attribute message by processing the given message template with the provided arguments.
+        ///     Retrieves the attribute message by processing the given message template with the provided arguments.
         /// </summary>
         /// <param name="msgWithAttr">The string consisting of `messageId.Attribute`.</param>
         /// <param name="args">The dictionary of arguments to be used for resolution in the message template. Can be null.</param>
@@ -152,22 +174,16 @@ namespace Linguini.Bundle
         string? GetAttrMessage(string msgWithAttr, params (string, IFluentType)[] args)
         {
             var dictionary = new Dictionary<string, IFluentType>(args.Length);
-            foreach (var (key, val) in args)
-            {
-                dictionary.Add(key, val);
-            }
+            foreach (var (key, val) in args) dictionary.Add(key, val);
 
             TryGetAttrMessage(msgWithAttr, dictionary, out var errors, out var message);
-            if (errors is { Count: > 0 })
-            {
-                throw new LinguiniException(errors);
-            }
+            if (errors is { Count: > 0 }) throw new LinguiniException(errors);
 
             return message;
         }
 
         /// <summary>
-        /// Tries to retrieve an attribute message.
+        ///     Tries to retrieve an attribute message.
         /// </summary>
         /// <param name="msgWithAttr">The message with attribute.</param>
         /// <param name="args">The arguments passed with the message.</param>
@@ -182,7 +198,7 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Tries to retrieve an attribute message.
+        ///     Tries to retrieve an attribute message.
         /// </summary>
         /// <param name="msgWithAttr">The message with attribute.</param>
         /// <param name="args">The arguments passed with the message.</param>
@@ -202,7 +218,7 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Tries to get a message based on the provided parameters.
+        ///     Tries to get a message based on the provided parameters.
         /// </summary>
         /// <param name="id">The identifier of the message.</param>
         /// <param name="attribute">The attribute of the message.</param>
@@ -218,7 +234,7 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Tries to get a message based on the provided parameters.
+        ///     Tries to get a message based on the provided parameters.
         /// </summary>
         /// <param name="id">The identifier of the message.</param>
         /// <param name="attribute">The attribute of the message.</param>
@@ -252,19 +268,18 @@ namespace Linguini.Bundle
                 return false;
             }
 
-            errors = null;
             message = FormatPattern(pattern, args, out errors);
-            return true;
+            return errors == null || errors.Count == 0;
         }
     }
 
     /// <summary>
-    /// Provides extension methods for working with bundles.
+    ///     Provides extension methods for working with bundles.
     /// </summary>
     public static class ReadBundleExtensions
     {
         /// <summary>
-        /// Thaws a frozen bundle and returns a new instance of a concurrent bundle.
+        ///     Thaws a frozen bundle and returns a new instance of a concurrent bundle.
         /// </summary>
         /// <param name="frozenBundle">The frozen bundle to thaw.</param>
         /// <returns>A new instance of a concurrent bundle.</returns>
@@ -286,7 +301,7 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Convenience method for <see cref="IReadBundle.HasAttrMessage"/>
+        ///     Convenience method for <see cref="IReadBundle.HasAttrMessage" />
         /// </summary>
         /// <param name="bundle">The bundle to retrieve the message from.</param>
         /// <param name="idWithAttr">The identifier with attribute.</param>
@@ -297,7 +312,7 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Convenience method for <see cref="IReadBundle.GetAttrMessage"/>
+        ///     Convenience method for <see cref="IReadBundle.GetAttrMessage" />
         /// </summary>
         /// <param name="bundle">The bundle to retrieve the message from.</param>
         /// <param name="msgWithAttr">The message with attribute to retrieve.</param>
@@ -311,7 +326,7 @@ namespace Linguini.Bundle
 
 
         /// <summary>
-        /// Retrieves a localized message from the given bundle.
+        ///     Retrieves a localized message from the given bundle.
         /// </summary>
         /// <param name="bundle">The bundle to retrieve the message from.</param>
         /// <param name="id">The ID of the message to retrieve.</param>
@@ -323,21 +338,21 @@ namespace Linguini.Bundle
             IDictionary<string, IFluentType>? args = null)
         {
             bundle.TryGetMessage(id, attribute, args, out var errors, out var message);
-            if (errors is { Count: > 0 })
-            {
-                throw new LinguiniException(errors);
-            }
+            if (errors is { Count: > 0 }) throw new LinguiniException(errors);
 
             return message;
         }
 
         /// <summary>
-        /// Convenience method for <see cref="IReadBundle.TryGetAttrMessage"/>
+        ///     Convenience method for <see cref="IReadBundle.TryGetAttrMessage" />
         /// </summary>
         /// <param name="bundle">The bundle to retrieve the message from.</param>
         /// <param name="msgWithAttr">The message with attribute</param>
         /// <param name="args">Optional arguments to be passed to the attribute message.</param>
-        /// <param name="errors">When this method returns false, contains a list of errors that occurred while trying to retrieve the message; otherwise, null.</param>
+        /// <param name="errors">
+        ///     When this method returns false, contains a list of errors that occurred while trying to retrieve
+        ///     the message; otherwise, null.
+        /// </param>
         /// <param name="message">When this method returns true, contains the retrieved message; otherwise, null.</param>
         /// <returns><c>true</c> if the attribute message was successfully retrieved; otherwise, <c>false</c>.</returns>
         public static bool TryGetAttrMessage(this IReadBundle bundle, string msgWithAttr,
@@ -348,13 +363,18 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Convenience method for <see cref="IReadBundle.TryGetMessage(string,string?,System.Collections.Generic.IDictionary{string,Linguini.Shared.Types.Bundle.IFluentType}?,out System.Collections.Generic.IList{Linguini.Bundle.Errors.FluentError}?,out string?)"/>
+        ///     Convenience method for
+        ///     <see
+        ///         cref="IReadBundle.TryGetMessage(string,string?,System.Collections.Generic.IDictionary{string,Linguini.Shared.Types.Bundle.IFluentType}?,out System.Collections.Generic.IList{Linguini.Bundle.Errors.FluentError}?,out string?)" />
         /// </summary>
         /// <param name="bundle">The bundle to retrieve the message from.</param>
         /// <param name="id">The identifier of the message.</param>
         /// <param name="attribute">Optional attribute of the message.</param>
         /// <param name="args">Optional arguments to be passed to the attribute message.</param>
-        /// <param name="errors">When this method returns false, contains a list of errors that occurred while trying to retrieve the message; otherwise, null.</param>
+        /// <param name="errors">
+        ///     When this method returns false, contains a list of errors that occurred while trying to retrieve
+        ///     the message; otherwise, null.
+        /// </param>
         /// <param name="message">When this method returns true, contains the retrieved message; otherwise, null.</param>
         /// <returns>True if the message was successfully retrieved, otherwise false.</returns>
         public static bool TryGetMessage(this IReadBundle bundle, string id, string? attribute,
@@ -365,12 +385,15 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Tries to get a message from the specified bundle.
+        ///     Tries to get a message from the specified bundle.
         /// </summary>
         /// <param name="bundle">The bundle from which to retrieve the message.</param>
         /// <param name="id">The identifier of the message to retrieve.</param>
         /// <param name="args">Optional arguments used to format the message (optional).</param>
-        /// <param name="errors">When this method returns false, contains a list of errors that occurred while trying to retrieve the message; otherwise, null.</param>
+        /// <param name="errors">
+        ///     When this method returns false, contains a list of errors that occurred while trying to retrieve
+        ///     the message; otherwise, null.
+        /// </param>
         /// <param name="message">When this method returns true, contains the retrieved message; otherwise, null.</param>
         /// <returns>True if the message was successfully retrieved; otherwise, false.</returns>
         public static bool TryGetMessage(this IReadBundle bundle, string id,

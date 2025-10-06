@@ -52,19 +52,6 @@ namespace Linguini.Bundle
         public byte MaxPlaceable { get; }
 
         /// <summary>
-        /// Whether experimental features are enabled.
-        ///
-        /// When `true` experimental features are enabled. Experimental features include stuff like:
-        /// <list type="bullet">
-        /// <item>dynamic reference</item>
-        /// <item>dynamic reference attributes</item>
-        /// <item>term reference as parameters</item>
-        /// </list>
-        /// </summary>
-        // ReSharper disable once MemberCanBeProtected.Global
-        public bool EnableExtensions { get; init; }
-
-        /// <summary>
         /// Specifies a method that will be applied only on values extending <see cref="IFluentType"/>. Useful for defining a special formatter for <see cref="FluentNumber"/>.
         /// </summary>
         public Func<string, string>? TransformFunc { get; }
@@ -116,6 +103,9 @@ namespace Linguini.Bundle
         }
 #endif
         /// <inheritdoc/>
+        public bool EnableExtensions { get; init; }
+
+        /// <inheritdoc/>
         public bool HasMessage(string identifier)
         {
             return Messages.ContainsKey(identifier);
@@ -126,9 +116,9 @@ namespace Linguini.Bundle
             [NotNullWhen(false)] ref IList<FluentError>? errors)
         {
             var scope = new Scope(this, args);
-            var value = pattern.Resolve(scope);
+            var value = pattern.FormatPattern(scope);
             errors = scope.Errors;
-            return value.AsString();
+            return value;
         }
 
         /// <inheritdoc/>

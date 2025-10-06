@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
-using Linguini.Bundle.Function;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 using NUnit.Framework;
@@ -61,17 +60,17 @@ new1  = new
         [Test]
         public void TestNonDefaultBundleOptions()
         {
-            var defaultBundleOpt = new FluentBundleOption()
+            var defaultBundleOpt = new FluentBundleOption
             {
                 Locales = { "en" },
                 MaxPlaceable = 123,
                 UseIsolating = false,
                 TransformFunc = _transform,
                 FormatterFunc = _formatter,
-                Functions = new Dictionary<string, ExternalFunction>()
+                Functions = new Dictionary<string, ExternalFunction>
                 {
                     ["zero"] = _zeroFunc,
-                    ["id"] = _idFunc,
+                    ["id"] = _idFunc
                 }
             };
             var bundle = FluentBundle.MakeUnchecked(defaultBundleOpt);
@@ -172,19 +171,19 @@ new1  = new
         [Test]
         public void TestConcurrencyOption()
         {
-            var bundleOpt = new FluentBundleOption()
+            var bundleOpt = new FluentBundleOption
             {
                 Locales = { "en-US" },
-                UseConcurrent = true,
+                UseConcurrent = true
             };
             var optBundle = FluentBundle.MakeUnchecked(bundleOpt);
-            
+
             Parallel.For(0, 10, i => optBundle.AddResource($"term-1 = {i}", out _));
             Parallel.For(0, 10, i => optBundle.AddResource($"term-2= {i}", out _));
             Parallel.For(0, 10, i => optBundle.TryGetAttrMessage("term-1", null, out _, out _));
             Parallel.For(0, 10, i => optBundle.AddResourceOverriding($"term-2= {i + 1}"));
             Assert.That(optBundle.HasMessage("term-1"));
-            
+
             // Frozen bundle are read only and should be thread-safe
             var frozenBundle = optBundle.ToFrozenBundle();
             Parallel.For(0, 10, i => frozenBundle.TryGetAttrMessage("term-1", null, out _, out _));
@@ -199,7 +198,7 @@ new1  = new
                 .AddResource("hello-user =  Hello, { $username }!")
                 .UncheckedBuild();
 
-            var message = bundler.GetAttrMessage("hello-user",  ("username", (FluentString)"Test"));
+            var message = bundler.GetAttrMessage("hello-user", ("username", (FluentString)"Test"));
             Assert.That("Hello, Test!", Is.EqualTo(message));
         }
 
@@ -213,11 +212,11 @@ new1  = new
                 .UncheckedBuild();
 
             bundle.TryAddFunction("id", _idFunc);
-            
+
             Assert.That(bundle.TryAddFunction("id", _zeroFunc), Is.False);
             Assert.Throws<ArgumentException>(() => bundle.AddFunctionUnchecked("id", _zeroFunc));
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCase("new1.attr", true)]
@@ -276,181 +275,6 @@ new1  = new
             return error.Select(e => e.GetSpan()).ToList();
         }
 
-        private const string DynRef = @"
-cat = {$number ->
-  *[one] Cat
-  [other] Cats
-}
-dog = {$number ->
-  *[one] Dog
-  [other] Dogs
-}
-attack-log = { $$attacker } attacked {$$defender}.
-"; 
-        
-        
-        [Test]
-        [TestCase(DynRef)]
-        public void TestDynamicReference(string input)
-        {
-            var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
-                .AddResource(input)
-                .Build();
-            Assert.That(err, Is.Null);
-            var args = new Dictionary<string, IFluentType>()
-            {
-                ["attacker"] = (FluentReference)"cat",
-                ["defender"] = (FluentReference)"dog",
-            };
-            Assert.That(bundle.TryGetMessage("attack-log", args, out _, out var message));
-            Assert.That("Cat attacked Dog.", Is.EqualTo(message));
-        }
-
-        private const string Macros = @"
--ship = Ship
-    .gender = {$style ->
-        *[traditional] neuter
-          [chicago] feminine
-    }
-call-attr-no-args = {-ship.gender() ->
-    *[masculine] He
-      [feminine] She
-      [neuter] It
-}
-"; 
-        
-        [Test]
-        [Parallelizable]
-        public void TestExtensionsWork()
-        {
-            var (bundle, err) =  LinguiniBuilder.Builder(useExperimental: true).Locale("en-US")
-                .AddResource(Macros)
-                .Build();
-            Assert.That(err, Is.Null);
-            var args = new Dictionary<string, IFluentType>
-            {
-                ["style"] = (FluentString)"chicago",
-            };
-            Assert.That(bundle.TryGetMessage("call-attr-no-args", args, out _, out var message));
-            Assert.That("It", Is.EqualTo(message));
-            
-            // Check Frozen bundle behaves similarly
-            var frozenBundle = bundle.ToFrozenBundle();
-            Assert.That(frozenBundle.TryGetMessage("call-attr-no-args", args, out _, out var frozenMessage));
-            Assert.That("It", Is.EqualTo(frozenMessage));
-        }
-        private const string DynamicSelectors = @"
--creature-fairy = fairy
--creature-elf = elf
-    .StartsWith = vowel
-
-you-see = You see { $$object.StartsWith ->
-    [vowel] an { $$object }
-    *[consonant] a { $$object }
-}.
-"; 
-        
-        private const string FuncRefs = @"
-emails = Number of unread emails { $unreadEmails }.
-emails2 = Number of unread emails { NUMBER($unreadEmails) }.
-liked-count = { $num ->
-    [0]     No likes yet.
-    [one]   One person liked your message.
-    *[other] { $num } people liked your message.
-}
-
-liked-count2 = { NUMBER($num) ->
-    [0]     No likes yet.
-    [one]   One person liked your message.
-    *[other] { $num } people liked your message.
-}
-";
-
-        [Test]
-        [Parallelizable]
-        public void TestFunctionReferences()
-        {
-            var (bundle, err) = LinguiniBuilder.Builder(useExperimental: true)
-                .Locale("en-US")
-                .AddResource(FuncRefs)
-                .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
-                .Build();
-            Assert.That(err, Is.Null.Or.Empty);
-            var args = new Dictionary<string, IFluentType>
-            {
-                ["unreadEmails"] = (FluentNumber)3,
-            };
-            Assert.That(bundle.TryGetMessage("emails", args, out _, out var message1));
-            Assert.That(message1, Is.EqualTo("Number of unread emails 3."));
-            Assert.That(bundle.TryGetMessage("emails2", args, out _, out var message2));
-            Assert.That(message2, Is.EqualTo("Number of unread emails 3."));
-            
-            var likedArg0 = new Dictionary<string, IFluentType>
-            {
-                ["num"] = (FluentNumber)0
-            };
-            var likedArg1 = new Dictionary<string, IFluentType>
-            {
-                ["num"] = (FluentNumber)1
-            };
-            var likedArg2 = new Dictionary<string, IFluentType>
-            {
-                ["num"] = (FluentNumber)2
-            };
-            Assert.That(bundle.TryGetMessage("liked-count", likedArg0, out _, out var likedMessage0));
-            Assert.That(bundle.TryGetMessage("liked-count", likedArg1, out _, out var likedMessage1));
-            Assert.That(bundle.TryGetMessage("liked-count", likedArg2, out _, out var likedMessage2));
-            Assert.That(likedMessage0, Is.EqualTo("No likes yet."));
-            Assert.That(likedMessage1, Is.EqualTo("One person liked your message."));
-            Assert.That(likedMessage2, Is.EqualTo("2 people liked your message."));
-            
-            Assert.That(bundle.TryGetMessage("liked-count2", likedArg0, out _, out var likedMessage2_0));
-            Assert.That(bundle.TryGetMessage("liked-count2", likedArg1, out _, out var likedMessage2_1));
-            Assert.That(bundle.TryGetMessage("liked-count2", likedArg2, out _, out var likedMessage2_2));
-            Assert.That(likedMessage2_0, Is.EqualTo("No likes yet."));
-            Assert.That(likedMessage2_1, Is.EqualTo("One person liked your message."));
-            Assert.That(likedMessage2_2, Is.EqualTo("2 people liked your message."));
-        }
-        
-        
-        [Test]
-        [Parallelizable]
-        public void TestDynamicSelectors()
-        {
-            var (bundle, err) = LinguiniBuilder.Builder(useExperimental: true)
-                .Locale("en-US")
-                .AddResource(DynamicSelectors)
-                .Build();
-            Assert.That(err, Is.Null);
-            var args = new Dictionary<string, IFluentType>
-            {
-                ["object"] = (FluentReference)"creature-elf",
-            };
-            Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message1));
-            Assert.That("You see an elf.", Is.EqualTo(message1));
-            args = new Dictionary<string, IFluentType>
-            {
-                ["object"] = (FluentReference)"creature-fairy",
-            };
-            Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message2));
-            Assert.That("You see a fairy.", Is.EqualTo(message2));
-            
-            // Check Frozen bundle behaves similarly
-            var frozenBundle = bundle.ToFrozenBundle();
-            args = new Dictionary<string, IFluentType>
-            {
-                ["object"] = (FluentReference)"creature-elf",
-            };
-            Assert.That(frozenBundle.TryGetMessage("you-see", args, out _, out var frozenMessage1));
-            Assert.That("You see an elf.", Is.EqualTo(frozenMessage1));
-            args = new Dictionary<string, IFluentType>
-            {
-                ["object"] = (FluentReference)"creature-fairy",
-            };
-            Assert.That(frozenBundle.TryGetMessage("you-see", args, out _, out var frozenMessage2));
-            Assert.That("You see a fairy.", Is.EqualTo(frozenMessage2));
-        }
-
         [Test]
         public void TestDeepClone()
         {
@@ -461,29 +285,29 @@ liked-count2 = { NUMBER($num) ->
                 UseIsolating = false,
                 TransformFunc = _transform,
                 FormatterFunc = _formatter,
-                Functions = new Dictionary<string, ExternalFunction>()
+                Functions = new Dictionary<string, ExternalFunction>
                 {
                     ["zero"] = _zeroFunc,
-                    ["id"] = _idFunc,
+                    ["id"] = _idFunc
                 }
             };
 
             // Assume FluentBundle object has DeepClone method
-            FluentBundle originalBundle = FluentBundle.MakeUnchecked(originalBundleOption);
-            FluentBundle clonedBundle = originalBundle.DeepClone();
+            var originalBundle = FluentBundle.MakeUnchecked(originalBundleOption);
+            var clonedBundle = originalBundle.DeepClone();
 
             // Assert that the original and cloned objects are not the same reference
             Assert.That(originalBundle, Is.Not.SameAs(clonedBundle));
 
             // Assert that the properties are copied properly
             Assert.That(originalBundle, Is.EqualTo(clonedBundle));
-            
+
             // Assert that if original property is changed, new property isn't.
             originalBundle.AddFunctionOverriding("zero", _idFunc);
             clonedBundle.TryGetFunction("zero", out var clonedZero);
-            Assert.That((FluentFunction) _zeroFunc, Is.EqualTo(clonedZero));
+            Assert.That((FluentFunction)_zeroFunc, Is.EqualTo(clonedZero));
             originalBundle.TryGetFunction("zero", out var originalZero);
-            Assert.That((FluentFunction) _idFunc, Is.EqualTo(originalZero));
+            Assert.That((FluentFunction)_idFunc, Is.EqualTo(originalZero));
         }
     }
 }

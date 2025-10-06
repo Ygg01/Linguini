@@ -12,6 +12,7 @@ using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace Linguini.Bundle
@@ -34,7 +35,7 @@ namespace Linguini.Bundle
         /// <summary>
         ///     When formatting patterns, FluentBundle inserts Unicode Directionality Isolation Marks to indicate that the
         ///     direction of a placeable may differ from the surrounding message.
-        ///     This is important for cases such as when a right-to-left user name is presented in the left-to-right message.
+        ///     This is important for cases such as when a right-to-left username is presented in the left-to-right message.
         /// </summary>
         public bool UseIsolating { get; set; } = true;
 
@@ -55,17 +56,9 @@ namespace Linguini.Bundle
         ///     elements count towards it). Useful for preventing billion laughs attack. Defaults to 100.
         /// </summary>
         public byte MaxPlaceable { get; internal init; } = 100;
+        
 
-        /// <summary>
-        ///     Whether experimental features are enabled.
-        ///     When `true` experimental features are enabled. Experimental features include stuff like:
-        ///     <list type="bullet">
-        ///         <item>dynamic reference</item>
-        ///         <item>dynamic reference attributes</item>
-        ///         <item>term reference as parameters</item>
-        ///     </list>
-        /// </summary>
-        // ReSharper disable once MemberCanBeProtected.Global
+        /// <inheritdoc />
         public bool EnableExtensions { get; init; }
 
         /// <summary>
@@ -138,9 +131,9 @@ namespace Linguini.Bundle
             [NotNullWhen(false)] ref IList<FluentError>? errors)
         {
             var scope = new Scope(this, args);
-            var value = pattern.Resolve(scope);
+            var value = pattern.FormatPattern(scope);
             errors = scope.Errors;
-            return value.AsString();
+            return value;
         }
 
         /// <summary>
@@ -187,7 +180,7 @@ namespace Linguini.Bundle
         public bool AddResource(TextReader reader, [NotNullWhen(false)] out List<FluentError>? errors,
             string inputName = "????")
         {
-            var res = LinguiniParser.FromTextReader(reader, inputName, enableExperimental: EnableExtensions).Parse();
+            var res = LinguiniParser.FromTextReader(reader, inputName, EnableExtensions).Parse();
             return AddResource(res, out errors);
         }
 
@@ -203,7 +196,6 @@ namespace Linguini.Bundle
             foreach (var parseError in resource.Errors) innerErrors.Add(ParserFluentError.ParseError(parseError));
 
             foreach (var entry in resource.Entries)
-            {
                 switch (entry)
                 {
                     case AstMessage message:
@@ -213,7 +205,6 @@ namespace Linguini.Bundle
                         TryAddTerm(term, innerErrors);
                         break;
                 }
-            }
 
             if (innerErrors.Count == 0)
             {
@@ -225,7 +216,7 @@ namespace Linguini.Bundle
             return false;
         }
 
-        
+
         /// <summary>
         ///     Adds the given AstMessage to the collection of messages, by overriding any existing messages with the same name.
         /// </summary>
@@ -239,14 +230,13 @@ namespace Linguini.Bundle
         protected abstract void AddTermOverriding(AstTerm term);
 
 
-
         /// <summary>
         /// Adds a <c>string</c> resource to the FluentBundle, overriding any existing messages and terms with the same identifiers.
         /// </summary>
         /// <param name="input">The resource content to add.</param>
         public void AddResourceOverriding(string input)
         {
-            var res = LinguiniParser.FromFragment(input: input, enableExperimental: EnableExtensions).Parse();
+            var res = LinguiniParser.FromFragment(input, enableExperimental: EnableExtensions).Parse();
             AddResourceOverriding(res);
         }
 
@@ -257,10 +247,10 @@ namespace Linguini.Bundle
         /// <param name="filename">name by which the text reader will be referenced</param>
         public void AddResourceOverriding(TextReader input, string filename = "????")
         {
-            var res = LinguiniParser.FromTextReader(input, filename, enableExperimental: EnableExtensions).Parse();
+            var res = LinguiniParser.FromTextReader(input, filename, EnableExtensions).Parse();
             AddResourceOverriding(res);
         }
-        
+
         /// <summary>
         /// Adds a <see cref="Resource"/> to the FluentBundle, overriding any existing messages and terms with the same identifiers.
         /// </summary>
@@ -322,7 +312,7 @@ namespace Linguini.Bundle
         /// <param name="funcName">The name of the function.</param>
         /// <param name="fluentFunction">The <see cref="ExternalFunction"/>  to add.</param>
         public abstract void AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction);
-        
+
         internal abstract IDictionary<string, AstMessage> GetMessagesDictionary();
         internal abstract IDictionary<string, AstTerm> GetTermsDictionary();
         internal abstract IDictionary<string, FluentFunction> GetFunctionDictionary();
@@ -346,7 +336,6 @@ namespace Linguini.Bundle
                 if (!TryAddFunction(keyValue.Key, keyValue.Value))
                     errors.Add(new OverrideFluentError(keyValue.Key, EntryKind.Func));
         }
-
 
 
         /// <summary>
@@ -407,7 +396,7 @@ namespace Linguini.Bundle
                    Equals(FormatterFunc, other.FormatterFunc) && MaxPlaceable == other.MaxPlaceable &&
                    EnableExtensions == other.EnableExtensions;
         }
-        
+
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {

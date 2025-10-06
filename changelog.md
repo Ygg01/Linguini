@@ -244,11 +244,23 @@ version 0.9.0
 version 0.9.1
 ========
 ## What's changed
-- Added docs to public API and ensure they are in the Nuget package.
+- Adds docs to public API and ensure they are in the Nuget package.
 
 version 0.9.2
 ========
 ## What's changed
 
 ### Bundle
-- Fixed issue with `Functions` not being properly passed to selectors for evaluation. (Thanks to @sowelipililimute)
+- Fixes issue with `Functions` not being properly passed to selectors for evaluation. (Thanks to @sowelipililimute)
+
+version 0.10.0
+=======
+## What's changed
+
+### Bundle
+- Removes `WriterHelpers` and `ResolverHelper`. This is backwards incompatible. But shouldn't have been used anyway.
+- Changes behavior of `FluentError.AsString()` method
+- Changed behavior of `FluentBundle` when encountering a laughing bomb attack.
+
+### Syntax
+- Adds IEquatable to `AstTerm`
