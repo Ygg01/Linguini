@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
@@ -17,7 +16,9 @@ namespace Linguini.Bundle.Resolver
     {
         public static string FormatPattern(this Pattern pattern, Scope scope)
         {
-            return pattern.ResolvePattern(scope).AsString();
+            
+            var fluentType = pattern.ResolvePattern(scope);
+            return scope.FormatterFunc != null ? scope.FormatterFunc(fluentType) : fluentType.AsString();
         }
 
         private static IFluentType ResolvePattern(this Pattern pattern, Scope scope)
@@ -196,7 +197,10 @@ namespace Linguini.Bundle.Resolver
 
             if (scope.TryGetFunction(funcRef.Id, out var func))
             {
-                return func.Function(resolvedPosArgs, resolvedNamedArgs);
+                var funcReturn = func.Function(resolvedPosArgs, resolvedNamedArgs);
+                return scope.Scope.FormatterFunc != null
+                    ? (FluentString)scope.Scope.FormatterFunc.Invoke(funcReturn)
+                    : funcReturn;
             }
 
             return scope.AddReferenceError(funcRef);

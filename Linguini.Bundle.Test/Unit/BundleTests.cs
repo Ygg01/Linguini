@@ -20,7 +20,7 @@ namespace Linguini.Bundle.Test.Unit
     {
         private readonly ExternalFunction _zeroFunc = (_, _) => FluentNone.None;
         private readonly ExternalFunction _idFunc = (args, _) => args[0];
-        private readonly Func<IFluentType, string> _formatter = _ => "";
+        private readonly Func<IFluentType, string> _formatter = x => x.AsString();
         private readonly Func<string, string> _transform = str => str.ToUpper(CultureInfo.InvariantCulture);
 
         private const string Res1 = @"

@@ -261,6 +261,7 @@ version 0.10.0
 - Removes `WriterHelpers` and `ResolverHelper`. This is backwards incompatible. But shouldn't have been used anyway.
 - Changes behavior of `FluentError.AsString()` method
 - Changed behavior of `FluentBundle` when encountering a laughing bomb attack.
+- Formatter functions that previously didn't work, now work for patterns, numbers and functions.
 
 ### Syntax
 - Adds IEquatable to `AstTerm`
