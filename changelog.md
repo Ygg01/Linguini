@@ -258,9 +258,9 @@ version 0.10.0
 ## What's changed
 
 ### Bundle
-- Removes WriterHeplers and ResolverHelper. This is backwards incompatible. But shouldn't have been used anyway.
+- Removes `WriterHelpers` and `ResolverHelper`. This is backwards incompatible. But shouldn't have been used anyway.
 - Changes behavior of `FluentError.AsString()` method
-- Changed behavior of FluentBundle when encountering a laughing bomb attack.
+- Changed behavior of `FluentBundle` when encountering a laughing bomb attack.
 
 ### Syntax
 - Adds IEquatable to `AstTerm`
