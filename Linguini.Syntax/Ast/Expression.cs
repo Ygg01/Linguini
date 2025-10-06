@@ -47,12 +47,6 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <inheritdoc />
-        public bool IsTriviallyResolvable()
-        {
-            return true;
-        }
-
-        /// <inheritdoc />
         public override string ToString()
         {
             return Value.Span.ToString();
@@ -120,12 +114,6 @@ namespace Linguini.Syntax.Ast
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return Value.Span.SequenceEqual(other.Value.Span);
-        }
-
-        /// <inheritdoc />
-        public bool IsTriviallyResolvable()
-        {
-            return true;
         }
 
         /// <inheritdoc />
@@ -557,12 +545,6 @@ namespace Linguini.Syntax.Ast
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return Expression.Equals(other.Expression);
-        }
-
-        /// <inheritdoc />
-        public bool IsTriviallyResolvable()
-        {
-            return Expression.IsTriviallyResolvable();
         }
 
         /// <inheritdoc />

@@ -80,7 +80,7 @@ namespace Linguini.Bundle.Resolver
                         var plc = placeable.ResolvePlaceable(writingScope);
                         if (writingScope.Dirty)
                         {
-                            writingScope._writer = new StringBuilder();
+                            writingScope.Builder = new StringBuilder();
                             return new FluentErrType("{???}");
                         }
                         writingScope.WritePlaceable(plc);
@@ -205,7 +205,7 @@ namespace Linguini.Bundle.Resolver
         private static IFluentType ResolveVarRef(this VariableReference varRef, WriterScope scope,
             IFluentType? localContextArg = null)
         {
-            var args = scope.Scope._localNameArgs ?? scope.Scope._args;
+            var args = scope.Scope.LocalNameArgs ?? scope.Scope._args;
             if (args != null
                 && args.TryGetValue(varRef.Id.ToString(), out var arg))
             {
@@ -227,9 +227,7 @@ namespace Linguini.Bundle.Resolver
                 return scope.AddReferenceError(termRef);
             }
 
-            var (pos, named) = ResolveArgs(termRef.Arguments, scope);
-            scope.Scope._localNameArgs = (Dictionary<string, IFluentType>?)named;
-            scope.Scope._localPosArgs = (List<IFluentType>?)pos;
+            scope.Scope.SetLocalArgs(ResolveArgs(termRef.Arguments, scope));
 
             if (termRef.Attribute == null)
             {
@@ -345,9 +343,9 @@ namespace Linguini.Bundle.Resolver
         }
     }
 
-    public ref struct WriterScope
+    internal ref struct WriterScope
     {
-        internal StringBuilder? _writer;
+        internal StringBuilder? Builder;
         internal bool IsTermScoped;
         internal IInlineExpression? PrevExpression;
 
@@ -369,7 +367,7 @@ namespace Linguini.Bundle.Resolver
         {
             return new WriterScope
             {
-                _writer = new StringBuilder(),
+                Builder = new StringBuilder(),
                 Scope = scope.Scope,
                 PrevExpression = scope.PrevExpression,
                 IsTermScoped = true
@@ -380,7 +378,7 @@ namespace Linguini.Bundle.Resolver
         {
             return new WriterScope
             {
-                _writer = null,
+                Builder = null,
                 Scope = writerScope.Scope,
                 PrevExpression = writerScope.PrevExpression,
                 IsTermScoped = writerScope.IsTermScoped
@@ -392,7 +390,7 @@ namespace Linguini.Bundle.Resolver
         {
             return new WriterScope
             {
-                _writer = new StringBuilder(),
+                Builder = new StringBuilder(),
                 Scope = scope,
                 IsTermScoped = false,
                 PrevExpression = null
@@ -404,18 +402,18 @@ namespace Linguini.Bundle.Resolver
             var str = Scope.TransformFunc == null
                 ? textLiteral.Value.ToString()
                 : Scope.TransformFunc(textLiteral.Value.ToString());
-            _writer?.Append(str);
+            Builder?.Append(str);
             return new FluentString(str);
         }
 
         internal void Write(char textLiteral)
         {
-            _writer?.Append(textLiteral);
+            Builder?.Append(textLiteral);
         }
 
         internal FluentString AsString()
         {
-            return new FluentString(_writer?.ToString() ?? string.Empty);
+            return new FluentString(Builder?.ToString() ?? string.Empty);
         }
 
         internal bool Contains(Pattern pattern)
@@ -431,7 +429,7 @@ namespace Linguini.Bundle.Resolver
         internal void WritePlaceable(IFluentType fluentType)
         {
             Scope.PopTraveled();
-            _writer?.Append(fluentType.AsString());
+            Builder?.Append(fluentType.AsString());
         }
 
 

@@ -225,22 +225,6 @@ namespace Linguini.Syntax.Ast
         {
             return Elements.GetHashCode();
         }
-
-        /// <summary>
-        ///     Returns if the element is trivially resolvable.
-        ///     For example: <see cref="TextLiteral" /> and <see cref="NumberLiteral" /> are simple while variable
-        ///     reference needs additional resolving.
-        /// </summary>
-        /// <returns>true for numbers and strings; false otherwise</returns>
-        public bool IsTriviallyResolvable()
-        {
-            return Elements.Count == 1 && Elements[0] switch
-            {
-                TextLiteral _ => true,
-                Placeable placeable => placeable.IsTriviallyResolvable(),
-                _ => false
-            };
-        }
     }
 
     /// <summary>

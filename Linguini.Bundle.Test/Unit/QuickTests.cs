@@ -72,17 +72,12 @@ call-attr-no-args = { -ship.gender()  ->
             // and default to neuter. This will then resolve `call-attr-no-args` to `It`.
             Assert.That(message, Is.EqualTo("It"));
 
-            // Check Frozen bundle behaves similarly
+            // Checks that a Frozen bundle behaves similarly.
             var frozenBundle = bundle.ToFrozenBundle();
             Assert.That(frozenBundle.TryGetMessage("call-attr-no-args", args, out _, out var frozenMessage));
             Assert.That(frozenMessage, Is.EqualTo("It"));
         }
 
-
-        private static readonly Dictionary<string, IFluentType> UnreadEmail2 = new()
-        {
-            ["unreadEmails"] = (FluentNumber)2
-        };
 
         private const string SelectorVarRef = @"
 liked-count = { $num ->
@@ -383,8 +378,7 @@ you-see = You see { $$object.StartsWith ->
                 .AddFunction("IDENTITY", LinguiniFluentFunctions.Identity)
                 .Build();
 
-            var a = new Dictionary<string, IFluentType>();
-            a.Add(argName, (IFluentType)argValue);
+            var a = new Dictionary<string, IFluentType> { { argName, (IFluentType)argValue } };
 
             var isCorrect = bundle.TryGetMessage(message, a, out _, out var result);
             Assert.That(result, Is.EqualTo(expected));
@@ -405,8 +399,7 @@ you-see = You see { $$object.StartsWith ->
                 .AddFunction("IDENTITY", LinguiniFluentFunctions.Identity)
                 .Build();
 
-            var a = new Dictionary<string, IFluentType>();
-            a.Add(argName, (IFluentType)argValue);
+            var a = new Dictionary<string, IFluentType> { { argName, (IFluentType)argValue } };
 
             var isCorrect = bundle.TryGetMessage(message, a, out _, out var result);
             Assert.That(result, Is.EqualTo(expected));

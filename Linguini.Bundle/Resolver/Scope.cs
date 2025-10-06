@@ -33,8 +33,8 @@ namespace Linguini.Bundle.Resolver
         internal readonly int MaxPlaceable;
         internal readonly List<Pattern> Travelled;
 
-        internal Dictionary<string, IFluentType>? _localNameArgs;
-        internal List<IFluentType>? _localPosArgs;
+        private Dictionary<string, IFluentType>? _localNamedArguments;
+        private List<IFluentType>? _localPositionalArguments;
 
 
         /// <summary>
@@ -58,8 +58,8 @@ namespace Linguini.Bundle.Resolver
             Travelled = new List<Pattern>();
             _args = args != null ? new Dictionary<string, IFluentType>(args) : null;
 
-            _localNameArgs = null;
-            _localPosArgs = null;
+            _localNamedArguments = null;
+            _localPositionalArguments = null;
             _errors = new List<FluentError>();
         }
 
@@ -83,8 +83,8 @@ namespace Linguini.Bundle.Resolver
             Travelled = new List<Pattern>();
             _args = args != null ? new Dictionary<string, IFluentType>(args) : null;
 
-            _localNameArgs = null;
-            _localPosArgs = null;
+            _localNamedArguments = null;
+            _localPositionalArguments = null;
             _errors = new List<FluentError>();
         }
 
@@ -113,7 +113,7 @@ namespace Linguini.Bundle.Resolver
         ///     If no local arguments are set, <c>LocalNameArgs</c> may return <c>null</c>.
         ///     It is utilized primarily for resolving variable references within the scope.
         /// </summary>
-        public IReadOnlyDictionary<string, IFluentType>? LocalNameArgs => _localNameArgs;
+        public IReadOnlyDictionary<string, IFluentType>? LocalNameArgs => _localNamedArguments;
 
         /// <summary>
         ///     Represents the list of positional arguments available in the current scope.
@@ -121,7 +121,7 @@ namespace Linguini.Bundle.Resolver
         ///     of <see cref="IFluentType" /> instances that define the positional arguments for the resolution process.
         ///     These arguments can be used during the evaluation of localized messages and functions.
         /// </summary>
-        public IReadOnlyList<IFluentType>? LocalPosArgs => _localPosArgs;
+        public IReadOnlyList<IFluentType>? LocalPosArgs => _localPositionalArguments;
 
         /// <summary>
         ///     Provides access to the arguments passed into the current scope.
@@ -284,8 +284,8 @@ namespace Linguini.Bundle.Resolver
         /// <param name="resNamed">Resolved arguments containing named and positional arguments to set locally.</param>
         public void SetLocalArgs(ResolvedArgs resNamed)
         {
-            _localNameArgs = (Dictionary<string, IFluentType>?)resNamed.Named;
-            _localPosArgs = (List<IFluentType>?)resNamed.Positional;
+            _localNamedArguments = (Dictionary<string, IFluentType>?)resNamed.Named;
+            _localPositionalArguments = (List<IFluentType>?)resNamed.Positional;
         }
 
         /// <summary>
@@ -293,8 +293,8 @@ namespace Linguini.Bundle.Resolver
         /// </summary>
         public void ClearLocalArgs()
         {
-            _localNameArgs = null;
-            _localPosArgs = null;
+            _localNamedArguments = null;
+            _localPositionalArguments = null;
         }
     }
 
@@ -309,7 +309,7 @@ namespace Linguini.Bundle.Resolver
         /// <param name="info">The CultureInfo representing the cultural context to determine the plural category.</param>
         /// <param name="ruleType">The type of pluralization rule (e.g., Cardinal or Ordinal) to apply.</param>
         /// <param name="number">The FluentNumber to evaluate for determining the plural category.</param>
-        /// <return>A PluralCategory enumerating the plural classification of the provided number.</return>
+        /// <return>A PluralCategory listing the plural classification of the provided number.</return>
         public static PluralCategory GetPluralCategory(CultureInfo info, RuleType ruleType, FluentNumber number)
         {
             var specialCase = IsSpecialCase(info.Name, ruleType);
@@ -327,7 +327,7 @@ namespace Linguini.Bundle.Resolver
         ///     Special language identifier, that goes over 4 ISO language code.
         /// </summary>
         /// <param name="info">language code</param>
-        /// <param name="ruleType">Is it ordinal or cardinal rule type.</param>
+        /// <param name="ruleType">Denotes if the pluralRule is an ordinal or a cardinal rule type.</param>
         /// <returns><c>true</c> when its not standard language code; <c>false</c> otherwise.</returns>
         public static bool IsSpecialCase(string info, RuleType ruleType)
         {

@@ -35,7 +35,7 @@ namespace Linguini.Bundle
         /// <summary>
         ///     When formatting patterns, FluentBundle inserts Unicode Directionality Isolation Marks to indicate that the
         ///     direction of a placeable may differ from the surrounding message.
-        ///     This is important for cases such as when a right-to-left user name is presented in the left-to-right message.
+        ///     This is important for cases such as when a right-to-left username is presented in the left-to-right message.
         /// </summary>
         public bool UseIsolating { get; set; } = true;
 
@@ -56,12 +56,7 @@ namespace Linguini.Bundle
         ///     elements count towards it). Useful for preventing billion laughs attack. Defaults to 100.
         /// </summary>
         public byte MaxPlaceable { get; internal init; } = 100;
-
-        /// <summary>
-        ///     Limit of recursion references can within one <see cref="Pattern" />, when fully expanded (all nested
-        ///     elements count towards it). Useful for preventing billion laughs attack. Defaults to 10.
-        /// </summary>
-        public byte MaxRecursion { get; internal init; } = 10;
+        
 
         /// <inheritdoc />
         public bool EnableExtensions { get; init; }
