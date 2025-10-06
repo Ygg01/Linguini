@@ -164,7 +164,7 @@ lol9 = {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8} {lol8}
 lolz = {lol9}
 ";
 
-        private static IEnumerable<TestCaseData> TestDataFunc()
+        private static IEnumerable<TestCaseData> TestFixtures()
         {
             yield return new TestCaseData(
                     "emails = Number of unread emails { $unreadEmails }.",
@@ -322,10 +322,58 @@ lolz = {lol9}
                 .Returns(false);
         }
 
+        private const string TermRefs = @"
+-ship = Ship
+    .zero = {NUMBER(0)}
+    .one = {NUMBER(1)}
+
+liked-count = { -ship.zero() ->
+    [0]     No likes yet.
+    [one]   One person liked your message.
+    *[other] { $num } people liked your message.
+}
+";
+
+        private const string DynamicSelectors = @"
+-creature-fairy = fairy
+-creature-elf = elf
+    .StartsWith = vowel
+
+you-see = You see { $$object.StartsWith ->
+    [vowel] an { $$object }
+    *[consonant] a { $$object }
+}.
+";
+
+        private static IEnumerable<TestCaseData> TestExperimentalFixtures()
+        {
+            yield return new TestCaseData(
+                    TermRefs,
+                    "liked-count",
+                    "No likes yet.",
+                    "", (FluentString)"")
+                .SetName("Dynamic reference to a placeable")
+                .Returns(true);
+            yield return new TestCaseData(
+                    DynamicSelectors,
+                    "you-see",
+                    "You see an elf.",
+                    "object", (FluentReference)"creature-elf")
+                .SetName("Dynamic references as selectors 1")
+                .Returns(true);
+            yield return new TestCaseData(
+                    DynamicSelectors,
+                    "you-see",
+                    "You see a fairy.",
+                    "object", (FluentReference)"creature-fairy")
+                .SetName("Dynamic references as selectors 2")
+                .Returns(true);
+        }
+
         [Test]
         [Parallelizable]
-        [TestCaseSource(nameof(TestDataFunc))]
-        public bool TestSimple(string resource, string message,
+        [TestCaseSource(nameof(TestFixtures))]
+        public bool TestNonExperimental(string resource, string message,
             string expected, string argName, object argValue)
         {
             var (bundle, _) = LinguiniBuilder.Builder()
@@ -343,67 +391,26 @@ lolz = {lol9}
             return isCorrect;
         }
 
-        private const string TermRefs = @"
--ship = Ship
-    .zero = {NUMBER(0)}
-    .one = {NUMBER(1)}
-
-liked-count = { -ship.zero() ->
-    [0]     No likes yet.
-    [one]   One person liked your message.
-    *[other] { $num } people liked your message.
-}
-";
-
         [Test]
         [Parallelizable]
-        public void TestTermReferences()
+        [TestCaseSource(nameof(TestFixtures))]
+        [TestCaseSource(nameof(TestExperimentalFixtures))]
+        public bool TestExperimental(string resource, string message,
+            string expected, string argName, object argValue)
         {
-            var (bundle, err) = LinguiniBuilder.Builder(true)
+            var (bundle, _) = LinguiniBuilder.Builder(true)
                 .Locale("en-US")
-                .AddResource(TermRefs)
+                .AddResource(resource)
                 .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
+                .AddFunction("IDENTITY", LinguiniFluentFunctions.Identity)
                 .Build();
-            Assert.That(err, Is.Null.Or.Empty);
-            var args = new Dictionary<string, IFluentType>();
-            Assert.That(bundle.TryGetMessage("liked-count", args, out _, out var message1));
-            Assert.That(message1, Is.EqualTo("No likes yet."));
-        }
 
+            var a = new Dictionary<string, IFluentType>();
+            a.Add(argName, (IFluentType)argValue);
 
-        private const string DynamicSelectors = @"
--creature-fairy = fairy
--creature-elf = elf
-    .StartsWith = vowel
-
-you-see = You see { $$object.StartsWith ->
-    [vowel] an { $$object }
-    *[consonant] a { $$object }
-}.
-";
-
-
-        [Test]
-        [Parallelizable]
-        public void TestDynamicSelectors()
-        {
-            var (bundle, err) = LinguiniBuilder.Builder(true)
-                .Locale("en-US")
-                .AddResource(DynamicSelectors)
-                .Build();
-            Assert.That(err, Is.Null);
-            var args = new Dictionary<string, IFluentType>
-            {
-                ["object"] = (FluentReference)"creature-elf"
-            };
-            Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message1));
-            Assert.That(message1, Is.EqualTo("You see an elf."));
-            args = new Dictionary<string, IFluentType>
-            {
-                ["object"] = (FluentReference)"creature-fairy"
-            };
-            Assert.That(bundle.TryGetMessage("you-see", args, out _, out var message2));
-            Assert.That("You see a fairy.", Is.EqualTo(message2));
+            var isCorrect = bundle.TryGetMessage(message, a, out _, out var result);
+            Assert.That(result, Is.EqualTo(expected));
+            return isCorrect;
         }
 
         private const string TransformFunc = @"
