@@ -262,6 +262,7 @@ version 0.10.0
 - Changes behavior of `FluentError.AsString()` method
 - Changed behavior of `FluentBundle` when encountering a laughing bomb attack.
 - Formatter functions that previously didn't work, now work for patterns, numbers and functions.
+- Made `StepBuilder` public and enabled for each step to return a corresponding interface via `Get{STEP_NAME}Builder`.
 
 ### Syntax
 - Adds IEquatable to `AstTerm`

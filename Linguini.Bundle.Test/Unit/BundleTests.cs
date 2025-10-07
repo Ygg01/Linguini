@@ -8,8 +8,11 @@ using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
+using Linguini.Syntax.Ast;
+using Linguini.Syntax.Parser.Error;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+using Attribute = Linguini.Syntax.Ast.Attribute;
 
 namespace Linguini.Bundle.Test.Unit
 {
@@ -308,6 +311,43 @@ new1  = new
             Assert.That((FluentFunction)_zeroFunc, Is.EqualTo(clonedZero));
             originalBundle.TryGetFunction("zero", out var originalZero);
             Assert.That((FluentFunction)_idFunc, Is.EqualTo(originalZero));
+        }
+
+        [Test]
+        public void TestImmutabilityOfBuilder()
+        {
+            // Test GetResourceStepBuilder method
+            var resStepBuilder = LinguiniBuilder.Builder().Locale("en-US");
+            var copyOfResStep = resStepBuilder.GetResourceStepBuilder();
+
+            var original = resStepBuilder.AddResource("term = foo").UncheckedBuild();
+            var copy = copyOfResStep.AddResource("term = bar").UncheckedBuild();
+
+            Assert.That(original.GetMessage("term"), Is.EqualTo("foo"));
+            Assert.That(copy.GetMessage("term"), Is.EqualTo("bar"));
+
+            // Test GetReadyStepBuilder method
+            var localeStep = LinguiniBuilder.Builder(true);
+            var copyOfLocaleStep = localeStep.GetLocaleStepBuilder();
+
+            var term = new AstMessage(new Identifier("term"), new PatternBuilder("baz").Build(), new List<Attribute>(),
+                AstLocation.Empty, null);
+            var resource = new Resource(new List<IEntry> { term }, new List<ParseError>());
+            var original2 = localeStep.Locale("en-US").AddResource("term = foo").UncheckedBuild();
+            var copy2 = copyOfLocaleStep.Locale("en-US").AddResources(resource).UncheckedBuild();
+
+            Assert.That(original2.GetMessage("term"), Is.EqualTo("foo"));
+            Assert.That(copy2.GetMessage("term"), Is.EqualTo("baz"));
+
+            // Test GetReadyStepBuilder method
+            var readyStepBuilder = LinguiniBuilder.Builder().Locale("en-US").AddResource("term = foo");
+            var copyOfReadyStep = readyStepBuilder.GetReadyStepBuilder();
+
+            var original3 = readyStepBuilder.UncheckedBuild();
+            var copy3 = copyOfReadyStep.SetTransformFunc(x => x.ToUpperInvariant()).UncheckedBuild();
+
+            Assert.That(original3.GetMessage("term"), Is.EqualTo("foo"));
+            Assert.That(copy3.GetMessage("term"), Is.EqualTo("FOO"));
         }
     }
 }
