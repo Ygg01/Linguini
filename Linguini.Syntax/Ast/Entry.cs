@@ -315,6 +315,74 @@ namespace Linguini.Syntax.Ast
             return HashCode.Combine(Id, Value, Attributes, Comment);
         }
     }
+    
+    /// <summary>
+    ///     Provides functionality for constructing Fluent AST message entries, including identifiers, patterns, and
+    ///     attributes.
+    /// </summary>
+    public class AstTermBuilder
+    {
+        private readonly List<Attribute> _attributes;
+        private Identifier _id;
+        private Pattern _pattern;
+
+        internal AstTermBuilder()
+        {
+            _id = new Identifier("");
+            _pattern = new Pattern();
+            _attributes = new List<Attribute>();
+        }
+
+        /// <summary>
+        ///     Creates a new instance of the <see cref="AstTermBuilder" /> class with the specified identifier.
+        /// </summary>
+        /// <param name="id">The <see cref="Identifier" /> used to initialize the builder.</param>
+        /// <returns>A new instance of <see cref="AstTermBuilder" />.</returns>
+        public static AstTermBuilder Builder(string id)
+        {
+            return new AstTermBuilder
+            {
+                _id = id
+            };
+        }
+
+        /// <summary>
+        ///     Assigns a <see cref="Pattern" /> to the message builder.
+        /// </summary>
+        /// <param name="patternBuilder">The <see cref="PatternBuilder" /> to be associated with this message builder.</param>
+        /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
+        public AstTermBuilder SetPattern(PatternBuilder patternBuilder)
+        {
+            _pattern = patternBuilder.Build();
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds an attribute to the message builder.
+        /// </summary>
+        /// <param name="attribute">The <see cref="Attribute" /> to be added to the <see cref="AstMessage" />.</param>
+        /// <returns>
+        ///     The instance of <see cref="AstTermBuilder" /> for chaining method calls.
+        /// </returns>
+        public AstTermBuilder AddAttribute(Attribute attribute)
+        {
+            _attributes.Add(attribute);
+            return this;
+        }
+
+
+        /// <summary>
+        ///     Constructs an <see cref="AstMessage" /> instance using the configured identifier, pattern, and
+        ///     attributes.
+        /// </summary>
+        /// <returns>
+        ///     A newly built <see cref="AstMessage" /> object containing the specified properties.
+        /// </returns>
+        public AstTerm Build()
+        {
+            return new AstTerm(_id, _pattern, _attributes, AstLocation.Empty, null);
+        }
+    }
 
     /// <summary>
     ///     Represents the location of an AST node, providing debugging information
