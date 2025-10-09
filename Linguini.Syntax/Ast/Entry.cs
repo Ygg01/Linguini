@@ -145,6 +145,74 @@ namespace Linguini.Syntax.Ast
     }
 
     /// <summary>
+    ///     Provides functionality for constructing Fluent AST message entries, including identifiers, patterns, and
+    ///     attributes.
+    /// </summary>
+    public class AstMessageBuilder
+    {
+        private readonly List<Attribute> _attributes;
+        private Identifier _id;
+        private Pattern? _pattern;
+
+        internal AstMessageBuilder()
+        {
+            _id = new Identifier("");
+            _pattern = null;
+            _attributes = new List<Attribute>();
+        }
+
+        /// <summary>
+        ///     Creates a new instance of the <see cref="AstMessageBuilder" /> class with the specified identifier.
+        /// </summary>
+        /// <param name="id">The <see cref="Identifier" /> used to initialize the builder.</param>
+        /// <returns>A new instance of <see cref="AstMessageBuilder" />.</returns>
+        public static AstMessageBuilder Builder(string id)
+        {
+            return new AstMessageBuilder
+            {
+                _id = id
+            };
+        }
+
+        /// <summary>
+        ///     Assigns a <see cref="Pattern" /> to the message builder.
+        /// </summary>
+        /// <param name="patternBuilder">The <see cref="PatternBuilder" /> to be associated with this message builder.</param>
+        /// <returns>The current instance of <see cref="AstMessageBuilder" /> to allow for method chaining.</returns>
+        public AstMessageBuilder SetPattern(PatternBuilder patternBuilder)
+        {
+            _pattern = patternBuilder.Build();
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds an attribute to the message builder.
+        /// </summary>
+        /// <param name="attribute">The <see cref="Attribute" /> to be added to the <see cref="AstMessage" />.</param>
+        /// <returns>
+        ///     The instance of <see cref="AstMessageBuilder" /> for chaining method calls.
+        /// </returns>
+        public AstMessageBuilder AddAttribute(Attribute attribute)
+        {
+            _attributes.Add(attribute);
+            return this;
+        }
+
+
+        /// <summary>
+        ///     Constructs an <see cref="AstMessage" /> instance using the configured identifier, pattern, and
+        ///     attributes.
+        /// </summary>
+        /// <returns>
+        ///     A newly built <see cref="AstMessage" /> object containing the specified properties.
+        /// </returns>
+        public AstMessage Build()
+        {
+            return new AstMessage(_id, _pattern, _attributes, AstLocation.Empty, null);
+        }
+    }
+
+    /// <summary>
     ///     Represents a Term node in the Fluent AST.
     /// </summary>
     /// <remarks>

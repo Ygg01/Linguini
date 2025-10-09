@@ -12,11 +12,20 @@ using ArgumentOutOfRangeException = System.ArgumentOutOfRangeException;
 
 namespace Linguini.Bundle.Resolver
 {
+    /// <summary>
+    ///     Provides utility methods for resolving and formatting <see cref="Pattern" /> into a string
+    ///     for a given <see cref="Bundle" />. This will create a patern resolution <see cref="Scope" />.
+    /// </summary>
     public static class Resolver
     {
+        /// <summary>
+        ///     Formats a given pattern with a given Bundle scope, according to the formatting rules.
+        /// </summary>
+        /// <param name="pattern">The pattern to format.</param>
+        /// <param name="scope">The scope that defines the context of a pattern being resolved.</param>
+        /// <returns>The formatted string representation of the pattern.</returns>
         public static string FormatPattern(this Pattern pattern, Scope scope)
         {
-            
             var fluentType = pattern.ResolvePattern(scope);
             return scope.FormatterFunc != null ? scope.FormatterFunc(fluentType) : fluentType.AsString();
         }
@@ -47,8 +56,8 @@ namespace Linguini.Bundle.Resolver
                 return pattern.Elements[0] switch
                 {
                     TextLiteral textLiteral => writingScope.Write(textLiteral),
-                    Placeable placeable     => placeable.ResolvePlaceable(writingScope),
-                    _                       => throw new ArgumentOutOfRangeException()
+                    Placeable placeable => placeable.ResolvePlaceable(writingScope),
+                    _ => throw new ArgumentOutOfRangeException()
                 };
             }
 
@@ -84,6 +93,7 @@ namespace Linguini.Bundle.Resolver
                             writingScope.Builder = new StringBuilder();
                             return new FluentErrType("{???}");
                         }
+
                         writingScope.WritePlaceable(plc);
 
                         if (needsIsolating)
@@ -103,9 +113,9 @@ namespace Linguini.Bundle.Resolver
         {
             return placeable.Expression switch
             {
-                SelectExpression selectExpression  => selectExpression.ResolveSelect(scope),
+                SelectExpression selectExpression => selectExpression.ResolveSelect(scope),
                 IInlineExpression inlineExpression => inlineExpression.ResolveInlineExpr(scope),
-                _                                  => FluentNone.None
+                _ => FluentNone.None
             };
         }
 
@@ -148,10 +158,12 @@ namespace Linguini.Bundle.Resolver
         private static Variant? GetDefault(this SelectExpression selectExpression, WriterScope writerScope)
         {
             foreach (var variant in selectExpression.Variants)
+            {
                 if (variant.IsDefault)
                 {
                     return variant;
                 }
+            }
 
             writerScope.AddMissingDefaultError();
             return null;
@@ -163,19 +175,19 @@ namespace Linguini.Bundle.Resolver
             scope.PrevExpression = expr;
             return expr switch
             {
-                NumberLiteral numberLiteral         => numberLiteral.ResolveNumber(),
-                TextLiteral textLiteral             => textLiteral.ResolveText(),
+                NumberLiteral numberLiteral => numberLiteral.ResolveNumber(),
+                TextLiteral textLiteral => textLiteral.ResolveText(),
                 FunctionReference functionReference => functionReference.ResolveFuncRef(scope),
                 VariableReference variableReference => variableReference.ResolveVarRef(scope, localPosArg),
-                TermReference termReference         => termReference.NestArguments(termReference.Arguments, scope),
-                MessageReference messageReference   => messageReference.ResolveMessageRef(scope),
+                TermReference termReference => termReference.NestArguments(termReference.Arguments, scope),
+                MessageReference messageReference => messageReference.ResolveMessageRef(scope),
                 DynamicReference dynamicReference when scope.EnableExtensions => dynamicReference.NestArguments(
                     dynamicReference.Arguments,
                     scope,
                     localPosArg
                 ),
                 Placeable placeable => placeable.ResolvePlaceable(scope),
-                _                   => throw new ArgumentException($"Unexpected expression! {expr}")
+                _ => throw new ArgumentException($"Unexpected expression! {expr}")
             };
         }
 
@@ -239,10 +251,12 @@ namespace Linguini.Bundle.Resolver
             }
 
             foreach (var arg in term.Attributes)
+            {
                 if (termRef.Attribute.Equals(arg.Id))
                 {
                     return arg.Value.ResolvePattern(WriterScope.CreateTermScope(scope));
                 }
+            }
 
             return scope.AddReferenceError(termRef);
         }
@@ -262,10 +276,12 @@ namespace Linguini.Bundle.Resolver
             }
 
             foreach (var arg in message.Attributes)
+            {
                 if (messageRef.Attribute.Equals(arg.Id))
                 {
                     return arg.Value.ResolvePattern(scope);
                 }
+            }
 
             return scope.AddReferenceError(messageRef);
         }
@@ -302,10 +318,12 @@ namespace Linguini.Bundle.Resolver
             }
 
             foreach (var arg in actualRef.attributes)
+            {
                 if (dynRef.Attribute != null && dynRef.Attribute.Equals(arg.Id) && arg.Value.Elements.Count == 1)
                 {
                     return arg.Value.ResolvePattern(scope);
                 }
+            }
 
             return localContextArg ?? scope.AddReferenceError(dynRef);
         }
@@ -333,7 +351,7 @@ namespace Linguini.Bundle.Resolver
             }
 
             return new ResolvedArgs(positionalArgs,
-                                    namedArgs);
+                namedArgs);
         }
 
         private static IFluentType? GetAt(this IReadOnlyList<IFluentType> list, int index)

@@ -12,7 +12,6 @@ using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser.Error;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using Attribute = Linguini.Syntax.Ast.Attribute;
 
 namespace Linguini.Bundle.Test.Unit
 {
@@ -330,9 +329,10 @@ new1  = new
             var localeStep = LinguiniBuilder.Builder(true);
             var copyOfLocaleStep = localeStep.GetLocaleStepBuilder();
 
-            var term = new AstMessage(new Identifier("term"), new PatternBuilder("baz").Build(), new List<Attribute>(),
-                AstLocation.Empty, null);
-            var resource = new Resource(new List<IEntry> { term }, new List<ParseError>());
+            var message = AstMessageBuilder.Builder("term")
+                .SetPattern(new PatternBuilder("baz"))
+                .Build();
+            var resource = new Resource(new List<IEntry> { message }, new List<ParseError>());
             var original2 = localeStep.Locale("en-US").AddResource("term = foo").UncheckedBuild();
             var copy2 = copyOfLocaleStep.Locale("en-US").AddResources(resource).UncheckedBuild();
 
