@@ -496,32 +496,32 @@ namespace Linguini.Syntax.Ast
         {
             return Comparer.GetHashCode(this);
         }
-        
+
         /// <summary>
-        /// Defines an implicit conversion from a <see cref="Identifier"/> to  a <see cref="string"/>.
+        ///     Defines an implicit conversion from a <see cref="Identifier" /> to  a <see cref="string" />.
         /// </summary>
         /// <param name="identifier">Identifier in question</param>
         /// <returns>string representation of Identifier</returns>
         public static implicit operator string(Identifier identifier) => identifier.Name.Span.ToString();
 
         /// <summary>
-        /// Checks inequality between two <see cref="Identifier" /> objects.
+        ///     Checks inequality between two <see cref="Identifier" /> objects.
         /// </summary>
         /// <param name="left">The first <see cref="Identifier" /> to compare.</param>
         /// <param name="right">The second <see cref="Identifier" /> to compare.</param>
         /// <returns>
-        /// <c>true</c> if the <see cref="Identifier" /> objects are not equal; otherwise, <c>false</c>.
+        ///     <c>true</c> if the <see cref="Identifier" /> objects are not equal; otherwise, <c>false</c>.
         /// </returns>
         public static bool operator !=(Identifier? left, Identifier? right) => Comparer.Equals(left, right);
 
         
         /// <summary>
-        /// Checks equality between two <see cref="Identifier" /> objects.
+        ///     Checks equality between two <see cref="Identifier" /> objects.
         /// </summary>
         /// <param name="left">The first <see cref="Identifier" /> to compare.</param>
         /// <param name="right">The second <see cref="Identifier" /> to compare.</param>
         /// <returns>
-        /// <c>true</c> if the <see cref="Identifier" /> objects are equal; otherwise, <c>false</c>.
+        ///     <c>true</c> if the <see cref="Identifier" /> objects are equal; otherwise, <c>false</c>.
         /// </returns>
         public static bool operator ==(Identifier? left, Identifier? right) => !Comparer.Equals(left, right);
 
