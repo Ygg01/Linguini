@@ -477,6 +477,15 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((Identifier)obj);
+        }
+        
+        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Span.ToString();
@@ -487,6 +496,34 @@ namespace Linguini.Syntax.Ast
         {
             return Comparer.GetHashCode(this);
         }
+        
+        /// <summary>
+        /// Defines an implicit conversion from a <see cref="Identifier"/> to  a <see cref="string"/>.
+        /// </summary>
+        /// <param name="identifier">Identifier in question</param>
+        /// <returns>string representation of Identifier</returns>
+        public static implicit operator string(Identifier identifier) => identifier.Name.Span.ToString();
+
+        /// <summary>
+        /// Checks inequality between two <see cref="Identifier" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="Identifier" /> to compare.</param>
+        /// <param name="right">The second <see cref="Identifier" /> to compare.</param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="Identifier" /> objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(Identifier? left, Identifier? right) => Comparer.Equals(left, right);
+
+        
+        /// <summary>
+        /// Checks equality between two <see cref="Identifier" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="Identifier" /> to compare.</param>
+        /// <param name="right">The second <see cref="Identifier" /> to compare.</param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="Identifier" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(Identifier? left, Identifier? right) => !Comparer.Equals(left, right);
 
         /// <inheritdoc />
         public class IdentifierComparer : IEqualityComparer<Identifier>

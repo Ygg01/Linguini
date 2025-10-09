@@ -266,3 +266,4 @@ version 0.10.0
 
 ### Syntax
 - Adds IEquatable to `AstTerm`
+- Adds operator `==` and `!=` to the Identifier.
