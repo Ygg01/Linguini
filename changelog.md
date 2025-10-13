@@ -268,3 +268,4 @@ version 0.10.0
 - Adds IEquatable to `AstTerm`
 - Adds `AstMessageBuilder`.
 - Adds `AstTermBuilder`.
+- Adds implicit conversion from `string` to `Identifier` and back.

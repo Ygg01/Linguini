@@ -481,6 +481,20 @@ namespace Linguini.Syntax.Ast
         {
             return Name.Span.ToString();
         }
+        
+        /// <summary>
+        /// Operator overload for implicit conversion of <see cref="string"/> to Identifier
+        /// </summary>
+        /// <param name="id">Identifier</param>
+        /// <returns>string value equal to Identifier's content</returns>
+        public static implicit operator string(Identifier id) => id.ToString();
+        
+        /// <summary>
+        /// Operator overload for implicit conversion of Identifier to <see cref="string"/>
+        /// </summary>
+        /// <param name="id">Identifier</param>
+        /// <returns>string value equal to Identifier's content</returns>
+        public static implicit operator Identifier(string id) => new(id);
 
         /// <inheritdoc />
         public override int GetHashCode()
