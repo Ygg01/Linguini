@@ -477,15 +477,6 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <inheritdoc />
-        public override bool Equals(object? obj)
-        {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((Identifier)obj);
-        }
-
-        /// <inheritdoc />
         public override string ToString()
         {
             return Name.Span.ToString();
@@ -495,53 +486,6 @@ namespace Linguini.Syntax.Ast
         public override int GetHashCode()
         {
             return Comparer.GetHashCode(this);
-        }
-
-        /// <summary>
-        ///     Defines an implicit conversion from a <see cref="Identifier" /> to  a <see cref="string" />.
-        /// </summary>
-        /// <param name="identifier">Identifier in question</param>
-        /// <returns>string representation of Identifier</returns>
-        public static implicit operator string(Identifier identifier)
-        {
-            return identifier.Name.Span.ToString();
-        }
-
-        /// <summary>
-        ///     Defines an implicit conversion from a <see cref="Identifier" /> to  a <see cref="string" />.
-        /// </summary>
-        /// <param name="identifier">Identifier in question</param>
-        /// <returns>string representation of Identifier</returns>
-        public static implicit operator Identifier(string identifier)
-        {
-            return new Identifier(identifier.AsMemory());
-        }
-
-        /// <summary>
-        ///     Checks inequality between two <see cref="Identifier" /> objects.
-        /// </summary>
-        /// <param name="left">The first <see cref="Identifier" /> to compare.</param>
-        /// <param name="right">The second <see cref="Identifier" /> to compare.</param>
-        /// <returns>
-        ///     <c>true</c> if the <see cref="Identifier" /> objects are not equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator !=(Identifier? left, Identifier? right)
-        {
-            return Comparer.Equals(left, right);
-        }
-
-
-        /// <summary>
-        ///     Checks equality between two <see cref="Identifier" /> objects.
-        /// </summary>
-        /// <param name="left">The first <see cref="Identifier" /> to compare.</param>
-        /// <param name="right">The second <see cref="Identifier" /> to compare.</param>
-        /// <returns>
-        ///     <c>true</c> if the <see cref="Identifier" /> objects are equal; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool operator ==(Identifier? left, Identifier? right)
-        {
-            return !Comparer.Equals(left, right);
         }
 
         /// <inheritdoc />
@@ -718,10 +662,7 @@ namespace Linguini.Syntax.Ast
         {
             var sb = new StringBuilder();
             if (pattern == null || pattern.Elements.Count <= 0) return sb.ToString();
-            for (var i = 0; i < pattern.Elements.Count; i++)
-            {
-                sb.Append(pattern.Elements[i]);
-            }
+            for (var i = 0; i < pattern.Elements.Count; i++) sb.Append(pattern.Elements[i]);
 
             return sb.ToString();
         }

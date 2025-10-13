@@ -170,7 +170,7 @@ namespace Linguini.Syntax.Ast
         {
             return new AstMessageBuilder
             {
-                _id = id
+                _id = new Identifier(id)
             };
         }
 
@@ -342,7 +342,7 @@ namespace Linguini.Syntax.Ast
         {
             return new AstTermBuilder
             {
-                _id = id
+                _id = new Identifier(id)
             };
         }
 
