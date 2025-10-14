@@ -636,7 +636,7 @@ namespace Linguini.Syntax.Parser
             {
                 List<IPatternElement> patterns = new(lastNonBlank.Value + 1);
 
-                for (int i = 0; i < lastNonBlank + 1; i++)
+                for (var i = 0; i < lastNonBlank + 1; i++)
                 {
                     if (i < elements.Count)
                     {
@@ -647,8 +647,8 @@ namespace Linguini.Syntax.Parser
                         }
                         else if (elem is TextElementPlaceholder textLiteral)
                         {
-                            int start = textLiteral.Start;
-                            int indent = textLiteral.Indent;
+                            var start = textLiteral.Start;
+                            var indent = textLiteral.Indent;
                             var end = textLiteral.End;
                             if (textLiteral.Role == TextElementPosition.LineStart)
                             {
