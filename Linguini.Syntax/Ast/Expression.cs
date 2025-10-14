@@ -181,7 +181,7 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Id.Equals(other.Id) && Arguments.Equals(other.Arguments);
+            return Id == other.Id && Arguments.Equals(other.Arguments);
         }
 
         /// <inheritdoc />
@@ -250,7 +250,7 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Id.Equals(other.Id) && Identifier.Comparer.Equals(Attribute, other.Attribute);
+            return Id == other.Id && Attribute == other.Attribute;
         }
 
         /// <inheritdoc />
@@ -346,7 +346,7 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Id.Equals(other.Id) && Identifier.Comparer.Equals(Attribute, other.Attribute) &&
+            return Id == other.Id && Attribute == other.Attribute &&
                    Nullable.Equals(Arguments, other.Arguments);
         }
 
@@ -436,7 +436,7 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Id.Equals(other.Id) && Identifier.Comparer.Equals(Attribute, other.Attribute) &&
+            return Id == other.Id && Attribute == other.Attribute &&
                    Nullable.Equals(Arguments, other.Arguments);
         }
 
@@ -684,7 +684,7 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(NamedArgument other)
         {
-            return Name.Equals(other.Name) && IInlineExpression.Comparer.Equals(Value, other.Value);
+            return Name == other.Name && IInlineExpression.Comparer.Equals(Value, other.Value);
         }
 
         /// <inheritdoc />

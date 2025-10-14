@@ -269,3 +269,4 @@ version 0.10.0
 - Adds `AstMessageBuilder`.
 - Adds `AstTermBuilder`.
 - Adds implicit conversion from `string` to `Identifier` and back.
+- Adds `==` and `!=` operators to `Identifier`.

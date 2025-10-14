@@ -142,7 +142,7 @@ namespace Linguini.Syntax.Ast
                 if (ReferenceEquals(x, null)) return false;
                 if (ReferenceEquals(y, null)) return false;
                 if (x.GetType() != y.GetType()) return false;
-                return Identifier.Comparer.Equals(x.Id, y.Id) &&
+                return x.Id == y.Id &&
                        x.Value.Equals(y.Value);
             }
 
@@ -425,6 +425,7 @@ namespace Linguini.Syntax.Ast
     /// <seealso cref="Linguini.Syntax.Ast.AstTerm" />
     public class Identifier : IEquatable<Identifier>
     {
+    
         /// <summary>
         ///     Provides a default instance of <see cref="Identifier.IdentifierComparer" /> for comparing
         ///     two <see cref="Identifier" /> instances based on their contents.
@@ -495,6 +496,34 @@ namespace Linguini.Syntax.Ast
         /// <param name="id">Identifier</param>
         /// <returns>string value equal to Identifier's content</returns>
         public static implicit operator Identifier(string id) => new(id);
+        
+        /// <summary>
+        /// Checks equality between two <see cref="Identifier" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="Identifier" /> to compare.</param>
+        /// <param name="right">The second <see cref="Identifier" /> to compare.</param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="Identifier" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        
+        public static bool operator ==(Identifier? left, Identifier? right) => Comparer.Equals(left, right);
+        /// <summary>
+        /// Checks inequality between two <see cref="Identifier" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="Identifier" /> to compare.</param>
+        /// <param name="right">The second <see cref="Identifier" /> to compare.</param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="Identifier" /> objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(Identifier? left, Identifier? right) => !Comparer.Equals(left, right);
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((Identifier)obj);
+        }
 
         /// <inheritdoc />
         public override int GetHashCode()

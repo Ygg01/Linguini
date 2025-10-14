@@ -252,7 +252,7 @@ namespace Linguini.Bundle.Resolver
 
             foreach (var arg in term.Attributes)
             {
-                if (termRef.Attribute.Equals(arg.Id))
+                if (termRef.Attribute == arg.Id)
                 {
                     return arg.Value.ResolvePattern(WriterScope.CreateTermScope(scope));
                 }
@@ -277,7 +277,7 @@ namespace Linguini.Bundle.Resolver
 
             foreach (var arg in message.Attributes)
             {
-                if (messageRef.Attribute.Equals(arg.Id))
+                if (messageRef.Attribute == arg.Id)
                 {
                     return arg.Value.ResolvePattern(scope);
                 }
@@ -319,7 +319,7 @@ namespace Linguini.Bundle.Resolver
 
             foreach (var arg in actualRef.attributes)
             {
-                if (dynRef.Attribute != null && dynRef.Attribute.Equals(arg.Id) && arg.Value.Elements.Count == 1)
+                if (dynRef.Attribute != null && dynRef.Attribute == arg.Id && arg.Value.Elements.Count == 1)
                 {
                     return arg.Value.ResolvePattern(scope);
                 }
