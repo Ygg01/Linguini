@@ -181,7 +181,7 @@ namespace Linguini.Syntax.Ast
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Id == other.Id && Arguments.Equals(other.Arguments);
+            return Id == other.Id && Arguments == other.Arguments;
         }
 
         /// <inheritdoc />
@@ -454,7 +454,7 @@ namespace Linguini.Syntax.Ast
         {
             return HashCode.Combine(Id, Attribute, Arguments);
         }
-    
+
         /// <inheritdoc />
         public override string ToString()
         {
@@ -652,6 +652,32 @@ namespace Linguini.Syntax.Ast
         {
             return HashCode.Combine(PositionalArgs, NamedArgs);
         }
+
+        /// <summary>
+        ///     Compares two <see cref="CallArguments" /> instances for equality.
+        /// </summary>
+        /// <param name="left">The left-hand <see cref="CallArguments" /> to compare.</param>
+        /// <param name="right">The right-hand <see cref="CallArguments" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the two <see cref="CallArguments" /> instances are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(CallArguments left, CallArguments right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        ///     Compares two <see cref="CallArguments" /> instances for inequality.
+        /// </summary>
+        /// <param name="left">The left-hand <see cref="CallArguments" /> to compare.</param>
+        /// <param name="right">The right-hand <see cref="CallArguments" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the two <see cref="CallArguments" /> instances are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(CallArguments left, CallArguments right)
+        {
+            return !left.Equals(right);
+        }
     }
 
     /// <summary>
@@ -697,6 +723,32 @@ namespace Linguini.Syntax.Ast
         public override int GetHashCode()
         {
             return HashCode.Combine(Name, Value);
+        }
+
+        /// <summary>
+        ///     Determines whether two specified <c>NamedArgument</c> instances are equal.
+        /// </summary>
+        /// <param name="left">The first <c>NamedArgument</c> instance to compare.</param>
+        /// <param name="right">The second <c>NamedArgument</c> instance to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the specified <c>NamedArgument</c> instances are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(NamedArgument left, NamedArgument right)
+        {
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        ///     Determines whether two specified <c>NamedArgument</c> instances are not equal.
+        /// </summary>
+        /// <param name="left">The first <c>NamedArgument</c> instance to compare.</param>
+        /// <param name="right">The second <c>NamedArgument</c> instance to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the specified <c>NamedArgument</c> instances are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(NamedArgument left, NamedArgument right)
+        {
+            return !(left == right);
         }
     }
 

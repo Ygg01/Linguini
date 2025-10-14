@@ -425,7 +425,6 @@ namespace Linguini.Syntax.Ast
     /// <seealso cref="Linguini.Syntax.Ast.AstTerm" />
     public class Identifier : IEquatable<Identifier>
     {
-    
         /// <summary>
         ///     Provides a default instance of <see cref="Identifier.IdentifierComparer" /> for comparing
         ///     two <see cref="Identifier" /> instances based on their contents.
@@ -482,40 +481,52 @@ namespace Linguini.Syntax.Ast
         {
             return Name.Span.ToString();
         }
-        
+
         /// <summary>
-        /// Operator overload for implicit conversion of <see cref="string"/> to Identifier
+        ///     Operator overload for implicit conversion of <see cref="string" /> to Identifier
         /// </summary>
         /// <param name="id">Identifier</param>
         /// <returns>string value equal to Identifier's content</returns>
-        public static implicit operator string(Identifier id) => id.ToString();
-        
+        public static implicit operator string(Identifier id)
+        {
+            return id.ToString();
+        }
+
         /// <summary>
-        /// Operator overload for implicit conversion of Identifier to <see cref="string"/>
+        ///     Operator overload for implicit conversion of Identifier to <see cref="string" />
         /// </summary>
         /// <param name="id">Identifier</param>
         /// <returns>string value equal to Identifier's content</returns>
-        public static implicit operator Identifier(string id) => new(id);
-        
+        public static implicit operator Identifier(string id)
+        {
+            return new Identifier(id);
+        }
+
         /// <summary>
-        /// Checks equality between two <see cref="Identifier" /> objects.
+        ///     Checks equality between two <see cref="Identifier" /> objects.
         /// </summary>
         /// <param name="left">The first <see cref="Identifier" /> to compare.</param>
         /// <param name="right">The second <see cref="Identifier" /> to compare.</param>
         /// <returns>
-        /// <c>true</c> if the <see cref="Identifier" /> objects are equal; otherwise, <c>false</c>.
+        ///     <c>true</c> if the <see cref="Identifier" /> objects are equal; otherwise, <c>false</c>.
         /// </returns>
-        
-        public static bool operator ==(Identifier? left, Identifier? right) => Comparer.Equals(left, right);
+        public static bool operator ==(Identifier? left, Identifier? right)
+        {
+            return Comparer.Equals(left, right);
+        }
+
         /// <summary>
-        /// Checks inequality between two <see cref="Identifier" /> objects.
+        ///     Checks inequality between two <see cref="Identifier" /> objects.
         /// </summary>
         /// <param name="left">The first <see cref="Identifier" /> to compare.</param>
         /// <param name="right">The second <see cref="Identifier" /> to compare.</param>
         /// <returns>
-        /// <c>true</c> if the <see cref="Identifier" /> objects are not equal; otherwise, <c>false</c>.
+        ///     <c>true</c> if the <see cref="Identifier" /> objects are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(Identifier? left, Identifier? right) => !Comparer.Equals(left, right);
+        public static bool operator !=(Identifier? left, Identifier? right)
+        {
+            return !Comparer.Equals(left, right);
+        }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
@@ -705,7 +716,10 @@ namespace Linguini.Syntax.Ast
         {
             var sb = new StringBuilder();
             if (pattern == null || pattern.Elements.Count <= 0) return sb.ToString();
-            for (var i = 0; i < pattern.Elements.Count; i++) sb.Append(pattern.Elements[i]);
+            for (var i = 0; i < pattern.Elements.Count; i++)
+            {
+                sb.Append(pattern.Elements[i]);
+            }
 
             return sb.ToString();
         }
