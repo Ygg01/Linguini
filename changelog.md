@@ -253,8 +253,8 @@ version 0.9.2
 ### Bundle
 - Fixes issue with `Functions` not being properly passed to selectors for evaluation. (Thanks to @sowelipililimute)
 
-version 0.10.0
-=======
+version 0.10.0 [yanked]
+========
 ## What's changed
 
 ### Bundle
@@ -265,8 +265,22 @@ version 0.10.0
 - Made `StepBuilder` public and enabled for each step to return a corresponding interface via `Get{STEP_NAME}Builder`.
 
 ### Syntax
-- Adds IEquatable to `AstTerm`
+- Adds `IEquatable` to `AstTerm`
 - Adds `AstMessageBuilder`.
 - Adds `AstTermBuilder`.
 - Adds implicit conversion from `string` to `Identifier` and back.
 - Adds `==` and `!=` operators to `Identifier` and `NamedArgument`.
+
+version 0.10.1
+========
+
+## What's changed
+
+### Shared
+- Publishes the changes erroenously made in commit 150698e72e3691704ee1fb0dfa3bb324743d6e86 as v0.10.0
+
+### Bundle
+- Yanks version v0.10.0
+
+### Syntax
+- Yanks version v0.10.0
