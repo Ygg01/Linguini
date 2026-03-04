@@ -91,6 +91,8 @@ namespace Linguini.Syntax.Tests.Parser
 
         [Test]
         [Parallelizable]
+        [TestCase("fixtures_errors/wrong_term_syntax", true)]
+        [TestCase("fixtures_errors/wrong_term_syntax", false)]
         [TestCase("fixtures_errors/func", true)]
         [TestCase("fixtures_errors/func", false)]
         [TestCase("fixtures_errors/wrong_row", true)]

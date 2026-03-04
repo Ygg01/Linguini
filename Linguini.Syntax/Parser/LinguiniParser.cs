@@ -530,8 +530,8 @@ namespace Linguini.Syntax.Parser
                             pattern = null;
                             return false;
                         }
-
-                        if (!TryCallArguments(out var args, out error))
+                        
+                        if (!TryCallArguments(!_enableExperimental, out var args, out error))
                         {
                             pattern = null;
                             return false;
@@ -1157,13 +1157,15 @@ namespace Linguini.Syntax.Parser
                     {
                         _reader.Position += 1;
                         var id = GetUncheckedIdentifier();
+
                         if (!TryGetAttributeAccessor(out var attribute, out error))
                         {
                             expr = null;
                             return false;
                         }
 
-                        if (!TryCallArguments(out var args, out error))
+                        // Only allow parsing non-literals if experimental features are enabled.
+                        if (!TryCallArguments(!_enableExperimental, out var args, out error))
                         {
                             expr = null;
                             return false;
@@ -1191,7 +1193,8 @@ namespace Linguini.Syntax.Parser
                     _reader.Position += 3;
                     return TryGetDynamicReference(out expr, out error);
                 }
-                else if ('$' == peekChr && !onlyLiteral)
+
+                if ('$' == peekChr && !onlyLiteral)
                 {
                     _reader.Position += 1;
                     if (!TryGetIdentifier(out var id, out error))
@@ -1203,12 +1206,13 @@ namespace Linguini.Syntax.Parser
                     expr = new VariableReference(id);
                     return true;
                 }
-                else if (peekChr.IsAsciiAlphabetic())
+
+                if (peekChr.IsAsciiAlphabetic())
                 {
                     _reader.Position += 1;
                     var id = GetUncheckedIdentifier();
 
-                    if (!TryCallArguments(out var args, out error))
+                    if (!TryCallArguments(onlyLiteral, out var args, out error))
                     {
                         expr = null;
                         return false;
@@ -1228,19 +1232,17 @@ namespace Linguini.Syntax.Parser
                         return true;
                     }
 
-                    else
+                    if (!TryGetAttributeAccessor(out var attribute, out error))
                     {
-                        if (!TryGetAttributeAccessor(out var attribute, out error))
-                        {
-                            expr = null;
-                            return false;
-                        }
-
-                        expr = new MessageReference(id, attribute);
-                        return true;
+                        expr = null;
+                        return false;
                     }
+
+                    expr = new MessageReference(id, attribute);
+                    return true;
                 }
-                else if ('{' == peekChr && !onlyLiteral)
+
+                if ('{' == peekChr && !onlyLiteral)
                 {
                     _reader.Position += 1;
                     if (!TryGetPlaceable(out var exp, out error))
@@ -1271,7 +1273,7 @@ namespace Linguini.Syntax.Parser
         {
             var id = GetUncheckedIdentifier();
 
-            if (!TryCallArguments(out var args, out error))
+            if (!TryCallArguments(!_enableExperimental, out var args, out error))
             {
                 expr = null;
                 return false;
@@ -1287,7 +1289,7 @@ namespace Linguini.Syntax.Parser
             return true;
         }
 
-        private bool TryCallArguments(out CallArguments? args, out ParseError? error, bool onlyLiteral = false)
+        private bool TryCallArguments(bool onlyLiteral, out CallArguments? args, out ParseError? error)
         {
             _reader.SkipBlank();
             if (!_reader.ReadCharIf('('))

@@ -466,5 +466,27 @@ baz = {NUMBER(3)}
                 _ => arg.AsString()
             };
         }
+
+        private const string NotCompile = @"
+list-conjugation = { -conjugate-red(ent: $item) }.
+
+-conjugate-red = 
+    { $case ->
+       *[one] One
+        [other] Other
+    }
+
+";
+
+        [Test]
+        [Parallelizable]
+        public void TestNotCompile()
+        {
+            var (_, err) = LinguiniBuilder.Builder()
+                .Locale("en-US")
+                .AddResource(NotCompile)
+                .Build();
+            Assert.That(err, Is.Not.Null.Or.Empty);
+        }
     }
 }
