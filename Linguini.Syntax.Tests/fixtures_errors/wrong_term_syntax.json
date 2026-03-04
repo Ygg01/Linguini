@@ -1,0 +1,15 @@
+[
+  {
+    "kind": "ExpectedLiteral",
+    "message": "Expected a string or number literal",
+    "row": 1,
+    "position": {
+      "start": 48,
+      "end": 49
+    },
+    "slice": {
+      "start": 0,
+      "end": 59
+    }
+  }
+]
