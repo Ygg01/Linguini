@@ -120,6 +120,14 @@ namespace Linguini.Bundle
             errors = scope.Errors;
             return value;
         }
+        
+        /// <inheritdoc/>
+        /// Convenience method for calling <see cref="IReadBundle.FormatPattern"/>
+        public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args, [NotNullWhen(false)] out IList<FluentError>? errors)
+        {
+            errors = null;
+            return FormatPatternErrRef(pattern, args, ref errors);
+        }
 
         /// <inheritdoc/>
         public bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message)

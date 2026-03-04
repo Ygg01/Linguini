@@ -292,3 +292,8 @@ version 0.10.2
 
 ### Syntax
 - Fixes issue with non-literals allowed as named term arguments.
+
+### Bundle
+- Reintroduce `FormatPattern` method from `IReadBundle` to `FluentBundle`, `FrozenBundle`.
+- Add `IReadBundle` interface to `ConcurrentBundle` (it implements it via `FluentBundle`).
+- Change so `FormatPatternErrRef` parameter `ref IList<FluentError>? errors` returns null if no errors found.

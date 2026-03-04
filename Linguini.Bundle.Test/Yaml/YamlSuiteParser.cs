@@ -191,7 +191,8 @@ namespace Linguini.Bundle.Test.Yaml
             IList<FluentError>? errs,
             string testName)
         {
-            Assert.That(expectedErrors.Count, Is.EqualTo(errs!.Count), testName);
+            var errCount = errs?.Count ?? 0;
+            Assert.That(errCount, Is.EqualTo(expectedErrors.Count), testName);
             for (var i = 0; i < expectedErrors.Count; i++)
             {
                 var actualError = errs[i];
