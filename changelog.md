@@ -284,3 +284,11 @@ version 0.10.1
 
 ### Syntax
 - Yanks version v0.10.0
+
+version 0.10.2
+========
+
+## What's changed
+
+### Syntax
+- Fixes issue with non-literals allowed as named term arguments.
