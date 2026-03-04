@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Linguini.Bundle.Builder;
@@ -348,6 +349,24 @@ new1  = new
 
             Assert.That(original3.GetMessage("term"), Is.EqualTo("foo"));
             Assert.That(copy3.GetMessage("term"), Is.EqualTo("FOO"));
+        }
+
+        [Test]
+        [Parallelizable]
+        public void TestFormatPattern()
+        {
+            var reader = new StringReader("term = foo");
+            var builder = LinguiniBuilder.Builder()
+                .Locale("en-Us")
+                .AddResource(reader)
+                .UncheckedBuild();
+
+            var correct = builder.TryGetAstMessage("term", out var astMessage);
+            Assert.That(correct, Is.True);
+            Assert.That(astMessage, Is.Not.Null);
+            Assert.That(astMessage.Value, Is.Not.Null);
+            builder.FormatPattern(astMessage.Value, null, out var err);
+            Assert.That(err, Is.Null);
         }
     }
 }

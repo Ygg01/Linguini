@@ -18,7 +18,7 @@ namespace Linguini.Bundle
     ///
     /// `ConcurrentBundle` implements the <see cref="IReadBundle"/> interface.
     /// </summary>
-    public sealed class ConcurrentBundle : FluentBundle, IEquatable<ConcurrentBundle>
+    public sealed class ConcurrentBundle : FluentBundle, IEquatable<ConcurrentBundle>, IReadBundle
     {
         internal ConcurrentDictionary<string, FluentFunction> Functions = new();
         internal ConcurrentDictionary<string, AstTerm> Terms = new();

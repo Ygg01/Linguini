@@ -132,8 +132,16 @@ namespace Linguini.Bundle
         {
             var scope = new Scope(this, args);
             var value = pattern.FormatPattern(scope);
-            errors = scope.Errors;
+            errors = scope.Errors.Count > 0 ? scope.Errors : null;
             return value;
+        }
+
+        /// <inheritdoc/>
+        /// Convenience method for calling <see cref="IReadBundle.FormatPattern"/>
+        public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args, [NotNullWhen(false)] out IList<FluentError>? errors)
+        {
+            errors = null;
+            return FormatPatternErrRef(pattern, args, ref errors);
         }
 
         /// <summary>
