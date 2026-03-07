@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
@@ -17,18 +16,12 @@ namespace Linguini.Serialization.Converters
     /// of its positional and named arguments.
     /// </remarks>
     public class CallArgumentsSerializer : JsonConverter<CallArguments>
-
     {
         /// <inheritdoc />
         public override CallArguments Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
-            if (TryGetCallArguments(el, options, out var value))
-            {
-                return value.Value;
-            }
-
-            throw new JsonException("Invalid CallArguments");
+            return ReadCallArguments(el, options);
         }
 
         /// <inheritdoc />
@@ -57,23 +50,17 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Attempts to extract and deserialize call arguments from a given JSON element.
+        /// Extract and deserialize call arguments from a given JSON element.
         /// </summary>
         /// <param name="el">The JSON element containing call argument data.</param>
         /// <param name="options">The JSON serializer options used during the deserialization process.</param>
-        /// <param name="callArguments">
-        /// When this method returns, contains the deserialized <see cref="CallArguments"/>,
-        /// if the operation was successful; otherwise, it is null.
-        /// </param>
         /// <returns>
-        /// true if the call arguments were successfully deserialized; otherwise, false.
+        /// Extracted call arguments.
         /// </returns>
         /// <exception cref="JsonException">
         /// Thrown when required fields `positional` or `named` are missing in the JSON element.
         /// </exception>
-        public static bool TryGetCallArguments(JsonElement el,
-            JsonSerializerOptions options,
-            [NotNullWhen(true)] out CallArguments? callArguments)
+        public static CallArguments ReadCallArguments(JsonElement el, JsonSerializerOptions options)
         {
             if (!el.TryGetProperty("positional", out var positional) || !el.TryGetProperty("named", out var named))
             {
@@ -83,23 +70,19 @@ namespace Linguini.Serialization.Converters
             var positionalArgs = new List<IInlineExpression>();
             foreach (var arg in positional.EnumerateArray())
             {
-                if (ResourceSerializer.TryReadInlineExpression(arg, options, out var posArgs))
-                {
-                    positionalArgs.Add(posArgs);
-                }
+                var posArgs = ResourceSerializer.ReadInlineExpression(arg, options);
+                positionalArgs.Add(posArgs);
             }
 
             var namedArgs = new List<NamedArgument>();
             foreach (var arg in named.EnumerateArray())
             {
-                if (NamedArgumentSerializer.TryReadNamedArguments(arg, options, out var namedArg))
-                {
-                    namedArgs.Add(namedArg.Value);
-                }
+                var namedArg = NamedArgumentSerializer.ReadNamedArguments(arg, options);
+                namedArgs.Add(namedArg);
             }
 
-            callArguments = new CallArguments(positionalArgs, namedArgs);
-            return true;
+            return new CallArguments(positionalArgs, namedArgs);
         }
     }
 }
+

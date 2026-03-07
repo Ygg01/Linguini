@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -198,19 +197,16 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Attempts to read an inline expression from the provided JSON element.
+        /// Read inline expression from the provided JSON element.
         /// </summary>
         /// <param name="el">The JSON element containing the data for the inline expression.</param>
         /// <param name="options">The JSON serializer options to customize reading behavior.</param>
-        /// <param name="o">When this method returns, contains the parsed inline expression if the read operation is successful,
-        /// or null if the read fails. This parameter is passed uninitialized.</param>
-        /// <returns>True if the inline expression is successfully read; otherwise, false.</returns>
+        /// <returns>Read inline expression.</returns>
         /// <exception cref="JsonException">Thrown when the JSON data is invalid or contains unexpected types.</exception>
-        public static bool TryReadInlineExpression(JsonElement el, JsonSerializerOptions options,
-            [MaybeNullWhen(false)] out IInlineExpression o)
+        public static IInlineExpression ReadInlineExpression(JsonElement el, JsonSerializerOptions options)
         {
             var type = el.GetProperty("type").GetString();
-            o = type switch
+            return type switch
             {
                 "DynamicReference" => DynamicReferenceSerializer.ProcessDynamicReference(el, options),
                 "FunctionReference" => FunctionReferenceSerializer.ProcessFunctionReference(el, options),
@@ -222,7 +218,7 @@ namespace Linguini.Serialization.Converters
                 "VariableReference" => VariableReferenceSerializer.ProcessVariableReference(el, options),
                 _ => throw new JsonException($"Unexpected value {type}")
             };
-            return true;
         }
     }
 }
+

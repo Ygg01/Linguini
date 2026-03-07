@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -269,7 +269,8 @@ namespace Linguini.Bundle
             }
 
             message = FormatPattern(pattern, args, out errors);
-            return errors == null || errors.Count == 0;
+            if (errors is { Count: 0 }) errors = null;
+            return errors == null;
         }
     }
 

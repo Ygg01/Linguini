@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
@@ -72,7 +72,7 @@ namespace Linguini.Serialization.Converters
 
             if (el.TryGetProperty("arguments", out var jsonArgs))
             {
-                CallArgumentsSerializer.TryGetCallArguments(jsonArgs, options, out arguments);
+                arguments = CallArgumentsSerializer.ReadCallArguments(jsonArgs, options);
             }
 
             return new DynamicReference(identifier, attribute, arguments);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -287,7 +287,7 @@ namespace Linguini.Bundle
         /// <param name="term">The term to add.</param>
         /// <param name="errors">A list to store any errors that occur during the <c>TryAdd</c> operation.</param>
         /// <returns><see langword="true"/> if the term was added successfully, <see langword="false"/> otherwise.</returns>
-        protected abstract bool TryAddTerm(AstTerm term, [NotNullWhen(false)] List<FluentError>? errors);
+        protected abstract bool TryAddTerm(AstTerm term, List<FluentError> errors);
 
         /// <summary>
         /// Tries to add a message to the bundle.
@@ -295,7 +295,7 @@ namespace Linguini.Bundle
         /// <param name="msg">The message to add.</param>
         /// <param name="errors">A list to store any errors that occur during the <c>TryAdd</c> operation.</param>
         /// <returns><see langword="true"/> if the message was added successfully, <see langword="false"/> otherwise.</returns>
-        protected abstract bool TryAddMessage(AstMessage msg, [NotNullWhen(false)] List<FluentError>? errors);
+        protected abstract bool TryAddMessage(AstMessage msg, List<FluentError> errors);
 
 
         /// <summary>
@@ -422,3 +422,4 @@ namespace Linguini.Bundle
         }
     }
 }
+

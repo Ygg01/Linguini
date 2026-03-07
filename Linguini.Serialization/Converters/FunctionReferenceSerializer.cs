@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
@@ -52,10 +52,11 @@ namespace Linguini.Serialization.Converters
             }
 
             CallArguments? arguments;
-
-            if (!el.TryGetProperty("arguments", out var jsonArguments) ||
-                !CallArgumentsSerializer.TryGetCallArguments(jsonArguments, options, out arguments)
-               )
+            if (el.TryGetProperty("arguments", out var jsonArguments))
+            {
+                arguments = CallArgumentsSerializer.ReadCallArguments(jsonArguments, options);
+            }
+            else
             {
                 throw new JsonException("Function reference must contain `arguments` field");
             }
