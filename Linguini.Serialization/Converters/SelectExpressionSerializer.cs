@@ -52,15 +52,17 @@ namespace Linguini.Serialization.Converters
         public static SelectExpression ProcessSelectExpression(JsonElement el,
             JsonSerializerOptions options)
         {
-            if (!el.TryGetProperty("selector", out var prop)) throw new JsonException("Select needs a `selector`");
-            if (!ResourceSerializer.TryReadInlineExpression(prop, options, out var selector))
+            if (!el.TryGetProperty("selector", out var prop))
             {
-                throw new JsonException("No inline expression found!");
+                throw new JsonException("Select needs a `selector`");
             }
 
+            var selector = ResourceSerializer.ReadInlineExpression(prop, options);
 
             if (el.TryGetProperty("variants", out var variantsProp) && variantsProp.ValueKind != JsonValueKind.Array)
+            {
                 throw new JsonException("Select `variants` must be a an array");
+            }
 
             var variants = new List<Variant>();
             foreach (var variantEl in variantsProp.EnumerateArray())

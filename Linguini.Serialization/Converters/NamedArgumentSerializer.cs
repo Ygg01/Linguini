@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -13,18 +13,11 @@ namespace Linguini.Serialization.Converters
     /// This class is used to handle the conversion of <see cref="NamedArgument"/> objects to and from their JSON representation.
     /// </remarks>
     public class NamedArgumentSerializer : JsonConverter<NamedArgument>
-
     {
         /// <inheritdoc />
         public override NamedArgument Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (TryReadNamedArguments(JsonSerializer.Deserialize<JsonElement>(ref reader, options), options,
-                    out var namedArgument))
-            {
-                return namedArgument.Value;
-            }
-
-            throw new JsonException("Invalid `NamedArgument`!");
+            return ReadNamedArguments(JsonSerializer.Deserialize<JsonElement>(ref reader, options), options);
         }
 
         /// <inheritdoc />
@@ -41,31 +34,25 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Attempts to read a <see cref="NamedArgument"/> from the provided <see cref="JsonElement"/>.
+        /// Read a <see cref="NamedArgument"/> from the provided <see cref="JsonElement"/>.
         /// </summary>
         /// <param name="el">The JSON element to be parsed.</param>
         /// <param name="options">The serializer options to use during parsing.</param>
-        /// <param name="o">
-        /// When this method returns, contains the parsed <see cref="NamedArgument"/> if the operation was successful;
-        /// otherwise, the value is null. This parameter is passed uninitialized.
-        /// </param>
         /// <returns>
-        /// true if the <see cref="NamedArgument"/> was successfully read; otherwise, false.
+        /// Read <see cref="NamedArgument"/>.
         /// </returns>
-        public static bool TryReadNamedArguments(JsonElement el, JsonSerializerOptions options,
-            [NotNullWhen(true)] out NamedArgument? o)
+        public static NamedArgument ReadNamedArguments(JsonElement el, JsonSerializerOptions options)
         {
             if (el.TryGetProperty("name", out var namedArg)
                 && IdentifierSerializer.TryGetIdentifier(namedArg, options, out var id)
-                && el.TryGetProperty("value", out var valueArg)
-                && ResourceSerializer.TryReadInlineExpression(valueArg, options, out var inline)
-               )
+                && el.TryGetProperty("value", out var valueArg))
             {
-                o = new NamedArgument(id, inline);
-                return true;
+                var inline = ResourceSerializer.ReadInlineExpression(valueArg, options);
+                return new NamedArgument(id, inline);
             }
 
             throw new JsonException("NamedArgument fields `name` and `value` properties are mandatory");
         }
     }
 }
+

@@ -40,9 +40,9 @@ namespace Linguini.Serialization.Converters
         private static void WriteKey(Utf8JsonWriter writer, Variant value)
         {
             writer.WritePropertyName("key");
-            
+
             writer.WriteStartObject();
-            
+
             switch (value.Type)
             {
                 case VariantType.Identifier:
@@ -83,9 +83,10 @@ namespace Linguini.Serialization.Converters
             if (el.TryGetProperty("key", out var jsonKey)
                 && TryReadKey(jsonKey, options, out var key))
             {
-                if (el.TryGetProperty("value", out var jsonValue)
-                    && PatternSerializer.TryReadPattern(jsonValue, options, out var pattern))
+                if (el.TryGetProperty("value", out var jsonValue))
                 {
+                    var pattern = PatternSerializer.ReadPattern(jsonValue, options);
+
                     var isDefault = false;
                     if (el.TryGetProperty("default", out var jsonDefault))
                     {
@@ -117,6 +118,5 @@ namespace Linguini.Serialization.Converters
             key = null;
             return false;
         }
-
     }
 }

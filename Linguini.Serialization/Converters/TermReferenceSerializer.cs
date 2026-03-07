@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
@@ -72,7 +71,7 @@ namespace Linguini.Serialization.Converters
 
             if (el.TryGetProperty("arguments", out var callarg))
             {
-                CallArgumentsSerializer.TryGetCallArguments(callarg, options, out arguments);
+                arguments = CallArgumentsSerializer.ReadCallArguments(callarg, options);
             }
 
             return new TermReference(id, attribute, arguments);

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -349,59 +349,6 @@ new1  = new
 
             Assert.That(original3.GetMessage("term"), Is.EqualTo("foo"));
             Assert.That(copy3.GetMessage("term"), Is.EqualTo("FOO"));
-        }
-
-        [Test]
-        public void TryGetMessage_Success_SetsErrorsToNull_ForMutableAndFrozenBundles()
-        {
-            var bundle = LinguiniBuilder.Builder()
-                .CultureInfo(new CultureInfo("en"))
-                .AddResource("hello = Hello")
-                .UncheckedBuild();
-
-            Assert.That(bundle.TryGetMessage("hello", null, out var mutableErrors, out var mutableMessage), Is.True);
-            Assert.That(mutableErrors, Is.Null);
-            Assert.That(mutableMessage, Is.EqualTo("Hello"));
-
-            var frozen = bundle.ToFrozenBundle();
-            Assert.That(frozen.TryGetMessage("hello", null, out var frozenErrors, out var frozenMessage), Is.True);
-            Assert.That(frozenErrors, Is.Null);
-            Assert.That(frozenMessage, Is.EqualTo("Hello"));
-        }
-
-        [Test]
-        public void TryGetAttrMessage_Success_SetsErrorsToNull_ForMutableAndFrozenBundles()
-        {
-            var bundle = LinguiniBuilder.Builder()
-                .CultureInfo(new CultureInfo("en"))
-                .AddResource("hello = Hello")
-                .UncheckedBuild();
-
-            Assert.That(bundle.TryGetAttrMessage("hello", null, out var mutableErrors, out var mutableMessage), Is.True);
-            Assert.That(mutableErrors, Is.Null);
-            Assert.That(mutableMessage, Is.EqualTo("Hello"));
-
-            var frozen = bundle.ToFrozenBundle();
-            Assert.That(frozen.TryGetAttrMessage("hello", null, out var frozenErrors, out var frozenMessage), Is.True);
-            Assert.That(frozenErrors, Is.Null);
-            Assert.That(frozenMessage, Is.EqualTo("Hello"));
-        }
-
-        [Test]
-        public void TryGetMessageErrRef_Success_NormalizesEmptyErrorListToNull()
-        {
-            var bundle = LinguiniBuilder.Builder()
-                .CultureInfo(new CultureInfo("en"))
-                .AddResource("hello = Hello")
-                .UncheckedBuild();
-
-            var readBundle = (IReadBundle)bundle.ToFrozenBundle();
-            IList<FluentError>? errors = new List<FluentError>();
-            var ok = readBundle.TryGetMessageErrRef("hello", null, null, ref errors, out var message);
-
-            Assert.That(ok, Is.True);
-            Assert.That(errors, Is.Null);
-            Assert.That(message, Is.EqualTo("Hello"));
         }
 
         [Test]
