@@ -20,7 +20,7 @@ public class SourceGenerator : IIncrementalGenerator
 
         var namesAndContent = xmlFiles
             .Select((text, token) => (path: Path.GetFileName(text.Path),
-                content: text.GetText(token)!.ToString()))
+                        content: text.GetText(token)!.ToString()))
             .Collect();
 
         initContext.RegisterSourceOutput(namesAndContent, (context, source) =>
@@ -29,7 +29,6 @@ public class SourceGenerator : IIncrementalGenerator
             List<CldrRule> ordinalRules = [];
             var debug = "";
             foreach (var (path, content) in source)
-            {
                 if (path.EndsWith("plurals.xml"))
                 {
                     cardinalRules = ProcessXmlFile(content);
@@ -38,7 +37,6 @@ public class SourceGenerator : IIncrementalGenerator
                 {
                     ordinalRules = ProcessXmlFile(content);
                 }
-            }
 
             var (sourceBuilder, testBuilder) = GenerateCode(ordinalRules, cardinalRules, debug);
 
@@ -52,6 +50,7 @@ public class SourceGenerator : IIncrementalGenerator
     {
         // begin creating the source we'll inject into the users compilation
         var sourceBuilder = new StringBuilder($$"""
+                                                #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
                                                 using System;
                                                 using Linguini.Shared.Util;
@@ -66,15 +65,15 @@ public class SourceGenerator : IIncrementalGenerator
                                                 """);
         WriteRules(sourceBuilder, cardinalRules);
         sourceBuilder.Append("""
-                             
+
                                      };
-                             
+
                                      private static Func<PluralOperands, PluralCategory>[] ordinalMap = 
                                      {
                              """);
         WriteRules(sourceBuilder, ordinalRules);
         sourceBuilder.Append("""
-                             
+
                                      };
                                      
                                      private static int GetCardinalIndex(string culture)
@@ -82,17 +81,17 @@ public class SourceGenerator : IIncrementalGenerator
                              """);
         WriteRulesIndex(sourceBuilder, cardinalRules);
         sourceBuilder.Append("""
-                             
+
                                      }
-                             
+
                                      private static int GetOrdinalIndex(string culture)
                                      {
                              """);
         WriteRulesIndex(sourceBuilder, ordinalRules);
         sourceBuilder.Append("""
-                             
+
                                      }
-                             
+
                                      public static Func<PluralOperands, PluralCategory> GetPluralFunc(string culture, RuleType type)
                                      {
                                          switch (type)
@@ -102,22 +101,22 @@ public class SourceGenerator : IIncrementalGenerator
                                              case RuleType.Ordinal:
                                                  return ordinalMap[GetOrdinalIndex(culture)];
                                          }
-                             
+
                                          return _ => PluralCategory.Other;
                                      }
-                             
+
                                      public static string[] SpecialCaseCardinal = {
                              """);
         WriteSpecialCase(sourceBuilder, cardinalRules);
         sourceBuilder.Append("""
-                             
+
                                      };
-                             
+
                                      public static string[] SpecialCaseOrdinal = {
                              """);
         WriteSpecialCase(sourceBuilder, ordinalRules);
         sourceBuilder.Append("""
-                             
+
                                      };
                                      
                                  }
@@ -128,6 +127,7 @@ public class SourceGenerator : IIncrementalGenerator
 
                                             using System;
                                             using Linguini.Shared.Types;
+                                            #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
                                             namespace PluralRulesGenerated.Test
                                             {
@@ -137,26 +137,20 @@ public class SourceGenerator : IIncrementalGenerator
                                                     {
 
                                             """);
-        foreach (var cardinalRule in cardinalRules)
-        {
-            WriteRuleTest(testBuilder, cardinalRule, true);
-        }
+        foreach (var cardinalRule in cardinalRules) WriteRuleTest(testBuilder, cardinalRule, true);
 
         testBuilder.Append("""
-                           
+
                                    };
-                           
+
                                    public static readonly object?[][] OrdinalTestData = 
                                    {
 
                            """);
-        foreach (var ordinalRule in ordinalRules)
-        {
-            WriteRuleTest(testBuilder, ordinalRule, false);
-        }
+        foreach (var ordinalRule in ordinalRules) WriteRuleTest(testBuilder, ordinalRule, false);
 
         testBuilder.Append("""
-                           
+
                                    };
                                }
                            }
@@ -171,21 +165,27 @@ public class SourceGenerator : IIncrementalGenerator
         {
             foreach (var langId in cldr.LangIds)
             {
-                if (langId.Length <= 4) continue;
+                if (langId.Length <= 4)
+                {
+                    continue;
+                }
+
                 var specCase = langId.Replace('_', '-');
                 specialCases.Add(langId);
                 specialCases.Add(specCase);
             }
         }
 
-        if (specialCases.Count <= 0) return;
-        foreach (var specialCase in specialCases)
+        if (specialCases.Count <= 0)
         {
+            return;
+        }
+
+        foreach (var specialCase in specialCases)
             sourceBuilder.Append($"""
-                                  
+
                                               "{specialCase}",
                                   """);
-        }
     }
 
     private void WriteRuleTest(StringBuilder testBuilder, CldrRule rule, bool isCardinal)
@@ -195,7 +195,11 @@ public class SourceGenerator : IIncrementalGenerator
         {
             foreach (var ruleMap in rule.Rules)
             {
-                if (ruleMap.Rule.Samples == null) continue;
+                if (ruleMap.Rule.Samples == null)
+                {
+                    continue;
+                }
+
                 var category = $"PluralCategory.{ruleMap.Category.FirstCharToUpper()}";
                 foreach (var integerSample in ruleMap.Rule.Samples.Value.IntegerSamples)
                 {
@@ -203,7 +207,7 @@ public class SourceGenerator : IIncrementalGenerator
                         ? "null"
                         : $"\"{integerSample.Upper.Value}\"";
                     testBuilder.Append($$"""
-                                         
+
                                                      new object?[] {"{{ruleLangId}}", {{ruleType}}, false, "{{integerSample.Lower.Value}}", {{upper}}, {{category}}},
                                          """);
                 }
@@ -213,10 +217,10 @@ public class SourceGenerator : IIncrementalGenerator
                     var upper = decimalSample.Upper switch
                     {
                         null => "null",
-                        _ => $"\"{decimalSample.Upper.Value}\""
+                        _    => $"\"{decimalSample.Upper.Value}\""
                     };
                     testBuilder.Append($$"""
-                                         
+
                                                      new object?[] {"{{ruleLangId}}", {{ruleType}}, true, "{{decimalSample.Lower.Value}}", {{upper}}, {{category}}},
                                          """);
                 }
@@ -227,12 +231,11 @@ public class SourceGenerator : IIncrementalGenerator
     private void WriteRules(StringBuilder stringBuilder, List<CldrRule> rules)
     {
         foreach (var rule in rules)
-        {
             if (rule.Rules.Count == 1)
             {
                 var category = rule.Rules[0].Category.FirstCharToUpper();
                 stringBuilder.Append($"""
-                                      
+
                                                   _ => PluralCategory.{category},
                                       """);
             }
@@ -240,23 +243,19 @@ public class SourceGenerator : IIncrementalGenerator
             {
                 WriteRuleMaps(stringBuilder, rule.Rules);
             }
-        }
     }
 
     private void WriteRuleMaps(StringBuilder stringBuilder, List<RuleMap> ruleMaps)
     {
         stringBuilder.Append("""
-                             
+
                                          po =>
                                          {
                              """);
-        foreach (var ruleMap in ruleMaps)
-        {
-            WriteRuleMap(stringBuilder, ruleMap);
-        }
+        foreach (var ruleMap in ruleMaps) WriteRuleMap(stringBuilder, ruleMap);
 
         stringBuilder.Append("""
-                             
+
                                          },
                              """);
     }
@@ -264,7 +263,7 @@ public class SourceGenerator : IIncrementalGenerator
     private void WriteRuleMap(StringBuilder stringBuilder, RuleMap ruleMap)
     {
         stringBuilder.Append("""
-                             
+
                                              
                              """);
         if (ruleMap.Rule.Condition.IsAny())
@@ -277,7 +276,7 @@ public class SourceGenerator : IIncrementalGenerator
             WriteCondition(stringBuilder, ruleMap.Rule.Condition);
             stringBuilder.Append(")");
             stringBuilder.Append($$"""
-                                   
+
                                                    {
                                                        return PluralCategory.{{ruleMap.Category.FirstCharToUpper()}};
                                                    }
@@ -420,17 +419,14 @@ public class SourceGenerator : IIncrementalGenerator
     private void WriteRulesIndex(StringBuilder stringBuilder, List<CldrRule> rules)
     {
         stringBuilder.Append("""
-                             
+
                                          switch (culture)
                                          {
                              """);
-        for (var i = 0; i < rules.Count; i++)
-        {
-            WriteRuleIndex(stringBuilder, rules[i], i);
-        }
+        for (var i = 0; i < rules.Count; i++) WriteRuleIndex(stringBuilder, rules[i], i);
 
         stringBuilder.Append("""
-                             
+
                                          }
                                          return -1;
                              """);
@@ -439,15 +435,13 @@ public class SourceGenerator : IIncrementalGenerator
     private void WriteRuleIndex(StringBuilder stringBuilder, CldrRule rule, int i)
     {
         foreach (var langId in rule.LangIds)
-        {
             stringBuilder.Append($"""
-                                  
+
                                                   case "{langId}":
                                   """);
-        }
 
         stringBuilder.Append($"""
-                              
+
                                                   return {i};
                               """);
     }
