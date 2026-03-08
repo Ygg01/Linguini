@@ -112,6 +112,7 @@ namespace Linguini.Bundle
         }
 
         /// <inheritdoc/>
+        [Obsolete("Use TryFormatPattern to follow bool + out value nullability contracts.")]
         public string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] ref IList<FluentError>? errors)
         {
@@ -123,10 +124,22 @@ namespace Linguini.Bundle
 
         /// <inheritdoc/>
         /// Convenience method for calling <see cref="IReadBundle.FormatPattern"/>
+        [Obsolete("Use TryFormatPattern to follow bool + out value nullability contracts.")]
         public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args, [NotNullWhen(false)] out IList<FluentError>? errors)
         {
             errors = null;
             return FormatPatternErrRef(pattern, args, ref errors);
+        }
+
+        /// <inheritdoc/>
+        public bool TryFormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors,
+            [NotNullWhen(true)] out string? value)
+        {
+            var scope = new Scope(this, args);
+            value = pattern.FormatPattern(scope);
+            errors = scope.Errors.Count > 0 ? scope.Errors : null;
+            return errors is null;
         }
 
         /// <inheritdoc/>

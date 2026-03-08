@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,6 +12,7 @@ namespace Linguini.Serialization.Converters
     /// Provides custom serialization and deserialization for the `Pattern` class.
     /// </summary>
     public class PatternSerializer : JsonConverter<Pattern>
+
     {
         /// <inheritdoc />
         public override Pattern Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -129,14 +131,20 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Deserialize a JSON element into a <see cref="Pattern"/> object based on a specific structure.
+        /// Attempts to deserialize a JSON element into a <see cref="Pattern"/> object based on a specific structure.
         /// </summary>
         /// <param name="jsonValue">The JSON element to be deserialized.</param>
         /// <param name="options">The JSON serialization options used for deserialization.</param>
+        /// <param name="pattern">
+        /// When this method returns, contains the deserialized <see cref="Pattern"/> object,
+        /// if the deserialization is successful; otherwise, null.
+        /// </param>
         /// <returns>
-        /// Deserialized <see cref="Pattern"/>
+        /// <c>true</c> if the JSON element was successfully deserialized into a <see cref="Pattern"/> object;
+        /// otherwise, <c>false</c>.
         /// </returns>
-        public static Pattern ReadPattern(JsonElement jsonValue, JsonSerializerOptions options)
+        public static bool TryReadPattern(JsonElement jsonValue, JsonSerializerOptions options,
+            [MaybeNullWhen(false)] out Pattern pattern)
         {
             if (!jsonValue.TryGetProperty("type", out var jsonType)
                 && "Placeable".Equals(jsonType.GetString()))
@@ -161,13 +169,17 @@ namespace Linguini.Serialization.Converters
                         patternElements.Add(new TextLiteral(textValue));
                         break;
                     case "Placeable":
-                        var placeable = PlaceableSerializer.ProcessPlaceable(element, options);
-                        patternElements.Add(placeable);
+                        if (PlaceableSerializer.TryProcessPlaceable(element, options, out var placeable))
+                        {
+                            patternElements.Add(placeable);
+                        }
+
                         break;
                 }
             }
 
-            return new Pattern(patternElements);
+            pattern = new Pattern(patternElements);
+            return true;
         }
     }
 }

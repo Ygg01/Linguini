@@ -127,6 +127,7 @@ namespace Linguini.Bundle
         /// <returns>
         /// The formatted string if the pattern is successfully resolved; otherwise, null.
         /// </returns>
+        [Obsolete("Use TryFormatPattern to follow bool + out value nullability contracts.")]
         public string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] ref IList<FluentError>? errors)
         {
@@ -138,10 +139,22 @@ namespace Linguini.Bundle
 
         /// <inheritdoc/>
         /// Convenience method for calling <see cref="IReadBundle.FormatPattern"/>
+        [Obsolete("Use TryFormatPattern to follow bool + out value nullability contracts.")]
         public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args, [NotNullWhen(false)] out IList<FluentError>? errors)
         {
             errors = null;
             return FormatPatternErrRef(pattern, args, ref errors);
+        }
+
+        /// <inheritdoc/>
+        public bool TryFormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors,
+            [NotNullWhen(true)] out string? value)
+        {
+            var scope = new Scope(this, args);
+            value = pattern.FormatPattern(scope);
+            errors = scope.Errors.Count > 0 ? scope.Errors : null;
+            return errors is null;
         }
 
         /// <summary>
@@ -287,7 +300,7 @@ namespace Linguini.Bundle
         /// <param name="term">The term to add.</param>
         /// <param name="errors">A list to store any errors that occur during the <c>TryAdd</c> operation.</param>
         /// <returns><see langword="true"/> if the term was added successfully, <see langword="false"/> otherwise.</returns>
-        protected abstract bool TryAddTerm(AstTerm term, List<FluentError> errors);
+        protected abstract bool TryAddTerm(AstTerm term, [NotNullWhen(false)] List<FluentError>? errors);
 
         /// <summary>
         /// Tries to add a message to the bundle.
@@ -295,7 +308,7 @@ namespace Linguini.Bundle
         /// <param name="msg">The message to add.</param>
         /// <param name="errors">A list to store any errors that occur during the <c>TryAdd</c> operation.</param>
         /// <returns><see langword="true"/> if the message was added successfully, <see langword="false"/> otherwise.</returns>
-        protected abstract bool TryAddMessage(AstMessage msg, List<FluentError> errors);
+        protected abstract bool TryAddMessage(AstMessage msg, [NotNullWhen(false)] List<FluentError>? errors);
 
 
         /// <summary>
@@ -422,4 +435,3 @@ namespace Linguini.Bundle
         }
     }
 }
-

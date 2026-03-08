@@ -42,6 +42,7 @@ namespace Linguini.Bundle
         /// <param name="args">The dictionary of arguments to replace the variables.</param>
         /// <param name="errors">The list of FluentErrors, if any occurred during formatting.</param>
         /// <returns>The formatted string.</returns>
+        [Obsolete("Use TryFormatPattern to follow bool + out value nullability contracts.")]
         string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors)
         {
@@ -56,8 +57,21 @@ namespace Linguini.Bundle
         /// <param name="args">The dictionary of arguments to replace the variables.</param>
         /// <param name="errors">The reference to a list of FluentErrors, will be full if any occurred during formatting.</param>
         /// <returns>The formatted string.</returns>
+        [Obsolete("Use TryFormatPattern to follow bool + out value nullability contracts.")]
         string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] ref IList<FluentError>? errors);
+
+        /// <summary>
+        ///     Tries to format a <see cref="Pattern" /> to a string using given arguments.
+        /// </summary>
+        /// <param name="pattern">The pattern to format.</param>
+        /// <param name="args">The dictionary of arguments to replace the variables.</param>
+        /// <param name="errors">The list of FluentErrors, if any occurred during formatting. Null when there are no errors.</param>
+        /// <param name="value">The formatted string when formatting succeeds.</param>
+        /// <returns>True when the pattern was formatted without errors; otherwise, false.</returns>
+        bool TryFormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors,
+            [NotNullWhen(true)] out string? value);
 
         /// <summary>
         ///     Tries to get the AstMessage associated with the specified ident.
@@ -243,7 +257,8 @@ namespace Linguini.Bundle
         /// <param name="message">The retrieved message.</param>
         /// <returns>True if the message was successfully retrieved, otherwise false.</returns>
         public bool TryGetMessageErrRef(string id, string? attribute, IDictionary<string, IFluentType>? args,
-            [NotNullWhen(false)] ref IList<FluentError>? errors, [NotNullWhen(true)] out string? message)
+            [NotNullWhen(false)] ref IList<FluentError>? errors,
+            [NotNullWhen(true)] out string? message)
         {
             errors = new List<FluentError>();
             var msg = attribute == null
@@ -268,9 +283,8 @@ namespace Linguini.Bundle
                 return false;
             }
 
-            message = FormatPattern(pattern, args, out errors);
-            if (errors is { Count: 0 }) errors = null;
-            return errors == null;
+            TryFormatPattern(pattern, args, out errors, out message);
+            return errors is null;
         }
     }
 
@@ -405,3 +419,4 @@ namespace Linguini.Bundle
         }
     }
 }
+

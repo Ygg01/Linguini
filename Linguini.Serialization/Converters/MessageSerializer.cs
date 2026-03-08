@@ -30,7 +30,7 @@ namespace Linguini.Serialization.Converters
             var attrs = new List<Attribute>();
             if (el.TryGetProperty("value", out var patternJson) && patternJson.ValueKind == JsonValueKind.Object)
             {
-                value = PatternSerializer.ReadPattern(patternJson, options);
+                PatternSerializer.TryReadPattern(patternJson, options, out value);
             }
 
             if (el.TryGetProperty("comment", out var commentJson) && patternJson.ValueKind == JsonValueKind.Object)

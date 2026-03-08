@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -37,17 +37,19 @@ namespace Linguini.Bundle
         }
 
         /// <inheritdoc />
-        protected override bool TryAddTerm(AstTerm term, List<FluentError> errors)
+        protected override bool TryAddTerm(AstTerm term, List<FluentError>? errors)
         {
             if (Terms.TryAdd(term.GetId(), term)) return true;
+            errors ??= new List<FluentError>();
             errors.Add(new OverrideFluentError(term.GetId(), EntryKind.Term));
             return false;
         }
 
         /// <inheritdoc />
-        protected override bool TryAddMessage(AstMessage message, List<FluentError> errors)
+        protected override bool TryAddMessage(AstMessage message, List<FluentError>? errors)
         {
             if (Messages.TryAdd(message.GetId(), message)) return true;
+            errors ??= new List<FluentError>();
             errors.Add(new OverrideFluentError(message.GetId(), EntryKind.Message));
             return false;
         }
@@ -150,7 +152,7 @@ namespace Linguini.Bundle
                 EnableExtensions = EnableExtensions,
             };
         }
-
+        
         /// <inheritdoc/>
         public bool Equals(ConcurrentBundle? other)
         {
@@ -173,6 +175,3 @@ namespace Linguini.Bundle
         }
     }
 }
-
-
-
