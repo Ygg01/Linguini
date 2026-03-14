@@ -297,3 +297,19 @@ version 0.10.2
 - Reintroduce `FormatPattern` method from `IReadBundle` to `FluentBundle`, `FrozenBundle`.
 - Add `IReadBundle` interface to `ConcurrentBundle` (it implements it via `FluentBundle`).
 - Change so `FormatPatternErrRef` parameter `ref IList<FluentError>? errors` returns null if no errors found.
+  
+version 0.11.0
+  ========
+
+## What's changed
+
+### Serialization
+- Replace `MaybeNullWhen` with `NotNullWhen`
+
+### Bundle
+- Deprecate `FormatPatternErrRef`
+- Introduce `GetPatternUnchecked` and `TryGetPattern`
+- `FormatPattern` now uses new method
+
+### PluralRules
+- Add docs to Plural Rules
