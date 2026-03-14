@@ -41,6 +41,10 @@
     {
         private readonly string _error;
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        /// <param name="error">Error message string</param>
         public FluentErrType(string error = "")
         {
             _error = error;
