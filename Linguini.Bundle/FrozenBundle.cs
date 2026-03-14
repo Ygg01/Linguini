@@ -122,6 +122,35 @@ namespace Linguini.Bundle
         }
         
         /// <inheritdoc/>
+        public string GetPatternUnchecked(Pattern pattern, IDictionary<string, IFluentType>? args)
+        {
+            var scope = new Scope(this, args);
+            return scope.Errors.Count > 0
+                ? throw new LinguiniException(scope.Errors)
+                : pattern.FormatPattern(scope);
+        }
+
+        /// <inheritdoc/>
+        public bool TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(true)] out string? result, 
+            [NotNullWhen(false)] out IList<FluentError>? errors)
+        {
+            var scope = new Scope(this, args);
+            var value = pattern.FormatPattern(scope);
+
+            if (scope.Errors.Count > 0)
+            {
+                result = null;
+                errors = scope.Errors;
+                return false;
+            }
+
+            result = value;
+            errors = null;
+            return true;
+        }
+        
+        /// <inheritdoc/>
         /// Convenience method for calling <see cref="IReadBundle.FormatPattern"/>
         public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args, [NotNullWhen(false)] out IList<FluentError>? errors)
         {

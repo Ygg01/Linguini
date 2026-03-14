@@ -56,8 +56,33 @@ namespace Linguini.Bundle
         /// <param name="args">The dictionary of arguments to replace the variables.</param>
         /// <param name="errors">The reference to a list of FluentErrors, will be full if any occurred during formatting.</param>
         /// <returns>The formatted string.</returns>
+        [Obsolete("Use TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args, out string? result, out IList<FluentError>? errors) instead.")]
         string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] ref IList<FluentError>? errors);
+
+        /// <summary>
+        /// Retrieves the textual representation of the given pattern without performing validation or error-checking.
+        /// </summary>
+        /// <param name="pattern">The pattern representing the structure of the message.</param>
+        /// <param name="args">Optional arguments used to format the pattern.</param>
+        /// <returns>The formatted string representation of the pattern, or null if no representation was obtained.</returns>
+        /// <throws cref="LinguiniException">Thrown when an error occurs during pattern formatting.</throws>
+        string GetPatternUnchecked(Pattern pattern, IDictionary<string, IFluentType>? args);
+
+        /// <summary>
+        /// Tries to retrieve and format a pattern based on the provided arguments.
+        /// </summary>
+        /// <param name="pattern">The <see cref="Pattern"/> object to be formatted.</param>
+        /// <param name="args">An optional dictionary of arguments used to format the pattern.</param>
+        /// <param name="result">The formatted pattern, if the operation succeeds; otherwise, null.</param>
+        /// <param name="errors">
+        /// A list of <see cref="FluentError"/> objects if an error occurs; otherwise, null.
+        /// </param>
+        /// <returns>True if the pattern was successfully retrieved and formatted; otherwise, false.</returns>
+        bool TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(true)] out string? result,
+            [NotNullWhen(false)] out IList<FluentError>? errors);
+
 
         /// <summary>
         ///     Tries to get the AstMessage associated with the specified ident.

@@ -56,7 +56,7 @@ namespace Linguini.Bundle
         ///     elements count towards it). Useful for preventing billion laughs attack. Defaults to 100.
         /// </summary>
         public byte MaxPlaceable { get; internal init; } = 100;
-        
+
 
         /// <inheritdoc />
         public bool EnableExtensions { get; init; }
@@ -67,6 +67,7 @@ namespace Linguini.Bundle
         /// <param name="identifier">The identifier to check.</param>
         /// <returns>True if the identifier has a message; otherwise, false.</returns>
         public abstract bool HasMessage(string identifier);
+
 
         /// <summary>
         ///     Tries to get the AstMessage associated with the specified ident.
@@ -137,8 +138,38 @@ namespace Linguini.Bundle
         }
 
         /// <inheritdoc/>
+        public string GetPatternUnchecked(Pattern pattern, IDictionary<string, IFluentType>? args)
+        {
+            var scope = new Scope(this, args);
+            return scope.Errors.Count > 0
+                ? throw new LinguiniException(scope.Errors)
+                : pattern.FormatPattern(scope);
+        }
+
+        /// <inheritdoc/>
+        public bool TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(true)] out string? result, 
+            [NotNullWhen(false)] out IList<FluentError>? errors)
+        {
+            var scope = new Scope(this, args);
+            var value = pattern.FormatPattern(scope);
+
+            if (scope.Errors.Count > 0)
+            {
+                result = null;
+                errors = scope.Errors;
+                return false;
+            }
+
+            result = value;
+            errors = null;
+            return true;
+        }
+
+        /// <inheritdoc/>
         /// Convenience method for calling <see cref="IReadBundle.FormatPattern"/>
-        public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args, [NotNullWhen(false)] out IList<FluentError>? errors)
+        public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors)
         {
             errors = null;
             return FormatPatternErrRef(pattern, args, ref errors);
