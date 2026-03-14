@@ -136,7 +136,7 @@ namespace Linguini.Serialization.Converters
         /// <param name="jsonValue">The JSON element to be deserialized.</param>
         /// <param name="options">The JSON serialization options used for deserialization.</param>
         /// <param name="pattern">
-        /// When this method returns, contains the deserialized <see cref="Pattern"/> object,
+        /// When this method returns <c>true</c>, contains the deserialized <see cref="Pattern"/> object,
         /// if the deserialization is successful; otherwise, null.
         /// </param>
         /// <returns>
@@ -144,7 +144,7 @@ namespace Linguini.Serialization.Converters
         /// otherwise, <c>false</c>.
         /// </returns>
         public static bool TryReadPattern(JsonElement jsonValue, JsonSerializerOptions options,
-            [MaybeNullWhen(false)] out Pattern pattern)
+            [NotNullWhen(true)] out Pattern? pattern)
         {
             if (!jsonValue.TryGetProperty("type", out var jsonType)
                 && "Placeable".Equals(jsonType.GetString()))
