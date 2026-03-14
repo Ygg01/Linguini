@@ -45,8 +45,9 @@ namespace Linguini.Bundle
         string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors)
         {
-            errors = null;
-            return FormatPatternErrRef(pattern, args, ref errors);
+            return TryGetPattern(pattern, args, out var result, out errors)
+                ? result
+                : FluentNone.None.AsString();
         }
 
         /// <summary>
@@ -56,7 +57,8 @@ namespace Linguini.Bundle
         /// <param name="args">The dictionary of arguments to replace the variables.</param>
         /// <param name="errors">The reference to a list of FluentErrors, will be full if any occurred during formatting.</param>
         /// <returns>The formatted string.</returns>
-        [Obsolete("Use TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args, out string? result, out IList<FluentError>? errors) instead.")]
+        [Obsolete(
+            "Use TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args, out string? result, out IList<FluentError>? errors) instead.")]
         string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] ref IList<FluentError>? errors);
 

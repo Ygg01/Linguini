@@ -7,6 +7,8 @@ using Linguini.Syntax.Ast;
 using NUnit.Framework;
 using Attribute = Linguini.Syntax.Ast.Attribute;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 
 namespace Linguini.Serialization.Test;
 

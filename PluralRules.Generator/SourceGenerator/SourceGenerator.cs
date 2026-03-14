@@ -59,6 +59,9 @@ public class SourceGenerator : IIncrementalGenerator
                                                 // ordinal {{debug}}
                                                 namespace PluralRulesGenerated
                                                 {
+                                                    /// <summary>
+                                                    ///     RuleTable for Plural rules.
+                                                    /// </summary>
                                                     public static partial class RuleTable
                                                     {
                                                         private static Func<PluralOperands, PluralCategory>[] cardinalMap = 
@@ -92,7 +95,12 @@ public class SourceGenerator : IIncrementalGenerator
         sourceBuilder.Append("""
                              
                                      }
-                             
+                                     /// <summary>
+                                     /// Returns the plural category for the given culture and rule type.
+                                     /// </summary>
+                                     /// <param name="culture">The culture name.</param>
+                                     /// <param name="type">The rule type.</param>
+                                     /// <returns>The function that for given <see cref="Linguini.Shared.Types.PluralOperands"/> returns a <see cref="Linguini.Shared.Types.PluralCategory"/>. </returns>
                                      public static Func<PluralOperands, PluralCategory> GetPluralFunc(string culture, RuleType type)
                                      {
                                          switch (type)
@@ -105,14 +113,18 @@ public class SourceGenerator : IIncrementalGenerator
                              
                                          return _ => PluralCategory.Other;
                                      }
-                             
+                                     /// <summary>
+                                     /// Special case cardinal rules.
+                                     /// </summary>
                                      public static string[] SpecialCaseCardinal = {
                              """);
         WriteSpecialCase(sourceBuilder, cardinalRules);
         sourceBuilder.Append("""
                              
                                      };
-                             
+                                     /// <summary>
+                                     /// Special case ordinal rules.
+                                     /// </summary>
                                      public static string[] SpecialCaseOrdinal = {
                              """);
         WriteSpecialCase(sourceBuilder, ordinalRules);
@@ -128,7 +140,9 @@ public class SourceGenerator : IIncrementalGenerator
 
                                             using System;
                                             using Linguini.Shared.Types;
-
+                                            
+                                            #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+                                            
                                             namespace PluralRulesGenerated.Test
                                             {
                                                 public static partial class RuleTableTest
