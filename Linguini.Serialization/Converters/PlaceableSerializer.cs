@@ -44,7 +44,7 @@ namespace Linguini.Serialization.Converters
         /// <param name="el">The JSON element to process.</param>
         /// <param name="options">The JSON serializer options to use during processing.</param>
         /// <param name="placeable">
-        /// When this method returns, contains the <see cref="Placeable"/> instance
+        /// When this method returns <c>true</c>, contains the <see cref="Placeable"/> instance
         /// if the operation was successful, or <c>null</c> if unsuccessful.
         /// </param>
         /// <returns>
@@ -54,7 +54,7 @@ namespace Linguini.Serialization.Converters
         /// Thrown when the required "expression" property is missing from the JSON element.
         /// </exception>
         public static bool TryProcessPlaceable(JsonElement el, JsonSerializerOptions options,
-            [MaybeNullWhen(false)] out Placeable placeable)
+            [NotNullWhen(true)] out Placeable? placeable)
         {
             if (!el.TryGetProperty("expression", out var expr))
             {

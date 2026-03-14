@@ -155,10 +155,10 @@ namespace Linguini.Serialization.Converters
         /// </summary>
         /// <param name="el">The JSON element to read the number literal from.</param>
         /// <param name="options">The JSON serializer options to use during processing.</param>
-        /// <param name="numberLiteral">When this method returns, contains the processed number literal if successful, or null if the operation failed.</param>
+        /// <param name="numberLiteral">When this method returns <c>true</c>, contains the processed number literal if successful, or null if the operation failed.</param>
         /// <returns>True if the number literal is successfully read and processed; otherwise, false.</returns>
         public static bool TryReadProcessNumberLiteral(JsonElement el, JsonSerializerOptions options,
-            [MaybeNullWhen(false)] out NumberLiteral numberLiteral)
+            [NotNullWhen(true)] out NumberLiteral? numberLiteral)
         {
             if (el.TryGetProperty("value", out var v) && v.ValueKind == JsonValueKind.String &&
                 !"".Equals(v.GetString()))
@@ -202,12 +202,12 @@ namespace Linguini.Serialization.Converters
         /// </summary>
         /// <param name="el">The JSON element containing the data for the inline expression.</param>
         /// <param name="options">The JSON serializer options to customize reading behavior.</param>
-        /// <param name="o">When this method returns, contains the parsed inline expression if the read operation is successful,
-        /// or null if the read fails. This parameter is passed uninitialized.</param>
+        /// <param name="o">When this method returns <c>true</c>, contains the parsed inline expression if the read operation is successful,
+        /// or null if the read fails.</param>
         /// <returns>True if the inline expression is successfully read; otherwise, false.</returns>
         /// <exception cref="JsonException">Thrown when the JSON data is invalid or contains unexpected types.</exception>
         public static bool TryReadInlineExpression(JsonElement el, JsonSerializerOptions options,
-            [MaybeNullWhen(false)] out IInlineExpression o)
+            [NotNullWhen(true)] out IInlineExpression? o)
         {
             var type = el.GetProperty("type").GetString();
             o = type switch
