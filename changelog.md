@@ -299,7 +299,7 @@ version 0.10.2
 - Change so `FormatPatternErrRef` parameter `ref IList<FluentError>? errors` returns null if no errors found.
   
 version 0.11.0
-  ========
+========
 
 ## What's changed
 
