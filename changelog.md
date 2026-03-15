@@ -317,3 +317,11 @@ version 0.11.0
 
 ### PluralRules
 - Add docs to Plural Rules
+
+version 0.12.0
+========
+
+## What's changed
+
+### LanguageNegotiation package
+- Add `LanguageNegotiator` solution that determines language locId and deterimines the best locale to use.
