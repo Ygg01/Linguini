@@ -310,6 +310,10 @@ version 0.11.0
 - Deprecate `FormatPatternErrRef`
 - Introduce `GetPatternUnchecked` and `TryGetPattern`
 - `FormatPattern` now uses new method
+- Obsoletes `TryGetPattern(pattern, args, result, errors)` for `TryGetPattern(pattern, args, errors, result)` in `IReadBundle` and implementors.
+- `GetPatternUnchecked` now throws `FluentException` if no pattern found.
+- Removed `FormatPattern` default implementation from `FluentBundle`.
+- `TryGetMessage` and similar methods now no longer return `{???}`.
 
 ### PluralRules
 - Add docs to Plural Rules

@@ -7,6 +7,7 @@ using Linguini.Bundle.Function;
 using Linguini.Bundle.Types;
 using NUnit.Framework;
 using YamlDotNet.RepresentationModel;
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
 
 namespace Linguini.Bundle.Test.Yaml
 {
@@ -166,6 +167,7 @@ namespace Linguini.Bundle.Test.Yaml
                         testBundle.TryGetMessage(assert.Id, assert.Attribute, assert.Args,
                             out var errs,
                             out var actualValue);
+                        actualValue ??= "{???}";
                         Assert.That(actualValue, Is.EqualTo(assert.ExpectedValue), test.TestName);
                         AssertErrorCases(assert.ExpectedErrors, errs, test.TestName);
                     }
