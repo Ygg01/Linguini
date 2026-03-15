@@ -117,7 +117,7 @@ namespace Linguini.Bundle
         {
             var scope = new Scope(this, args);
             var value = pattern.FormatPattern(scope);
-            errors = scope.Errors;
+            errors = scope.Errors.Count == 0 ? null : scope.Errors;
             return value;
         }
         
@@ -125,15 +125,22 @@ namespace Linguini.Bundle
         public string GetPatternUnchecked(Pattern pattern, IDictionary<string, IFluentType>? args)
         {
             var scope = new Scope(this, args);
-            return scope.Errors.Count > 0
-                ? throw new LinguiniException(scope.Errors)
-                : pattern.FormatPattern(scope);
+            var value = pattern.FormatPattern(scope);
+            return scope.Errors.Count > 0 ? throw new LinguiniException(scope.Errors) : value;
         }
 
         /// <inheritdoc/>
         public bool TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(true)] out string? result, 
             [NotNullWhen(false)] out IList<FluentError>? errors)
+        {
+            return TryGetPattern(pattern, args, out errors, out result);
+        }
+        
+        /// <inheritdoc/>
+        public bool TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors,
+            [NotNullWhen(true)] out string? result)
         {
             var scope = new Scope(this, args);
             var value = pattern.FormatPattern(scope);

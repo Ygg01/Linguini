@@ -273,7 +273,7 @@ lolz = {lol9}
             yield return new TestCaseData(
                     PlaceableMacros3,
                     "foo",
-                    "{???}",
+                    null,
                     "", (FluentString)"")
                 .SetName("Message reference that is null")
                 .Returns(false);
