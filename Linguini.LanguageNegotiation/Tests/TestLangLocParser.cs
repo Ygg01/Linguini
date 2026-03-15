@@ -6,20 +6,24 @@ namespace Linguini.LanguageNegotiation.Tests
     [TestFixture]
     public class TestLangLocParser
     {
-        [Test]
+        [Parallelizable]
         [TestCase("en-US", "en", "US", null, ExpectedResult = true)]
+        [TestCase("sr", "sr", null, null, ExpectedResult = true)]
+        [TestCase("sr-RS", "sr", "RS", null, ExpectedResult = true)]
+        [TestCase("sr-Cyrl-RS", "sr", "RS", "Cyrl", ExpectedResult = true)]
+        [TestCase("en-", null, null, null, ExpectedResult = false)]
+        [TestCase("-en", null, null, null, ExpectedResult = false)]
         public bool Test(string input, string expectedLanguage, string? expectedRegion, string? expectedScript)
         {
             var result = LangLocParser.TryParse(
                 input,
-                out var errors,
-                out var language,
-                out var script,
-                out var region
+                out var _,
+                out var langLocId
             );
-            Assert.That(language, Is.EqualTo(expectedLanguage));
-            Assert.That(region, Is.EqualTo(expectedRegion));
-            Assert.That(script, Is.EqualTo(expectedScript));
+            
+            Assert.That(langLocId?.LanguageStr, Is.EqualTo(expectedLanguage));
+            Assert.That(langLocId?.Region, Is.EqualTo(expectedRegion));
+            Assert.That(langLocId?.ScriptStr, Is.EqualTo(expectedScript));
             return result;
         }
     }

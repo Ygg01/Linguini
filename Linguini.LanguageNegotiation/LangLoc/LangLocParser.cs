@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Linguini.LanguageNegotiation.LangLoc
 {
-
     /// <summary>
     /// Represents the LangLocParser class, which is responsible for the parsing
     /// and processing of language tags and locale negotiation. This class is
@@ -14,130 +14,196 @@ namespace Linguini.LanguageNegotiation.LangLoc
     /// This class should conform to https://www.unicode.org/reports/tr35/#unicode_language_id
     /// unicode_language_id = "root"
     ///     | (unicode_language_subtag (sep unicode_script_subtag)? (sep unicode_region_subtag)? (sep unicode_variant_subtag)*)
-    /// 
+    /// <br/>
     /// unicode_language_subtag = alpha{2,3} | alpha{5,8}
+    /// <br/>
     /// unicode_script_subtag   = alpha{4}
+    /// <br/>
     /// unicode_region_subtag   = (alpha{2} | digit{3})
+    /// <br/>
     /// unicode_variant_subtag  = (alphanum{5,8} | digit alphanum{3})
+    /// <br/>
+    /// sep                     = "-" | "_"
+    /// <br/>
+    /// alphanum                = alpha | digit
+    /// <br/>
+    /// alpha                   = "a".."z" | "A".."Z"
+    /// <br/>
+    /// digit                   = "0".."9"
     /// </remarks>
     public class LangLocParser
     {
-        public static bool TryParse(string langLoc, out List<string> errors, out string language, out string? script, out string? region)
+        public static bool TryParse(string langLoc, out List<string> errors,
+            [NotNullWhen(true)] out LangLocId? langLocId)
         {
             errors = new List<string>();
-            language = string.Empty;
-            script = string.Empty;
-            region = string.Empty;
+            var language = ReadOnlyMemory<char>.Empty;
+            ReadOnlyMemory<char>? region = null;
+            ReadOnlyMemory<char>? script = null;
 
             if (string.IsNullOrEmpty(langLoc))
             {
                 errors.Add("Language tag cannot be null or empty");
+                langLocId = null;
                 return false;
             }
 
             if (langLoc == "root")
             {
-                language = "root";
+                language = "root".AsMemory();
+                langLocId = new LangLocId(language, region, script);
                 return true;
             }
 
-            var parts = langLoc.Split(new[] { '-', '_' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 0)
-            {
-                errors.Add("Invalid language tag format");
-                return false;
-            }
-
-            int index = 0;
-
+            var pos = 0;
             // Parse language subtag
-            if (!TryParseLanguage(parts[index], out language))
+            if (!TryParseLanguage(langLoc.AsMemory(), ref pos, ref errors, out language))
             {
-                errors.Add($"Invalid language subtag: {parts[index]}");
+                langLocId = null;
                 return false;
             }
-            index++;
-
-            // Parse script subtag (optional)
-            if (index < parts.Length && TryParseScript(parts[index], out script))
+            
+            // skip `-`
+            pos += 1;
+            
+            if (!TryParseScript(langLoc.AsMemory(), ref pos, ref errors, out script))
             {
-                index++;
+                langLocId = null;
+                return false;
             }
+            
+            //
+            // index++;
+            //
+            // // Parse script subtag (optional)
+            // if (index < parts.Length && TryParseScript(parts[index], out script))
+            // {
+            //     index++;
+            // }
+            //
+            // // Parse region subtag (optional)
+            // if (index < parts.Length && TryParseRegion(parts[index], out region))
+            // {
+            //     index++;
+            // }
 
-            // Parse region subtag (optional)
-            if (index < parts.Length && TryParseRegion(parts[index], out region))
-            {
-                index++;
-            }
-
+            langLocId = new LangLocId(language, region, script);
             return errors.Count == 0;
         }
 
-        private static bool TryParseLanguage(string value, out string language)
+
+        private static bool TryParseLanguage(
+            ReadOnlyMemory<char> value,
+            ref int index,
+            ref List<string> errors,
+            out ReadOnlyMemory<char> language)
         {
-            language = string.Empty;
-            if (string.IsNullOrEmpty(value))
-                return false;
+            language = string.Empty.AsMemory();
 
-            if (!IsAlpha(value))
-                return false;
-
-            int len = value.Length;
-            if ((len >= 2 && len <= 3) || (len >= 5 && len <= 8))
+            if (value.IsEmpty)
             {
-                language = value.ToLowerInvariant();
-                return true;
+                errors.Add("Language tag cannot be empty");
+                return false;
             }
 
-            return false;
+            for (; index < value.Length; index++)
+            {
+                if (value.Span[index] != '-' && value.Span[index] != '_') continue;
+                break;
+            }
+            language = value.Slice(0, index);
+
+            if (!IsAlpha(language))
+            {
+                errors.Add("Language tag must contain only letters");
+                return false;
+            }
+
+            if ((index < 2 || index > 3) && (index < 5 || index > 8))
+            {
+                errors.Add("Language tag can only be 2-3 or 5-8 characters long");
+                return false;
+            }
+
+            language = ToLowerCase(language);
+            return true;
+        }
+        
+        private static bool TryParseScript(
+            ReadOnlyMemory<char> asMemory, 
+            ref int pos, 
+            ref List<string> errors, 
+            out ReadOnlyMemory<char>? script)
+        {
+            // Not enough space for language script
+            if (pos + 4 >= asMemory.Length)
+            {
+                script = null;
+                return true;
+            }
+            var scriptStr = asMemory.Slice(pos, 4);
+            if (IsAlpha(scriptStr))
+            {
+                script = scriptStr;
+                pos += 4;
+            }
         }
 
-        private static bool TryParseScript(string value, out string script)
+
+        private static ReadOnlyMemory<char> ToLowerCase(ReadOnlyMemory<char> language)
         {
-            script = string.Empty;
-            if (string.IsNullOrEmpty(value))
-                return false;
-
-            if (!IsAlpha(value))
-                return false;
-
-            if (value.Length == 4)
+            if (IsAllLowercase(language))
             {
-                script = char.ToUpperInvariant(value[0]) + value.Substring(1).ToLowerInvariant();
-                return true;
+                return language;
             }
 
-            return false;
+            var memory = new char[language.Length];
+            foreach (char c in language.Span)
+            {
+                memory[0] = char.ToLowerInvariant(c);
+            }
+
+            return memory.AsMemory();
         }
 
-        private static bool TryParseRegion(string value, out string region)
+        private static bool IsAllLowercase(ReadOnlyMemory<char> value)
         {
-            region = string.Empty;
-            if (string.IsNullOrEmpty(value))
-                return false;
-
-            if (value.Length == 2 && IsAlpha(value))
+            foreach (char c in value.Span)
             {
-                region = value.ToUpperInvariant();
-                return true;
+                if (!char.IsAsciiLetterLower(c))
+                {
+                    return false;
+                }
             }
 
-            if (value.Length == 3 && IsDigit(value))
+            return true;
+        }
+        
+        private static bool IsAllUppercase(ReadOnlyMemory<char> value)
+        {
+            foreach (char c in value.Span)
             {
-                region = value;
-                return true;
+                if (!char.IsAsciiLetterUpper(c))
+                {
+                    return false;
+                }
             }
 
-            return false;
+            return true;
         }
 
-        private static bool IsAlpha(string value)
+        
+
+        private static bool IsAlpha(ReadOnlyMemory<char> value)
         {
-            foreach (char c in value)
+            foreach (char c in value.Span)
             {
                 if (!char.IsLetter(c))
+                {
                     return false;
+                }
             }
+
             return true;
         }
 
@@ -148,6 +214,7 @@ namespace Linguini.LanguageNegotiation.LangLoc
                 if (!char.IsDigit(c))
                     return false;
             }
+
             return true;
         }
     }
@@ -156,12 +223,12 @@ namespace Linguini.LanguageNegotiation.LangLoc
     public class LangParseError : Exception
     {
         public List<string> Errors;
-        
+
         public LangParseError(string error)
         {
             Errors = new List<string> { error };
         }
-        
+
         public LangParseError(List<string> errors)
         {
             Errors = errors;

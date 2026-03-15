@@ -1,25 +1,31 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 
 namespace Linguini.LanguageNegotiation.LangLoc
 {
-    public sealed class LangLocId
+    public struct LangLocId
     {
-        string Language { get; }
-        string? Region { get; }
-        string? Script { get;  }
-
-        private LangLocId(string language, string? region = null, string? script = null)
+        public ReadOnlyMemory<char> Language { get; }
+        public ReadOnlyMemory<char>? Region { get; }
+        public ReadOnlyMemory<char>? Script { get; }
+        
+        public string LanguageStr => Language.ToString();
+        public string? RegionStr => Region?.ToString();
+        public string? ScriptStr => Script?.ToString();
+        
+        public LangLocId(ReadOnlyMemory<char> language, ReadOnlyMemory<char>? region = null,
+            ReadOnlyMemory<char>? script = null)
         {
-            Region = region;
             Language = language;
+            Region = region;
             Script = script;
         }
         
         public static LangLocId Create(string langLoc)
         {
-            if (LangLocParser.TryParse(langLoc, out var errors, out var region, out var language, out var script))
+            if (LangLocParser.TryParse(langLoc, out var errors, out var langLocId))
             {
-                return new LangLocId(region, language, script);
+                return langLocId.Value;
             }
             throw new LangParseError(errors);
         }
