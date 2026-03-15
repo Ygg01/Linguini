@@ -88,8 +88,8 @@ namespace Linguini.Bundle.Test.Yaml
 
         [TestCaseSource(nameof(YamlTestCases))]
         [TestCaseSource(nameof(LinguiniExtTestCases))]
-        // [TestCaseSource(nameof(SingleTestCase), new object[] { "linguini_ext/linguini_func_ref.yaml" })]
-        // [TestCaseSource(nameof(SingleTestCase), new object[] { "fixtures/arguments.yaml" })]
+        [TestCaseSource(nameof(SingleTestCase), new object[] { "linguini_ext/linguini_func_ref.yaml" })]
+        [TestCaseSource(nameof(SingleTestCase), new object[] { "fixtures/arguments.yaml" })]
         [Parallelizable]
         public void YamlTestSuiteMethod(ResolverTestSuite parsedTestSuite, LinguiniBuilder.IReadyStep builder)
         {
