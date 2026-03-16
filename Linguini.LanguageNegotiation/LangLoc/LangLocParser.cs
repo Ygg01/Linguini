@@ -57,98 +57,135 @@ namespace Linguini.LanguageNegotiation.LangLoc
 
             var pos = 0;
             // Parse language subtag
-            if (!TryParseLanguage(langLoc.AsMemory(), ref pos, ref errors, out language))
+            var firstPart = TryReadAlpha(langLoc.AsMemory(), pos);
+            if (firstPart.Length == 2 || firstPart.Length == 3 || firstPart.Length == 5 || firstPart.Length == 8)
             {
+                language = ToLowerCase(firstPart);
+                pos += firstPart.Length;
+            }
+            else
+            {
+                errors.Add("Language tag must be 2, 3, 5 or 8 characters long");
                 langLocId = null;
                 return false;
             }
             
-            // skip `-`
-            pos += 1;
-            
-            if (!TryParseScript(langLoc.AsMemory(), ref pos, ref errors, out script))
-            {
-                langLocId = null;
-                return false;
-            }
-            
-            //
-            // index++;
-            //
-            // // Parse script subtag (optional)
-            // if (index < parts.Length && TryParseScript(parts[index], out script))
-            // {
-            //     index++;
-            // }
-            //
-            // // Parse region subtag (optional)
-            // if (index < parts.Length && TryParseRegion(parts[index], out region))
-            // {
-            //     index++;
-            // }
+            // Parse script subtag (optional)
+            script = GetScript(langLoc.AsMemory(), ref pos);
 
+            region = GetRegion(langLoc.AsMemory(), ref errors, ref pos);
+
+
+            if (errors.Count > 0)
+            {
+                langLocId = null;
+                return false;
+            } 
+            
             langLocId = new LangLocId(language, region, script);
-            return errors.Count == 0;
-        }
-
-
-        private static bool TryParseLanguage(
-            ReadOnlyMemory<char> value,
-            ref int index,
-            ref List<string> errors,
-            out ReadOnlyMemory<char> language)
-        {
-            language = string.Empty.AsMemory();
-
-            if (value.IsEmpty)
-            {
-                errors.Add("Language tag cannot be empty");
-                return false;
-            }
-
-            for (; index < value.Length; index++)
-            {
-                if (value.Span[index] != '-' && value.Span[index] != '_') continue;
-                break;
-            }
-            language = value.Slice(0, index);
-
-            if (!IsAlpha(language))
-            {
-                errors.Add("Language tag must contain only letters");
-                return false;
-            }
-
-            if ((index < 2 || index > 3) && (index < 5 || index > 8))
-            {
-                errors.Add("Language tag can only be 2-3 or 5-8 characters long");
-                return false;
-            }
-
-            language = ToLowerCase(language);
             return true;
         }
-        
-        private static bool TryParseScript(
-            ReadOnlyMemory<char> asMemory, 
-            ref int pos, 
-            ref List<string> errors, 
-            out ReadOnlyMemory<char>? script)
+
+        private static ReadOnlyMemory<char>? GetScript(ReadOnlyMemory<char> input, ref int oldPos)
         {
-            // Not enough space for language script
-            if (pos + 4 >= asMemory.Length)
+            var pos = oldPos;
+            
+            // Skip  separator
+            if (pos < input.Length 
+                && (input.Span[pos] == '-' || input.Span[pos] == '_'))
             {
-                script = null;
-                return true;
+                pos += 1;
             }
-            var scriptStr = asMemory.Slice(pos, 4);
-            if (IsAlpha(scriptStr))
+
+            var secondPart = TryReadAlpha(input, pos);
+            if (secondPart.Length != 4) return null;
+                
+            pos += secondPart.Length;
+            oldPos = pos;
+
+            return ToLowerCase(secondPart);
+        }
+        
+        private static ReadOnlyMemory<char>? GetRegion(ReadOnlyMemory<char> input, ref List<string> errors, ref int oldPos)
+        {
+            var pos = oldPos;
+            
+            // Don't read past the end of the string
+            if (pos >= input.Length) return null;
+
+            if (input.Span[pos] == '-' || input.Span[pos] == '_')
             {
-                script = scriptStr;
-                pos += 4;
+                pos += 1;
+
+                if (pos >= input.Length)
+                {
+                    errors.Add("Unexpected end of tag");
+                    return null;
+                }
+
+                if (char.IsAscii(input.Span[pos]))
+                {
+                    var alphaRegionCode = TryReadAlpha(input, pos);
+
+                    if (alphaRegionCode.Length == 2)
+                    {
+                        ToUpperCase(alphaRegionCode);
+                        pos += alphaRegionCode.Length;
+                        oldPos = pos;
+                        return ToUpperCase(alphaRegionCode);
+                    }
+                }
+                else if (char.IsDigit(input.Span[pos]))
+                {
+                    var digitRegionCode = TryReadDigit(input, pos);
+                    
+                    if (digitRegionCode.Length == 3)
+                    {
+                        pos += digitRegionCode.Length;
+                        oldPos = pos;
+                        return ToUpperCase(digitRegionCode);
+                    }
+                }
             }
+            errors.Add("Expected region code found something else");
+            return null;
         }
 
+
+        private static ReadOnlyMemory<char> TryReadAlpha(
+            ReadOnlyMemory<char> readOnlyMemory,
+            int oldPos)
+        {
+            var ind = oldPos;
+            foreach (var chr in readOnlyMemory.Span[oldPos..])
+            {
+                if (!char.IsAsciiLetter(chr))
+                {
+                    break;
+                }
+
+                ind += 1;
+            }
+
+            return readOnlyMemory.Slice(oldPos, ind - oldPos);
+        }
+        
+        private static ReadOnlyMemory<char> TryReadDigit(
+            ReadOnlyMemory<char> readOnlyMemory,
+            int oldPos)
+        {
+            var index = oldPos;
+            foreach (var chr in readOnlyMemory.Span[oldPos..])
+            {
+                if (!char.IsAsciiDigit(chr))
+                {
+                    break;
+                }
+
+                index += 1;
+            }
+            return readOnlyMemory.Slice(oldPos, index - oldPos);
+        }
 
         private static ReadOnlyMemory<char> ToLowerCase(ReadOnlyMemory<char> language)
         {
@@ -158,9 +195,29 @@ namespace Linguini.LanguageNegotiation.LangLoc
             }
 
             var memory = new char[language.Length];
+            var i = 0;
+            foreach (var c in language.Span)
+            {
+                memory[i] = char.ToLowerInvariant(c);
+                i += 1;
+            }
+
+            return memory.AsMemory();
+        }
+        
+        private static ReadOnlyMemory<char> ToUpperCase(ReadOnlyMemory<char> language)
+        {
+            if (IsAllUppercase(language))
+            {
+                return language;
+            }
+
+            var memory = new char[language.Length];
+            var i = 0;
             foreach (char c in language.Span)
             {
-                memory[0] = char.ToLowerInvariant(c);
+                memory[i] = char.ToUpperInvariant(c);
+                i += 1;
             }
 
             return memory.AsMemory();
@@ -187,32 +244,6 @@ namespace Linguini.LanguageNegotiation.LangLoc
                 {
                     return false;
                 }
-            }
-
-            return true;
-        }
-
-        
-
-        private static bool IsAlpha(ReadOnlyMemory<char> value)
-        {
-            foreach (char c in value.Span)
-            {
-                if (!char.IsLetter(c))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool IsDigit(string value)
-        {
-            foreach (char c in value)
-            {
-                if (!char.IsDigit(c))
-                    return false;
             }
 
             return true;

@@ -10,7 +10,7 @@ namespace Linguini.LanguageNegotiation.Tests
         [TestCase("en-US", "en", "US", null, ExpectedResult = true)]
         [TestCase("sr", "sr", null, null, ExpectedResult = true)]
         [TestCase("sr-RS", "sr", "RS", null, ExpectedResult = true)]
-        [TestCase("sr-Cyrl-RS", "sr", "RS", "Cyrl", ExpectedResult = true)]
+        [TestCase("sr-Cyrl-RS", "sr", "RS", "cyrl", ExpectedResult = true)]
         [TestCase("en-", null, null, null, ExpectedResult = false)]
         [TestCase("-en", null, null, null, ExpectedResult = false)]
         public bool Test(string input, string expectedLanguage, string? expectedRegion, string? expectedScript)
@@ -22,7 +22,7 @@ namespace Linguini.LanguageNegotiation.Tests
             );
             
             Assert.That(langLocId?.LanguageStr, Is.EqualTo(expectedLanguage));
-            Assert.That(langLocId?.Region, Is.EqualTo(expectedRegion));
+            Assert.That(langLocId?.RegionStr, Is.EqualTo(expectedRegion));
             Assert.That(langLocId?.ScriptStr, Is.EqualTo(expectedScript));
             return result;
         }
