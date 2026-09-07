@@ -29,31 +29,31 @@ namespace Linguini.LanguageNegotiation.Algorithm
         {
             id =>
             {
-                if (id == new LangLocId("en"))
+                if (id == LangLocId.EN)
                 {
                     return new LangLocId("en", "US", "Latn");
                 }
-                if (id == new LangLocId("fr"))
+                if (id == LangLocId.FR)
                 {
                     return new LangLocId("fr", "FR", "Latn");
                 }
-                if (id == new LangLocId("sr"))
+                if (id == LangLocId.SR)
                 {
                     return new LangLocId("sr", "SR", "Cyrl");
                 }
-                if (id == new LangLocId("sr", "SR"))
+                if (id == LangLocId.SR_SR)
                 {
                     return new LangLocId("sr", "SR", "Latn");
                 }
-                if (id == new LangLocId("az", "IR"))
+                if (id == LangLocId.AZ_IR)
                 {
                     return new LangLocId("az", "IR", "Arab");
                 }
-                if (id == new LangLocId("zh", "GB"))
+                if (id == LangLocId.ZH_GB)
                 {
                     return new LangLocId("zh", "GB", "Hant");
                 }
-                if (id == new LangLocId("zh", "US"))
+                if (id ==  LangLocId.ZH_US)
                 {
                     return new LangLocId("zh", "US", "Hant");
                 }
