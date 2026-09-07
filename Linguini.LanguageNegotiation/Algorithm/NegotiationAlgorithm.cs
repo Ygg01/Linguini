@@ -34,7 +34,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
                         break;
                     }
 
-                    if (strategy == NegotiationStrategy.Filtering)
+                    if (strategy == NegotiationStrategy.Matching)
                     {
                         continue;
                     }
@@ -48,7 +48,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
                         break;
                     }
 
-                    if (strategy == NegotiationStrategy.Filtering)
+                    if (strategy == NegotiationStrategy.Matching)
                     {
                         continue;
                     }
@@ -70,7 +70,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
                         break;
                     }
 
-                    if (strategy == NegotiationStrategy.Filtering)
+                    if (strategy == NegotiationStrategy.Matching)
                     {
                         continue;
                     }
@@ -85,7 +85,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
                         break;
                     }
 
-                    if (strategy == NegotiationStrategy.Filtering)
+                    if (strategy == NegotiationStrategy.Matching)
                     {
                         continue;
                     }
@@ -101,7 +101,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
                         break;
                     }
 
-                    if (strategy == NegotiationStrategy.Filtering)
+                    if (strategy == NegotiationStrategy.Matching)
                     {
                         continue;
                     }
@@ -116,7 +116,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
                         break;
                     }
 
-                    if (strategy == NegotiationStrategy.Filtering)
+                    if (strategy == NegotiationStrategy.Matching)
                     {
                         continue;
                     }
