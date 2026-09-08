@@ -47,9 +47,6 @@ namespace Linguini.LanguageNegotiation.LangLoc
             [NotNullWhen(true)] out LangLocId? langLocId)
         {
             errors = new List<string>();
-            ReadOnlyMemory<char> language;
-            ReadOnlyMemory<char>? region = null;
-            ReadOnlyMemory<char>? script = null;
 
             if (string.IsNullOrEmpty(langLoc))
             {
@@ -60,18 +57,19 @@ namespace Linguini.LanguageNegotiation.LangLoc
 
             if (langLoc == "root")
             {
-                language = "root".AsMemory();
-                langLocId = new LangLocId(language, region, script);
+                langLocId = new LangLocId(langLoc);
                 return true;
             }
 
             var pos = 0;
+            var languageEnd = 0;
             // Parse language subtag
-            var firstPart = TryReadAlpha(langLoc.AsMemory(), pos);
-            if (firstPart.Length == 2 || firstPart.Length == 3 || firstPart.Length == 5 || firstPart.Length == 8)
+            var length = TryReadAlpha(langLoc.AsMemory(), pos);
+            if (length== 2 || length == 3 || length== 5 || length == 8)
             {
-                language = ToLowerCase(firstPart);
-                pos += firstPart.Length;
+                // language = ToLowerCase(firstPart);
+                pos += length;
+                languageEnd = pos;
             }
             else
             {
@@ -81,9 +79,9 @@ namespace Linguini.LanguageNegotiation.LangLoc
             }
             
             // Parse script subtag (optional)
-            script = GetScript(langLoc.AsMemory(), ref pos);
+            var scriptRange = GetScript(langLoc.AsMemory(), ref pos);
 
-            region = GetRegion(langLoc.AsMemory(), ref errors, ref pos);
+            var regionRange = GetRegion(langLoc.AsMemory(), ref errors, ref pos);
 
 
             if (errors.Count > 0)
@@ -92,33 +90,39 @@ namespace Linguini.LanguageNegotiation.LangLoc
                 return false;
             } 
             
-            langLocId = new LangLocId(language, region, script);
+            langLocId = LangLocId.CreateFromOffsets(langLoc, 0..languageEnd, regionRange, scriptRange);
             return true;
         }
 
-        private static ReadOnlyMemory<char>? GetScript(ReadOnlyMemory<char> input, ref int oldPos)
+        private static Range? GetScript(ReadOnlyMemory<char> input, ref int oldPos)
         {
             var pos = oldPos;
+            var rangeStart = pos;
+            var rangeEnd = pos;
             
-            // Skip  separator
+            // Skip `-` | `_` separator
             if (pos < input.Length 
                 && (input.Span[pos] == '-' || input.Span[pos] == '_'))
             {
                 pos += 1;
+                rangeStart = pos;
             }
 
-            var secondPart = TryReadAlpha(input, pos);
-            if (secondPart.Length != 4) return null;
+            var length = TryReadAlpha(input, pos);
+            if (length != 4) return null;
                 
-            pos += secondPart.Length;
+            pos += length;
             oldPos = pos;
+            rangeEnd = pos;
 
-            return ToLowerCase(secondPart);
+            return new Range(rangeStart, rangeEnd);
         }
         
-        private static ReadOnlyMemory<char>? GetRegion(ReadOnlyMemory<char> input, ref List<string> errors, ref int oldPos)
+        private static Range? GetRegion(ReadOnlyMemory<char> input, ref List<string> errors, ref int oldPos)
         {
             var pos = oldPos;
+            var regionStart = pos;
+            var regionEnd = pos;
             
             // Don't read past the end of the string
             if (pos >= input.Length) return null;
@@ -126,6 +130,7 @@ namespace Linguini.LanguageNegotiation.LangLoc
             if (input.Span[pos] == '-' || input.Span[pos] == '_')
             {
                 pos += 1;
+                regionStart = pos;
 
                 if (pos >= input.Length)
                 {
@@ -135,25 +140,27 @@ namespace Linguini.LanguageNegotiation.LangLoc
 
                 if (char.IsAscii(input.Span[pos]))
                 {
-                    var alphaRegionCode = TryReadAlpha(input, pos);
+                    var length = TryReadAlpha(input, pos);
 
-                    if (alphaRegionCode.Length == 2)
+                    if (length == 2)
                     {
-                        ToUpperCase(alphaRegionCode);
-                        pos += alphaRegionCode.Length;
+                        
+                        pos += length;
+                        regionEnd = pos;
                         oldPos = pos;
-                        return ToUpperCase(alphaRegionCode);
+                        return new Range(regionStart, regionEnd);
                     }
                 }
                 else if (char.IsDigit(input.Span[pos]))
                 {
-                    var digitRegionCode = TryReadDigit(input, pos);
+                    var digitRegionLength = TryReadDigit(input, pos);
                     
-                    if (digitRegionCode.Length == 3)
+                    if (digitRegionLength== 3)
                     {
-                        pos += digitRegionCode.Length;
+                        pos += digitRegionLength;
+                        regionEnd = pos;
                         oldPos = pos;
-                        return ToUpperCase(digitRegionCode);
+                        return new Range(regionStart, regionEnd);
                     }
                 }
             }
@@ -162,7 +169,7 @@ namespace Linguini.LanguageNegotiation.LangLoc
         }
 
 
-        private static ReadOnlyMemory<char> TryReadAlpha(
+        private static int TryReadAlpha(
             ReadOnlyMemory<char> readOnlyMemory,
             int oldPos)
         {
@@ -177,10 +184,10 @@ namespace Linguini.LanguageNegotiation.LangLoc
                 ind += 1;
             }
 
-            return readOnlyMemory.Slice(oldPos, ind - oldPos);
+            return ind - oldPos;
         }
         
-        private static ReadOnlyMemory<char> TryReadDigit(
+        private static int TryReadDigit(
             ReadOnlyMemory<char> readOnlyMemory,
             int oldPos)
         {
@@ -194,7 +201,7 @@ namespace Linguini.LanguageNegotiation.LangLoc
 
                 index += 1;
             }
-            return readOnlyMemory.Slice(oldPos, index - oldPos);
+            return index - oldPos;
         }
 
         private static ReadOnlyMemory<char> ToLowerCase(ReadOnlyMemory<char> language)

@@ -6,13 +6,12 @@ using System.Text;
 
 namespace Linguini.LanguageNegotiation.LangLoc
 {
-    
     public struct LangLocId : IEquatable<LangLocId>
     {
         public bool Equals(LangLocId other)
         {
             return LanguageStr.Equals(other.LanguageStr)
-                   && Nullable.Equals(RegionStr, other.RegionStr) 
+                   && Nullable.Equals(RegionStr, other.RegionStr)
                    && Nullable.Equals(ScriptStr, other.ScriptStr);
         }
 
@@ -28,23 +27,7 @@ namespace Linguini.LanguageNegotiation.LangLoc
 
         public override string ToString()
         {
-            var sb = new StringBuilder(10);
-            
-            sb.Append(LanguageStr);
-
-            if (Region != null)
-            {
-                sb.Append('-');
-                sb.Append(RegionStr);
-            }
-            
-            if (Script != null)
-            {
-                sb.Append('-');
-                sb.Append(ScriptStr);
-            }
-            
-            return sb.ToString();
+            return _original;
         }
 
         public static bool operator ==(LangLocId left, LangLocId right)
@@ -66,34 +49,80 @@ namespace Linguini.LanguageNegotiation.LangLoc
         public static readonly LangLocId ZH_GB = new LangLocId("zh", "GB");
         public static readonly LangLocId ZH_US = new LangLocId("zh", "US");
 
-        public ReadOnlyMemory<char> Language { get; }
-        public ReadOnlyMemory<char>? Region { get; set; }
-        public ReadOnlyMemory<char>? Script { get; }
+        private string _original;
+        private ReadOnlyMemory<char> _language;
+        private ReadOnlyMemory<char>? _region;
+        private ReadOnlyMemory<char>? _script;
+
+        public readonly ReadOnlyMemory<char> Language => _language;
+
+        public readonly ReadOnlyMemory<char>? Region => _region;
+
+        public readonly ReadOnlyMemory<char>? Script => _script;
 
         public string LanguageStr => Language.ToString();
         public string? RegionStr => Region?.ToString();
         public string? ScriptStr => Script?.ToString();
-
-        public LangLocId(ReadOnlyMemory<char> language, ReadOnlyMemory<char>? region = null,
-            ReadOnlyMemory<char>? script = null)
-        {
-            Language = language;
-            Region = region;
-            Script = script;
-        }
         
-         public LangLocId(string language, string? region = null,
+
+        public static LangLocId CreateFromOffsets(string full, Range language, Range? region = null, Range? script = null)
+        {
+            ReadOnlyMemory<char>? scriptMem = null;
+            ReadOnlyMemory<char>? regionMem = null;
+            if (script != null)
+            {
+                scriptMem = full.AsMemory(script.Value);
+            }
+
+            if (region != null)
+            {
+                regionMem = full.AsMemory(region.Value);
+            }
+            return new LangLocId()
+            {
+                _original = full,
+                _language = full.AsMemory(language),
+                _region = regionMem,
+                _script = scriptMem
+            };
+        }
+
+        public LangLocId(string language, string? region = null,
             string? script = null)
         {
-            Language = language.AsMemory();
-            Region = region?.AsMemory();
-            Script = script?.AsMemory();
+            var sb = new StringBuilder(language);
+            var langRange = ..sb.Length;
+            Range? scriptRange = null;
+            Range? regionRange = null;
+            _original = sb.ToString();
+            if (script != null)
+            {
+                sb.Append('-');
+                var scriptStart = sb.Length;
+                sb.Append(script);
+                var scriptEnd = sb.Length;
+                scriptRange = scriptStart..scriptEnd;
+            }
+            
+            if (region != null)
+            {
+                sb.Append('-');
+                var regionStart = sb.Length;
+                sb.Append(script);
+                var regionEnd = sb.Length;
+                regionRange = regionStart..regionEnd;
+            }
+
+            _original = sb.ToString();
+            _language = _original.AsMemory(langRange);
+            _script = scriptRange != null ? _original.AsMemory(scriptRange.Value) : null;
+            _region = regionRange != null ? _original.AsMemory(regionRange.Value) : null;
         }
 
         public static LangLocId Create(string langLoc)
         {
-            return LangLocParser.TryParse(langLoc, out var errors, out var langLocId) 
-                ? langLocId.Value 
+            return LangLocParser.TryParse(langLoc, out var errors, out var langLocId)
+                ? langLocId.Value
                 : throw new LangParseError(errors);
         }
 
@@ -101,9 +130,14 @@ namespace Linguini.LanguageNegotiation.LangLoc
         {
             var region = new RegionInfo(cultureInfo.LCID);
             return new LangLocId(
-                cultureInfo.TwoLetterISOLanguageName.AsMemory(),
-                region.TwoLetterISORegionName.AsMemory()
+                cultureInfo.TwoLetterISOLanguageName,
+                region.TwoLetterISORegionName
             );
+        }
+
+        public LangLocId ClearRegion()
+        {
+            return new LangLocId(LanguageStr, null, ScriptStr);
         }
     }
 }
