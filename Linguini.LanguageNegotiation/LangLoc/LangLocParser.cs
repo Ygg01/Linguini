@@ -33,11 +33,21 @@ namespace Linguini.LanguageNegotiation.LangLoc
     /// </remarks>
     public class LangLocParser
     {
+        public static LangLocId? Parse(string? langLoc)
+        {
+            if (string.IsNullOrEmpty(langLoc))
+            {
+                return null;
+            }
+
+            return TryParse(langLoc, out _, out var langLocId) ? langLocId : null;
+        }
+        
         public static bool TryParse(string langLoc, out List<string> errors,
             [NotNullWhen(true)] out LangLocId? langLocId)
         {
             errors = new List<string>();
-            var language = ReadOnlyMemory<char>.Empty;
+            ReadOnlyMemory<char> language;
             ReadOnlyMemory<char>? region = null;
             ReadOnlyMemory<char>? script = null;
 

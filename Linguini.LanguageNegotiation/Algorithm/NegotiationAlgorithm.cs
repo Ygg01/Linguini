@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Linguini.LanguageNegotiation.LangLoc;
 
 namespace Linguini.LanguageNegotiation.Algorithm
@@ -12,7 +11,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
         Matching,
         Lookup,
     }
-    
+
 
     public class NegotiationAlgorithm
     {
@@ -154,8 +153,16 @@ namespace Linguini.LanguageNegotiation.Algorithm
         {
             var supported = FilterMatches(requested, available, strategy, localeExpander);
 
-            if (defaultLanguage != null && (strategy == NegotiationStrategy.Lookup && supported.Count == 0 ||
-                                            !supported.Contains(defaultLanguage.Value)))
+            if (defaultLanguage == null) return supported;
+
+            if (strategy == NegotiationStrategy.Lookup)
+            {
+                if (supported.Count == 0)
+                {
+                    supported.Add(defaultLanguage.Value);
+                }
+            }
+            else if (!supported.Contains(defaultLanguage.Value))
             {
                 supported.Add(defaultLanguage.Value);
             }
