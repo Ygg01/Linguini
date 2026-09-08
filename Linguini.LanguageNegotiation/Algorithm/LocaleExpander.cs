@@ -23,65 +23,48 @@ namespace Linguini.LanguageNegotiation.Algorithm
             {"ro","RO"},
             {"ru","RU"},
         };
-        
-        
-        private List<Func<LangLocId, LangLocId?>> _expandLocale = new List<Func<LangLocId, LangLocId?>>
-        {
-            id =>
-            {
-                if (id == LangLocId.EN)
-                {
-                    return new LangLocId("en", "US", "Latn");
-                }
-                if (id == LangLocId.FR)
-                {
-                    return new LangLocId("fr", "FR", "Latn");
-                }
-                if (id == LangLocId.SR)
-                {
-                    return new LangLocId("sr", "SR", "Cyrl");
-                }
-                if (id == LangLocId.SR_SR)
-                {
-                    return new LangLocId("sr", "SR", "Latn");
-                }
-                if (id == LangLocId.AZ_IR)
-                {
-                    return new LangLocId("az", "IR", "Arab");
-                }
-                if (id == LangLocId.ZH_GB)
-                {
-                    return new LangLocId("zh", "GB", "Hant");
-                }
-                if (id ==  LangLocId.ZH_US)
-                {
-                    return new LangLocId("zh", "US", "Hant");
-                }
-
-                if (RegionMatchingKeys.TryGetValue(id.LanguageStr, out var region))
-                {
-                    return new LangLocId(id.LanguageStr, region);
-                };
-                
-                return null;
-            },
-        };
 
         public LocaleExpander() {}
-        public LocaleExpander(Func<LangLocId, LangLocId?>[] expandLocale) { _expandLocale.AddRange(expandLocale); }
         
-        public bool Maximize(ref LangLocId languageIdentifier)
+
+
+        public LangLocId? Maximize(LangLocId id)
         {
-            foreach (var func in _expandLocale)
+            if (id == LangLocId.EN)
             {
-                var expand = func(languageIdentifier);
-                if (expand == null) continue;
-                
-                languageIdentifier = expand.Value;
-                return true;
+                return new LangLocId("en", "US", "Latn");
+            }
+            if (id == LangLocId.FR)
+            {
+                return new LangLocId("fr", "FR", "Latn");
+            }
+            if (id == LangLocId.SR)
+            {
+                return new LangLocId("sr", "SR", "Cyrl");
+            }
+            if (id == LangLocId.SR_SR)
+            {
+                return new LangLocId("sr", "SR", "Latn");
+            }
+            if (id == LangLocId.AZ_IR)
+            {
+                return new LangLocId("az", "IR", "Arab");
+            }
+            if (id == LangLocId.ZH_GB)
+            {
+                return new LangLocId("zh", "GB", "Hant");
+            }
+            if (id ==  LangLocId.ZH_US)
+            {
+                return new LangLocId("zh", "US", "Hant");
             }
 
-            return false;
+            if (RegionMatchingKeys.TryGetValue(id.LanguageStr, out var region))
+            {
+                return new LangLocId(id.LanguageStr, region);
+            };
+                
+            return null;
         }
     }
 }

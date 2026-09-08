@@ -10,9 +10,9 @@ namespace Linguini.LanguageNegotiation.LangLoc
     {
         public bool Equals(LangLocId other)
         {
-            return LanguageStr.Equals(other.LanguageStr)
-                   && Nullable.Equals(RegionStr, other.RegionStr)
-                   && Nullable.Equals(ScriptStr, other.ScriptStr);
+            return LanguageStr.Equals(other.LanguageStr, StringComparison.OrdinalIgnoreCase)
+                   && String.Equals(RegionStr, other.RegionStr, StringComparison.OrdinalIgnoreCase)
+                   && String.Equals(ScriptStr, other.ScriptStr, StringComparison.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object? obj)
@@ -92,31 +92,43 @@ namespace Linguini.LanguageNegotiation.LangLoc
         {
             var sb = new StringBuilder(language);
             var langRange = ..sb.Length;
+            ReadOnlyMemory<char>? scriptMemory = null;
+            ReadOnlyMemory<char>? regionMemory = null;
             Range? scriptRange = null;
             Range? regionRange = null;
-            _original = sb.ToString();
+
             if (script != null)
             {
                 sb.Append('-');
                 var scriptStart = sb.Length;
                 sb.Append(script);
                 var scriptEnd = sb.Length;
-                scriptRange = scriptStart..scriptEnd;
+                scriptRange = new Range(scriptStart, scriptEnd);
             }
             
             if (region != null)
             {
                 sb.Append('-');
                 var regionStart = sb.Length;
-                sb.Append(script);
+                sb.Append(region);
                 var regionEnd = sb.Length;
-                regionRange = regionStart..regionEnd;
+                regionRange = new Range(regionStart, regionEnd);
             }
 
             _original = sb.ToString();
             _language = _original.AsMemory(langRange);
-            _script = scriptRange != null ? _original.AsMemory(scriptRange.Value) : null;
-            _region = regionRange != null ? _original.AsMemory(regionRange.Value) : null;
+            
+            if (scriptRange != null )
+            {
+                scriptMemory = _original.AsMemory(scriptRange.Value);
+            }
+            if (regionRange != null )
+            {
+                regionMemory = _original.AsMemory(regionRange.Value);
+            }
+            
+            _script = scriptMemory;
+            _region = regionMemory;
         }
 
         public static LangLocId Create(string langLoc)
