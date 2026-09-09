@@ -44,7 +44,7 @@ namespace Linguini.LanguageNegotiation.LangLoc
         public static readonly LangLocId EN = new LangLocId("en");
         public static readonly LangLocId FR = new LangLocId("fr");
         public static readonly LangLocId SR = new LangLocId("sr");
-        public static readonly LangLocId SR_SR = new LangLocId("sr", "SR");
+        public static readonly LangLocId SR_RU = new LangLocId("sr", "RU");
         public static readonly LangLocId AZ_IR = new LangLocId("az", "IR");
         public static readonly LangLocId ZH_GB = new LangLocId("zh", "GB");
         public static readonly LangLocId ZH_US = new LangLocId("zh", "US");

@@ -169,7 +169,7 @@ namespace Linguini.LanguageNegotiation.Tests
                 .Returns(new[]{"az-Arab"});
             yield return new TestCaseData(new[] { "sr-RU" }, new[] {"sr-Cyrl", "sr-Latn" },
                     NegotiationStrategy.Filtering, null)
-                .Returns(new[]{"sr-Cyrl"});
+                .Returns(new[]{"sr-Latn"});
             yield return new TestCaseData(new[] { "zh-GB" }, new[] {"zh-Hans", "zh-Hant" },
                     NegotiationStrategy.Filtering, null)
                 .Returns(new[]{"zh-Hant"});
@@ -216,9 +216,9 @@ namespace Linguini.LanguageNegotiation.Tests
         [TestCaseSource(nameof(TestFilteringCrossRegion))]
         [TestCaseSource(nameof(TestFilteringDefaultLocale))]
         [TestCaseSource(nameof(TestFilteringExactMatch))]
-        [TestCaseSource(nameof(TestFilteringLikelySubtag))]
         [TestCaseSource(nameof(TestFilteringPriority))]
         [TestCaseSource(nameof(TestFilteringRequestedUnd))]
+        [TestCaseSource(nameof(TestFilteringLikelySubtag))]
         public string[] TestAlgo(string[] requested, string[] available, NegotiationStrategy strategy,
             string? defLang = null)
         {

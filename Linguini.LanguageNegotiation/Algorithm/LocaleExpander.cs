@@ -42,7 +42,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
             {
                 return new LangLocId("sr", "SR", "Cyrl");
             }
-            if (id == LangLocId.SR_SR)
+            if (id == LangLocId.SR_RU)
             {
                 return new LangLocId("sr", "SR", "Latn");
             }
