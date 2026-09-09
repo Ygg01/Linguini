@@ -138,7 +138,7 @@ namespace Linguini.LanguageNegotiation.LangLoc
                     return null;
                 }
 
-                if (char.IsAscii(input.Span[pos]))
+                if (IsAscii(input.Span[pos]))
                 {
                     var length = TryReadAlpha(input, pos);
 
@@ -176,7 +176,7 @@ namespace Linguini.LanguageNegotiation.LangLoc
             var ind = oldPos;
             foreach (var chr in readOnlyMemory.Span[oldPos..])
             {
-                if (!char.IsAsciiLetter(chr))
+                if (!IsAsciiLetter(chr))
                 {
                     break;
                 }
@@ -194,7 +194,7 @@ namespace Linguini.LanguageNegotiation.LangLoc
             var index = oldPos;
             foreach (var chr in readOnlyMemory.Span[oldPos..])
             {
-                if (!char.IsAsciiDigit(chr))
+                if (!IsAsciiDigit(chr))
                 {
                     break;
                 }
@@ -244,7 +244,7 @@ namespace Linguini.LanguageNegotiation.LangLoc
         {
             foreach (char c in value.Span)
             {
-                if (!char.IsAsciiLetterLower(c))
+                if (!IsAsciiLetterLower(c))
                 {
                     return false;
                 }
@@ -257,7 +257,7 @@ namespace Linguini.LanguageNegotiation.LangLoc
         {
             foreach (char c in value.Span)
             {
-                if (!char.IsAsciiLetterUpper(c))
+                if (!IsAsciiLetterUpper(c))
                 {
                     return false;
                 }
@@ -265,6 +265,12 @@ namespace Linguini.LanguageNegotiation.LangLoc
 
             return true;
         }
+
+        private static bool IsAscii(char c) => c <= '\u007F';
+        private static bool IsAsciiLetter(char c) => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+        private static bool IsAsciiDigit(char c) => c >= '0' && c <= '9';
+        private static bool IsAsciiLetterLower(char c) => c >= 'a' && c <= 'z';
+        private static bool IsAsciiLetterUpper(char c) => c >= 'A' && c <= 'Z';
     }
 
 

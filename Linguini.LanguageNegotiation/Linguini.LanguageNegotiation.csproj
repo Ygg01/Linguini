@@ -2,18 +2,23 @@
 
     <PropertyGroup>
         <OutputType>Library</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <PackageVersion>0.12.0</PackageVersion>
         <Title>Linguini Language Negotiation algorithm</Title>
         <LangVersion>8</LangVersion>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <TargetFrameworks>net8.0;net6.0;netstandard2.1</TargetFrameworks>
     </PropertyGroup>
 
-    <ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.1'">
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.0" />
       <PackageReference Include="NUnit" Version="4.0.1" />
       <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+      <Compile Remove="Tests\**" />
+      <Compile Remove="Tests.cs" />
     </ItemGroup>
     
     <ItemGroup>
