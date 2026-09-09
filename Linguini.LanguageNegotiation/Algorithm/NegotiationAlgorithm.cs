@@ -61,7 +61,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
                 }
 
                 // 3) Try to match against a maximized version of the requested locale);
-                var expandedRefReq = localeExpander.Maximize(refReq);
+                var expandedRefReq = localeExpander.Expand(refReq);
                 if (expandedRefReq != null)
                 {
                     refReq = expandedRefReq.Value;
@@ -98,7 +98,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
 
                 // 5) Try to match against the likely subtag without region
                 refReq = refReq.ClearRegion();
-                var expandedRefReq5 = localeExpander.Maximize(refReq);
+                var expandedRefReq5 = localeExpander.Expand(refReq);
                 if (expandedRefReq5 != null)
                 {
                     refReq = expandedRefReq5.Value;

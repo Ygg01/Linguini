@@ -24,11 +24,36 @@ namespace Linguini.LanguageNegotiation.Algorithm
             {"ru","RU"},
         };
 
-        public LocaleExpander() {}
+        public Func<LangLocId, LangLocId?>[] Expanders;
+
+        public LocaleExpander()
+        {
+            Expanders = new Func<LangLocId, LangLocId?>[]
+            {
+                Maximize,
+            };
+        }
+
+        public LocaleExpander(List<Func<LangLocId, LangLocId?>> expansions)
+        {
+            Expanders = expansions.ToArray();
+        }
+
+        public LangLocId? Expand(LangLocId id)
+        {
+            foreach (var expander in Expanders)
+            {
+                if (expander(id) != null)
+                {
+                    return expander(id);
+                }
+            }
+            return null;
+        }
         
 
 
-        public LangLocId? Maximize(LangLocId id)
+        private static LangLocId? Maximize(LangLocId id)
         {
             if (id == LangLocId.EN)
             {
