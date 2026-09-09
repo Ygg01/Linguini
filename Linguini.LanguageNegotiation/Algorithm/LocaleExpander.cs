@@ -61,7 +61,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
 
             if (RegionMatchingKeys.TryGetValue(id.LanguageStr, out var region))
             {
-                return new LangLocId(id.LanguageStr, region);
+                return new LangLocId(id.LanguageStr, region, id.ScriptStr);
             };
                 
             return null;

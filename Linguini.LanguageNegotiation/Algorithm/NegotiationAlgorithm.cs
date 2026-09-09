@@ -65,7 +65,7 @@ namespace Linguini.LanguageNegotiation.Algorithm
                 if (expandedRefReq != null)
                 {
                     refReq = expandedRefReq.Value;
-                    if(TestStrategy(refReq, true, false))
+                    if (TestStrategy(refReq, true, false))
                     {
                         if (strategy == NegotiationStrategy.Lookup)
                         {
@@ -78,22 +78,22 @@ namespace Linguini.LanguageNegotiation.Algorithm
                         }
                     }
                 }
-                   
+
 
                 // 4) Try to match against a variant as a range
                 // TODO refReq.variants.clear();
-                if (TestStrategy(refReq, true, true))
-                {
-                    if (strategy == NegotiationStrategy.Lookup)
-                    {
-                        break;
-                    }
-
-                    if (strategy == NegotiationStrategy.Matching)
-                    {
-                        continue;
-                    }
-                }
+                // if (TestStrategy(refReq, true, true))
+                // {
+                //     if (strategy == NegotiationStrategy.Lookup)
+                //     {
+                //         break;
+                //     }
+                //
+                //     if (strategy == NegotiationStrategy.Matching)
+                //     {
+                //         continue;
+                //     }
+                // }
 
 
                 // 5) Try to match against the likely subtag without region
@@ -119,21 +119,16 @@ namespace Linguini.LanguageNegotiation.Algorithm
 
                 // 6) Try to match against a region as a range
                 refReq = refReq.ClearRegion();
-                var expandedRefReq6 = localeExpander.Maximize(refReq);
-                if (expandedRefReq6 != null)
+                if (TestStrategy(refReq, true, true))
                 {
-                    refReq = expandedRefReq6.Value;
-                    if (TestStrategy(refReq, true, true))
+                    if (strategy == NegotiationStrategy.Lookup)
                     {
-                        if (strategy == NegotiationStrategy.Lookup)
-                        {
-                            break;
-                        }
+                        break;
+                    }
 
-                        if (strategy == NegotiationStrategy.Matching)
-                        {
-                            continue;
-                        }
+                    if (strategy == NegotiationStrategy.Matching)
+                    {
+                        continue;
                     }
                 }
             }
@@ -187,15 +182,20 @@ namespace Linguini.LanguageNegotiation.Algorithm
         }
 
 
-        public static bool Matches(LangLocId lid1, LangLocId lid2, bool isRange1, bool isRange2)
+        static bool Matches(LangLocId lid1, LangLocId lid2, bool isRange1, bool isRange2)
         {
             return (isRange1 && lid1.Language.IsEmpty)
                    || (isRange2 && lid2.Language.IsEmpty)
                    || String.Equals(lid1.LanguageStr, lid2.LanguageStr, StringComparison.OrdinalIgnoreCase)
-                   && ((isRange1 && lid1.Script == null) || (isRange2 && lid2.Script == null) ||
-                       String.Equals(lid1.ScriptStr, lid2.ScriptStr, StringComparison.OrdinalIgnoreCase))
-                   && ((isRange1 && lid1.Region == null) || (isRange2 && lid2.Region == null) ||
-                       String.Equals(lid1.RegionStr, lid2.RegionStr, StringComparison.OrdinalIgnoreCase));
+                   && SubMatch(lid1.ScriptStr, lid2.ScriptStr, isRange1, isRange2)
+                   && SubMatch(lid1.RegionStr, lid2.RegionStr, isRange1, isRange2);
+        }
+        
+        static bool SubMatch(string? lid1, string? lid2, bool isRange1, bool isRange2)
+        {
+            return (isRange1 && lid1 == null)
+                   || (isRange2 && lid2 == null)
+                   || String.Equals(lid1, lid2, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
