@@ -30,7 +30,7 @@ namespace Linguini.Shared.Types.Bundle
         }
 
         /// <inheritdoc/>
-        string IFluentType.AsString()
+        string IFluentType.AsString(IFluentContext context)
         {
             return _content;
         }

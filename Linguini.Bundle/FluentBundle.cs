@@ -9,6 +9,7 @@ using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
+using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
@@ -30,7 +31,7 @@ namespace Linguini.Bundle
         /// <summary>
         ///     List of Locales. First element is primary bundle locale, others are fallback locales.
         /// </summary>
-        public List<string> Locales { get; internal set; } = new();
+        public List<LangLocId> Locales { get; internal set; } = new();
 
         /// <summary>
         ///     When formatting patterns, FluentBundle inserts Unicode Directionality Isolation Marks to indicate that the
@@ -60,6 +61,9 @@ namespace Linguini.Bundle
 
         /// <inheritdoc />
         public bool EnableExtensions { get; init; }
+
+        /// <inheritdoc />
+        public IFluentContext Context { get; }
 
         /// <summary>
         ///     Determines if the provided identifier has a message associated with it.
@@ -392,15 +396,16 @@ namespace Linguini.Bundle
         public static FluentBundle MakeUnchecked(FluentBundleOption option)
         {
             var primaryLocale = option.Locales.Count > 0
-                ? option.Locales[0]
+                ? option.Locales[0].ToString()
                 : CultureInfo.CurrentCulture.Name;
             var cultureInfo = new CultureInfo(primaryLocale, false);
             var func = option.Functions.ToDictionary(x => x.Key, x => (FluentFunction)x.Value);
+            var optionLocales = option.Locales;
             return option.UseConcurrent switch
             {
                 true => new ConcurrentBundle
                 {
-                    Locales = option.Locales,
+                    Locales = optionLocales,
                     Culture = cultureInfo,
                     EnableExtensions = option.EnableExtensions,
                     FormatterFunc = option.FormatterFunc,
@@ -411,7 +416,7 @@ namespace Linguini.Bundle
                 },
                 _ => new NonConcurrentBundle
                 {
-                    Locales = option.Locales,
+                    Locales = optionLocales,
                     Culture = cultureInfo,
                     EnableExtensions = option.EnableExtensions,
                     FormatterFunc = option.FormatterFunc,

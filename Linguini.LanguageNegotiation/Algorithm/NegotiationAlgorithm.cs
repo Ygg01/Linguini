@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Linguini.LanguageNegotiation.LangLoc;
+using Linguini.Shared.Types;
 
 namespace Linguini.LanguageNegotiation.Algorithm
 {

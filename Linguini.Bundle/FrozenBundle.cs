@@ -5,6 +5,7 @@ using System.Globalization;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Resolver;
 using Linguini.Bundle.Types;
+using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 #if NET8_0_OR_GREATER
@@ -31,13 +32,13 @@ namespace Linguini.Bundle
         public CultureInfo Culture { get; }
 
         /// <summary>
-        /// List of Locales. First element is primary bundle locale, others are fallback locales.
+        /// List of Locales. The first element is primary bundle locale, others are fallback locales.
         /// </summary>
-        public List<string> Locales { get; init; }
+        public List<LangLocId> Locales { get; init; }
 
         /// <summary>
         /// When formatting patterns, FluentBundle inserts Unicode Directionality Isolation Marks to indicate that the direction of a placeable may differ from the surrounding message.
-        /// This is important for cases such as when a right-to-left user name is presented in the left-to-right message.
+        /// This is important for cases such as when a right-to-left username is presented in the left-to-right message.
         /// </summary>
         public bool UseIsolating { get; }
 
@@ -59,6 +60,7 @@ namespace Linguini.Bundle
         internal readonly IDictionary<string, FluentFunction> Functions;
         internal readonly IDictionary<string, AstTerm> Terms;
         internal readonly IDictionary<string, AstMessage> Messages;
+        internal readonly IFluentContext InternalContext;
 #if NET8_0_OR_GREATER
         internal FrozenBundle(FluentBundle bundle)
         {
@@ -72,6 +74,7 @@ namespace Linguini.Bundle
             Messages = bundle.GetMessagesDictionary().ToFrozenDictionary();
             Terms = bundle.GetTermsDictionary().ToFrozenDictionary();
             Functions = bundle.GetFunctionDictionary().ToFrozenDictionary();
+            InternalContext = new FluentContext(Culture);
         }
 #elif NET6_0_OR_GREATER
         internal FrozenBundle(FluentBundle bundle)
@@ -86,6 +89,7 @@ namespace Linguini.Bundle
             Messages = bundle.GetMessagesDictionary().ToImmutableDictionary();
             Terms = bundle.GetTermsDictionary().ToImmutableDictionary();
             Functions = bundle.GetFunctionDictionary().ToImmutableDictionary();
+            InternalContext = new FluentContext(Culture);
         }
 #else
         internal FrozenBundle(FluentBundle bundle)
@@ -100,10 +104,14 @@ namespace Linguini.Bundle
             Messages = new Dictionary<string, AstMessage>(bundle.GetMessagesDictionary());
             Terms = new Dictionary<string, AstTerm>(bundle.GetTermsDictionary());
             Functions = new Dictionary<string, FluentFunction>(bundle.GetFunctionDictionary());
+            InternalContext = new FluentContext(Culture);
         }
 #endif
         /// <inheritdoc/>
         public bool EnableExtensions { get; init; }
+
+        /// <inheritdoc/>
+        public IFluentContext Context => InternalContext;
 
         /// <inheritdoc/>
         public bool HasMessage(string identifier)

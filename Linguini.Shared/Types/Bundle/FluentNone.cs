@@ -35,7 +35,7 @@ namespace Linguini.Shared.Types.Bundle
         }
 
         /// <inheritdoc/>
-        public string AsString()
+        public string AsString(IFluentContext context)
         {
             return "{???}";
         }
@@ -47,12 +47,6 @@ namespace Linguini.Shared.Types.Bundle
         public bool IsError()
         {
             return false;
-        }
-
-        /// <inheritdoc/>
-        public override string ToString()
-        {
-            return AsString();
         }
     }
 }

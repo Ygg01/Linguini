@@ -14,21 +14,26 @@ namespace Linguini.Shared.Types.Bundle
         /// Numerical value of fluent number, depicted using IEEE 754 64-bit floating number.
         /// </summary>
         public readonly double Value;
-        private readonly FluentNumberOptions _options;
+        
 
-        private FluentNumber(double value, FluentNumberOptions options)
+        private FluentNumber(double value)
         {
             Value = value;
-            _options = options;
         }
 
         /// <inheritdoc/>
         public string AsString()
         {
-            var stringVal = Value.ToString(CultureInfo.InvariantCulture);
-            if (_options.MinimumFractionDigits != null)
+            return AsString(InvariantContext.Default);
+        }
+
+        /// <inheritdoc/>
+        public string AsString(IFluentContext context)
+        {
+            var stringVal = Value.ToString(context.Culture);
+            if (context.NumberOptions?.MinimumFractionDigits != null)
             {
-                var minfd = _options.MinimumFractionDigits.Value;
+                var minfd = context.NumberOptions.MinimumFractionDigits.Value;
                 var pos = stringVal.IndexOf('.');
                 if (pos != -1)
                 {
@@ -75,7 +80,7 @@ namespace Linguini.Shared.Types.Bundle
             {
                 options.MinimumFractionDigits = input.Length - input.IndexOf('.') - 1;
             }
-            return new FluentNumber(parsed, options);
+            return new FluentNumber(parsed);
         }
 
         /// <summary>
@@ -114,16 +119,16 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Overloads an operator to convert a <see cref="double"/> to <see cref="FluentNumber"/>.
         /// </summary>
-        public static implicit operator FluentNumber(double db) => new(db, new FluentNumberOptions());
+        public static implicit operator FluentNumber(double db) => new(db);
         /// <summary>
         /// Overloads an operator to convert a <see cref="float"/> to <see cref="FluentNumber"/>.
         /// </summary>
-        public static implicit operator FluentNumber(float fl) => new(fl, new FluentNumberOptions());
+        public static implicit operator FluentNumber(float fl) => new((double)fl);
 
         /// <inheritdoc/>
         public IFluentType Copy()
         {
-            return new FluentNumber(Value, _options);
+            return new FluentNumber(Value);
         }
 
         /// <inheritdoc/>

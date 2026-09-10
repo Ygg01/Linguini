@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Linguini.LanguageNegotiation.Algorithm;
-using Linguini.LanguageNegotiation.LangLoc;
+using Linguini.Shared.Types;
 using NUnit.Framework;
 
 namespace Linguini.LanguageNegotiation.Tests
@@ -225,11 +225,9 @@ namespace Linguini.LanguageNegotiation.Tests
             var defLangId = LangLocParser.Parse(defLang);
             var requestedLangs = requested
                 .Select(LangLocParser.Parse)
-                .OfType<LangLocId>()
                 .ToList();
             var availableLangs = available
                 .Select(LangLocParser.Parse)
-                .OfType<LangLocId>()
                 .ToList();
             var actual = NegotiationAlgorithm.NegotiateLanguages(requestedLangs, availableLangs, strategy, defLangId)
                 .Select(s => s.ToString())

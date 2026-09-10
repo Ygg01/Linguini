@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
+using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 
@@ -144,7 +145,7 @@ namespace Linguini.Bundle
                 Terms = new ConcurrentDictionary<string, AstTerm>(Terms),
                 Messages = new ConcurrentDictionary<string, AstMessage>(Messages),
                 Culture = (CultureInfo)Culture.Clone(),
-                Locales = new List<string>(Locales),
+                Locales = new List<LangLocId>(Locales),
                 UseIsolating = UseIsolating,
                 TransformFunc = (Func<string, string>?)TransformFunc?.Clone(),
                 FormatterFunc = (Func<IFluentType, string>?)FormatterFunc?.Clone(),

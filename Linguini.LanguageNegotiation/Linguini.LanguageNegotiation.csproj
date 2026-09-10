@@ -24,5 +24,13 @@
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\Linguini.Shared\Linguini.Shared.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="LangLoc\" />
+    </ItemGroup>
 
 </Project>

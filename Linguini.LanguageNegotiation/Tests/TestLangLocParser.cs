@@ -1,4 +1,4 @@
-﻿using Linguini.LanguageNegotiation.LangLoc;
+﻿using Linguini.Shared.Types;
 using NUnit.Framework;
 
 namespace Linguini.LanguageNegotiation.Tests

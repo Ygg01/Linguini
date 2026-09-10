@@ -29,7 +29,7 @@ namespace Linguini.Shared.Types.Bundle
         }
         
         /// <inheritdoc/>
-        public string AsString()
+        public string AsString(IFluentContext context)
         {
             return _reference;
         }
