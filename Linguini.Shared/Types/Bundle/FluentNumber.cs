@@ -3,7 +3,6 @@ using System.Globalization;
 using Linguini.Shared.Algorithm;
 using Linguini.Shared.Util;
 
-#nullable enable
 namespace Linguini.Shared.Types.Bundle
 {
     /// <summary>
@@ -15,6 +14,7 @@ namespace Linguini.Shared.Types.Bundle
         /// Numerical value of fluent number, depicted using IEEE 754 64-bit floating number.
         /// </summary>
         public readonly double Value;
+
         private readonly FluentNumberOptions _options;
 
         private FluentNumber(double value, FluentNumberOptions options)
@@ -61,13 +61,13 @@ namespace Linguini.Shared.Types.Bundle
         {
             return false;
         }
-        
+
         /// <inheritdoc/>
         public bool Matches(IFluentType other, IScope scope)
         {
             return SharedUtil.Matches(this, other, scope);
         }
-        
+
 
         /// <summary>
         /// Method that converts characters span into a <see cref="FluentNumber"/>
@@ -77,12 +77,14 @@ namespace Linguini.Shared.Types.Bundle
         /// <returns>extracted <see cref="FluentNumber"/></returns>
         public static FluentNumber FromString(ReadOnlySpan<char> input)
         {
-            var parsed = Double.Parse(input.ToString(), NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture);
+            var parsed = Double.Parse(input.ToString(), NumberStyles.Float | NumberStyles.AllowThousands,
+                CultureInfo.InvariantCulture);
             var options = new FluentNumberOptions();
             if (input.IndexOf('.') != -1)
             {
                 options.MinimumFractionDigits = input.Length - input.IndexOf('.') - 1;
             }
+
             return new FluentNumber(parsed, options);
         }
 
@@ -123,6 +125,7 @@ namespace Linguini.Shared.Types.Bundle
         /// Overloads an operator to convert a <see cref="double"/> to <see cref="FluentNumber"/>.
         /// </summary>
         public static implicit operator FluentNumber(double db) => new(db, new FluentNumberOptions());
+
         /// <summary>
         /// Overloads an operator to convert a <see cref="float"/> to <see cref="FluentNumber"/>.
         /// </summary>
@@ -146,38 +149,50 @@ namespace Linguini.Shared.Types.Bundle
     /// </summary>
     public record FluentNumberOptions
     {
-        /// <summary>
-        /// Number style used. <seealso cref="FluentNumberStyle"/>
-        /// </summary>
-        public FluentNumberStyle Style;
-        
+        #region LocaleOption
+
         /// <summary>
         /// The locale matching algorithm to use.
         /// Possible values are "lookup" and "matching"; the default is "matching".
         /// </summary>
         public NegotiationStrategy LocaleMatcher;
-        
+
+        #endregion
+
+        #region StyleOption
+
+        /// <summary>
+        /// Number style used. <seealso cref="FluentNumberStyle"/>
+        /// </summary>
+        public FluentNumberStyle Style;
+
         /// <summary>
         /// Currency string
         /// </summary>
         public string? Currency;
-        
+
         /// <summary>
-        /// Display style for currency. <seealso cref="CurrencyDisplayStyle"/>
+        /// Display style for currency. <seealso cref="CurrencyDisplay"/>
         /// </summary>
-        public CurrencyDisplayStyle CurrencyDisplayStyle;
-        
+        public CurrencyDisplayStyle CurrencyDisplay;
+
         /// <summary>
         /// In many locales, accounting format means to wrap the number with
         /// parentheses instead of appending a minus sign. <seealso cref="CurrencySign"/>
         /// </summary>
         public CurrencySign CurrencySign;
-        
-        
+
         /// <summary>
-        /// Whether to use digits grouping in number display.
+        /// The unit to use in unit formatting. 
         /// </summary>
-        public bool UseGrouping;
+        public string? Unit;
+
+        /// <summary>
+        /// The unit to use in unit formatting. 
+        /// </summary>
+        public UnitDisplay UnitDisplay;
+
+        #endregion
 
         #region DigitOption
 
@@ -187,6 +202,7 @@ namespace Linguini.Shared.Types.Bundle
         /// from <c>1</c> to <c>21</c>; the default is <c>1</c>.
         /// </summary>
         public int? MinimumIntegerDigits;
+
         /// <summary>
         /// The minimum number of fraction digits to use. Possible values are from <c>0</c> to <c>100</c>;
         /// the default for plain number and percent formatting is <c>0</c>; the default for currency formatting is the
@@ -194,7 +210,7 @@ namespace Linguini.Shared.Types.Bundle
         /// or <c>2</c> if list doesn't provide information.
         /// </summary>
         public int? MinimumFractionDigits;
-        
+
         /// <summary>
         /// The maximum number of fraction digits to use. Possible values are from <c>0</c> to <c>100</c>; the default
         /// for plain number formatting is the larger of <c>minimumFractionDigits</c> and <c>3</c>; the default
@@ -203,18 +219,49 @@ namespace Linguini.Shared.Types.Bundle
         /// or <c>2</c> if list doesn't provide information. The default for percent formatting is the larger of <c>minimumFractionDigits</c> and <c>0</c>.
         /// </summary>
         public int? MaximumFractionDigits;
+
         /// <summary>
         /// The minimum number of significant digits to use. Possible values are from <c>1</c> to <c>21</c>;
         /// the default is <c>1</c>.
         /// </summary>
         public int? MinimumSignificantDigits;
-        
+
         /// <summary>
         /// The maximum  number of significant digits to use. Possible values are from <c>1</c> to <c>21</c>;
         /// the default is <c>21</c>.
         /// </summary>
         public int? MaximumSignificantDigits;
-        
+
+        /// <summary>
+        /// Specify how rounding conflicts will be resolved.
+        /// </summary>
+        public RoundingPriority RoundingPriority;
+
+        /// <summary>
+        /// Indicates the increment at which rounding should take place relative to the calculated rounding magnitude.
+        /// </summary>
+        public int RoundingIncrement;
+
+        /// <summary>
+        /// How decimals should be rounded.
+        /// </summary>
+        public RoundingMode RoundingMode;
+
+        /// <summary>
+        /// The strategy for displaying trailing zeros on whole numbers.
+        /// If true, trailing zeros will be stripped from whole numbers.
+        /// </summary>
+        public bool StripIfInteger;
+
+        #endregion
+
+        #region OtherOption
+
+        /// <summary>
+        /// Whether to use digits grouping in number display.
+        /// </summary>
+        public bool UseGrouping;
+
         #endregion
 
         /// <summary>
@@ -224,7 +271,7 @@ namespace Linguini.Shared.Types.Bundle
         {
             Style = FluentNumberStyle.Decimal;
             Currency = null;
-            CurrencyDisplayStyle = CurrencyDisplayStyle.Symbol;
+            CurrencyDisplay = CurrencyDisplayStyle.Symbol;
             UseGrouping = true;
             MinimumIntegerDigits = null;
             MinimumFractionDigits = null;
@@ -232,6 +279,29 @@ namespace Linguini.Shared.Types.Bundle
             MinimumSignificantDigits = null;
             MaximumSignificantDigits = null;
         }
+    }
+
+    /// <summary>
+    /// Specify how rounding conflicts will be resolved if both
+    /// "FractionDigits" (minimumFractionDigits/maximumFractionDigits) and
+    /// "SignificantDigits" (minimumSignificantDigits/maximumSignificantDigits) are specified.
+    /// </summary>
+    public enum RoundingPriority
+    {
+        /// <summary>
+        /// The result from the significant digits property is used.
+        /// </summary>
+        Auto,
+
+        /// <summary>
+        /// The result from the property that results in more precision is used.
+        /// </summary>
+        MorePrecise,
+
+        /// <summary>
+        /// The result from the property that results in less precision is used.
+        /// </summary>
+        LessPrecise,
     }
 
     /// <summary>
@@ -243,15 +313,17 @@ namespace Linguini.Shared.Types.Bundle
         /// Formats <see cref="FluentNumber"/> as a number e.g. <c>1 000</c>.
         /// </summary>
         Decimal,
+
         /// <summary>
         /// Formats <see cref="FluentNumber"/> as a currency, with provided currency e.g. <c>$100</c>.
         /// </summary>
         Currency,
+
         /// <summary>
         /// Formats <see cref="FluentNumber"/> as a number, with percent symbol e.g. <c>19%</c>
         /// </summary>
         Percent,
-        
+
         /// <summary>
         /// Formats <see cref="FluentNumber"/> as a number with provided measurement unit e.g. <c>100 gallons</c>
         /// </summary>
@@ -267,20 +339,23 @@ namespace Linguini.Shared.Types.Bundle
         /// Symbolic depiciton e.g. <c>$</c>.
         /// </summary>
         Symbol,
+
         /// <summary>
         /// Use ISO currency code e.g. <c>USD</c>.
         /// </summary>
         Code,
+
         /// <summary>
         /// Use a narrow format symbol (<c>$100</c> rather than <c>US$100</c>).
         /// </summary>
         Narrow,
+
         /// <summary>
         /// Name of currency e.g. <c>dollar</c>
         /// </summary>
         Name,
     }
-    
+
     /// <summary>
     /// Represents the style of how currency is displayed
     /// </summary>
@@ -290,9 +365,73 @@ namespace Linguini.Shared.Types.Bundle
         /// Symbolic depiciton e.g. <c>$</c>.
         /// </summary>
         Standard,
+
         /// <summary>
         ///  Accounting format means to wrap the number with parentheses instead of appending a minus sign
         /// </summary>
         Accounting,
+    }
+
+    /// <summary>
+    /// The unit formatting style to use in unit formatting. 
+    /// </summary>
+    public enum UnitDisplay
+    {
+        /// <summary>
+        /// Default. <c>16 l</c>
+        /// </summary>
+        Short,
+
+        /// <summary>
+        /// Narrow formatting <c>16l</c>
+        /// </summary>
+        Narrow,
+
+        /// <summary>
+        /// Long formatting <c>16 litres</c>
+        /// </summary>
+        Long,
+    }
+
+    /// <summary>
+    /// How decimals should be rounded. 
+    /// </summary>
+    public enum RoundingMode
+    {
+        /// <summary>
+        /// Round toward <c>+∞</c>. Positive values round up. Negative values round "more positive".
+        /// </summary>
+        Ceil,
+
+        /// <summary>
+        /// Round toward <c>-∞</c>. Positive values round down. Negative values round "more negative".
+        /// </summary>
+        Floor,
+    }
+    
+    /// <summary>
+    /// How decimals should be rounded. 
+    /// </summary>
+    public enum UseGrouping
+    {
+        /// <summary>
+        /// Display grouping separators even if the locale prefers otherwise
+        /// </summary>
+        Always,
+
+        /// <summary>
+        /// Display grouping separators based on the locale preference, which may also be dependent on the currency.
+        /// </summary>
+        Auto,
+        
+        /// <summary>
+        /// Display grouping separators when there are at least 2 digits in a group.
+        /// </summary>
+        Min2,
+        
+        /// <summary>
+        /// Display no grouping separators.
+        /// </summary>
+        False,
     }
 }
