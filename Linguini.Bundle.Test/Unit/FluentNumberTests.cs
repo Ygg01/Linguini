@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-using Linguini.Shared.Types;
+﻿using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using NUnit.Framework;
 

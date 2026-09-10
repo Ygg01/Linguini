@@ -3,18 +3,50 @@ using System.Collections.Generic;
 using System.Linq;
 using Linguini.Shared.Types;
 
-namespace Linguini.LanguageNegotiation.Algorithm
+namespace Linguini.Shared.Algorithm
 {
+    /// <summary>
+    /// Defines the strategies used for language negotiation.
+    /// </summary>
     public enum NegotiationStrategy
     {
+        /// <summary>
+        /// Filtering
+        /// </summary>
         Filtering,
+
+        /// <summary>
+        /// Tries to exact match the requested locale against the available locales.
+        /// </summary>
         Matching,
+        
+        /// <summary>
+        /// Lookup as defined in <a href="https://datatracker.ietf.org/doc/html/rfc4647#section-3.4">RFC 4647</a>.
+        /// </summary>
         Lookup,
     }
 
 
+    /// <summary>
+    /// Represents a language negotiation algorithm designed to match requested languages
+    /// against available languages based on various negotiation strategies.
+    /// </summary>
     public class NegotiationAlgorithm
     {
+        /// <summary>
+        /// Filters the requested language tags against the available language tags based
+        /// on the specified negotiation strategy, optionally utilizing a locale expander.
+        /// </summary>
+        /// <param name="requested">The list of requested language tags.</param>
+        /// <param name="available">The list of available language tags.</param>
+        /// <param name="strategy">The negotiation strategy to apply during filtering.</param>
+        /// <param name="localeExpander">
+        /// An optional locale expander object for expanding language ranges.
+        /// If not provided, a default instance is created.
+        /// </param>
+        /// <returns>
+        /// A list of language tags that match the filtering conditions based on the specified strategy.
+        /// </returns>
         public static List<LangLocId> FilterMatches(List<LangLocId> requested, List<LangLocId> available,
             NegotiationStrategy strategy, LocaleExpander? localeExpander = null)
         {
@@ -159,6 +191,26 @@ namespace Linguini.LanguageNegotiation.Algorithm
         }
 
 
+        /// <summary>
+        /// Negotiates a list of languages from the requested and available languages,
+        /// using a specified negotiation strategy. Optionally includes a default language
+        /// and uses a locale expander if provided.
+        /// </summary>
+        /// <param name="requested">The list of requested language tags.</param>
+        /// <param name="available">The list of available language tags for negotiation.</param>
+        /// <param name="strategy">The strategy to use for negotiating language matches.</param>
+        /// <param name="defaultLanguage">
+        /// An optional default language to include in the result if no matches are found
+        /// or if not already present.
+        /// </param>
+        /// <param name="localeExpander">
+        /// An optional locale expander to expand the list of requested or available languages.
+        /// If not provided, expansion is skipped.
+        /// </param>
+        /// <returns>
+        /// A list of negotiated language tags based on the specified negotiation strategy,
+        /// optionally including the default language if applicable.
+        /// </returns>
         public static List<LangLocId> NegotiateLanguages(List<LangLocId> requested, List<LangLocId> available,
             NegotiationStrategy strategy, LangLocId? defaultLanguage = null, LocaleExpander? localeExpander = null)
         {

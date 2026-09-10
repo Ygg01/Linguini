@@ -1,7 +1,7 @@
 ﻿using Linguini.Shared.Types;
 using NUnit.Framework;
 
-namespace Linguini.LanguageNegotiation.Tests
+namespace Linguini.Bundle.Test.Tests
 {
     [TestFixture]
     public class TestLangLocParser

@@ -10,7 +10,11 @@ namespace Linguini.Shared.Types
     /// </summary>
     public class PluralOperands
     {
-        
+        /// <summary>
+        /// Compares this <see cref="PluralOperands"/> instance with other <see cref="PluralOperands"/> instance.
+        /// </summary>
+        /// <param name="other">Another instance to compare it to</param>
+        /// <returns><c>true</c> if the operands are equal; otherwise, <c>false</c>.</returns>
         protected bool Equals(PluralOperands other)
         {
             return N.Equals(other.N) && I == other.I && V == other.V && W == other.W && F == other.F && T == other.T;

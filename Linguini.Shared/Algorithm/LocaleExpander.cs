@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using Linguini.Shared.Types;
 
-namespace Linguini.LanguageNegotiation.Algorithm
+namespace Linguini.Shared.Algorithm
 {
+    /// <summary>
+    /// Provides functionality for expanding locale identifiers with the use of custom or predefined expansion functions.
+    /// </summary>
     public class LocaleExpander
     {
         private static readonly Dictionary<string, string> RegionMatchingKeys = new Dictionary<string, string>{
@@ -24,8 +27,14 @@ namespace Linguini.LanguageNegotiation.Algorithm
             {"ru","RU"},
         };
 
+        /// <summary>
+        /// All expander applied to get the maximized locale identifier.
+        /// </summary>
         public Func<LangLocId, LangLocId?>[] Expanders;
 
+        /// <summary>
+        /// Provides functionality for expanding locale identifiers using specified expansion rules.
+        /// </summary>
         public LocaleExpander()
         {
             Expanders = new Func<LangLocId, LangLocId?>[]
@@ -34,11 +43,24 @@ namespace Linguini.LanguageNegotiation.Algorithm
             };
         }
 
+        /// <summary>
+        /// Provides functionality for expanding locale identifiers using specified or custom expansion mechanisms.
+        /// </summary>
+        /// <param name="expansions">The list of expansion functions to apply.</param>
         public LocaleExpander(List<Func<LangLocId, LangLocId?>> expansions)
         {
             Expanders = expansions.ToArray();
         }
 
+        /// <summary>
+        /// Executes the sequence of locale expansion functions on the provided locale identifier
+        /// and returns the first expanded result that is not null.
+        /// </summary>
+        /// <param name="id">The locale identifier to be expanded using the registered expansion functions.</param>
+        /// <returns>
+        /// The expanded locale identifier if a suitable expansion is found; otherwise, null if none
+        /// of the expansion functions produce a result.
+        /// </returns>
         public LangLocId? Expand(LangLocId id)
         {
             foreach (var expander in Expanders)

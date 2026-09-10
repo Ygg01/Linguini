@@ -1,2 +1,0 @@
-﻿# Linguini.LanguageNegotiation package
-

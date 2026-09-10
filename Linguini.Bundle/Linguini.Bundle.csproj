@@ -26,7 +26,6 @@ It provides easy to use and extend system for describing translations.</Descript
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Linguini.LanguageNegotiation\Linguini.LanguageNegotiation.csproj" />
         <ProjectReference Include="..\Linguini.Syntax\Linguini.Syntax.csproj" />
         <ProjectReference Include="..\Linguini.Shared\Linguini.Shared.csproj" />
         <ProjectReference Include="..\PluralRules.Generator\PluralRules.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

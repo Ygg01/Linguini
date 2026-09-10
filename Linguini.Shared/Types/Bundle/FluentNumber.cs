@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using Linguini.Shared.Algorithm;
 using Linguini.Shared.Util;
 
 #nullable enable
@@ -151,20 +152,35 @@ namespace Linguini.Shared.Types.Bundle
         public FluentNumberStyle Style;
         
         /// <summary>
+        /// The locale matching algorithm to use.
+        /// Possible values are "lookup" and "matching"; the default is "matching".
+        /// </summary>
+        public NegotiationStrategy LocaleMatcher;
+        
+        /// <summary>
         /// Currency string
         /// </summary>
         public string? Currency;
         
         /// <summary>
-        /// Display style for currency. <seealso cref="FluentNumberCurrencyDisplayStyle"/>
+        /// Display style for currency. <seealso cref="CurrencyDisplayStyle"/>
         /// </summary>
-        public FluentNumberCurrencyDisplayStyle CurrencyDisplayStyle;
+        public CurrencyDisplayStyle CurrencyDisplayStyle;
+        
+        /// <summary>
+        /// In many locales, accounting format means to wrap the number with
+        /// parentheses instead of appending a minus sign. <seealso cref="CurrencySign"/>
+        /// </summary>
+        public CurrencySign CurrencySign;
+        
         
         /// <summary>
         /// Whether to use digits grouping in number display.
         /// </summary>
         public bool UseGrouping;
-        
+
+        #region DigitOption
+
         /// <summary>
         /// The minimum number of integer digits to use. A value with a smaller number of integer digits than this
         /// number will be left-padded with zeros (to the specified length) when formatted. Possible values are
@@ -198,6 +214,8 @@ namespace Linguini.Shared.Types.Bundle
         /// the default is <c>21</c>.
         /// </summary>
         public int? MaximumSignificantDigits;
+        
+        #endregion
 
         /// <summary>
         /// Default constructor
@@ -206,7 +224,7 @@ namespace Linguini.Shared.Types.Bundle
         {
             Style = FluentNumberStyle.Decimal;
             Currency = null;
-            CurrencyDisplayStyle = FluentNumberCurrencyDisplayStyle.Symbol;
+            CurrencyDisplayStyle = CurrencyDisplayStyle.Symbol;
             UseGrouping = true;
             MinimumIntegerDigits = null;
             MinimumFractionDigits = null;
@@ -243,7 +261,7 @@ namespace Linguini.Shared.Types.Bundle
     /// <summary>
     /// Represents the style of how currency is displayed
     /// </summary>
-    public enum FluentNumberCurrencyDisplayStyle
+    public enum CurrencyDisplayStyle
     {
         /// <summary>
         /// Symbolic depiciton e.g. <c>$</c>.
@@ -254,8 +272,27 @@ namespace Linguini.Shared.Types.Bundle
         /// </summary>
         Code,
         /// <summary>
+        /// Use a narrow format symbol (<c>$100</c> rather than <c>US$100</c>).
+        /// </summary>
+        Narrow,
+        /// <summary>
         /// Name of currency e.g. <c>dollar</c>
         /// </summary>
         Name,
+    }
+    
+    /// <summary>
+    /// Represents the style of how currency is displayed
+    /// </summary>
+    public enum CurrencySign
+    {
+        /// <summary>
+        /// Symbolic depiciton e.g. <c>$</c>.
+        /// </summary>
+        Standard,
+        /// <summary>
+        ///  Accounting format means to wrap the number with parentheses instead of appending a minus sign
+        /// </summary>
+        Accounting,
     }
 }
