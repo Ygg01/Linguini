@@ -10,6 +10,50 @@ namespace Linguini.Shared.Types
     /// </summary>
     public class PluralOperands
     {
+        
+        protected bool Equals(PluralOperands other)
+        {
+            return N.Equals(other.N) && I == other.I && V == other.V && W == other.W && F == other.F && T == other.T;
+        }
+
+        
+        /// <inheritdoc/>
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((PluralOperands)obj);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(N, I, V, W, F, T);
+        }
+
+        /// <summary>
+        /// Determines whether two <see cref="PluralOperands"/> instances are equal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="PluralOperands"/> to compare.</param>
+        /// <param name="right">The second instance of <see cref="PluralOperands"/> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are equal; otherwise, <c>false</c>.</returns>
+        public static bool operator ==(PluralOperands? left, PluralOperands? right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <summary>
+        /// Determines whether two <see cref="PluralOperands"/> instances are not equal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="PluralOperands"/> to compare.</param>
+        /// <param name="right">The second instance of <see cref="PluralOperands"/> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are inequal; otherwise, <c>false</c>.</returns>
+        public static bool operator !=(PluralOperands? left, PluralOperands? right)
+        {
+            return !Equals(left, right);
+        }
+
         /// <summary>
         /// Absolute value of input
         /// </summary>
@@ -39,16 +83,22 @@ namespace Linguini.Shared.Types
         /// Visible fraction digits without trailing zeros
         /// </summary>
         public readonly long T;
+        
+        /// <summary>
+        /// compact decimal exponent value: exponent of the power of 10 used in compact decimal formatting.
+        /// </summary>
+        public readonly long C;
+
 
         /// Represents the operands used for pluralization rules.
         /// This class encapsulates numeric values in different formats which are
         /// used in determining plural forms in linguistic contexts.
         /// <param name="n">The complete numeric value, represented as a double.</param>
-        /// <param name="i">The integral part of the numeric value, represented as an unsigned long.</param>
-        /// <param name="v">The number of visible fraction digits in the numeric value, without trailing zeros.</param>
-        /// <param name="w">The number of significant fraction digits in the numeric value.</param>
-        /// <param name="f">The numeric value of the visible fraction digits, without trailing zeros.</param>
-        /// <param name="t">Similar to F but includes significant fractional digits only.</param>
+        /// <param name="i">The integer digits of <c>N</c>.</param>
+        /// <param name="v">The number of visible fraction digits in <c>N</c>, with trailing zeros.</param>
+        /// <param name="w">The number of visible fraction digits in <c>N</c>, without trailing zeros.</param>
+        /// <param name="f">The visible fraction digits in <c>N</c> with trailing zeros, expressed as an integer.</param>
+        /// <param name="t">The visible fraction digits in <c>N</c> without trailing zeros, expressed as an integer.</param>
         public PluralOperands(double n, ulong i, int v, int w, long f, long t)
         {
             N = n;
@@ -57,15 +107,13 @@ namespace Linguini.Shared.Types
             W = w;
             F = f;
             T = t;
+            C = (int)Math.Floor(Math.Log10(N));
         }
 
-        /// <summary>
-        /// The exponent of the value.
-        /// </summary>
-        /// <returns>Exponent of the value e.g. for <c>100</c> it returns <c>2</c></returns>
-        public int Exp()
+        /// <inheritdoc />
+        public override string ToString()
         {
-            return (int)Math.Floor(Math.Log10(N));
+            return $"PluralOperands (N: {N}, I: {I}, V: {V}, W: {W}, F: {F}, T: {T})";
         }
     }
 

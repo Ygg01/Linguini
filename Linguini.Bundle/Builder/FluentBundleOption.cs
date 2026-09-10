@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Linguini.Bundle.Types;
+using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 
 namespace Linguini.Bundle.Builder
@@ -20,7 +21,7 @@ namespace Linguini.Bundle.Builder
         /// <summary>
         /// Enables Extensions to standard Fluent syntax.
         ///
-        /// When true it enables following features:
+        /// When true, it enables the following features:
         /// <list type="bullet">
         /// <item><b>Dynamic Reference</b> - ability to reference terms/message using <c>$$term_ref</c>.</item>
         /// <item><b>Dynamic Reference attribute</b> - ability to reference terms/message using <c>$$term_ref.Attribute</c>.</item>
@@ -35,7 +36,7 @@ namespace Linguini.Bundle.Builder
         /// 
         /// Most of the time the Unicode BiDi Algorithm handles bidirectional text very well. In some cases it needs
         /// some help, so this adds isolating characters to ensure correct behavior.
-        /// For more detalis see: https://github.com/projectfluent/fluent.js/wiki/Unicode-Isolation
+        /// For more details see: https://github.com/projectfluent/fluent.js/wiki/Unicode-Isolation
         /// </summary>
         /// <value>
         /// Enables bidirectional text isolation. Defaults to <c>true</c>.
@@ -45,7 +46,7 @@ namespace Linguini.Bundle.Builder
         /// <summary>
         /// Maximal number of Placeable(s).
         ///
-        /// It prevents the deep nesting of terms, which may lead to https://en.wikipedia.org/wiki/Billion_laughs_attack .
+        /// It prevents the deep nesting of terms, which may lead to https://en.wikipedia.org/wiki/Billion_laughs_attack
         /// </summary>
         /// <value>
         /// Number of nested placeable values, defaults to one hundred.
@@ -59,7 +60,7 @@ namespace Linguini.Bundle.Builder
         /// <value>
         /// The locales define the languages and regional variations that the FluentBundle supports.
         /// </value>
-        public List<string> Locales { get; init; } = new List<string>();
+        public List<LangLocId> Locales { get; init; } = new();
 
         /// <summary>
         /// Specifies the external functions that can be used in a FluentBundle.
@@ -73,8 +74,8 @@ namespace Linguini.Bundle.Builder
             new Dictionary<string, ExternalFunction>();
 
         /// <summary>
-        /// Gets or sets the formatter function that is used to format Fluent type values into strings,
-        /// allowing for type specific formatting.
+        /// Gets or sets the formatter function used to format Fluent type values into strings,
+        /// allowing for type-specific formatting.
         /// </summary>
         /// <remarks>
         /// The formatter function takes an instance of <see cref="IFluentType"/> and returns the string representation of the value.
@@ -90,7 +91,7 @@ namespace Linguini.Bundle.Builder
         
 
         /// <summary>
-        /// Represents a function that transforms all textual fragment during formatting.
+        /// Represents a function that transforms all textual fragments during formatting.
         /// </summary>
         /// <value>The transformed string value.</value>
         public Func<string, string>? TransformFunc { get; init; }

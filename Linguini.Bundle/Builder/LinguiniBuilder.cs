@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
+using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
@@ -50,6 +51,8 @@ namespace Linguini.Bundle.Builder
 
             /// <summary>
             ///     Sets the locale chain to given <c>IEnumerable&lt;string&gt;</c> of locale strings.
+            ///     First locale in the list will be the assumed locale, while rest can be fallback locales for date
+            ///     and time formatting.
             /// </summary>
             /// <param name="unparsedLocales">The locale list.</param>
             /// <returns>The <see cref="IResourceStep">next step (defining resources)</see> in the builder.</returns>
@@ -279,7 +282,7 @@ namespace Linguini.Bundle.Builder
         {
             private readonly bool _enableExperimental;
             private readonly Dictionary<string, ExternalFunction> _functions = new();
-            private readonly List<string> _locales = new();
+            private readonly List<LangLocId> _locales = new();
             private readonly List<Resource> _resources = new();
             private bool _concurrent;
             private CultureInfo _culture;
@@ -300,7 +303,7 @@ namespace Linguini.Bundle.Builder
                 _concurrent = other._concurrent;
                 _enableExperimental = other._enableExperimental;
 
-                _locales = new List<string>(other._locales);
+                _locales = new List<LangLocId>(other._locales);
                 _resources = new List<Resource>(other._resources);
                 _functions = new Dictionary<string, ExternalFunction>(other._functions);
                 _transformFunc = other._transformFunc;
@@ -330,11 +333,13 @@ namespace Linguini.Bundle.Builder
             /// <inheritdoc />
             public IResourceStep Locales(params string[] unparsedLocales)
             {
-                _locales.AddRange(unparsedLocales);
+                foreach (var unparsedLocale in unparsedLocales)
+                {
+                    _locales.Add(unparsedLocale);
+                }
                 if (_locales.Count > 0)
                 {
-                    // TODO proper culture info negotiations
-                    _culture = new CultureInfo(_locales[0]);
+                    _culture = new CultureInfo(_locales[0].ToString());
                 }
                 else
                 {

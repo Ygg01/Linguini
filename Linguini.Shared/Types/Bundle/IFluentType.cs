@@ -6,10 +6,19 @@
     public interface IFluentType
     {
         /// <summary>
-        ///     String representation of the value
+        ///     String representation of the value assuming invariant culture.
         /// </summary>
         /// <returns>String value of the Fluent type.</returns>
-        string AsString();
+        string AsString()
+        {
+            return AsString(InvariantContext.Default);
+        }
+
+        /// <summary>
+        ///     String representation of the value assuming invariant culture.
+        /// </summary>
+        /// <returns>String value of the Fluent type.</returns>
+        string AsString(IFluentContext context);
 
         /// <summary>
         ///     Determines if type is an error. Defaults to <c>false</c>.
@@ -61,12 +70,13 @@
         {
             return this;
         }
+        
 
         /// <summary>
-        ///     Fluent representation of error
+        ///     Fluent representation of error is same in any culture
         /// </summary>
         /// <returns>A constant string value.</returns>
-        public string AsString()
+        public string AsString(IFluentContext context)
         {
             return _error;
         }

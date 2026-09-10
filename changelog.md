@@ -324,4 +324,15 @@ version 0.12.0
 ## What's changed
 
 ### LanguageNegotiation package
-- Add `LanguageNegotiator` solution that determines language locId and deterimines the best locale to use.
+- Add `LanguageNegotiator.Algorithm` solution that determines language locId and deterimines the best locale to use.
+
+### Linguini.Shared
+- Introduces `InvariantContext` as a default context for `FluentNumber` and `FluentDateTime`.
+- Introduces `LangLocId` as a way to represent a language locale identifier instead of `CultureInfo`.
+- Introduces `LangLocParser` to parse `LangLocId` from string.
+- Adds `IFluentContext` interface to allow extra formatting functionality.
+- Adds `FluendDateTime` stub for parsing date/time.
+
+### Linguini.Bundle
+- Introduce `LangLocId` as a way to represent a language locale identifier instead of `CultureInfo`.
+- Adds `AsString(IFluentContext)` method to `FluentBundle` to allow extra formatting functionality.

@@ -29,6 +29,12 @@ namespace Linguini.Bundle
         public bool EnableExtensions { get; init; }
 
         /// <summary>
+        /// Provides access to the underlying language context associated with this bundle.
+        /// The context contains locale, culture, and options for handling numbers in messages.
+        /// </summary>
+        IFluentContext Context { get; }
+
+        /// <summary>
         ///     Determines if the provided identifier has a message associated with it.
         /// </summary>
         /// <param name="identifier">The identifier to check.</param>

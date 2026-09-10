@@ -25,10 +25,17 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc/>
         public string AsString()
         {
-            var stringVal = Value.ToString(CultureInfo.InvariantCulture);
-            if (_options.MinimumFractionDigits != null)
+            return AsString(InvariantContext.Default);
+        }
+
+        /// <inheritdoc/>
+        public string AsString(IFluentContext context)
+        {
+            var stringVal = Value.ToString(context.Culture);
+            var options = context.NumberOptions ?? _options;
+            if (options.MinimumFractionDigits != null)
             {
-                var minfd = _options.MinimumFractionDigits.Value;
+                var minfd = options.MinimumFractionDigits.Value;
                 var pos = stringVal.IndexOf('.');
                 if (pos != -1)
                 {

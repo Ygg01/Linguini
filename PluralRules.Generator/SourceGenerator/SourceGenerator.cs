@@ -339,7 +339,7 @@ public class SourceGenerator : IIncrementalGenerator
         var operand = relation.Expr.Operand.ToUpperChar();
         if (operand == "E")
         {
-            operand = "Exp()";
+            operand = "C";
         }
 
         var brackets = relation.RangeListItems.Count > 1;
