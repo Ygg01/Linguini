@@ -18,10 +18,7 @@
         ///     String representation of the value assuming invariant culture.
         /// </summary>
         /// <returns>String value of the Fluent type.</returns>
-        string AsString(IFluentContext context)
-        {
-            return AsString(context);
-        }
+        string AsString(IFluentContext context);
 
         /// <summary>
         ///     Determines if type is an error. Defaults to <c>false</c>.

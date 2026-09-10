@@ -77,10 +77,10 @@ namespace Linguini.Shared.Types.Bundle
         /// </summary>
         private InvariantContext()
         {
-            Locale = LangLocParser.Parse("inv");
+            Locale = LangLocParser.Parse("root");
             Culture = CultureInfo.InvariantCulture;
-            NumberOptions = new FluentNumberOptions();
-            DateTimeOptions = new FluentDateTimeOptions();
+            NumberOptions = null;
+            DateTimeOptions = null;
             NumberFormatInfo = Culture.NumberFormat;
             DateTimeFormatInfo = Culture.DateTimeFormat;
         }

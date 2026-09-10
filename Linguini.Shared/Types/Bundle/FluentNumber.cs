@@ -14,49 +14,28 @@ namespace Linguini.Shared.Types.Bundle
         /// Numerical value of fluent number, depicted using IEEE 754 64-bit floating number.
         /// </summary>
         public readonly double Value;
-        
+        private readonly FluentNumberOptions _options;
 
-        private FluentNumber(double value)
+        private FluentNumber(double value, FluentNumberOptions options)
         {
             Value = value;
+            _options = options;
         }
 
         /// <inheritdoc/>
-        /// <inheritdoc/>
         public string AsString()
         {
-            var stringVal = Value.ToString(CultureInfo.InvariantCulture);
-            var options = new FluentNumberOptions();
-            
-            if (options.MinimumFractionDigits != null)
-            {
-                var minfd = options.MinimumFractionDigits.Value;
-                var pos = stringVal.IndexOf('.');
-                if (pos != -1)
-                {
-                    var fracNum = stringVal.Length - pos - 1;
-                    var missing = fracNum > minfd
-                        ? 0
-                        : minfd - fracNum;
-                    var pattern = new String('0', missing);
-                    stringVal = $"{stringVal}{pattern}";
-                }
-                else
-                {
-                    stringVal = $"{stringVal}.{new String('0', minfd)}";
-                }
-            }
-
-            return stringVal;
+            return AsString(InvariantContext.Default);
         }
 
         /// <inheritdoc/>
         public string AsString(IFluentContext context)
         {
             var stringVal = Value.ToString(context.Culture);
-            if (context.NumberOptions?.MinimumFractionDigits != null)
+            var options = context.NumberOptions ?? _options;
+            if (options.MinimumFractionDigits != null)
             {
-                var minfd = context.NumberOptions.MinimumFractionDigits.Value;
+                var minfd = options.MinimumFractionDigits.Value;
                 var pos = stringVal.IndexOf('.');
                 if (pos != -1)
                 {
@@ -103,7 +82,7 @@ namespace Linguini.Shared.Types.Bundle
             {
                 options.MinimumFractionDigits = input.Length - input.IndexOf('.') - 1;
             }
-            return new FluentNumber(parsed);
+            return new FluentNumber(parsed, options);
         }
 
         /// <summary>
@@ -142,16 +121,16 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Overloads an operator to convert a <see cref="double"/> to <see cref="FluentNumber"/>.
         /// </summary>
-        public static implicit operator FluentNumber(double db) => new(db);
+        public static implicit operator FluentNumber(double db) => new(db, new FluentNumberOptions());
         /// <summary>
         /// Overloads an operator to convert a <see cref="float"/> to <see cref="FluentNumber"/>.
         /// </summary>
-        public static implicit operator FluentNumber(float fl) => new((double)fl);
+        public static implicit operator FluentNumber(float fl) => new(fl, new FluentNumberOptions());
 
         /// <inheritdoc/>
         public IFluentType Copy()
         {
-            return new FluentNumber(Value);
+            return new FluentNumber(Value, _options);
         }
 
         /// <inheritdoc/>
