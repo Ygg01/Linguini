@@ -157,6 +157,11 @@ namespace Linguini.Shared.Types.Bundle
         /// </summary>
         public NegotiationStrategy LocaleMatcher;
 
+        /// <summary>
+        /// The numbering system to use for number formatting, such as "arab", "hans", "mathsans", and so on
+        /// </summary>
+        public NumberingSystemOption NumberingSystem;
+        
         #endregion
 
         #region StyleOption
@@ -433,5 +438,13 @@ namespace Linguini.Shared.Types.Bundle
         /// Display no grouping separators.
         /// </summary>
         False,
+    }
+    
+    /// <summary>
+    /// The numbering system to use for number formatting, such as "arab", "hans", "mathsans", and so on
+    /// </summary>
+    public enum NumberingSystemOption 
+    {
+        
     }
 }
