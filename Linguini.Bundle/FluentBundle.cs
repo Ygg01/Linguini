@@ -63,7 +63,7 @@ namespace Linguini.Bundle
         public bool EnableExtensions { get; init; }
 
         /// <inheritdoc />
-        public IFluentContext Context { get; }
+        public IFluentContext Context { get; } = InvariantContext.Default;
 
         /// <summary>
         ///     Determines if the provided identifier has a message associated with it.

@@ -299,7 +299,7 @@ namespace Linguini.Shared.Types
         /// <returns>
         /// <c>true</c> if the parsing was successful; otherwise, <c>false</c>.
         /// </returns>
-        public static bool TryParse(string langLoc, out List<string> errors,
+        public static bool TryParse(string? langLoc, out List<string> errors,
             [NotNullWhen(true)] out LangLocId? langLocId)
         {
             errors = new List<string>();

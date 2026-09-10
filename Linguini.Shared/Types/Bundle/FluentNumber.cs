@@ -22,9 +22,32 @@ namespace Linguini.Shared.Types.Bundle
         }
 
         /// <inheritdoc/>
+        /// <inheritdoc/>
         public string AsString()
         {
-            return AsString(InvariantContext.Default);
+            var stringVal = Value.ToString(CultureInfo.InvariantCulture);
+            var options = new FluentNumberOptions();
+            
+            if (options.MinimumFractionDigits != null)
+            {
+                var minfd = options.MinimumFractionDigits.Value;
+                var pos = stringVal.IndexOf('.');
+                if (pos != -1)
+                {
+                    var fracNum = stringVal.Length - pos - 1;
+                    var missing = fracNum > minfd
+                        ? 0
+                        : minfd - fracNum;
+                    var pattern = new String('0', missing);
+                    stringVal = $"{stringVal}{pattern}";
+                }
+                else
+                {
+                    stringVal = $"{stringVal}.{new String('0', minfd)}";
+                }
+            }
+
+            return stringVal;
         }
 
         /// <inheritdoc/>

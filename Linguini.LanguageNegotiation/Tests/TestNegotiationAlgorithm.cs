@@ -222,7 +222,8 @@ namespace Linguini.LanguageNegotiation.Tests
         public string[] TestAlgo(string[] requested, string[] available, NegotiationStrategy strategy,
             string? defLang = null)
         {
-            var defLangId = LangLocParser.Parse(defLang);
+            
+            LangLocParser.TryParse(defLang, out _, out var defLangId);
             var requestedLangs = requested
                 .Select(LangLocParser.Parse)
                 .ToList();
