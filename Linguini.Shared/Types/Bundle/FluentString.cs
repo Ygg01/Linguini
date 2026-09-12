@@ -52,21 +52,31 @@ namespace Linguini.Shared.Types.Bundle
         /// </summary>
         /// <param name="fs">value </param>
         /// <returns>the string being wrapped</returns>
-        public static implicit operator string(FluentString fs) => fs._content;
-        
+        public static implicit operator string(FluentString fs)
+        {
+            return fs._content;
+        }
+
         /// <summary>
         /// Converts a <see cref="string"/> to a <see cref="FluentString"/>
         /// </summary>
         /// <param name="s">value to be wrapped in <see cref="FluentString"/></param>
         /// <returns>the wrapper around FluentString</returns>
-        public static implicit operator FluentString(string s) => new(s);
-        
+        public static implicit operator FluentString(string s)
+        {
+            return new FluentString(s);
+        }
+
         /// <summary>
         /// Converts a <see cref="ReadOnlySpan{T}"/> to a <see cref="FluentString"/>
         /// </summary>
         /// <param name="s">value to be wrapped in <see cref="FluentString"/></param>
         /// <returns>the wrapper around FluentString</returns>
-        public static implicit operator FluentString(ReadOnlySpan<char> s) => new(s.ToString());
+        public static implicit operator FluentString(ReadOnlySpan<char> s)
+        {
+            return new FluentString(s.ToString());
+        }
+
 
         /// <inheritdoc/>
         public IFluentType Copy()
@@ -90,4 +100,7 @@ namespace Linguini.Shared.Types.Bundle
             return _content.TryPluralCategory(out category);
         }
     }
+
+
+
 }

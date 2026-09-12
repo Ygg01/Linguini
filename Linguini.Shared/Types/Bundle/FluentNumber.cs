@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Linguini.Shared.Algorithm;
 using Linguini.Shared.Util;
@@ -23,6 +25,16 @@ namespace Linguini.Shared.Types.Bundle
             _options = options;
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="FluentNumber"/> with the specified options.
+        /// </summary>
+        /// <param name="options">The <see cref="FluentNumberOptions"/> to apply to the current number.</param>
+        /// <returns>A new <see cref="FluentNumber"/> instance with the applied options.</returns>
+        public FluentNumber WithOptions(FluentNumberOptions options)
+        {
+            return new FluentNumber(Value, options);
+        }
+
         /// <inheritdoc/>
         public string AsString()
         {
@@ -44,12 +56,12 @@ namespace Linguini.Shared.Types.Bundle
                     var missing = fracNum > minfd
                         ? 0
                         : minfd - fracNum;
-                    var pattern = new String('0', missing);
+                    var pattern = new string('0', missing);
                     stringVal = $"{stringVal}{pattern}";
                 }
                 else
                 {
-                    stringVal = $"{stringVal}.{new String('0', minfd)}";
+                    stringVal = $"{stringVal}.{new string('0', minfd)}";
                 }
             }
 
@@ -77,8 +89,8 @@ namespace Linguini.Shared.Types.Bundle
         /// <returns>extracted <see cref="FluentNumber"/></returns>
         public static FluentNumber FromString(ReadOnlySpan<char> input)
         {
-            var parsed = Double.Parse(input.ToString(), NumberStyles.Float | NumberStyles.AllowThousands,
-                CultureInfo.InvariantCulture);
+            var parsed = double.Parse(input.ToString(), NumberStyles.Float | NumberStyles.AllowThousands,
+                                      CultureInfo.InvariantCulture);
             var options = new FluentNumberOptions();
             if (input.IndexOf('.') != -1)
             {
@@ -119,17 +131,26 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Overloads an operator to convert a <see cref="FluentNumber"/> to <see cref="double"/>.
         /// </summary>
-        public static implicit operator double(FluentNumber fs) => fs.Value;
+        public static implicit operator double(FluentNumber fs)
+        {
+            return fs.Value;
+        }
 
         /// <summary>
         /// Overloads an operator to convert a <see cref="double"/> to <see cref="FluentNumber"/>.
         /// </summary>
-        public static implicit operator FluentNumber(double db) => new(db, new FluentNumberOptions());
+        public static implicit operator FluentNumber(double db)
+        {
+            return new FluentNumber(db, new FluentNumberOptions());
+        }
 
         /// <summary>
         /// Overloads an operator to convert a <see cref="float"/> to <see cref="FluentNumber"/>.
         /// </summary>
-        public static implicit operator FluentNumber(float fl) => new(fl, new FluentNumberOptions());
+        public static implicit operator FluentNumber(float fl)
+        {
+            return new FluentNumber(fl, new FluentNumberOptions());
+        }
 
         /// <inheritdoc/>
         public IFluentType Copy()
@@ -149,21 +170,6 @@ namespace Linguini.Shared.Types.Bundle
     /// </summary>
     public record FluentNumberOptions
     {
-        #region LocaleOption
-
-        /// <summary>
-        /// The locale matching algorithm to use.
-        /// Possible values are "lookup" and "matching"; the default is "matching".
-        /// </summary>
-        public NegotiationStrategy LocaleMatcher;
-
-        /// <summary>
-        /// The numbering system to use for number formatting, such as "arab", "hans", "mathsans", and so on
-        /// </summary>
-        public NumberingSystemOption NumberingSystem;
-        
-        #endregion
-
         #region StyleOption
 
         /// <summary>
@@ -180,22 +186,6 @@ namespace Linguini.Shared.Types.Bundle
         /// Display style for currency. <seealso cref="CurrencyDisplay"/>
         /// </summary>
         public CurrencyDisplayStyle CurrencyDisplay;
-
-        /// <summary>
-        /// In many locales, accounting format means to wrap the number with
-        /// parentheses instead of appending a minus sign. <seealso cref="CurrencySign"/>
-        /// </summary>
-        public CurrencySign CurrencySign;
-
-        /// <summary>
-        /// The unit to use in unit formatting. 
-        /// </summary>
-        public string? Unit;
-
-        /// <summary>
-        /// The unit to use in unit formatting. 
-        /// </summary>
-        public UnitDisplay UnitDisplay;
 
         #endregion
 
@@ -237,27 +227,6 @@ namespace Linguini.Shared.Types.Bundle
         /// </summary>
         public int? MaximumSignificantDigits;
 
-        /// <summary>
-        /// Specify how rounding conflicts will be resolved.
-        /// </summary>
-        public RoundingPriority RoundingPriority;
-
-        /// <summary>
-        /// Indicates the increment at which rounding should take place relative to the calculated rounding magnitude.
-        /// </summary>
-        public int RoundingIncrement;
-
-        /// <summary>
-        /// How decimals should be rounded.
-        /// </summary>
-        public RoundingMode RoundingMode;
-
-        /// <summary>
-        /// The strategy for displaying trailing zeros on whole numbers.
-        /// If true, trailing zeros will be stripped from whole numbers.
-        /// </summary>
-        public bool StripIfInteger;
-
         #endregion
 
         #region OtherOption
@@ -284,136 +253,136 @@ namespace Linguini.Shared.Types.Bundle
             MinimumSignificantDigits = null;
             MaximumSignificantDigits = null;
         }
+
+        /// <summary>
+        /// Converts a dictionary of options into a <see cref="FluentNumberOptions"/> object.
+        /// </summary>
+        /// <param name="options">
+        /// A dictionary containing key-value pairs where the keys represent number formatting options,
+        /// and the values are instances of <see cref="IFluentType"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="FluentNumberOptions"/> object populated with the provided options.
+        /// </returns>
+        public static FluentNumberOptions ToNumberOption(IDictionary<string, IFluentType> options)
+        {
+            var numberOption = new FluentNumberOptions();
+            if (options.TryGetValue("style", out var ft)
+                && ft is FluentString styleStr && styleStr.TryIntoNumberOption(out var style))
+            {
+                numberOption.Style = style;
+            }
+
+            if (options.TryGetValue("currency", out var ft2) 
+                && ft2 is FluentString currencyStr)
+            {
+                numberOption.Currency = currencyStr;
+            }
+
+            if (options.TryGetValue("currencyDisplay", out var ft3) &&
+                ft3 is FluentString currencyDisplayStr && currencyDisplayStr.TryIntoCurrencyStyle(out var currencyDisplay))
+            {
+                numberOption.CurrencyDisplay = currencyDisplay;
+            }
+
+            if (options.TryGetValue("useGrouping", out var useGrouping) &&
+                useGrouping is FluentString useGroupingStr)
+            {
+                numberOption.UseGrouping = (string)useGroupingStr switch
+                {
+                    "true"  => true,
+                    "false" => false,
+                    _       => numberOption.UseGrouping
+                };
+            }
+            
+            if (options.TryGetValue("minimumIntegerDigits", out var minIntDig) &&
+                minIntDig is FluentNumber minIntDigNum)
+            {
+                numberOption.MinimumIntegerDigits = (int)minIntDigNum;
+            }
+            
+            if (options.TryGetValue("minimumFractionDigits", out var minFracDig) &&
+                minFracDig is FluentNumber minFracDigNum)
+            {
+                numberOption.MinimumFractionDigits = (int)minFracDigNum;
+            }
+            
+            if (options.TryGetValue("maximumFractionDigits", out var maxFracDig) &&
+                maxFracDig is FluentNumber maxFracDigNum)
+            {
+                numberOption.MaximumFractionDigits = (int)maxFracDigNum;
+            }
+            
+            if (options.TryGetValue("minimumSignificantDigits", out var minSigDig) &&
+                minSigDig is FluentNumber minSigDigNum)
+            {
+                numberOption.MinimumSignificantDigits = (int)minSigDigNum;
+            }
+            
+            if (options.TryGetValue("maximumSignificantDigits", out var maxSigDig) &&
+                maxSigDig is FluentNumber maxSigDigNum)
+            {
+                numberOption.MaximumSignificantDigits = (int)maxSigDigNum;
+            }
+
+            return numberOption;
+        }
     }
 
-    /// <summary>
-    /// Specify how rounding conflicts will be resolved if both
-    /// "FractionDigits" (minimumFractionDigits/maximumFractionDigits) and
-    /// "SignificantDigits" (minimumSignificantDigits/maximumSignificantDigits) are specified.
-    /// </summary>
-    public enum RoundingPriority
-    {
-        /// <summary>
-        /// The result from the significant digits property is used.
-        /// </summary>
-        Auto,
-
-        /// <summary>
-        /// The result from the property that results in more precision is used.
-        /// </summary>
-        MorePrecise,
-
-        /// <summary>
-        /// The result from the property that results in less precision is used.
-        /// </summary>
-        LessPrecise,
-    }
 
     /// <summary>
     /// Represents which formatting style of a fluent number, specifying how the number is formatted.
     /// </summary>
-    public enum FluentNumberStyle
+    public enum FluentNumberStyle : byte
     {
         /// <summary>
         /// Formats <see cref="FluentNumber"/> as a number e.g. <c>1 000</c>.
         /// </summary>
-        Decimal,
+        Decimal = 1,
 
         /// <summary>
         /// Formats <see cref="FluentNumber"/> as a currency, with provided currency e.g. <c>$100</c>.
         /// </summary>
-        Currency,
+        Currency = 2,
 
         /// <summary>
         /// Formats <see cref="FluentNumber"/> as a number, with percent symbol e.g. <c>19%</c>
         /// </summary>
-        Percent,
+        Percent = 3,
 
         /// <summary>
         /// Formats <see cref="FluentNumber"/> as a number with provided measurement unit e.g. <c>100 gallons</c>
         /// </summary>
-        Unit,
+        Unit = 4
     }
 
     /// <summary>
     /// Represents the style of how currency is displayed
     /// </summary>
-    public enum CurrencyDisplayStyle
+    public enum CurrencyDisplayStyle : byte
     {
         /// <summary>
         /// Symbolic depiciton e.g. <c>$</c>.
         /// </summary>
-        Symbol,
+        Symbol = 1,
 
         /// <summary>
         /// Use ISO currency code e.g. <c>USD</c>.
         /// </summary>
-        Code,
+        Code = 2,
 
         /// <summary>
         /// Use a narrow format symbol (<c>$100</c> rather than <c>US$100</c>).
         /// </summary>
-        Narrow,
+        Narrow = 3,
 
         /// <summary>
         /// Name of currency e.g. <c>dollar</c>
         /// </summary>
-        Name,
+        Name = 4
     }
 
-    /// <summary>
-    /// Represents the style of how currency is displayed
-    /// </summary>
-    public enum CurrencySign
-    {
-        /// <summary>
-        /// Symbolic depiciton e.g. <c>$</c>.
-        /// </summary>
-        Standard,
-
-        /// <summary>
-        ///  Accounting format means to wrap the number with parentheses instead of appending a minus sign
-        /// </summary>
-        Accounting,
-    }
-
-    /// <summary>
-    /// The unit formatting style to use in unit formatting. 
-    /// </summary>
-    public enum UnitDisplay
-    {
-        /// <summary>
-        /// Default. <c>16 l</c>
-        /// </summary>
-        Short,
-
-        /// <summary>
-        /// Narrow formatting <c>16l</c>
-        /// </summary>
-        Narrow,
-
-        /// <summary>
-        /// Long formatting <c>16 litres</c>
-        /// </summary>
-        Long,
-    }
-
-    /// <summary>
-    /// How decimals should be rounded. 
-    /// </summary>
-    public enum RoundingMode
-    {
-        /// <summary>
-        /// Round toward <c>+∞</c>. Positive values round up. Negative values round "more positive".
-        /// </summary>
-        Ceil,
-
-        /// <summary>
-        /// Round toward <c>-∞</c>. Positive values round down. Negative values round "more negative".
-        /// </summary>
-        Floor,
-    }
-    
     /// <summary>
     /// How decimals should be rounded. 
     /// </summary>
@@ -428,23 +397,78 @@ namespace Linguini.Shared.Types.Bundle
         /// Display grouping separators based on the locale preference, which may also be dependent on the currency.
         /// </summary>
         Auto,
-        
+
         /// <summary>
         /// Display grouping separators when there are at least 2 digits in a group.
         /// </summary>
         Min2,
-        
+
         /// <summary>
         /// Display no grouping separators.
         /// </summary>
-        False,
+        False
     }
-    
-    /// <summary>
-    /// The numbering system to use for number formatting, such as "arab", "hans", "mathsans", and so on
-    /// </summary>
-    public enum NumberingSystemOption 
+
+    public static class FluentNumberExtensions
     {
+        public static bool TryIntoNumberOption(this FluentString options, out FluentNumberStyle style)
+        {
+            var conversionSuccess = false;
+            switch ((string)options)
+            {
+                case "decimal":
+                    style = FluentNumberStyle.Decimal;
+                    conversionSuccess = true;
+                    break;
+                case "currency":
+                    style = FluentNumberStyle.Currency;
+                    conversionSuccess = true;
+                    break;
+                case "percent":
+                    style = FluentNumberStyle.Percent;
+                    conversionSuccess = true;
+                    break;
+                case "unit":
+                    style = FluentNumberStyle.Unit;
+                    conversionSuccess = true;
+                    break;
+                default:
+                    style = default;
+                    conversionSuccess = false;
+                    break;
+            }
+            
+            return conversionSuccess;
+        }
         
+        public static bool TryIntoCurrencyStyle(this FluentString options, out CurrencyDisplayStyle style)
+        {
+            var conversionSuccess = false;
+            switch ((string)options)
+            {
+                case "symbol":
+                    style = CurrencyDisplayStyle.Symbol;
+                    conversionSuccess = true;
+                    break;
+                case "code":
+                    style = CurrencyDisplayStyle.Code;
+                    conversionSuccess = true;
+                    break;
+                case "narrow":
+                    style = CurrencyDisplayStyle.Narrow;
+                    conversionSuccess = true;
+                    break;
+                case "name":
+                    style = CurrencyDisplayStyle.Name;
+                    conversionSuccess = true;
+                    break;
+                default:
+                    style = default;
+                    conversionSuccess = false;
+                    break;
+            }
+            
+            return conversionSuccess;
+        }
     }
 }

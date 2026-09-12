@@ -31,8 +31,16 @@ namespace Linguini.Bundle.Function
         {
             var num = args[0].ToFluentNumber();
             if (num != null)
-                // TODO merge named arguments
+            {
+                if (namedArgs.Count > 0)
+                {
+                    var numOptions = FluentNumberOptions.ToNumberOption(namedArgs);
+                    return num.WithOptions(numOptions);
+
+                }
+
                 return num;
+            }
 
             return new FluentErrType();
         }
@@ -60,7 +68,10 @@ namespace Linguini.Bundle.Function
             for (var i = 0; i < args.Count; i++)
             {
                 var fluentType = args[i].ToFluentNumber();
-                if (fluentType == null) return new FluentErrType();
+                if (fluentType == null)
+                {
+                    return new FluentErrType();
+                }
 
                 sum += fluentType.Value;
             }
@@ -118,8 +129,13 @@ namespace Linguini.Bundle.Function
             {
                 var str = args[i];
                 if (str is FluentString fs)
+                {
                     stringConcat.Append(fs);
-                else if (str is FluentNumber fn) stringConcat.Append(fn);
+                }
+                else if (str is FluentNumber fn)
+                {
+                    stringConcat.Append(fn);
+                }
             }
 
             return (FluentString)stringConcat.ToString();

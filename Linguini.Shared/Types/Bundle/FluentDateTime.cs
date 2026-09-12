@@ -16,23 +16,12 @@ namespace Linguini.Shared.Types.Bundle
     /// </summary>
     public record FluentDateTimeOptions
     {
+        /// <summary>
+        /// The time zone to use for time formatting, such as "America/New_York" or "UTC".
+        /// </summary>
+        public TimeZoneInfo TimeZone;
+
         #region LocaleOptions
-
-        /// <summary>
-        /// The locale matching algorithm to use.
-        /// Possible values are "lookup" and "matching"; the default is "matching".
-        /// </summary>
-        public NegotiationStrategy LocaleMatcher;
-
-        /// <summary>
-        /// The calendar to use, such as "chinese", "gregory", "persian", and so on. 
-        /// </summary>
-        public CalendarOption Calendar;
-
-        /// <summary>
-        /// The numbering system to use for number formatting, such as "arab", "hans", "mathsans", and so on
-        /// </summary>
-        public NumberingSystemOption NumberingSystem;
 
         /// <summary>
         /// Whether to use 12-hour time (as opposed to 24-hour time). Possible values are true and false; the default is
@@ -46,19 +35,11 @@ namespace Linguini.Shared.Types.Bundle
         public HourCycle HourCycle;
 
         /// <summary>
-        /// The time zone to use for time formatting, such as "America/New_York" or "UTC".
-        /// </summary>
-        public TimeZoneInfo TimeZone;
-
-        #endregion
-
-        #region DateTimeOptions
-
-        /// <summary>
         /// Determines the representation style of the day of the week in a formatted date.
         /// Possible values are "Long", "Short", and "Narrow", as defined in the <see cref="DateTimeRepresentation"/> enumeration.
         /// </summary>
         public DateTimeRepresentation Weekday;
+
 
         /// <summary>
         /// Specifies how the era is displayed in a formatted date output.
@@ -121,12 +102,6 @@ namespace Linguini.Shared.Types.Bundle
         #endregion
     }
 
-    /// <summary>
-    /// The calendar to use, such as "chinese", "gregory", "persian", and so on. 
-    /// </summary>
-    public enum CalendarOption
-    {
-    }
 
     /// <summary>
     /// The hour cycle to use. Possible values are "h11", "h12", "h23", and "h24";
@@ -156,7 +131,7 @@ namespace Linguini.Shared.Types.Bundle
         /// Represents a 24-hour clock with the hour ranging from 1 to 24.
         /// Commonly used in locales or formats that follow a military or standard time representation without AM/PM markers.
         /// </summary>
-        H24,
+        H24
     }
 
     /// <summary>
@@ -177,7 +152,7 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Extremely short representation style for time unit. E.g. `T` or `A`.
         /// </summary>
-        Narrow,
+        Narrow
     }
 
     /// <summary>
@@ -193,7 +168,7 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Numeric representation of temporal unit with two digits.
         /// </summary>
-        TwoDigit,
+        TwoDigit
     }
 
     /// <summary>
@@ -224,7 +199,7 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Extremely short textual representation of month. E.g.<c>J</c> for <c>January</c>.
         /// </summary>
-        Narrow,
+        Narrow
     }
 
     /// <summary>
@@ -245,7 +220,7 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Three fractional second digits.
         /// </summary>
-        ThreeDigits,
+        ThreeDigits
     }
 
     /// <summary>
@@ -281,6 +256,6 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Long generic non-location format (e.g., <c>Pacific Time</c>, <c>Nordamerikanische Westküstenzeit</c>)
         /// </summary>
-        LongGeneric,
+        LongGeneric
     }
 }
