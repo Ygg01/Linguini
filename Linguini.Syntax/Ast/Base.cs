@@ -574,16 +574,7 @@ namespace Linguini.Syntax.Ast
     /// </remarks>
     public interface IExpression
     {
-        /// <summary>
-        ///     Returns if the element is trivially resolvable.
-        ///     For example: <see cref="TextLiteral" /> and <see cref="NumberLiteral" /> are simple while variable
-        ///     reference needs additional resolving.
-        /// </summary>
-        /// <returns>true for numbers and strings; false otherwise</returns>
-        public bool IsTriviallyResolvable()
-        {
-            return false;
-        }
+
     }
 
     /// <summary>
