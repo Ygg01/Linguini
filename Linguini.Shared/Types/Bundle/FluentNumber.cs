@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Linguini.Shared.Algorithm;
 using Linguini.Shared.Util;
 
 namespace Linguini.Shared.Types.Bundle
@@ -12,17 +10,36 @@ namespace Linguini.Shared.Types.Bundle
     /// </summary>
     public record FluentNumber : IFluentType
     {
+        /// <inheritdoc/>
+        public virtual bool Equals(FluentNumber? other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return Value.Equals(other.Value);
+        }
+
         /// <summary>
         /// Numerical value of fluent number, depicted using IEEE 754 64-bit floating number.
         /// </summary>
         public readonly double Value;
 
-        private readonly FluentNumberOptions _options;
+        /// <summary>
+        /// Formatting options used for fluent number.
+        /// </summary>
+        public readonly FluentNumberOptions Options;
 
         private FluentNumber(double value, FluentNumberOptions options)
         {
             Value = value;
-            _options = options;
+            Options = options;
         }
 
         /// <summary>
@@ -45,7 +62,7 @@ namespace Linguini.Shared.Types.Bundle
         public string AsString(IFluentContext context)
         {
             var stringVal = Value.ToString(context.Culture);
-            var options = context.NumberOptions ?? _options;
+            var options = context.NumberOptions ?? Options;
             if (options.MinimumFractionDigits != null)
             {
                 var minfd = options.MinimumFractionDigits.Value;
@@ -155,7 +172,7 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc/>
         public IFluentType Copy()
         {
-            return new FluentNumber(Value, _options);
+            return new FluentNumber(Value, Options);
         }
 
         /// <inheritdoc/>
@@ -234,7 +251,7 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Whether to use digits grouping in number display.
         /// </summary>
-        public bool UseGrouping;
+        public UseGrouping UseGrouping;
 
         #endregion
 
@@ -246,7 +263,7 @@ namespace Linguini.Shared.Types.Bundle
             Style = FluentNumberStyle.Decimal;
             Currency = null;
             CurrencyDisplay = CurrencyDisplayStyle.Symbol;
-            UseGrouping = true;
+            UseGrouping = UseGrouping.Auto;
             MinimumIntegerDigits = null;
             MinimumFractionDigits = null;
             MaximumFractionDigits = null;
@@ -285,15 +302,10 @@ namespace Linguini.Shared.Types.Bundle
                 numberOption.CurrencyDisplay = currencyDisplay;
             }
 
-            if (options.TryGetValue("useGrouping", out var useGrouping) &&
-                useGrouping is FluentString useGroupingStr)
+            if (options.TryGetValue("useGrouping", out var ft4) &&
+                ft4 is FluentString useGroupingStr && useGroupingStr.TryIntoUseGrouping(out var useGrouping))
             {
-                numberOption.UseGrouping = (string)useGroupingStr switch
-                {
-                    "true"  => true,
-                    "false" => false,
-                    _       => numberOption.UseGrouping
-                };
+                numberOption.UseGrouping = useGrouping;
             }
             
             if (options.TryGetValue("minimumIntegerDigits", out var minIntDig) &&
@@ -386,17 +398,18 @@ namespace Linguini.Shared.Types.Bundle
     /// <summary>
     /// How decimals should be rounded. 
     /// </summary>
-    public enum UseGrouping
+    public enum UseGrouping : byte
     {
-        /// <summary>
-        /// Display grouping separators even if the locale prefers otherwise
-        /// </summary>
-        Always,
-
         /// <summary>
         /// Display grouping separators based on the locale preference, which may also be dependent on the currency.
         /// </summary>
         Auto,
+        
+        /// <summary>
+        /// Display grouping separators even if the locale prefers otherwise
+        /// </summary>
+        Always,
+        
 
         /// <summary>
         /// Display grouping separators when there are at least 2 digits in a group.
@@ -409,11 +422,20 @@ namespace Linguini.Shared.Types.Bundle
         False
     }
 
+    /// <summary>
+    /// Utility for converting a <see cref="FluentString"/> to a corresponding enum.
+    /// </summary>
     public static class FluentNumberExtensions
     {
+        /// <summary>
+        /// Attempts to convert a <see cref="FluentString"/> to a corresponding <see cref="FluentNumberStyle"/>.
+        /// </summary>
+        /// <param name="options">The <see cref="FluentString"/> representing the desired currency display style.</param>
+        /// <param name="style">When this method returns, contains the resulting <see cref="FluentNumberStyle"/> if the conversion succeeded; otherwise, contains the default value of <see cref="CurrencyDisplayStyle"/>.</param>
+        /// <returns><c>true</c> if the conversion succeeded; otherwise, <c>false</c>.</returns>
         public static bool TryIntoNumberOption(this FluentString options, out FluentNumberStyle style)
         {
-            var conversionSuccess = false;
+            bool conversionSuccess;
             switch ((string)options)
             {
                 case "decimal":
@@ -440,10 +462,16 @@ namespace Linguini.Shared.Types.Bundle
             
             return conversionSuccess;
         }
-        
+
+        /// <summary>
+        /// Attempts to convert a <see cref="FluentString"/> to a corresponding <see cref="CurrencyDisplayStyle"/>.
+        /// </summary>
+        /// <param name="options">The <see cref="FluentString"/> representing the desired currency display style.</param>
+        /// <param name="style">When this method returns, contains the resulting <see cref="CurrencyDisplayStyle"/> if the conversion succeeded; otherwise, contains the default value of <see cref="CurrencyDisplayStyle"/>.</param>
+        /// <returns><c>true</c> if the conversion succeeded; otherwise, <c>false</c>.</returns>
         public static bool TryIntoCurrencyStyle(this FluentString options, out CurrencyDisplayStyle style)
         {
-            var conversionSuccess = false;
+            bool conversionSuccess;
             switch ((string)options)
             {
                 case "symbol":
@@ -464,6 +492,42 @@ namespace Linguini.Shared.Types.Bundle
                     break;
                 default:
                     style = default;
+                    conversionSuccess = false;
+                    break;
+            }
+            
+            return conversionSuccess;
+        }
+        
+        /// <summary>
+        /// Attempts to convert a <see cref="FluentString"/> to a corresponding <see cref="CurrencyDisplayStyle"/>.
+        /// </summary>
+        /// <param name="options">The <see cref="FluentString"/> representing the desired currency display style.</param>
+        /// <param name="style">When this method returns, contains the resulting <see cref="CurrencyDisplayStyle"/> if the conversion succeeded; otherwise, contains the default value of <see cref="CurrencyDisplayStyle"/>.</param>
+        /// <returns><c>true</c> if the conversion succeeded; otherwise, <c>false</c>.</returns>
+        public static bool TryIntoUseGrouping(this FluentString options, out UseGrouping style)
+        {
+            bool conversionSuccess;
+            switch ((string)options)
+            {
+                case "always": case "true":
+                    style = UseGrouping.Always;
+                    conversionSuccess = true;
+                    break;
+                case "false":
+                    style = UseGrouping.False;
+                    conversionSuccess = true;
+                    break;
+                case "min2":
+                    style = UseGrouping.Min2;
+                    conversionSuccess = true;
+                    break;
+                case "auto":
+                    style = UseGrouping.Auto;
+                    conversionSuccess = true;
+                    break;
+                default:
+                    style = UseGrouping.Auto;
                     conversionSuccess = false;
                     break;
             }
