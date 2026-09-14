@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Linguini.Shared.Types
 {
     /// <summary>
     /// Represents the operands used in plural rule calculations to determine plural forms.
+    ///
+    /// See <a href="https://unicode.org/reports/tr35/tr35-numbers.html#Operands">CLDR Plural Operands</a> for more information.
     /// </summary>
     public class PluralOperands
     {
@@ -16,7 +19,7 @@ namespace Linguini.Shared.Types
         /// <returns><c>true</c> if the operands are equal; otherwise, <c>false</c>.</returns>
         protected bool Equals(PluralOperands other)
         {
-            return N.Equals(other.N) && I == other.I && V == other.V && W == other.W && F == other.F && T == other.T;
+            return N.Equals(other.N) && I == other.I && V == other.V && W == other.W && F == other.F && T == other.T && C == other.C;
         }
 
         
@@ -32,7 +35,7 @@ namespace Linguini.Shared.Types
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return HashCode.Combine(N, I, V, W, F, T);
+            return HashCode.Combine(N, I, V, W, F, T, C);
         }
 
         /// <summary>
@@ -88,7 +91,7 @@ namespace Linguini.Shared.Types
         public readonly long T;
         
         /// <summary>
-        /// compact decimal exponent value: exponent of the power of 10 used in compact decimal formatting.
+        /// Compact decimal exponent value: exponent of the power of 10 used in compact decimal formatting.
         /// </summary>
         public readonly long C;
 
@@ -102,7 +105,8 @@ namespace Linguini.Shared.Types
         /// <param name="w">The number of visible fraction digits in <c>N</c>, without trailing zeros.</param>
         /// <param name="f">The visible fraction digits in <c>N</c> with trailing zeros, expressed as an integer.</param>
         /// <param name="t">The visible fraction digits in <c>N</c> without trailing zeros, expressed as an integer.</param>
-        public PluralOperands(double n, ulong i, int v, int w, long f, long t)
+        /// <param name="c">Compact decimal exponent value.</param>
+        public PluralOperands(double n, ulong i, int v, int w, long f, long t, long c)
         {
             N = n;
             I = i;
@@ -110,13 +114,13 @@ namespace Linguini.Shared.Types
             W = w;
             F = f;
             T = t;
-            C = (int)Math.Floor(Math.Log10(N));
+            C = c;
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"PluralOperands (N: {N}, I: {I}, V: {V}, W: {W}, F: {F}, T: {T})";
+            return $"PluralOperands (N: {N}, I: {I}, V: {V}, W: {W}, F: {F}, T: {T}, C: {C})";
         }
     }
 
@@ -130,13 +134,16 @@ namespace Linguini.Shared.Types
         /// For given <see cref="string"/> input, will convert it to number and then try to find it's <see cref="PluralOperands"/>
         /// necessary for determining plural forms for a given language.
         /// </summary>
-        /// <param name="input">number as a string, using <see cref="NumberFormatInfo.InvariantInfo"/> parsing rules.</param>
+        /// <param name="strInput">number as a string, using <see cref="NumberFormatInfo.InvariantInfo"/> parsing rules.</param>
         /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
         /// <returns>true if the number is parsable to a <see cref="PluralOperands"/>; false otherwise.</returns>
-        public static bool TryPluralOperands(this string input, [NotNullWhen(true)] out PluralOperands? operands)
+        public static bool TryPluralOperands(this string strInput, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            var spanStart = input.StartsWith("-") ? 1 : 0;
-            var absStr = input.AsSpan()[spanStart..];
+            // replace any 1c3 string to 1e3 which is a valid double
+            var input = Regex.Replace(strInput, "[cC]", "e");
+            var expPosition = input.IndexOf('e');
+            var minusStart = input.StartsWith("-") ? 1 : 0;
+            var absStr = input.AsSpan()[minusStart..];
  
             if (!double.TryParse(absStr.ToString(),
                     NumberStyles.Float | NumberStyles.AllowThousands, NumberFormatInfo.InvariantInfo,
@@ -151,10 +158,20 @@ namespace Linguini.Shared.Types
             var numFractionDigits = 0;
             var fractionDigits0 = 0 ;
             var fractionDigits = 0;
+            var exp = 0;
             var decPos = absStr.IndexOf('.');
-            if (decPos > -1)
+            var fixedDecPos = decPos + 1;
+            var endDecPos = absStr.Length;
+            if (expPosition != -1 && expPosition < input.Length)
             {
-                var decStr = absStr[(decPos + 1) ..];
+                exp = int.Parse(input[(expPosition + 1)..]);
+                fixedDecPos += exp;
+                endDecPos = expPosition;
+            }
+            
+            if (decPos > -1 && fixedDecPos < absStr.Length)
+            {
+                var decStr = absStr[fixedDecPos ..endDecPos];
                 var backTrace = decStr.TrimEnd('0');
 
                 numFractionDigits0 = decStr.Length;
@@ -179,7 +196,8 @@ namespace Linguini.Shared.Types
                 numFractionDigits0,
                 numFractionDigits,
                 fractionDigits0,
-                fractionDigits
+                fractionDigits,
+                exp
             );
             return true;
         }
@@ -237,6 +255,7 @@ namespace Linguini.Shared.Types
                 0,
                 0,
                 0,
+                0,
                 0
             );
             return true;
@@ -261,6 +280,7 @@ namespace Linguini.Shared.Types
                 0,
                 0,
                 0,
+                0,
                 0
             );
             return true;
@@ -278,6 +298,7 @@ namespace Linguini.Shared.Types
             operands = new(
                 Convert.ToDouble(input),
                 Convert.ToUInt64(input),
+                0,
                 0,
                 0,
                 0,
@@ -301,6 +322,7 @@ namespace Linguini.Shared.Types
                 0,
                 0,
                 0,
+                0,
                 0
             );
             return true;
@@ -318,6 +340,7 @@ namespace Linguini.Shared.Types
             operands = new(
                 Convert.ToDouble(input),
                 Convert.ToUInt64(input),
+                0,
                 0,
                 0,
                 0,
