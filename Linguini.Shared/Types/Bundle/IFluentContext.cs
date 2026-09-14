@@ -30,16 +30,6 @@ namespace Linguini.Shared.Types.Bundle
         /// it overrides the default options set by the culture.
         /// </summary>
         public FluentDateTimeOptions? DateTimeOptions { get; }
-        
-        /// <summary>
-        /// Formatter used to format numbers.
-        /// </summary>
-        public NumberFormatInfo NumberFormatInfo { get; }
-        
-        /// <summary>
-        /// Formatter used to format date-times.
-        /// </summary>
-        public DateTimeFormatInfo DateTimeFormatInfo  { get; }
 
     }
 
@@ -65,13 +55,7 @@ namespace Linguini.Shared.Types.Bundle
 
         /// <inheritdoc />
         public FluentDateTimeOptions? DateTimeOptions { get; }
-
-        /// <inheritdoc />
-        public NumberFormatInfo NumberFormatInfo { get; }
         
-        /// <inheritdoc />
-        public DateTimeFormatInfo DateTimeFormatInfo { get; }
-
         /// <summary>
         /// Private constructor to prevent instantiation from outside.
         /// </summary>
@@ -81,8 +65,6 @@ namespace Linguini.Shared.Types.Bundle
             Culture = CultureInfo.InvariantCulture;
             NumberOptions = null;
             DateTimeOptions = null;
-            NumberFormatInfo = Culture.NumberFormat;
-            DateTimeFormatInfo = Culture.DateTimeFormat;
         }
     }
 }

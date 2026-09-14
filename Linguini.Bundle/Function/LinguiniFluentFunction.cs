@@ -35,8 +35,6 @@ namespace Linguini.Bundle.Function
                 if (namedArgs.Count > 0)
                 {
                     var numOptions = FluentNumberOptions.ToNumberOption(namedArgs);
-                    return num.WithOptions(numOptions);
-
                 }
 
                 return num;

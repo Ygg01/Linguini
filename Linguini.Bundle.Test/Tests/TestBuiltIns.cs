@@ -14,7 +14,15 @@ namespace Linguini.Bundle.Test.Tests
             yield return new TestCaseData(
                 0.0,
                 "en-US",
-                new FluentNumberOptions(){},
+                new FluentNumberOptions(),
+                "0");
+            yield return new TestCaseData(
+                0.0,
+                "en-US",
+                new FluentNumberOptions()
+                {
+                    MinimumFractionDigits = 1
+                },
                 "0.0");
         }
 

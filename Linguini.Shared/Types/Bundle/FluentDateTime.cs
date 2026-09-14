@@ -164,7 +164,6 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Specifies the formatting style for the minute in date and time representations.
         /// Possible values include "Numeric" and "TwoDigit", determining how the day should be displayed.
-        /// E.g., for the 3rd minute of the day, "Numeric" would display <c>3</c> while "TwoDigit" would display <c>03</c>.
         /// </summary>
         public NumericDateFormat Minute;
 

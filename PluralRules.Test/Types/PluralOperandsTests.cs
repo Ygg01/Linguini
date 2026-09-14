@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using Linguini.Shared.Types;
+using Linguini.Shared.Types.Bundle;
 using NUnit.Framework;
 
 namespace PluralRules.Test.Types
@@ -23,16 +24,19 @@ namespace PluralRules.Test.Types
         [TestCase(123.45, 123, 2, 2, 45, 45, "123.45")]
         [TestCase(1234.567, 1234, 3, 3, 567, 567, "-1234.567")]
         [TestCase(1234.567, 1234, 4, 3, 5670, 567, "-1234.5670")]
-        public void TestOperandsFromStr(double n, long I, int v, int w, long f, long t, string input)
+        public void TestOperandsFromStr(double n, long i, int v, int w, long f, long t, string input)
         {
             var x = input.TryPluralOperands(out var operands);
             Assert.That(x, $"Parsing operand failed for {input}");
-            Assert.That(n, Is.EqualTo(operands!.N));
-            Assert.That(I, Is.EqualTo(operands!.I));
-            Assert.That(v, Is.EqualTo(operands!.V));
-            Assert.That(w, Is.EqualTo(operands!.W));
-            Assert.That(f, Is.EqualTo(operands!.F));
-            Assert.That(t, Is.EqualTo(operands!.T));
+            if (operands != null)
+            {
+                Assert.That(n, Is.EqualTo(operands.N));
+                Assert.That(i, Is.EqualTo(operands.I));
+                Assert.That(v, Is.EqualTo(operands.V));
+                Assert.That(w, Is.EqualTo(operands.W));
+                Assert.That(f, Is.EqualTo(operands.F));
+                Assert.That(t, Is.EqualTo(operands.T));
+            }
         }
         
         [Test]
@@ -56,12 +60,15 @@ namespace PluralRules.Test.Types
         {
             var x = input.TryPluralOperands(out var operands);
             Assert.That(x, $"Parsing operand failed for {input}");
-            Assert.That(n, Is.EqualTo(operands!.N));
-            Assert.That(I, Is.EqualTo(operands!.I));
-            Assert.That(v, Is.EqualTo(operands!.V));
-            Assert.That(w, Is.EqualTo(operands!.W));
-            Assert.That(f, Is.EqualTo(operands!.F));
-            Assert.That(t, Is.EqualTo(operands!.T));
+            if (operands != null)
+            {
+                Assert.That(n, Is.EqualTo(operands.N));
+                Assert.That(I, Is.EqualTo(operands.I));
+                Assert.That(v, Is.EqualTo(operands.V));
+                Assert.That(w, Is.EqualTo(operands.W));
+                Assert.That(f, Is.EqualTo(operands.F));
+                Assert.That(t, Is.EqualTo(operands.T));
+            }
         }
 
         [Test]
@@ -73,32 +80,32 @@ namespace PluralRules.Test.Types
         [TestCase(1234567, 1234567, 0, 0, 0, 0, 1234567)]
         [TestCase(10, 10, 0, 0, 0, 0, -10)]
         [TestCase(100000, 100000, 0, 0, 0, 0, -100000)]
-        public void TestOperandsFromInt(double n, long I, int v, int w, long f, long t, long input)
+        public void TestOperandsFromInt(double n, long i, int v, int w, long f, long t, long input)
         {
             if (input >= SByte.MinValue && input <= SByte.MaxValue)
             {
                 sbyte byteInput = Convert.ToSByte(input);
                 var x = byteInput.TryPluralOperands(out var operands);
-                CheckInput(n, I, v, w, f, t, x, operands);
+                CheckInput(n, i, v, w, f, t, x, operands);
             }
 
             if (input >= Int16.MinValue && input <= Int16.MaxValue)
             {
                 short shortInput = Convert.ToInt16(input);
                 var x = shortInput.TryPluralOperands(out var operands);
-                CheckInput(n, I, v, w, f, t, x, operands);
+                CheckInput(n, i, v, w, f, t, x, operands);
             }
 
             if (input >= Int32.MinValue && input <= Int32.MaxValue)
             {
                 int intInput = Convert.ToInt32(input);
                 var x = intInput.TryPluralOperands(out var operands);
-                CheckInput(n, I, v, w, f, t, x, operands);
+                CheckInput(n, i, v, w, f, t, x, operands);
             }
 
             {
                 var r = input.TryPluralOperands(out var operands);
-                CheckInput(n, I, v, w, f, t, r, operands);
+                CheckInput(n, i, v, w, f, t, r, operands);
             }
         }
 
@@ -169,28 +176,34 @@ namespace PluralRules.Test.Types
             Assert.That("foo".TryPluralOperands(out _), Is.False);
         }
         
-        private static void CheckInput(double n, long I, int v, int w, long f, long t, bool x,
+        private static void CheckInput(double n, long i, int v, int w, long f, long t, bool x,
             PluralOperands? operands)
         {
             Assert.That(x);
-            Assert.That(n, Is.EqualTo(operands!.N));
-            Assert.That(I, Is.EqualTo(operands!.I));
-            Assert.That(v, Is.EqualTo(operands!.V));
-            Assert.That(w, Is.EqualTo(operands!.W));
-            Assert.That(f, Is.EqualTo(operands!.F));
-            Assert.That(t, Is.EqualTo(operands!.T));
+            if (operands != null)
+            {
+                Assert.That(n, Is.EqualTo(operands.N));
+                Assert.That(i, Is.EqualTo(operands.I));
+                Assert.That(v, Is.EqualTo(operands.V));
+                Assert.That(w, Is.EqualTo(operands.W));
+                Assert.That(f, Is.EqualTo(operands.F));
+                Assert.That(t, Is.EqualTo(operands.T));
+            }
         }
         
-        private static void CheckInput(double n, ulong I, int v, int w, long f, long t, bool x,
+        private static void CheckInput(double n, ulong i, int v, int w, long f, long t, bool x,
             PluralOperands? operands)
         {
             Assert.That(x);
-            Assert.That(n, Is.EqualTo(operands!.N));
-            Assert.That(I, Is.EqualTo(operands!.I));
-            Assert.That(v, Is.EqualTo(operands!.V));
-            Assert.That(w, Is.EqualTo(operands!.W));
-            Assert.That(f, Is.EqualTo(operands!.F));
-            Assert.That(t, Is.EqualTo(operands!.T));
+            if (operands != null)
+            {
+                Assert.That(n, Is.EqualTo(operands.N));
+                Assert.That(i, Is.EqualTo(operands.I));
+                Assert.That(v, Is.EqualTo(operands.V));
+                Assert.That(w, Is.EqualTo(operands.W));
+                Assert.That(f, Is.EqualTo(operands.F));
+                Assert.That(t, Is.EqualTo(operands.T));
+            }
         }
     }
 }

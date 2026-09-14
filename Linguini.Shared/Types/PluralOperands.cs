@@ -346,41 +346,7 @@ namespace Linguini.Shared.Types
 
         #region FLOATS
 
-        /// <summary>
-        /// For given <see cref="float"/> input, will try to find its <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
-        /// </summary>
-        /// <param name="input"><see cref="FluentNumber"/> to convert to <see cref="PluralOperands"/></param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
-        /// <returns>true if conversion succeeds; otherwise false</returns>
-        public static bool TryPluralOperands(this float input, [NotNullWhen(true)] out PluralOperands? operands)
-        {
-            return input.ToString(CultureInfo.InvariantCulture).TryPluralOperands(out operands);
-        }
 
-        /// <summary>
-        /// For given <see cref="float"/> input, will try to find its <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
-        /// </summary>
-        /// <param name="input"><see cref="FluentNumber"/> to convert to <see cref="PluralOperands"/></param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
-        /// <returns>true if conversion succeeds; otherwise false</returns>
-        public static bool TryPluralOperands(this double input, [NotNullWhen(true)] out PluralOperands? operands)
-        {
-            return input.ToString(CultureInfo.InvariantCulture).TryPluralOperands(out operands);
-        }
-
-        /// <summary>
-        /// For given <see cref="FluentNumber"/> input, will try to find its <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
-        /// </summary>
-        /// <param name="input"><see cref="FluentNumber"/> to convert to <see cref="PluralOperands"/></param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
-        /// <returns>true</returns>
-        public static bool TryPluralOperands(this FluentNumber input, [NotNullWhen(true)] out PluralOperands? operands)
-        {
-            return input.AsString().TryPluralOperands(out operands);
-        }
 
         #endregion
     }

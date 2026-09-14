@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+
 using Linguini.Shared.Util;
 
 namespace Linguini.Shared.Types.Bundle
@@ -31,26 +33,41 @@ namespace Linguini.Shared.Types.Bundle
         /// </summary>
         public readonly double Value;
 
-        /// <summary>
-        /// Formatting options used for fluent number.
-        /// </summary>
-        public readonly FluentNumberOptions Options;
+        private readonly PluralOperands? _operands;
 
-        private FluentNumber(double value, FluentNumberOptions options)
+
+
+        private FluentNumber(double value)
         {
+            _operands = ParseOperands(value, value.ToString(CultureInfo.InvariantCulture.NumberFormat));
             Value = value;
-            Options = options;
         }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="FluentNumber"/> with the specified options.
-        /// </summary>
-        /// <param name="options">The <see cref="FluentNumberOptions"/> to apply to the current number.</param>
-        /// <returns>A new <see cref="FluentNumber"/> instance with the applied options.</returns>
-        public FluentNumber WithOptions(FluentNumberOptions options)
+        
+        private FluentNumber(ReadOnlySpan<char> input)
         {
-            return new FluentNumber(Value, options);
+            Value = double.Parse(input.ToString(), NumberStyles.Float | NumberStyles.AllowThousands,
+                CultureInfo.InvariantCulture);
+            _operands = ParseOperands(Value, input);
         }
+        
+        private static PluralOperands ParseOperands(double n, ReadOnlySpan<char> input)
+        {
+            var intDigits = (uint)Math.Abs(Math.Truncate(n));
+            var commaPos = input.IndexOf('.');
+            var comma = commaPos == -1 ? input.Length : commaPos;
+            
+            var fractionPart = (commaPos == input.Length || commaPos == -1) ? "" : input.Slice(comma + 1);
+            var trimFractionPart = fractionPart.TrimEnd("0");
+            
+            var numVisibleFract = fractionPart.Length;
+            var numFractionWithoutZero = trimFractionPart.Length;
+            var fractionIntWithZero = fractionPart.IsEmpty ? 0 : int.Parse(fractionPart);
+            var fractionIntWithoutZero = trimFractionPart.IsEmpty ? 0 : int.Parse(trimFractionPart);
+           
+           return new PluralOperands(n, intDigits, numVisibleFract, numFractionWithoutZero, fractionIntWithZero, fractionIntWithoutZero);
+
+        }
+        
 
         /// <inheritdoc/>
         public string AsString()
@@ -62,10 +79,9 @@ namespace Linguini.Shared.Types.Bundle
         public string AsString(IFluentContext context)
         {
             var stringVal = Value.ToString(context.Culture);
-            var options = context.NumberOptions ?? Options;
-            if (options.MinimumFractionDigits != null)
+            if (context.NumberOptions?.MinimumFractionDigits != null)
             {
-                var minfd = options.MinimumFractionDigits.Value;
+                var minfd = context.NumberOptions.MinimumFractionDigits.Value;
                 var pos = stringVal.IndexOf('.');
                 if (pos != -1)
                 {
@@ -106,15 +122,7 @@ namespace Linguini.Shared.Types.Bundle
         /// <returns>extracted <see cref="FluentNumber"/></returns>
         public static FluentNumber FromString(ReadOnlySpan<char> input)
         {
-            var parsed = double.Parse(input.ToString(), NumberStyles.Float | NumberStyles.AllowThousands,
-                                      CultureInfo.InvariantCulture);
-            var options = new FluentNumberOptions();
-            if (input.IndexOf('.') != -1)
-            {
-                options.MinimumFractionDigits = input.Length - input.IndexOf('.') - 1;
-            }
-
-            return new FluentNumber(parsed, options);
+            return new FluentNumber(input);
         }
 
         /// <summary>
@@ -158,7 +166,7 @@ namespace Linguini.Shared.Types.Bundle
         /// </summary>
         public static implicit operator FluentNumber(double db)
         {
-            return new FluentNumber(db, new FluentNumberOptions());
+            return new FluentNumber(db);
         }
 
         /// <summary>
@@ -166,19 +174,31 @@ namespace Linguini.Shared.Types.Bundle
         /// </summary>
         public static implicit operator FluentNumber(float fl)
         {
-            return new FluentNumber(fl, new FluentNumberOptions());
+            return new FluentNumber((double)fl);
         }
 
         /// <inheritdoc/>
         public IFluentType Copy()
         {
-            return new FluentNumber(Value, Options);
+            return new FluentNumber(Value);
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
             return Value.GetHashCode();
+        }
+        
+        /// <summary>
+        /// For given <see cref="FluentNumber"/> input, will try to find its <see cref="PluralOperands"/>
+        /// necessary for determining plural forms for a given language.
+        /// </summary>
+        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
+        /// <returns>true</returns>
+        public bool TryPluralOperands([NotNullWhen(true)] out PluralOperands? operands)
+        {
+            operands = _operands;
+            return operands != null;
         }
     }
 
@@ -290,14 +310,15 @@ namespace Linguini.Shared.Types.Bundle
                 numberOption.Style = style;
             }
 
-            if (options.TryGetValue("currency", out var ft2) 
+            if (options.TryGetValue("currency", out var ft2)
                 && ft2 is FluentString currencyStr)
             {
                 numberOption.Currency = currencyStr;
             }
 
             if (options.TryGetValue("currencyDisplay", out var ft3) &&
-                ft3 is FluentString currencyDisplayStr && currencyDisplayStr.TryIntoCurrencyStyle(out var currencyDisplay))
+                ft3 is FluentString currencyDisplayStr &&
+                currencyDisplayStr.TryIntoCurrencyStyle(out var currencyDisplay))
             {
                 numberOption.CurrencyDisplay = currencyDisplay;
             }
@@ -307,31 +328,31 @@ namespace Linguini.Shared.Types.Bundle
             {
                 numberOption.UseGrouping = useGrouping;
             }
-            
+
             if (options.TryGetValue("minimumIntegerDigits", out var minIntDig) &&
                 minIntDig is FluentNumber minIntDigNum)
             {
                 numberOption.MinimumIntegerDigits = (int)minIntDigNum;
             }
-            
+
             if (options.TryGetValue("minimumFractionDigits", out var minFracDig) &&
                 minFracDig is FluentNumber minFracDigNum)
             {
                 numberOption.MinimumFractionDigits = (int)minFracDigNum;
             }
-            
+
             if (options.TryGetValue("maximumFractionDigits", out var maxFracDig) &&
                 maxFracDig is FluentNumber maxFracDigNum)
             {
                 numberOption.MaximumFractionDigits = (int)maxFracDigNum;
             }
-            
+
             if (options.TryGetValue("minimumSignificantDigits", out var minSigDig) &&
                 minSigDig is FluentNumber minSigDigNum)
             {
                 numberOption.MinimumSignificantDigits = (int)minSigDigNum;
             }
-            
+
             if (options.TryGetValue("maximumSignificantDigits", out var maxSigDig) &&
                 maxSigDig is FluentNumber maxSigDigNum)
             {
@@ -404,12 +425,12 @@ namespace Linguini.Shared.Types.Bundle
         /// Display grouping separators based on the locale preference, which may also be dependent on the currency.
         /// </summary>
         Auto,
-        
+
         /// <summary>
         /// Display grouping separators even if the locale prefers otherwise
         /// </summary>
         Always,
-        
+
 
         /// <summary>
         /// Display grouping separators when there are at least 2 digits in a group.
@@ -459,7 +480,7 @@ namespace Linguini.Shared.Types.Bundle
                     conversionSuccess = false;
                     break;
             }
-            
+
             return conversionSuccess;
         }
 
@@ -495,10 +516,10 @@ namespace Linguini.Shared.Types.Bundle
                     conversionSuccess = false;
                     break;
             }
-            
+
             return conversionSuccess;
         }
-        
+
         /// <summary>
         /// Attempts to convert a <see cref="FluentString"/> to a corresponding <see cref="CurrencyDisplayStyle"/>.
         /// </summary>
@@ -510,7 +531,8 @@ namespace Linguini.Shared.Types.Bundle
             bool conversionSuccess;
             switch ((string)options)
             {
-                case "always": case "true":
+                case "always":
+                case "true":
                     style = UseGrouping.Always;
                     conversionSuccess = true;
                     break;
@@ -531,8 +553,34 @@ namespace Linguini.Shared.Types.Bundle
                     conversionSuccess = false;
                     break;
             }
-            
+
             return conversionSuccess;
         }
+        
+                /// <summary>
+        /// For given <see cref="float"/> input, will try to find its <see cref="PluralOperands"/>
+        /// necessary for determining plural forms for a given language.
+        /// </summary>
+        /// <param name="input"><see cref="FluentNumber"/> to convert to <see cref="PluralOperands"/></param>
+        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
+        /// <returns>true if conversion succeeds; otherwise false</returns>
+        public static bool TryPluralOperands(this float input, [NotNullWhen(true)] out PluralOperands? operands)
+        {
+            return input.ToString(CultureInfo.InvariantCulture).TryPluralOperands(out operands);
+        }
+
+        /// <summary>
+        /// For given <see cref="float"/> input, will try to find its <see cref="PluralOperands"/>
+        /// necessary for determining plural forms for a given language.
+        /// </summary>
+        /// <param name="input"><see cref="FluentNumber"/> to convert to <see cref="PluralOperands"/></param>
+        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
+        /// <returns>true if conversion succeeds; otherwise false</returns>
+        public static bool TryPluralOperands(this double input, [NotNullWhen(true)] out PluralOperands? operands)
+        {
+            return input.ToString(CultureInfo.InvariantCulture).TryPluralOperands(out operands);
+        }
+
+
     }
 }
