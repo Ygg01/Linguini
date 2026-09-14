@@ -39,33 +39,22 @@ namespace Linguini.Shared.Types.Bundle
 
         private FluentNumber(double value)
         {
-            _operands = ParseOperands(value, value.ToString(CultureInfo.InvariantCulture.NumberFormat));
+            var parsedDbl = value.ToString(CultureInfo.InvariantCulture.NumberFormat);
+            if (parsedDbl.TryPluralOperands(out var ops))
+            {
+                _operands = ops;
+            }
             Value = value;
         }
         
         private FluentNumber(ReadOnlySpan<char> input)
         {
-            Value = double.Parse(input.ToString(), NumberStyles.Float | NumberStyles.AllowThousands,
-                CultureInfo.InvariantCulture);
-            _operands = ParseOperands(Value, input);
-        }
-        
-        private static PluralOperands ParseOperands(double n, ReadOnlySpan<char> input)
-        {
-            var intDigits = (uint)Math.Abs(Math.Truncate(n));
-            var commaPos = input.IndexOf('.');
-            var comma = commaPos == -1 ? input.Length : commaPos;
-            
-            var fractionPart = (commaPos == input.Length || commaPos == -1) ? "" : input.Slice(comma + 1);
-            var trimFractionPart = fractionPart.TrimEnd("0");
-            
-            var numVisibleFract = fractionPart.Length;
-            var numFractionWithoutZero = trimFractionPart.Length;
-            var fractionIntWithZero = fractionPart.IsEmpty ? 0 : int.Parse(fractionPart);
-            var fractionIntWithoutZero = trimFractionPart.IsEmpty ? 0 : int.Parse(trimFractionPart);
-           
-           return new PluralOperands(n, intDigits, numVisibleFract, numFractionWithoutZero, fractionIntWithZero, fractionIntWithoutZero);
-
+            if (!input.ToString().TryPluralOperands(out var ops))
+            {
+                throw new ArgumentException("Invalid input for plural operands");
+            }
+            _operands = ops;
+            Value = ops.N;
         }
         
 

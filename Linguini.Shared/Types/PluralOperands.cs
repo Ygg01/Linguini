@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Linguini.Shared.Types.Bundle;
 
 namespace Linguini.Shared.Types
 {
@@ -134,12 +133,11 @@ namespace Linguini.Shared.Types
         /// <param name="input">number as a string, using <see cref="NumberFormatInfo.InvariantInfo"/> parsing rules.</param>
         /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
         /// <returns>true if the number is parsable to a <see cref="PluralOperands"/>; false otherwise.</returns>
-        public static bool TryPluralOperands(this string input, out PluralOperands? operands)
+        public static bool TryPluralOperands(this string input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            var absStr = input.StartsWith("-")
-                ? input.AsSpan()[1..]
-                : input.AsSpan();
-
+            var spanStart = input.StartsWith("-") ? 1 : 0;
+            var absStr = input.AsSpan()[spanStart..];
+ 
             if (!double.TryParse(absStr.ToString(),
                     NumberStyles.Float | NumberStyles.AllowThousands, NumberFormatInfo.InvariantInfo,
                     out var absoluteValue))
@@ -148,45 +146,31 @@ namespace Linguini.Shared.Types
                 return false;
             }
             
-            ulong intDigits;
-            int numFractionDigits0;
-            int numFractionDigits;
-            long fractionDigits0;
-            long fractionDigits;
+            ulong intDigits = (uint)Math.Truncate(absoluteValue);
+            var numFractionDigits0 = 0;
+            var numFractionDigits = 0;
+            var fractionDigits0 = 0 ;
+            var fractionDigits = 0;
             var decPos = absStr.IndexOf('.');
             if (decPos > -1)
             {
-                var intStr = absStr[..decPos];
                 var decStr = absStr[(decPos + 1) ..];
-
-                if (!ulong.TryParse(intStr.ToString(), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out intDigits))
-                {
-                    operands = null;
-                    return false;
-                }
-
                 var backTrace = decStr.TrimEnd('0');
 
                 numFractionDigits0 = decStr.Length;
                 numFractionDigits = backTrace.Length;
-                if (!long.TryParse(decStr.ToString(), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits0))
-                {
-                    operands = null;
-                    return false;
-                }
-
-                if (!long.TryParse(backTrace.ToString(), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits))
-                {
-                    fractionDigits = 0;
-                }
-            }
-            else
-            {
-                intDigits = Convert.ToUInt64(absoluteValue);
-                numFractionDigits0 = 0;
-                numFractionDigits = 0;
-                fractionDigits0 = 0;
-                fractionDigits = 0;
+                fractionDigits0 = decStr.Length > 0 ? int.Parse(decStr) : 0;
+                fractionDigits = backTrace.Length > 0 ? int.Parse(backTrace) : 0;
+                // if (!int.TryParse(decStr.ToString(), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits0))
+                // {
+                //     operands = null;
+                //     return false;
+                // }
+                //
+                // if (!int.TryParse(backTrace.ToString(), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits))
+                // {
+                //     fractionDigits = 0;
+                // }
             }
 
             operands = new(
@@ -344,10 +328,5 @@ namespace Linguini.Shared.Types
 
         #endregion
 
-        #region FLOATS
-
-
-
-        #endregion
     }
 }
