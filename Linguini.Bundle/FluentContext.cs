@@ -1,4 +1,7 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
+using System.Text;
+using System.Xml;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 
@@ -23,10 +26,10 @@ namespace Linguini.Bundle
         public FluentDateTimeOptions? DateTimeOptions { get; }
 
         /// <inheritdoc />
-        public NumberFormatInfo NumberFormatInfo { get; }
+        public string? NumFormatStr { get; }
 
         /// <inheritdoc />
-        public DateTimeFormatInfo DateTimeFormatInfo { get; }
+        public NumberFormatInfo NumberFormatInfo { get; }
 
 
         /// <summary>
@@ -41,8 +44,8 @@ namespace Linguini.Bundle
             Locale = LangLocId.FromCultureInfo(Culture);
             NumberOptions = new FluentNumberOptions();
             DateTimeOptions = new FluentDateTimeOptions();
-            NumberFormatInfo = culture.NumberFormat;
-            DateTimeFormatInfo = culture.DateTimeFormat;
+            NumFormatStr = null;
+            NumberFormatInfo = Culture.NumberFormat;
         }
 
         /// <summary>
@@ -50,19 +53,47 @@ namespace Linguini.Bundle
         /// for Fluent localization. This includes locale information, number and date formatting options,
         /// as well as the underlying culture settings.
         /// </summary>
-        /// <param name="culture"><see cref="LangLocId"/> that determines the culture upon which the other fields will be set.</param>
+        /// <param name="locale"><see cref="LangLocId"/> that determines the culture upon which the other fields will be set.</param>
         /// <param name="numberOptions">Optional <see cref="FluentNumberOptions"/> that determines the number's formatting options.</param>
         /// <param name="dateTimeOptions">Optional <see cref="FluentDateTimeOptions"/> that determines the date's formatting options.</param>
-        public FluentContext(LangLocId culture, FluentNumberOptions? numberOptions = null,
+        public FluentContext(LangLocId locale, FluentNumberOptions? numberOptions = null,
             FluentDateTimeOptions? dateTimeOptions = null)
         {
-            Culture = CultureInfo.GetCultureInfo(culture.ToString());
-            Locale = LangLocId.FromCultureInfo(Culture);
+            Culture = CultureInfo.GetCultureInfo(locale.ToString());
+            Locale = locale;
             NumberOptions = numberOptions;
             DateTimeOptions = dateTimeOptions;
-            // TODO set from Fluent options
+            var info = Culture.NumberFormat;
             NumberFormatInfo = Culture.NumberFormat;
-            DateTimeFormatInfo = Culture.DateTimeFormat;
+            // TODO set from Fluent options
+            NumFormatStr = ProcessNumberOptions(numberOptions, ref info);
+            
+        }
+
+        protected static string? ProcessNumberOptions(FluentNumberOptions? numberOptions,
+            ref NumberFormatInfo numberFormatInfo)
+        {
+            if (numberOptions == null)
+                return null;
+
+            var stringBuilder = new StringBuilder();
+            
+            switch (numberOptions.Style)
+            {
+                case FluentNumberStyle.Decimal:
+                    break;
+                case FluentNumberStyle.Currency:
+                    stringBuilder.Append("C");
+                    break;
+                case FluentNumberStyle.Percent:
+                    break;
+                case FluentNumberStyle.Unit:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return numStr;
         }
     }
 }
