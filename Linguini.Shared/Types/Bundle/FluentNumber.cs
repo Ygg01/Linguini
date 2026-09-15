@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-
 using Linguini.Shared.Util;
 
 namespace Linguini.Shared.Types.Bundle
@@ -36,7 +35,6 @@ namespace Linguini.Shared.Types.Bundle
         private readonly PluralOperands? _operands;
 
 
-
         private FluentNumber(double value)
         {
             var parsedDbl = value.ToString(CultureInfo.InvariantCulture.NumberFormat);
@@ -44,19 +42,21 @@ namespace Linguini.Shared.Types.Bundle
             {
                 _operands = ops;
             }
+
             Value = value;
         }
-        
+
         private FluentNumber(ReadOnlySpan<char> input)
         {
             if (!input.ToString().TryPluralOperands(out var ops))
             {
                 throw new ArgumentException("Invalid input for plural operands");
             }
+
             _operands = ops;
             Value = ops.N;
         }
-        
+
 
         /// <inheritdoc/>
         public string AsString()
@@ -67,27 +67,11 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc/>
         public string AsString(IFluentContext context)
         {
-            var stringVal = Value.ToString(context.Culture);
-            if (context.NumberOptions?.MinimumFractionDigits != null)
+            if (context.NumFormatStr != null)
             {
-                var minfd = context.NumberOptions.MinimumFractionDigits.Value;
-                var pos = stringVal.IndexOf('.');
-                if (pos != -1)
-                {
-                    var fracNum = stringVal.Length - pos - 1;
-                    var missing = fracNum > minfd
-                        ? 0
-                        : minfd - fracNum;
-                    var pattern = new string('0', missing);
-                    stringVal = $"{stringVal}{pattern}";
-                }
-                else
-                {
-                    stringVal = $"{stringVal}.{new string('0', minfd)}";
-                }
+                return Value.ToString(context.NumFormatStr, context.NumberFormatInfo);
             }
-
-            return stringVal;
+            return Value.ToString(context.NumberFormatInfo);
         }
 
         /// <inheritdoc/>
@@ -177,7 +161,7 @@ namespace Linguini.Shared.Types.Bundle
         {
             return Value.GetHashCode();
         }
-        
+
         /// <summary>
         /// For given <see cref="FluentNumber"/> input, will try to find its <see cref="PluralOperands"/>
         /// necessary for determining plural forms for a given language.
@@ -219,39 +203,34 @@ namespace Linguini.Shared.Types.Bundle
 
         /// <summary>
         /// The minimum number of integer digits to use. A value with a smaller number of integer digits than this
-        /// number will be left-padded with zeros (to the specified length) when formatted. Possible values are
-        /// from <c>1</c> to <c>21</c>; the default is <c>1</c>.
+        /// number will be left-padded with zeros (to the specified length) when formatted.
+        /// Defaults to Culture's <see cref="NumberFormatInfo"/>.
         /// </summary>
-        public int? MinimumIntegerDigits;
+        public byte? MinimumIntegerDigits;
 
         /// <summary>
         /// The minimum number of fraction digits to use. Possible values are from <c>0</c> to <c>100</c>;
-        /// the default for plain number and percent formatting is <c>0</c>; the default for currency formatting is the
-        /// number of minor unit digits provided by the <see href="https://www.six-group.com/dam/download/financial-information/data-center/iso-currrency/lists/list-one.xml">ISO 4217 currency code list (XML file)</see>
-        /// or <c>2</c> if list doesn't provide information.
+        /// Defaults to Culture's <see cref="NumberFormatInfo"/>.
         /// </summary>
-        public int? MinimumFractionDigits;
+        public byte? MinimumFractionDigits;
 
         /// <summary>
-        /// The maximum number of fraction digits to use. Possible values are from <c>0</c> to <c>100</c>; the default
-        /// for plain number formatting is the larger of <c>minimumFractionDigits</c> and <c>3</c>; the default
-        /// for currency formatting is the larger of <c>minimumFractionDigits</c> and the number of minor unit digits
-        /// provided by the  <see href="https://www.six-group.com/dam/download/financial-information/data-center/iso-currrency/lists/list-one.xml">ISO 4217 currency code list (XML file)</see>
-        /// or <c>2</c> if list doesn't provide information. The default for percent formatting is the larger of <c>minimumFractionDigits</c> and <c>0</c>.
+        /// The maximum number of fraction digits to use. Possible values are from <c>0</c> to <c>100</c>.
+        /// Defaults to Culture's <see cref="NumberFormatInfo"/>.
         /// </summary>
-        public int? MaximumFractionDigits;
+        public byte? MaximumFractionDigits;
 
         /// <summary>
-        /// The minimum number of significant digits to use. Possible values are from <c>1</c> to <c>21</c>;
-        /// the default is <c>1</c>.
+        /// The minimum number of significant digits to use. Possible values are from <c>1</c> to <c>21</c>.
+        /// Defaults to Culture's <see cref="NumberFormatInfo"/>.
         /// </summary>
-        public int? MinimumSignificantDigits;
+        public byte? MinimumSignificantDigits;
 
         /// <summary>
         /// The maximum  number of significant digits to use. Possible values are from <c>1</c> to <c>21</c>;
-        /// the default is <c>21</c>.
+        /// Defaults to Culture's <see cref="NumberFormatInfo"/>.
         /// </summary>
-        public int? MaximumSignificantDigits;
+        public byte? MaximumSignificantDigits;
 
         #endregion
 
@@ -321,31 +300,31 @@ namespace Linguini.Shared.Types.Bundle
             if (options.TryGetValue("minimumIntegerDigits", out var minIntDig) &&
                 minIntDig is FluentNumber minIntDigNum)
             {
-                numberOption.MinimumIntegerDigits = (int)minIntDigNum;
+                numberOption.MinimumIntegerDigits = (byte)minIntDigNum;
             }
 
             if (options.TryGetValue("minimumFractionDigits", out var minFracDig) &&
                 minFracDig is FluentNumber minFracDigNum)
             {
-                numberOption.MinimumFractionDigits = (int)minFracDigNum;
+                numberOption.MinimumFractionDigits = (byte)minFracDigNum;
             }
 
             if (options.TryGetValue("maximumFractionDigits", out var maxFracDig) &&
                 maxFracDig is FluentNumber maxFracDigNum)
             {
-                numberOption.MaximumFractionDigits = (int)maxFracDigNum;
+                numberOption.MaximumFractionDigits = (byte)maxFracDigNum;
             }
 
             if (options.TryGetValue("minimumSignificantDigits", out var minSigDig) &&
                 minSigDig is FluentNumber minSigDigNum)
             {
-                numberOption.MinimumSignificantDigits = (int)minSigDigNum;
+                numberOption.MinimumSignificantDigits = (byte)minSigDigNum;
             }
 
             if (options.TryGetValue("maximumSignificantDigits", out var maxSigDig) &&
                 maxSigDig is FluentNumber maxSigDigNum)
             {
-                numberOption.MaximumSignificantDigits = (int)maxSigDigNum;
+                numberOption.MaximumSignificantDigits = (byte)maxSigDigNum;
             }
 
             return numberOption;
@@ -545,8 +524,8 @@ namespace Linguini.Shared.Types.Bundle
 
             return conversionSuccess;
         }
-        
-                /// <summary>
+
+        /// <summary>
         /// For given <see cref="float"/> input, will try to find its <see cref="PluralOperands"/>
         /// necessary for determining plural forms for a given language.
         /// </summary>
@@ -569,7 +548,5 @@ namespace Linguini.Shared.Types.Bundle
         {
             return input.ToString(CultureInfo.InvariantCulture).TryPluralOperands(out operands);
         }
-
-
     }
 }
