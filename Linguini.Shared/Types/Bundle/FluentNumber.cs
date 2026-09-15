@@ -67,11 +67,9 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc/>
         public string AsString(IFluentContext context)
         {
-            if (context.NumFormatStr != null)
-            {
-                return Value.ToString(context.NumFormatStr, context.NumberFormatInfo);
-            }
-            return Value.ToString(context.NumberFormatInfo);
+            return context.NumFormatStr == null 
+                ? Value.ToString(context.NumberOptions.Style.ToFormat(), context.NumberFormatInfo) 
+                : Value.ToString(context.NumFormatStr, context.NumberFormatInfo);
         }
 
         /// <inheritdoc/>
@@ -259,6 +257,12 @@ namespace Linguini.Shared.Types.Bundle
             MaximumSignificantDigits = null;
         }
 
+        public bool CanBeFormattedSimply => !MinimumIntegerDigits.HasValue
+                                            && !MaximumFractionDigits.HasValue
+                                            && !MinimumSignificantDigits.HasValue
+                                            && !MaximumSignificantDigits.HasValue
+                                            && Currency == null;
+
         /// <summary>
         /// Converts a dictionary of options into a <see cref="FluentNumberOptions"/> object.
         /// </summary>
@@ -351,11 +355,6 @@ namespace Linguini.Shared.Types.Bundle
         /// Formats <see cref="FluentNumber"/> as a number, with percent symbol e.g. <c>19%</c>
         /// </summary>
         Percent = 3,
-
-        /// <summary>
-        /// Formats <see cref="FluentNumber"/> as a number with provided measurement unit e.g. <c>100 gallons</c>
-        /// </summary>
-        Unit = 4
     }
 
     /// <summary>
@@ -437,10 +436,6 @@ namespace Linguini.Shared.Types.Bundle
                     break;
                 case "percent":
                     style = FluentNumberStyle.Percent;
-                    conversionSuccess = true;
-                    break;
-                case "unit":
-                    style = FluentNumberStyle.Unit;
                     conversionSuccess = true;
                     break;
                 default:
@@ -547,6 +542,16 @@ namespace Linguini.Shared.Types.Bundle
         public static bool TryPluralOperands(this double input, [NotNullWhen(true)] out PluralOperands? operands)
         {
             return input.ToString(CultureInfo.InvariantCulture).TryPluralOperands(out operands);
+        }
+        
+        public static string ToFormat(this FluentNumberStyle style)
+        {
+            return style switch
+            {
+                FluentNumberStyle.Currency => "C",
+                FluentNumberStyle.Percent => "P",
+                _ => "F"
+            };
         }
     }
 }

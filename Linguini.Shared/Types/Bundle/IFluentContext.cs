@@ -23,7 +23,7 @@ namespace Linguini.Shared.Types.Bundle
         /// NumberOptions represents the Localization-specific options used during number formatting. If present,
         /// it overrides the default options set by the culture.
         /// </summary>
-        public FluentNumberOptions? NumberOptions { get; }
+        public FluentNumberOptions NumberOptions { get; }
         
         /// <summary>
         /// DateTimeOptions represents the Localization-specific options used during date-time formatting. If present,
@@ -31,8 +31,15 @@ namespace Linguini.Shared.Types.Bundle
         /// </summary>
         public FluentDateTimeOptions? DateTimeOptions { get; }
         
+        /// <summary>
+        /// Formatting string used to format numbers. If present, it overrides the default options set by the <see cref="NumberFormatInfo"/>.
+        /// </summary>
+        
         public string? NumFormatStr { get; }
         
+        /// <summary>
+        /// Number formatter for FluentNumbers
+        /// </summary>
         public NumberFormatInfo NumberFormatInfo { get; }
         
 
@@ -61,7 +68,10 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc />
         public FluentDateTimeOptions? DateTimeOptions { get; }
 
+        /// <inheritdoc />
         public string? NumFormatStr { get; }
+        
+        /// <inheritdoc />
         public NumberFormatInfo NumberFormatInfo { get; }
 
         /// <summary>

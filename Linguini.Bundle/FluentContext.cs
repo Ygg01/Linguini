@@ -59,7 +59,7 @@ namespace Linguini.Bundle
         public FluentContext(LangLocId locale, FluentNumberOptions? numberOptions = null,
             FluentDateTimeOptions? dateTimeOptions = null)
         {
-            Culture = CultureInfo.GetCultureInfo(locale.ToString());
+            Culture = (CultureInfo)CultureInfo.GetCultureInfo(locale.ToString()).Clone();
             Locale = locale;
             NumberOptions = numberOptions;
             DateTimeOptions = dateTimeOptions;
@@ -77,23 +77,29 @@ namespace Linguini.Bundle
                 return null;
 
             var stringBuilder = new StringBuilder();
-            
-            switch (numberOptions.Style)
+
+            if (numberOptions.CanBeFormattedSimply)
             {
-                case FluentNumberStyle.Decimal:
-                    break;
-                case FluentNumberStyle.Currency:
-                    stringBuilder.Append("C");
-                    break;
-                case FluentNumberStyle.Percent:
-                    break;
-                case FluentNumberStyle.Unit:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                if (numberOptions.MinimumFractionDigits != null)
+                {
+                    switch (numberOptions.Style)
+                    {
+                        case FluentNumberStyle.Decimal:
+                            numberFormatInfo.NumberDecimalDigits = (int)numberOptions.MinimumFractionDigits;
+                            break;
+                        case FluentNumberStyle.Currency:
+                            numberFormatInfo.CurrencyDecimalDigits = (int)numberOptions.MinimumFractionDigits;
+                            break;
+                        case FluentNumberStyle.Percent:
+                            numberFormatInfo.PercentDecimalDigits = (int)numberOptions.MinimumFractionDigits;
+                            break;
+                    }
+                    
+                }
+                return null;
             }
 
-            return numStr;
+            return stringBuilder.ToString();
         }
     }
 }

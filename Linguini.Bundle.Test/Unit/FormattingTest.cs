@@ -14,6 +14,10 @@ namespace Linguini.Bundle.Test.Unit
             {
                 MinimumFractionDigits = 2
             })).Returns("123.00");
+            yield return new TestCaseData(123.1, new FluentContext(LangLocId.EN, new FluentNumberOptions()
+            {
+                MinimumFractionDigits = 4
+            })).Returns("123.1000");
         }
         
         [Test]
