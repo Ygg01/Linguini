@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
-using System.Xml;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 
@@ -67,39 +66,155 @@ namespace Linguini.Bundle
             NumberFormatInfo = Culture.NumberFormat;
             // TODO set from Fluent options
             NumFormatStr = ProcessNumberOptions(numberOptions, ref info);
-            
         }
 
+        /// <summary>
+        /// Processes the given number formatting options and updates the provided NumberFormatInfo accordingly.
+        /// Returns a string representation of the number format pattern if applicable based on the options and style.
+        /// </summary>
+        /// <param name="numberOptions">The FluentNumberOptions that contain the desired formatting preferences.</param>
+        /// <param name="numberFormatInfo">A reference to the NumberFormatInfo that will be updated according to the specified options.</param>
+        /// <returns>
+        /// A string that represents the number format pattern when applicable, or null if the given options
+        /// require no specific pattern.
+        /// </returns>
         protected static string? ProcessNumberOptions(FluentNumberOptions? numberOptions,
             ref NumberFormatInfo numberFormatInfo)
         {
             if (numberOptions == null)
-                return null;
-
-            var stringBuilder = new StringBuilder();
-
-            if (numberOptions.CanBeFormattedSimply)
             {
-                if (numberOptions.MinimumFractionDigits != null)
-                {
-                    switch (numberOptions.Style)
-                    {
-                        case FluentNumberStyle.Decimal:
-                            numberFormatInfo.NumberDecimalDigits = (int)numberOptions.MinimumFractionDigits;
-                            break;
-                        case FluentNumberStyle.Currency:
-                            numberFormatInfo.CurrencyDecimalDigits = (int)numberOptions.MinimumFractionDigits;
-                            break;
-                        case FluentNumberStyle.Percent:
-                            numberFormatInfo.PercentDecimalDigits = (int)numberOptions.MinimumFractionDigits;
-                            break;
-                    }
-                    
-                }
                 return null;
             }
 
-            return stringBuilder.ToString();
+            if (!numberOptions.CanBeFormattedSimply)
+            {
+                return numberOptions.Style switch
+                {
+                    FluentNumberStyle.Decimal => FormatDecimal(numberOptions, ref numberFormatInfo),
+                    FluentNumberStyle.Currency => FormatCurrency(numberOptions, ref numberFormatInfo),
+                    FluentNumberStyle.Percent => FormatPercent(numberOptions, ref numberFormatInfo),
+                    _ => null,
+                };
+            }
+
+            if (numberOptions.MinimumFractionDigits != null)
+            {
+                switch (numberOptions.Style)
+                {
+                    case FluentNumberStyle.Decimal:
+                        numberFormatInfo.NumberDecimalDigits = (int)numberOptions.MinimumFractionDigits;
+                        break;
+                    case FluentNumberStyle.Currency:
+                        numberFormatInfo.CurrencyDecimalDigits = (int)numberOptions.MinimumFractionDigits;
+                        break;
+                    case FluentNumberStyle.Percent:
+                        numberFormatInfo.PercentDecimalDigits = (int)numberOptions.MinimumFractionDigits;
+                        break;
+                }
+            }
+
+            return null;
+
+        }
+
+        private static string FormatDecimal(FluentNumberOptions numberOptions, ref NumberFormatInfo numberFormatInfo)
+        {
+            var stringBuild = new StringBuilder();
+            var decimalSeparator = numberFormatInfo.NumberDecimalSeparator;
+
+            GenerateDecimalFormatString(stringBuild, numberOptions, decimalSeparator, 0);
+
+            return stringBuild.ToString();
+        }
+
+        private static string FormatCurrency(FluentNumberOptions numberOptions, ref NumberFormatInfo numberFormatInfo)
+        {
+            var currencyBuilder = new StringBuilder();
+            var numberPattern = new StringBuilder();
+            var curr = numberOptions.Currency ?? numberFormatInfo.CurrencySymbol;
+            var negSymbol = numberFormatInfo.NegativeSign;
+            var decimalSeparator = numberFormatInfo.NumberDecimalSeparator;
+            GenerateDecimalFormatString(numberPattern, numberOptions, decimalSeparator, 2);
+            switch (numberFormatInfo.CurrencyPositivePattern)
+            {
+                case 0:
+                    currencyBuilder.Append(curr);
+                    currencyBuilder.Append(numberPattern);
+
+                    currencyBuilder.Append(';');
+
+                    currencyBuilder.Append(negSymbol);
+                    currencyBuilder.Append(curr);
+                    currencyBuilder.Append(numberPattern);
+                    break;
+                case 1:
+                    currencyBuilder.Append(numberPattern);
+                    currencyBuilder.Append(curr);
+
+                    currencyBuilder.Append(';');
+
+                    currencyBuilder.Append(negSymbol);
+                    currencyBuilder.Append(numberPattern);
+                    currencyBuilder.Append(curr);
+                    break;
+                case 2:
+                    currencyBuilder.Append(curr);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(numberPattern);
+
+                    currencyBuilder.Append(';');
+
+                    currencyBuilder.Append(curr);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(negSymbol);
+                    currencyBuilder.Append(numberPattern);
+                    break;
+                default:
+                    currencyBuilder.Append(numberPattern);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(curr);
+
+                    currencyBuilder.Append(';');
+
+                    currencyBuilder.Append(negSymbol);
+                    currencyBuilder.Append(numberPattern);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(curr);
+                    break;
+            }
+
+            return currencyBuilder.ToString();
+        }
+
+        private static string FormatPercent(FluentNumberOptions numberOptions, ref NumberFormatInfo numberFormatInfo)
+        {
+            var stringBuild = new StringBuilder();
+
+            return stringBuild.ToString();
+        }
+
+        private static void GenerateDecimalFormatString(StringBuilder stringBuild,
+            FluentNumberOptions numberOptions,
+            string decimalSeparator,
+            byte defaultMinimalFrac)
+        {
+            var mandatoryFrac = numberOptions.MinimumFractionDigits ?? defaultMinimalFrac;
+            var maxFracDigit = Math.Max(mandatoryFrac,
+                numberOptions.MaximumFractionDigits ?? 0);
+            var optionalFrac = SaturatingSubtract(maxFracDigit, mandatoryFrac);
+
+            stringBuild.Append('0', numberOptions.MinimumIntegerDigits ?? 0);
+            stringBuild.Append(decimalSeparator);
+            stringBuild.Append('0', mandatoryFrac);
+            stringBuild.Append('#', optionalFrac);
+        }
+
+
+        private static int SaturatingSubtract(byte a, byte b)
+        {
+            return a < b
+                ? 0
+                : a - b;
         }
     }
 }
