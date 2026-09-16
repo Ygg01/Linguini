@@ -114,17 +114,48 @@ namespace Linguini.Bundle
             }
 
             return null;
-
         }
 
         private static string FormatDecimal(FluentNumberOptions numberOptions, ref NumberFormatInfo numberFormatInfo)
         {
-            var stringBuild = new StringBuilder();
+            var numberBuilder = new StringBuilder();
+            var n = new StringBuilder();
             var decimalSeparator = numberFormatInfo.NumberDecimalSeparator;
 
-            GenerateDecimalFormatString(stringBuild, numberOptions, decimalSeparator, 0);
+            GenerateDecimalFormatString(n, numberOptions, decimalSeparator, 0);
 
-            return stringBuild.ToString();
+            numberBuilder.Append(n);
+            numberBuilder.Append(';');
+
+            var minus = numberFormatInfo.NegativeSign;
+            switch (numberFormatInfo.NumberNegativePattern)
+            {
+                case 0:
+                    numberBuilder.Append('(');
+                    numberBuilder.Append(n);
+                    numberBuilder.Append(')');
+                    break;
+                case 1:
+                    numberBuilder.Append(minus);
+                    numberBuilder.Append(n);
+                    break;
+                case 2:
+                    numberBuilder.Append(minus);
+                    numberBuilder.Append(' ');
+                    numberBuilder.Append(n);
+                    break;
+                case 3:
+                    numberBuilder.Append(n);
+                    numberBuilder.Append(minus);
+                    break;
+                default:
+                    numberBuilder.Append(n);
+                    numberBuilder.Append(' ');
+                    numberBuilder.Append(minus);
+                    break;
+            }
+
+            return numberBuilder.ToString();
         }
 
         private static string FormatCurrency(FluentNumberOptions numberOptions, ref NumberFormatInfo numberFormatInfo)
@@ -132,10 +163,10 @@ namespace Linguini.Bundle
             var currencyBuilder = new StringBuilder();
             var n = new StringBuilder();
             var dollar = numberOptions.Currency ?? numberFormatInfo.CurrencySymbol;
-            
+
             var decimalSeparator = numberFormatInfo.NumberDecimalSeparator;
             GenerateDecimalFormatString(n, numberOptions, decimalSeparator, 2);
-            
+
             switch (numberFormatInfo.CurrencyPositivePattern)
             {
                 case 0:
@@ -160,7 +191,6 @@ namespace Linguini.Bundle
 
             currencyBuilder.Append(';');
 
-            
             var minus = numberFormatInfo.NegativeSign;
             switch (numberFormatInfo.CurrencyNegativePattern)
             {
@@ -269,9 +299,111 @@ namespace Linguini.Bundle
 
         private static string FormatPercent(FluentNumberOptions numberOptions, ref NumberFormatInfo numberFormatInfo)
         {
-            var stringBuild = new StringBuilder();
+            var percentBuilder = new StringBuilder();
+            var currencyBuilder = new StringBuilder();
+            var n = new StringBuilder();
+            var percent = numberFormatInfo.PercentSymbol;
 
-            return stringBuild.ToString();
+            var decimalSeparator = numberFormatInfo.NumberDecimalSeparator;
+            GenerateDecimalFormatString(n, numberOptions, decimalSeparator, 2);
+
+            switch (numberFormatInfo.PercentPositivePattern)
+            {
+                case 0:
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(percent);
+                    break;
+                case 1:
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(percent);
+                    break;
+                case 2:
+                    currencyBuilder.Append(percent);
+                    currencyBuilder.Append(n);
+                    break;
+                default:
+                    currencyBuilder.Append(percent);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(n);
+                    break;
+            }
+
+            currencyBuilder.Append(';');
+
+
+            var minus = numberFormatInfo.NegativeSign;
+            switch (numberFormatInfo.PercentNegativePattern)
+            {
+                case 0:
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(percent);
+                    break;
+                case 1:
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(percent);
+                    break;
+                case 2:
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(percent);
+                    currencyBuilder.Append(n);
+                    break;
+                case 3:
+                    currencyBuilder.Append(percent);
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(n);
+                    break;
+                case 4:
+                    currencyBuilder.Append(percent);
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(minus);
+                    break;
+                case 5:
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(percent);
+                    break;
+                case 6:
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(percent);
+                    currencyBuilder.Append(minus);
+                    break;
+                case 7:
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(percent);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(n);
+                    break;
+                case 8:
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(percent);
+                    currencyBuilder.Append(minus);
+                    break;
+                case 9:
+                    currencyBuilder.Append(percent);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(minus);
+                    break;
+                case 10:
+                    currencyBuilder.Append(percent);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(n);
+                    break;
+                default:
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(percent);
+                    break;
+            }
+
+            return percentBuilder.ToString();
         }
 
         private static void GenerateDecimalFormatString(StringBuilder stringBuild,
