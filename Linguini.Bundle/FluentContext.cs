@@ -86,7 +86,7 @@ namespace Linguini.Bundle
                 return null;
             }
 
-            if (!numberOptions.CanBeFormattedSimply)
+            if (!numberOptions.CanUseDefaultFormatter)
             {
                 return numberOptions.Style switch
                 {
@@ -95,6 +95,13 @@ namespace Linguini.Bundle
                     FluentNumberStyle.Percent => FormatPercent(numberOptions, ref numberFormatInfo),
                     _ => null,
                 };
+            }
+
+            if (numberOptions.UseGrouping == UseGrouping.False)
+            {
+                return numberOptions.MinimumFractionDigits is { } or > 0 
+                    ? $"G{numberOptions.MinimumFractionDigits}" 
+                    : "G";
             }
 
             if (numberOptions.MinimumFractionDigits != null)
