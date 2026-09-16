@@ -130,56 +130,137 @@ namespace Linguini.Bundle
         private static string FormatCurrency(FluentNumberOptions numberOptions, ref NumberFormatInfo numberFormatInfo)
         {
             var currencyBuilder = new StringBuilder();
-            var numberPattern = new StringBuilder();
-            var curr = numberOptions.Currency ?? numberFormatInfo.CurrencySymbol;
-            var negSymbol = numberFormatInfo.NegativeSign;
+            var n = new StringBuilder();
+            var dollar = numberOptions.Currency ?? numberFormatInfo.CurrencySymbol;
+            
             var decimalSeparator = numberFormatInfo.NumberDecimalSeparator;
-            GenerateDecimalFormatString(numberPattern, numberOptions, decimalSeparator, 2);
+            GenerateDecimalFormatString(n, numberOptions, decimalSeparator, 2);
+            
             switch (numberFormatInfo.CurrencyPositivePattern)
             {
                 case 0:
-                    currencyBuilder.Append(curr);
-                    currencyBuilder.Append(numberPattern);
-
-                    currencyBuilder.Append(';');
-
-                    currencyBuilder.Append(negSymbol);
-                    currencyBuilder.Append(curr);
-                    currencyBuilder.Append(numberPattern);
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(n);
                     break;
                 case 1:
-                    currencyBuilder.Append(numberPattern);
-                    currencyBuilder.Append(curr);
-
-                    currencyBuilder.Append(';');
-
-                    currencyBuilder.Append(negSymbol);
-                    currencyBuilder.Append(numberPattern);
-                    currencyBuilder.Append(curr);
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(dollar);
                     break;
                 case 2:
-                    currencyBuilder.Append(curr);
+                    currencyBuilder.Append(dollar);
                     currencyBuilder.Append(' ');
-                    currencyBuilder.Append(numberPattern);
-
-                    currencyBuilder.Append(';');
-
-                    currencyBuilder.Append(curr);
-                    currencyBuilder.Append(' ');
-                    currencyBuilder.Append(negSymbol);
-                    currencyBuilder.Append(numberPattern);
+                    currencyBuilder.Append(n);
                     break;
                 default:
-                    currencyBuilder.Append(numberPattern);
+                    currencyBuilder.Append(n);
                     currencyBuilder.Append(' ');
-                    currencyBuilder.Append(curr);
+                    currencyBuilder.Append(dollar);
+                    break;
+            }
 
-                    currencyBuilder.Append(';');
+            currencyBuilder.Append(';');
 
-                    currencyBuilder.Append(negSymbol);
-                    currencyBuilder.Append(numberPattern);
+            
+            var minus = numberFormatInfo.NegativeSign;
+            switch (numberFormatInfo.CurrencyNegativePattern)
+            {
+                case 0:
+                    currencyBuilder.Append('(');
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(')');
+                    break;
+                case 1:
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(n);
+                    break;
+                case 2:
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(n);
+                    break;
+                case 3:
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(minus);
+                    break;
+                case 4:
+                    currencyBuilder.Append('(');
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(')');
+                    break;
+                case 5:
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(dollar);
+                    break;
+                case 6:
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(dollar);
+                    break;
+                case 7:
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(minus);
+                    break;
+                case 8:
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(n);
                     currencyBuilder.Append(' ');
-                    currencyBuilder.Append(curr);
+                    currencyBuilder.Append(dollar);
+                    break;
+                case 9:
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(n);
+                    break;
+                case 10:
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(minus);
+                    break;
+                case 11:
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(minus);
+                    break;
+                case 12:
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(n);
+                    break;
+                case 13:
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(dollar);
+                    break;
+                case 14:
+                    currencyBuilder.Append('(');
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(')');
+                    break;
+                case 15:
+                    currencyBuilder.Append('(');
+                    currencyBuilder.Append(n);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(')');
+                    break;
+                default:
+                    currencyBuilder.Append(dollar);
+                    currencyBuilder.Append(minus);
+                    currencyBuilder.Append(' ');
+                    currencyBuilder.Append(n);
                     break;
             }
 
