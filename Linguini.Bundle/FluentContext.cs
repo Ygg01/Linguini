@@ -99,7 +99,7 @@ namespace Linguini.Bundle
 
             if (numberOptions.UseGrouping == UseGrouping.False)
             {
-                return numberOptions.MinimumFractionDigits is { } or > 0 
+                return numberOptions.MinimumFractionDigits != null || numberOptions.MinimumFractionDigits > 0
                     ? $"G{numberOptions.MinimumFractionDigits}" 
                     : "G";
             }

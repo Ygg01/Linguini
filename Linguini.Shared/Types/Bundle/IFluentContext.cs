@@ -29,12 +29,11 @@ namespace Linguini.Shared.Types.Bundle
         /// DateTimeOptions represents the Localization-specific options used during date-time formatting. If present,
         /// it overrides the default options set by the culture.
         /// </summary>
-        public FluentDateTimeOptions? DateTimeOptions { get; }
+        public FluentDateTimeOptions DateTimeOptions { get; }
         
         /// <summary>
         /// Formatting string used to format numbers. If present, it overrides the default options set by the <see cref="NumberFormatInfo"/>.
         /// </summary>
-        
         public string? NumFormatStr { get; }
         
         /// <summary>
@@ -63,7 +62,7 @@ namespace Linguini.Shared.Types.Bundle
         public CultureInfo Culture { get; }
 
         /// <inheritdoc />
-        public FluentNumberOptions? NumberOptions { get; }
+        public FluentNumberOptions NumberOptions { get; }
 
         /// <inheritdoc />
         public FluentDateTimeOptions? DateTimeOptions { get; }
@@ -81,8 +80,8 @@ namespace Linguini.Shared.Types.Bundle
         {
             Locale = LangLocParser.Parse("root");
             Culture = CultureInfo.InvariantCulture;
-            NumberOptions = null;
-            DateTimeOptions = null;
+            NumberOptions = new FluentNumberOptions();
+            DateTimeOptions = new FluentDateTimeOptions();
             NumFormatStr = null;
             NumberFormatInfo = Culture.NumberFormat;
         }

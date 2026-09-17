@@ -38,6 +38,28 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc/>
         public string AsString(IFluentContext context)
         {
+            var hour = Date.Hour;
+            if (context.DateTimeOptions != null)
+            {
+                switch (context.DateTimeOptions.HourCycle)
+                {
+                    case HourCycle.H11:
+                        hour %= 12;
+                        break;
+                    case HourCycle.H12:
+                        hour %= 12;
+                        hour += 1;
+                        break;
+                    case HourCycle.H23:
+                        hour %= 24;
+                        break;
+                    case HourCycle.H24:
+                        hour += 1;
+                        break;
+                }
+            }
+            var weekday = Date.DayOfWeek;
+
             throw new NotImplementedException();
         }
 
@@ -57,16 +79,6 @@ namespace Linguini.Shared.Types.Bundle
         public IFluentType Copy()
         {
             return new FluentDateTime(Date, Options);
-        }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="FluentDateTime"/> with the specified options.
-        /// </summary>
-        /// <param name="dateTimeOptions">The <see cref="FluentDateTimeOptions"/> to apply to the current number.</param>
-        /// <returns>A new <see cref="FluentDateTime"/> instance with the applied options.</returns>
-        public IFluentType WithOptions(FluentDateTimeOptions dateTimeOptions)
-        {
-            return new FluentDateTime(Date, dateTimeOptions);
         }
 
         /// <inheritdoc/>
@@ -126,13 +138,7 @@ namespace Linguini.Shared.Types.Bundle
         /// Possible values are "Long", "Short", and "Narrow", as defined in the <see cref="DateTextFormat"/> enumeration.
         /// </summary>
         public DateTextFormat Weekday;
-
-
-        /// <summary>
-        /// Specifies how the era is displayed in a formatted date output.
-        /// Possible values are "Long", "Short", and "Narrow", as defined in the <see cref="DateTextFormat"/> enumeration.
-        /// </summary>
-        public DateTextFormat Era;
+        
 
         /// <summary>
         /// Specifies the representation style for the year value.
@@ -220,12 +226,7 @@ namespace Linguini.Shared.Types.Bundle
             {
                 dateTimeOptions.Weekday = weekday;
             }
-
-            if (namedArgs.TryGetValue("era", out var ft4) &&
-                ft4 is FluentString eraStr && eraStr.TryIntoDateTextFormat(out var era))
-            {
-                dateTimeOptions.Era = era;
-            }
+            
 
             if (namedArgs.TryGetValue("year", out var ft5) &&
                 ft5 is FluentString yearStr && yearStr.TryIntoNumericFormat(out var year))
