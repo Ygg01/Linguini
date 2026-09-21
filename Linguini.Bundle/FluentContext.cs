@@ -31,7 +31,7 @@ namespace Linguini.Bundle
         public string? NumFormatStr { get;  }
 
         /// <inheritdoc />
-        public string? DateFormatStr { get;  }
+        public string? DateFormatStr { get; set; }
 
         /// <inheritdoc />
         public NumberFormatInfo NumberFormatInfo { get; }

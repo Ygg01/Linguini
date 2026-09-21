@@ -40,7 +40,7 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Formatting string used to format dates. If present, it overrides the default options set by the <see cref="DateTimeFormatInfo"/>.
         /// </summary>
-        public string? DateFormatStr { get; }
+        public string? DateFormatStr { get; set; }
         
         /// <summary>
         /// Number formatter for FluentNumbers
@@ -80,7 +80,7 @@ namespace Linguini.Shared.Types.Bundle
         public string? NumFormatStr { get; }
         
         /// <inheritdoc />
-        public string? DateFormatStr { get; }
+        public string? DateFormatStr { get; set; }
 
         /// <inheritdoc />
         public NumberFormatInfo NumberFormatInfo { get; }

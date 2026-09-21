@@ -78,25 +78,60 @@ namespace Linguini.Shared.Types.Bundle
         {
             if (context.DateFormatStr != null)
             {
-                return Date.ToString(context.DateFormatInfo.FullDateTimePattern, context.DateFormatInfo);
+                return Date.ToString(context.DateFormatStr, context.DateFormatInfo);
             }
             
-            if (context.DateTimeOptions.GetStyleFields == DateTimeZoneFormat.Time)
+            switch (context.DateTimeOptions.GetStyleFields)
             {
-                context.DateFormatInfo.FullDateTimePattern = ExtractTimeFmt(context);
+                case DateTimeZoneFormat.Time:
+                    context.DateFormatStr = ExtractTimeFmt(context);
+                    break;
+                case DateTimeZoneFormat.Date:
+                    context.DateFormatStr = ExtractDateFmt(context);
+                    break;
+                case DateTimeZoneFormat.DateTime:
+                    var time = ExtractDateFmt(context);
+                    var date  = ExtractDateFmt(context);
+                    context.DateFormatStr = $"{date} {time}";
+                    break;
+                default:
+                    context.DateFormatStr = context.DateFormatInfo.FullDateTimePattern;
+                    break;
             }
 
-            return Date.ToString(context.DateFormatInfo.FullDateTimePattern, context.DateFormatInfo);
+            return Date.ToString(context.DateFormatStr, context.DateFormatInfo);
         }
 
         private static string ExtractTimeFmt(IFluentContext context)
         {
-            var timeFmt = context.DateFormatInfo.LongTimePattern;
+            var timeFmt = new StringBuilder();
             var h = context.DateTimeOptions.Hour12  == true 
                 ? "h" : "H";
-            var hourStr = context.DateTimeOptions.Hour == NumericDateFormat.TwoDigit ? $"{h}{h}" : $"{h}";
-            var minStr = context.DateTimeOptions.Minute == NumericDateFormat.TwoDigit ? "mm" : "m";
-            var secStr = context.DateTimeOptions.Minute == NumericDateFormat.TwoDigit ? "ss" : "s";
+
+
+            var hourStr = context.DateTimeOptions.Hour switch
+            {
+                NumericDateFormat.Numeric => $"{h}",
+                NumericDateFormat.TwoDigit => $"{h}{h}",
+                _ => null,
+            };
+            var minStr = (context.DateTimeOptions.Minute, hourStr == null) switch
+            {
+                (NumericDateFormat.TwoDigit, true) => "mm",
+                (NumericDateFormat.TwoDigit, false) => ":mm",
+                (NumericDateFormat.Numeric, true) => "m",
+                (NumericDateFormat.Numeric, false) => ":m",
+                _ => null,
+            };
+            var secStr = (context.DateTimeOptions.Second, minStr == null) switch
+            {
+                (NumericDateFormat.TwoDigit, true) => "ss",
+                (NumericDateFormat.TwoDigit, false) => ":ss",
+                (NumericDateFormat.Numeric, true) => "s",
+                (NumericDateFormat.Numeric, false) => ":s",
+                _ => null,
+            };
+            
             var fracStr = context.DateTimeOptions.FractionalSecondsDigit switch
             {
                 FractionalSecodsDigit.OneDigit => ".f",
@@ -104,17 +139,73 @@ namespace Linguini.Shared.Types.Bundle
                 FractionalSecodsDigit.ThreeDigits => ".f",
                 _ => ""
             };
-            var newTimeFmt = Regex.Replace(timeFmt, "(h|H){1,2}", hourStr);
-            newTimeFmt = Regex.Replace(newTimeFmt, "m{1,2}", minStr);
-            newTimeFmt = Regex.Replace(newTimeFmt, "s{1,2}", secStr + fracStr);
+            timeFmt.Append(hourStr);
+            timeFmt.Append(minStr);
+            timeFmt.Append(secStr);
+            timeFmt.Append(fracStr);
             if (context.DateTimeOptions.Hour12 == true)
             {
-                newTimeFmt += " tt";
+                timeFmt.Append(" tt");
             }
 
-            return newTimeFmt;
+            return timeFmt.ToString();
         }
 
+        private static string ExtractDateFmt(IFluentContext context)
+        {
+            if (!context.DateTimeOptions.TryGetRecognizedDate(out var recognizedDate))
+            {
+                return "";
+            }
+
+            var startingFmt = recognizedDate switch
+            {
+                DateFormatRecognized.Year => "yyyy",
+                DateFormatRecognized.Month => "MM",
+                DateFormatRecognized.Day => "dd",
+                DateFormatRecognized.YearMonth => context.DateFormatInfo.YearMonthPattern,
+                DateFormatRecognized.MonthDay => context.DateFormatInfo.MonthDayPattern,
+                DateFormatRecognized.Short => context.DateFormatInfo.ShortDatePattern,
+                DateFormatRecognized.Long => context.DateFormatInfo.LongTimePattern,
+                _ => "",
+            };
+            var yearFmt = context.DateTimeOptions.Year switch
+            {
+                NumericDateFormat.Numeric => "yyyy",
+                NumericDateFormat.TwoDigit => "yy",
+                _ => "",
+            };
+            var monthFmt = context.DateTimeOptions.Month switch
+            {
+                MonthFormat.Numeric => "M",
+                MonthFormat.TwoDigit => "MM",
+                MonthFormat.Short => "MMM",
+                MonthFormat.Long => "MMMM",
+                _ => "",
+            };
+
+            var dayFmt = context.DateTimeOptions.Day switch
+            {
+                NumericDateFormat.Numeric => "d",
+                NumericDateFormat.TwoDigit => "dd",
+                _ => "",
+            };
+            
+            var weekDayFmt = context.DateTimeOptions.Weekday switch
+            {
+                DateTextFormat.Long => "dddd",
+                DateTextFormat.Short => "ddd",
+                _ => "",
+            };
+            
+            var finalFmt = Regex.Replace(startingFmt, "y{1,4}", yearFmt);
+            finalFmt = Regex.Replace(finalFmt, "M{1,4}", monthFmt);
+            finalFmt = Regex.Replace(finalFmt, "d{1,2}", dayFmt);
+            finalFmt = Regex.Replace(finalFmt, "d{3,4}", weekDayFmt);
+
+            return finalFmt;
+        }
+        
         private void FormatDate(StringBuilder sb, DateTimeFormatInfo dateTimeFormatInfo,
             DateTimeRepresentation? dateStyle)
         {
@@ -512,11 +603,6 @@ namespace Linguini.Shared.Types.Bundle
         /// Abbreviate textual representation of a month. E.g.<c>Jan</c> for <c>January</c>.
         /// </summary>
         Short = 4,
-
-        /// <summary>
-        /// Extremely short textual representation of a month. E.g.<c>J</c> for <c>January</c>.
-        /// </summary>
-        Narrow = 5
     }
 
     /// <summary>
@@ -624,44 +710,94 @@ namespace Linguini.Shared.Types.Bundle
     }
 
     /// <summary>
+    /// Specifies the recognized formats for representing date values.
+    /// </summary>
+    enum DateFormatRecognized : byte
+    {
+        /// <summary>
+        /// Just year.
+        /// </summary>
+        None = 0,
+        
+        /// <summary>
+        /// Just year.
+        /// </summary>
+        Year = 1,
+        
+        /// <summary>
+        /// Just month.
+        /// </summary>
+        Month = 2,
+        
+        /// <summary>
+        /// Just day.
+        /// </summary>
+        Day = 4,
+        
+        /// <summary>
+        /// Just day.
+        /// </summary>
+        Weekday = 8,
+        
+        /// <summary>
+        /// Format year and month.
+        /// </summary>
+        YearMonth = 3,
+        
+        /// <summary>
+        /// Format month and day.
+        /// </summary>
+        MonthDay = 6,
+        
+        /// <summary>
+        /// Formats year, month and day.
+        /// </summary>
+        Short = 7,
+        
+        /// <summary>
+        /// Format year, month, day and weekday.
+        /// </summary>
+        Long = 15,
+    }
+
+    /// <summary>
     /// Extensions from converting <see cref="FluentString"/> into <see cref="FluentNumberOptions"/> fields.
     /// </summary>
     public static class DateTimeExtensions
     {
         /// <summary>
-        /// Attempts to convert the current <see cref="FluentString"/> instance into an <see cref="HourCycle"/> enumeration value.
+        /// Attempts to determine the recognized date format based on the provided <see cref="FluentDateTimeOptions"/>.
         /// </summary>
-        /// <param name="fs">The <see cref="FluentString"/> instance to convert.</param>
-        /// <param name="style">When this method returns, contains the equivalent <see cref="HourCycle"/> value if the conversion succeeded; otherwise, the default value of <see cref="HourCycle"/>.</param>
-        /// <returns><c>true</c> if the conversion was successful; otherwise, <c>false</c>.</returns>
-        public static bool TryIntoHourCycle(this FluentString fs, out HourCycle style)
+        /// <param name="fs">The <see cref="FluentDateTimeOptions"/> instance to evaluate.</param>
+        /// <param name="formatRecognized">
+        /// When this method returns, contains the recognized <see cref="DateFormatRecognized"/> value
+        /// if the evaluation is successful; otherwise, contains <see cref="DateFormatRecognized.None"/>.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if a valid date format is recognized; otherwise, <c>false</c>.
+        /// </returns>
+        internal static bool TryGetRecognizedDate(this FluentDateTimeOptions fs, out DateFormatRecognized formatRecognized)
         {
             bool conversionSuccess;
-            switch ((string)fs)
-            {
-                case "h11":
-                    conversionSuccess = true;
-                    style = HourCycle.H11;
-                    break;
-                case "h12":
-                    conversionSuccess = true;
-                    style = HourCycle.H12;
-                    break;
-                case "h23":
-                    conversionSuccess = true;
-                    style = HourCycle.H23;
-                    break;
-                case "h24":
-                    conversionSuccess = true;
-                    style = HourCycle.H24;
-                    break;
-                default:
-                    conversionSuccess = false;
-                    style = default;
-                    break;
-            }
+            var year = fs.Year != null ? 1 : 0;
+            var month = fs.Month != null ? 2 : 0;
+            var day = fs.Day != null ? 4 : 0;
+            var weekDay = fs.Weekday != null ? 8 : 0;
 
-            return conversionSuccess;
+            formatRecognized = (year + month + day + weekDay) switch
+            {
+                1 => DateFormatRecognized.Year,
+                2 => DateFormatRecognized.Month,
+                4 => DateFormatRecognized.Day,
+                8 => DateFormatRecognized.Weekday,
+                3 => DateFormatRecognized.YearMonth,
+                6 => DateFormatRecognized.MonthDay,
+                7 => DateFormatRecognized.Short,
+                15 => DateFormatRecognized.Long,
+                _ => DateFormatRecognized.None,
+            };
+
+            return formatRecognized != DateFormatRecognized.None;
         }
 
         /// <summary>
@@ -750,10 +886,6 @@ namespace Linguini.Shared.Types.Bundle
                 case "short":
                     conversionSuccess = true;
                     style = MonthFormat.Short;
-                    break;
-                case "narrow":
-                    conversionSuccess = true;
-                    style = MonthFormat.Narrow;
                     break;
                 default:
                     conversionSuccess = false;
