@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Linguini.Shared.Types;
@@ -122,70 +123,18 @@ namespace Linguini.Bundle
             switch (dateTimeOptions.GetStyleFields)
             {
                 case DateTimeZoneFormat.Time:
-                    return ExtractTimeFmt(info.LongTimePattern, dateTimeOptions);
+                    return FluentDateTime.ExtractTimeFmt(dateTimeOptions, info);
                 case DateTimeZoneFormat.Date:
-                    return ExtractDateFmt(dateTimeOptions, info);
+                    return FluentDateTime.ExtractDateFmt(dateTimeOptions, info);
                 case DateTimeZoneFormat.DateTime:
-                    var time = ExtractTimeFmt(info.LongTimePattern, dateTimeOptions);;
-                    var dateFmt = ExtractDateFmt(dateTimeOptions, info);
+                    var time = FluentDateTime.ExtractTimeFmt(dateTimeOptions, info);;
+                    var dateFmt = FluentDateTime.ExtractDateFmt(dateTimeOptions, info);
                     return $"{dateFmt} {time}";
             }
 
             return null;
         }
-
-        private static string ExtractTimeFmt(string timeFmt, FluentDateTimeOptions dateTimeOptions)
-        {
-            var newFmtSb = new StringBuilder();
-            var h = dateTimeOptions.Hour12  == true 
-                ? "h" : "H";
-            
-            var hourStr = dateTimeOptions.Hour switch
-            {
-                NumericDateFormat.Numeric => $"{h}",
-                NumericDateFormat.TwoDigit => $"{h}{h}",
-                _ => "",
-            };
-            var minStr = dateTimeOptions.Minute switch
-            {
-                NumericDateFormat.TwoDigit => ":mm",
-                NumericDateFormat.Numeric => ":m",
-                _ => "",
-            };
-            var secStr = dateTimeOptions.Second switch
-            {
-                NumericDateFormat.TwoDigit => ":ss",
-                NumericDateFormat.Numeric => ":s",
-                _ => "",
-            };
-            var fracStr = dateTimeOptions.FractionalSecondsDigit switch
-            {
-                FractionalSecodsDigit.OneDigit => ".f",
-                FractionalSecodsDigit.TwoDigits => ".f",
-                FractionalSecodsDigit.ThreeDigits => ".f",
-                _ => ""
-            };
-            var dayPart =  dateTimeOptions.Hour12 == true ? " tt" : "";
-            newFmtSb.Append(hourStr);
-            newFmtSb.Append(minStr);
-            newFmtSb.Append(secStr);
-            newFmtSb.Append(fracStr);
-            newFmtSb.Append(dayPart);
-
-
-            return newFmtSb.ToString();
-        }
         
-        private static string ExtractDateFmt(FluentDateTimeOptions dateTimeOptions, DateTimeFormatInfo info)
-        {
-            var newTimeFmt = info.FullDateTimePattern;
-            if (dateTimeOptions.Hour12 == true)
-            {
-                newTimeFmt += " tt";
-            }
-
-            return newTimeFmt;
-        }
 
         private static void FormatDate(StringBuilder sb, DateTimeFormatInfo dateTimeFormatInfo,
             DateTimeRepresentation? dateStyle)
@@ -460,7 +409,6 @@ namespace Linguini.Bundle
         private static string FormatPercent(FluentNumberOptions numberOptions, ref NumberFormatInfo numberFormatInfo)
         {
             var percentBuilder = new StringBuilder();
-            var currencyBuilder = new StringBuilder();
             var n = new StringBuilder();
             var percent = numberFormatInfo.PercentSymbol;
 
@@ -470,96 +418,96 @@ namespace Linguini.Bundle
             switch (numberFormatInfo.PercentPositivePattern)
             {
                 case 0:
-                    currencyBuilder.Append(n);
-                    currencyBuilder.Append(' ');
-                    currencyBuilder.Append(percent);
+                    percentBuilder.Append(n);
+                    percentBuilder.Append(' ');
+                    percentBuilder.Append(percent);
                     break;
                 case 1:
-                    currencyBuilder.Append(n);
-                    currencyBuilder.Append(percent);
+                    percentBuilder.Append(n);
+                    percentBuilder.Append(percent);
                     break;
                 case 2:
-                    currencyBuilder.Append(percent);
-                    currencyBuilder.Append(n);
+                    percentBuilder.Append(percent);
+                    percentBuilder.Append(n);
                     break;
                 default:
-                    currencyBuilder.Append(percent);
-                    currencyBuilder.Append(' ');
-                    currencyBuilder.Append(n);
+                    percentBuilder.Append(percent);
+                    percentBuilder.Append(' ');
+                    percentBuilder.Append(n);
                     break;
             }
 
-            currencyBuilder.Append(';');
+            percentBuilder.Append(';');
 
 
             var minus = numberFormatInfo.NegativeSign;
             switch (numberFormatInfo.PercentNegativePattern)
             {
                 case 0:
-                    currencyBuilder.Append(minus);
-                    currencyBuilder.Append(n);
-                    currencyBuilder.Append(' ');
-                    currencyBuilder.Append(percent);
+                    percentBuilder.Append(minus);
+                    percentBuilder.Append(n);
+                    percentBuilder.Append(' ');
+                    percentBuilder.Append(percent);
                     break;
                 case 1:
-                    currencyBuilder.Append(minus);
-                    currencyBuilder.Append(n);
-                    currencyBuilder.Append(percent);
+                    percentBuilder.Append(minus);
+                    percentBuilder.Append(n);
+                    percentBuilder.Append(percent);
                     break;
                 case 2:
-                    currencyBuilder.Append(minus);
-                    currencyBuilder.Append(percent);
-                    currencyBuilder.Append(n);
+                    percentBuilder.Append(minus);
+                    percentBuilder.Append(percent);
+                    percentBuilder.Append(n);
                     break;
                 case 3:
-                    currencyBuilder.Append(percent);
-                    currencyBuilder.Append(minus);
-                    currencyBuilder.Append(n);
+                    percentBuilder.Append(percent);
+                    percentBuilder.Append(minus);
+                    percentBuilder.Append(n);
                     break;
                 case 4:
-                    currencyBuilder.Append(percent);
-                    currencyBuilder.Append(n);
-                    currencyBuilder.Append(minus);
+                    percentBuilder.Append(percent);
+                    percentBuilder.Append(n);
+                    percentBuilder.Append(minus);
                     break;
                 case 5:
-                    currencyBuilder.Append(n);
-                    currencyBuilder.Append(minus);
-                    currencyBuilder.Append(percent);
+                    percentBuilder.Append(n);
+                    percentBuilder.Append(minus);
+                    percentBuilder.Append(percent);
                     break;
                 case 6:
-                    currencyBuilder.Append(n);
-                    currencyBuilder.Append(percent);
-                    currencyBuilder.Append(minus);
+                    percentBuilder.Append(n);
+                    percentBuilder.Append(percent);
+                    percentBuilder.Append(minus);
                     break;
                 case 7:
-                    currencyBuilder.Append(minus);
-                    currencyBuilder.Append(percent);
-                    currencyBuilder.Append(' ');
-                    currencyBuilder.Append(n);
+                    percentBuilder.Append(minus);
+                    percentBuilder.Append(percent);
+                    percentBuilder.Append(' ');
+                    percentBuilder.Append(n);
                     break;
                 case 8:
-                    currencyBuilder.Append(n);
-                    currencyBuilder.Append(' ');
-                    currencyBuilder.Append(percent);
-                    currencyBuilder.Append(minus);
+                    percentBuilder.Append(n);
+                    percentBuilder.Append(' ');
+                    percentBuilder.Append(percent);
+                    percentBuilder.Append(minus);
                     break;
                 case 9:
-                    currencyBuilder.Append(percent);
-                    currencyBuilder.Append(' ');
-                    currencyBuilder.Append(n);
-                    currencyBuilder.Append(minus);
+                    percentBuilder.Append(percent);
+                    percentBuilder.Append(' ');
+                    percentBuilder.Append(n);
+                    percentBuilder.Append(minus);
                     break;
                 case 10:
-                    currencyBuilder.Append(percent);
-                    currencyBuilder.Append(' ');
-                    currencyBuilder.Append(minus);
-                    currencyBuilder.Append(n);
+                    percentBuilder.Append(percent);
+                    percentBuilder.Append(' ');
+                    percentBuilder.Append(minus);
+                    percentBuilder.Append(n);
                     break;
                 default:
-                    currencyBuilder.Append(n);
-                    currencyBuilder.Append(minus);
-                    currencyBuilder.Append(' ');
-                    currencyBuilder.Append(percent);
+                    percentBuilder.Append(n);
+                    percentBuilder.Append(minus);
+                    percentBuilder.Append(' ');
+                    percentBuilder.Append(percent);
                     break;
             }
 
@@ -588,6 +536,15 @@ namespace Linguini.Bundle
             return a < b
                 ? 0
                 : a - b;
+        }
+
+        /// <summary>
+        /// Clones the current context into a new instance.
+        /// </summary>
+        /// <returns>Cloned instance</returns>
+        public FluentContext Clone()
+        {
+            return new FluentContext(Locale, NumberOptions, DateTimeOptions);
         }
     }
 }

@@ -30,17 +30,37 @@ namespace Linguini.Bundle.Function
         public static IFluentType Number(IList<IFluentType> args, IDictionary<string, IFluentType> namedArgs)
         {
             var num = args[0].ToFluentNumber();
-            if (num != null)
-            {
-                if (namedArgs.Count > 0)
-                {
-                    var numOptions = FluentNumberOptions.ToNumberOption(namedArgs);
-                }
 
-                return num;
-            }
+            if (num == null) return new FluentErrType();
+            if (namedArgs.Count <= 0) return num;
 
-            return new FluentErrType();
+            var numOptions = FluentNumberOptions.ToNumberOption(namedArgs);
+            return num.WithFormatting(numOptions);
+        }
+
+        /// <summary>
+        ///     Converts the first argument to a <see cref="FluentNumber" /> if possible and merges
+        ///     any additional named arguments. If the conversion fails, returns a <see cref="FluentErrType" />.
+        /// </summary>
+        /// <param name="args">
+        ///     A list of <see cref="IFluentType" /> arguments. The first argument is expected
+        ///     to be convertible to a <see cref="FluentNumber" />.
+        /// </param>
+        /// <param name="namedArgs">
+        ///     A dictionary of named arguments where the key is the argument name and the
+        ///     value is the corresponding <see cref="IFluentType" />.
+        /// </param>
+        /// <returns>
+        ///     Returns the converted <see cref="FluentNumber" /> if successful, or a <see cref="FluentErrType" />
+        ///     if the conversion fails.
+        /// </returns>
+        public static IFluentType DateTime(IList<IFluentType> args, IDictionary<string, IFluentType> namedArgs)
+        {
+            var num = args[0].ToFluentDate();
+            if (num == null) return new FluentErrType();
+            if (namedArgs.Count <= 0) return num;
+            var numOptions = FluentDateTimeOptions.ToDateOptions(namedArgs);
+            return num.WithFormatting(numOptions);
         }
 
         /// <summary>

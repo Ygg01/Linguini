@@ -34,5 +34,20 @@ namespace Linguini.Bundle.Types
 
             return null;
         }
+        
+        /// <summary>
+        /// Attempts to cast the specified <see cref="IFluentType"/> to a <see cref="FluentDateTime"/>.
+        /// </summary>
+        /// <param name="fluentType">The <see cref="IFluentType"/> instance to cast.</param>
+        /// <returns>A <see cref="FluentDateTime"/> instance if the cast is successful, otherwise null.</returns>
+        public static FluentDateTime? ToFluentDate(this IFluentType fluentType)
+        {
+            if (fluentType is FluentDateTime type)
+            {
+                return type;
+            }
+
+            return null;
+        }
     }
 }

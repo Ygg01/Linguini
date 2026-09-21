@@ -38,6 +38,16 @@ namespace Linguini.Shared.Types.Bundle
             Options = options;
         }
 
+        /// <summary>
+        /// Creates a new <see cref="FluentDateTime"/> instance with the specified formatting options applied.
+        /// </summary>
+        /// <param name="options">The formatting options to apply to the new <see cref="FluentDateTime"/> instance.</param>
+        /// <returns>A new <see cref="FluentDateTime"/> instance with the provided formatting options.</returns>
+        public FluentDateTime WithFormatting(FluentDateTimeOptions options)
+        {
+            return new FluentDateTime(Date, options);
+        }
+
         /// <inheritdoc/>
         public string AsString(IFluentContext context)
         {
@@ -84,14 +94,14 @@ namespace Linguini.Shared.Types.Bundle
             switch (context.DateTimeOptions.GetStyleFields)
             {
                 case DateTimeZoneFormat.Time:
-                    context.DateFormatStr = ExtractTimeFmt(context);
+                    context.DateFormatStr = ExtractTimeFmt(context.DateTimeOptions, context.DateFormatInfo);
                     break;
                 case DateTimeZoneFormat.Date:
-                    context.DateFormatStr = ExtractDateFmt(context);
+                    context.DateFormatStr = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
                     break;
                 case DateTimeZoneFormat.DateTime:
-                    var time = ExtractDateFmt(context);
-                    var date  = ExtractDateFmt(context);
+                    var time = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
+                    var date  = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
                     context.DateFormatStr = $"{date} {time}";
                     break;
                 default:
@@ -102,20 +112,20 @@ namespace Linguini.Shared.Types.Bundle
             return Date.ToString(context.DateFormatStr, context.DateFormatInfo);
         }
 
-        private static string ExtractTimeFmt(IFluentContext context)
+        public static string ExtractTimeFmt(FluentDateTimeOptions dateTimeOptions, DateTimeFormatInfo info)
         {
             var timeFmt = new StringBuilder();
-            var h = context.DateTimeOptions.Hour12  == true 
+            var h = dateTimeOptions.Hour12  == true 
                 ? "h" : "H";
 
 
-            var hourStr = context.DateTimeOptions.Hour switch
+            var hourStr = dateTimeOptions.Hour switch
             {
                 NumericDateFormat.Numeric => $"{h}",
                 NumericDateFormat.TwoDigit => $"{h}{h}",
                 _ => null,
             };
-            var minStr = (context.DateTimeOptions.Minute, hourStr == null) switch
+            var minStr = (dateTimeOptions.Minute, hourStr == null) switch
             {
                 (NumericDateFormat.TwoDigit, true) => "mm",
                 (NumericDateFormat.TwoDigit, false) => ":mm",
@@ -123,7 +133,7 @@ namespace Linguini.Shared.Types.Bundle
                 (NumericDateFormat.Numeric, false) => ":m",
                 _ => null,
             };
-            var secStr = (context.DateTimeOptions.Second, minStr == null) switch
+            var secStr = (dateTimeOptions.Second, minStr == null) switch
             {
                 (NumericDateFormat.TwoDigit, true) => "ss",
                 (NumericDateFormat.TwoDigit, false) => ":ss",
@@ -132,7 +142,7 @@ namespace Linguini.Shared.Types.Bundle
                 _ => null,
             };
             
-            var fracStr = context.DateTimeOptions.FractionalSecondsDigit switch
+            var fracStr = dateTimeOptions.FractionalSecondsDigit switch
             {
                 FractionalSecodsDigit.OneDigit => ".f",
                 FractionalSecodsDigit.TwoDigits => ".f",
@@ -143,7 +153,7 @@ namespace Linguini.Shared.Types.Bundle
             timeFmt.Append(minStr);
             timeFmt.Append(secStr);
             timeFmt.Append(fracStr);
-            if (context.DateTimeOptions.Hour12 == true)
+            if (dateTimeOptions.Hour12 == true)
             {
                 timeFmt.Append(" tt");
             }
@@ -151,9 +161,9 @@ namespace Linguini.Shared.Types.Bundle
             return timeFmt.ToString();
         }
 
-        private static string ExtractDateFmt(IFluentContext context)
+        public static string ExtractDateFmt(FluentDateTimeOptions dateTimeOptions, DateTimeFormatInfo info)
         {
-            if (!context.DateTimeOptions.TryGetRecognizedDate(out var recognizedDate))
+            if (!dateTimeOptions.TryGetRecognizedDate(out var recognizedDate))
             {
                 return "";
             }
@@ -163,19 +173,19 @@ namespace Linguini.Shared.Types.Bundle
                 DateFormatRecognized.Year => "yyyy",
                 DateFormatRecognized.Month => "MM",
                 DateFormatRecognized.Day => "dd",
-                DateFormatRecognized.YearMonth => context.DateFormatInfo.YearMonthPattern,
-                DateFormatRecognized.MonthDay => context.DateFormatInfo.MonthDayPattern,
-                DateFormatRecognized.Short => context.DateFormatInfo.ShortDatePattern,
-                DateFormatRecognized.Long => context.DateFormatInfo.LongTimePattern,
+                DateFormatRecognized.YearMonth => info.YearMonthPattern,
+                DateFormatRecognized.MonthDay => info.MonthDayPattern,
+                DateFormatRecognized.Short => info.ShortDatePattern,
+                DateFormatRecognized.Long => info.LongTimePattern,
                 _ => "",
             };
-            var yearFmt = context.DateTimeOptions.Year switch
+            var yearFmt = dateTimeOptions.Year switch
             {
                 NumericDateFormat.Numeric => "yyyy",
                 NumericDateFormat.TwoDigit => "yy",
                 _ => "",
             };
-            var monthFmt = context.DateTimeOptions.Month switch
+            var monthFmt = dateTimeOptions.Month switch
             {
                 MonthFormat.Numeric => "M",
                 MonthFormat.TwoDigit => "MM",
@@ -184,14 +194,14 @@ namespace Linguini.Shared.Types.Bundle
                 _ => "",
             };
 
-            var dayFmt = context.DateTimeOptions.Day switch
+            var dayFmt = dateTimeOptions.Day switch
             {
                 NumericDateFormat.Numeric => "d",
                 NumericDateFormat.TwoDigit => "dd",
                 _ => "",
             };
             
-            var weekDayFmt = context.DateTimeOptions.Weekday switch
+            var weekDayFmt = dateTimeOptions.Weekday switch
             {
                 DateTextFormat.Long => "dddd",
                 DateTextFormat.Short => "ddd",
@@ -285,6 +295,16 @@ namespace Linguini.Shared.Types.Bundle
         public override int GetHashCode()
         {
             return Date.GetHashCode();
+        }
+
+        /// <summary>
+        /// Implicitly converts a <see cref="DateTimeOffset"/> to a <see cref="FluentDateTime"/> instance.
+        /// </summary>
+        /// <param name="input">The <see cref="DateTimeOffset"/> value to be converted.</param>
+        /// <returns>A new <see cref="FluentDateTime"/> instance initialized with the specified <see cref="DateTimeOffset"/> value.</returns>
+        public static implicit operator FluentDateTime(DateTimeOffset input)
+        {
+            return new FluentDateTime(input, null);
         }
     }
 
@@ -778,7 +798,6 @@ namespace Linguini.Shared.Types.Bundle
         /// </returns>
         internal static bool TryGetRecognizedDate(this FluentDateTimeOptions fs, out DateFormatRecognized formatRecognized)
         {
-            bool conversionSuccess;
             var year = fs.Year != null ? 1 : 0;
             var month = fs.Month != null ? 2 : 0;
             var day = fs.Day != null ? 4 : 0;

@@ -31,10 +31,31 @@ namespace Linguini.Shared.Types.Bundle
         /// Numerical value of fluent number, depicted using IEEE 754 64-bit floating number.
         /// </summary>
         public readonly double Value;
+        
+        /// <summary>
+        /// Numerical options of fluent number.
+        /// </summary>
+        public readonly FluentNumberOptions? Options;
 
         private readonly PluralOperands? _operands;
 
+        private FluentNumber(double value, PluralOperands? pluralOperands, FluentNumberOptions? options = null)
+        {
+            Value = value;
+            _operands = pluralOperands;
+            Options = options;
+        }
 
+        /// <summary>
+        /// Creates a new <see cref="FluentNumber"/> instance with the specified formatting options applied.
+        /// </summary>
+        /// <param name="options">The formatting options to apply to the new <see cref="FluentNumber"/> instance.</param>
+        /// <returns>A new <see cref="FluentNumber"/> instance with the provided formatting options.</returns>
+        public FluentNumber WithFormatting(FluentNumberOptions options)
+        {
+            return new FluentNumber(Value, _operands, options);
+        }
+        
         private FluentNumber(double value)
         {
             var parsedDbl = value.ToString(CultureInfo.InvariantCulture.NumberFormat);
@@ -44,6 +65,7 @@ namespace Linguini.Shared.Types.Bundle
             }
 
             Value = value;
+            Options = null;
         }
 
         private FluentNumber(ReadOnlySpan<char> input)
@@ -55,6 +77,7 @@ namespace Linguini.Shared.Types.Bundle
 
             _operands = ops;
             Value = ops.N;
+            Options = null;
         }
 
 
