@@ -95,6 +95,7 @@ namespace Linguini.Shared.Types
         /// </summary>
         public readonly long C;
 
+        public bool IsInteger => F == 0 && W == 0;
 
         /// Represents the operands used for pluralization rules.
         /// This class encapsulates numeric values in different formats which are

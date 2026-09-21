@@ -74,7 +74,7 @@ namespace Linguini.Bundle
             Messages = bundle.GetMessagesDictionary().ToFrozenDictionary();
             Terms = bundle.GetTermsDictionary().ToFrozenDictionary();
             Functions = bundle.GetFunctionDictionary().ToFrozenDictionary();
-            InternalContext = new FluentContext(Culture);
+            InternalContext = new FluentContext(LangLocId.FromCultureInfo(Culture));
         }
 #elif NET6_0_OR_GREATER
         internal FrozenBundle(FluentBundle bundle)
@@ -89,7 +89,7 @@ namespace Linguini.Bundle
             Messages = bundle.GetMessagesDictionary().ToImmutableDictionary();
             Terms = bundle.GetTermsDictionary().ToImmutableDictionary();
             Functions = bundle.GetFunctionDictionary().ToImmutableDictionary();
-            InternalContext = new FluentContext(Culture);
+            InternalContext = new FluentContext(LangLocId.FromCultureInfo(Culture));
         }
 #else
         internal FrozenBundle(FluentBundle bundle)
@@ -104,7 +104,7 @@ namespace Linguini.Bundle
             Messages = new Dictionary<string, AstMessage>(bundle.GetMessagesDictionary());
             Terms = new Dictionary<string, AstTerm>(bundle.GetTermsDictionary());
             Functions = new Dictionary<string, FluentFunction>(bundle.GetFunctionDictionary());
-            InternalContext = new FluentContext(Culture);
+            InternalContext = new FluentContext(LangLocId.FromCultureInfo(Culture));
         }
 #endif
         /// <inheritdoc/>

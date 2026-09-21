@@ -67,8 +67,13 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc/>
         public string AsString(IFluentContext context)
         {
+            var fractionsDigits = context.NumberOptions.MinimumFractionDigits == null
+                ? _operands != null 
+                    ? (int)_operands.F
+                    : null 
+                : (int?)context.NumberOptions.MinimumFractionDigits;
             return context.NumFormatStr == null
-                ? Value.ToString(context.NumberOptions.Style.ToFormat(), context.NumberFormatInfo)
+                ? Value.ToString(context.NumberOptions.Style.ToFormat(fractionsDigits), context.NumberFormatInfo)
                 : Value.ToString(context.NumFormatStr, context.NumberFormatInfo);
         }
 
@@ -474,14 +479,15 @@ namespace Linguini.Shared.Types.Bundle
         /// Converts a <see cref="FluentNumberStyle"/> enumeration to its corresponding format string representation.
         /// </summary>
         /// <param name="style">The <see cref="FluentNumberStyle"/> value to be converted.</param>
+        /// <param name="fractionalDigit">The <see cref="PluralOperands"/> operand value.</param>
         /// <returns>A format string representing the specified <see cref="FluentNumberStyle"/>.</returns>
-        public static string ToFormat(this FluentNumberStyle style)
+        public static string ToFormat(this FluentNumberStyle style, int? fractionalDigit = null)
         {
             return style switch
             {
                 FluentNumberStyle.Currency => "C",
                 FluentNumberStyle.Percent => "P",
-                _ => "F"
+                _ => fractionalDigit != null ? $"F{fractionalDigit}" : "F"
             };
         }
     }
