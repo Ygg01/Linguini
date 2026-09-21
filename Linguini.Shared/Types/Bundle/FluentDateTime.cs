@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
 using Linguini.Shared.Util;
 
 namespace Linguini.Shared.Types.Bundle
@@ -38,29 +41,114 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc/>
         public string AsString(IFluentContext context)
         {
-            var hour = Date.Hour;
-            if (context.DateTimeOptions != null)
+            // Can we reuse a formatter?
+            if (context.DateTimeOptions.CanUseDefaultFormatter)
             {
-                switch (context.DateTimeOptions.HourCycle)
-                {
-                    case HourCycle.H11:
-                        hour %= 12;
-                        break;
-                    case HourCycle.H12:
-                        hour %= 12;
-                        hour += 1;
-                        break;
-                    case HourCycle.H23:
-                        hour %= 24;
-                        break;
-                    case HourCycle.H24:
-                        hour += 1;
-                        break;
-                }
-            }
-            var weekday = Date.DayOfWeek;
+                var fmt = new StringBuilder();
 
-            throw new NotImplementedException();
+                if (context.DateTimeOptions.GetStyleFormat == DateTimeZoneFormat.Date)
+                {
+                    FormatDate(fmt, context.DateFormatInfo, context.DateTimeOptions.DateStyle);
+                }
+                else if (context.DateTimeOptions.GetStyleFormat == DateTimeZoneFormat.Time)
+                {
+                    FormatTime(fmt, context.DateFormatInfo, context.DateTimeOptions.TimeStyle);
+                }
+                else if (context.DateTimeOptions.GetStyleFormat == DateTimeZoneFormat.DateTime &&
+                         (context.DateTimeOptions.DateStyle == DateTimeRepresentation.Full ||
+                          context.DateTimeOptions.TimeStyle == DateTimeRepresentation.Full))
+                {
+                    fmt.Append(context.DateFormatInfo.FullDateTimePattern);
+                }
+                else
+                {
+                    FormatDate(fmt, context.DateFormatInfo, context.DateTimeOptions.DateStyle);
+                    fmt.Append(" ");
+                    FormatTime(fmt, context.DateFormatInfo, context.DateTimeOptions.TimeStyle);
+                }
+                
+                return Date.ToString(fmt.ToString(), context.DateFormatInfo);
+            }
+
+            return FullFormatDateTime(context);
+        }
+        
+        
+        private string FullFormatDateTime(IFluentContext context)
+        {
+            if (context.DateFormatStr != null)
+            {
+                return Date.ToString(context.DateFormatInfo.FullDateTimePattern, context.DateFormatInfo);
+            }
+            
+            if (context.DateTimeOptions.GetStyleFields == DateTimeZoneFormat.Time)
+            {
+                context.DateFormatInfo.FullDateTimePattern = ExtractTimeFmt(context);
+            }
+
+            return Date.ToString(context.DateFormatInfo.FullDateTimePattern, context.DateFormatInfo);
+        }
+
+        private static string ExtractTimeFmt(IFluentContext context)
+        {
+            var timeFmt = context.DateFormatInfo.LongTimePattern;
+            var h = context.DateTimeOptions.Hour12  == true 
+                ? "h" : "H";
+            var hourStr = context.DateTimeOptions.Hour == NumericDateFormat.TwoDigit ? $"{h}{h}" : $"{h}";
+            var minStr = context.DateTimeOptions.Minute == NumericDateFormat.TwoDigit ? "mm" : "m";
+            var secStr = context.DateTimeOptions.Minute == NumericDateFormat.TwoDigit ? "ss" : "s";
+            var fracStr = context.DateTimeOptions.FractionalSecondsDigit switch
+            {
+                FractionalSecodsDigit.OneDigit => ".f",
+                FractionalSecodsDigit.TwoDigits => ".f",
+                FractionalSecodsDigit.ThreeDigits => ".f",
+                _ => ""
+            };
+            var newTimeFmt = Regex.Replace(timeFmt, "(h|H){1,2}", hourStr);
+            newTimeFmt = Regex.Replace(newTimeFmt, "m{1,2}", minStr);
+            newTimeFmt = Regex.Replace(newTimeFmt, "s{1,2}", secStr + fracStr);
+            if (context.DateTimeOptions.Hour12 == true)
+            {
+                newTimeFmt += " tt";
+            }
+
+            return newTimeFmt;
+        }
+
+        private void FormatDate(StringBuilder sb, DateTimeFormatInfo dateTimeFormatInfo,
+            DateTimeRepresentation? dateStyle)
+        {
+            switch (dateStyle)
+            {
+                case DateTimeRepresentation.Full:
+                case DateTimeRepresentation.Long:
+                    sb.Append(dateTimeFormatInfo.LongDatePattern);
+                    break;
+                case DateTimeRepresentation.Medium:
+                    sb.Append(Date.ToString(dateTimeFormatInfo));
+                    break;
+                case DateTimeRepresentation.Short:
+                    sb.Append(Date.ToString(dateTimeFormatInfo.ShortDatePattern, dateTimeFormatInfo));
+                    break;
+            }
+        }
+
+        private void FormatTime(StringBuilder sb, DateTimeFormatInfo dateTimeFormatInfo,
+            DateTimeRepresentation? timeStyle)
+        {
+            switch (timeStyle)
+            {
+                case DateTimeRepresentation.Full:
+                case DateTimeRepresentation.Long:
+                    sb.Append(Date.ToString(dateTimeFormatInfo.LongTimePattern, dateTimeFormatInfo));
+                    break;
+                case DateTimeRepresentation.Medium:
+                    sb.Append(Date.ToString(dateTimeFormatInfo));
+                    break;
+                case DateTimeRepresentation.Short:
+                    sb.Append(Date.ToString(dateTimeFormatInfo.ShortDatePattern, dateTimeFormatInfo));
+                    break;
+            }
         }
 
         /// <inheritdoc/>
@@ -127,71 +215,112 @@ namespace Linguini.Shared.Types.Bundle
         /// locale-dependent. When true, this option sets hourCycle to either "h11" or "h12"
         /// </summary>
         public bool? Hour12;
-
-        /// <summary>
-        /// How hours are displayed depends on the hourCycle option.
-        /// </summary>
-        public HourCycle HourCycle;
+        
 
         /// <summary>
         /// Determines the representation style of the day of the week in a formatted date.
         /// Possible values are "Long", "Short", and "Narrow", as defined in the <see cref="DateTextFormat"/> enumeration.
         /// </summary>
-        public DateTextFormat Weekday;
-        
+        public DateTextFormat? Weekday;
+
 
         /// <summary>
         /// Specifies the representation style for the year value.
         /// Possible values include "Numeric" and "TwoDigit", determining how the year should be displayed.
         /// E.g., for the year 1999, "Numeric" would display <c>1999</c> while "TwoDigit" would display <c>99</c>.
         /// </summary>
-        public NumericDateFormat Year;
+        public NumericDateFormat? Year;
 
         /// <summary>
         /// Specifies the representation of the month in date/time formatting.
         /// Possible values are "Numeric", "TwoDigit", "Long", "Short", and "Narrow". 
         /// </summary>
-        public MonthFormat Month;
+        public MonthFormat? Month;
 
         /// <summary>
         /// Specifies the representation style for the day value.
         /// Possible values include "Numeric" and "TwoDigit", determining how the day should be displayed.
-        /// E.g., for the 9th day of month, "Numeric" would display <c>9</c> while "TwoDigit" would display <c>09</c>.
+        /// E.g., for the 9th day of a month, "Numeric" would display <c>9</c> while "TwoDigit" would display <c>09</c>.
         /// </summary>
-        public NumericDateFormat Day;
+        public NumericDateFormat? Day;
 
         /// <summary>
         /// Specifies the formatting style for the hour in date and time representations.
         /// Possible values include "Numeric" and "TwoDigit", determining how the day should be displayed.
         /// E.g., for the 9th hour of the day, "Numeric" would display <c>9</c> while "TwoDigit" would display <c>09</c>.
         /// </summary>
-        public NumericDateFormat Hour;
+        public NumericDateFormat? Hour;
 
         /// <summary>
         /// Specifies the formatting style for the minute in date and time representations.
         /// Possible values include "Numeric" and "TwoDigit", determining how the day should be displayed.
         /// </summary>
-        public NumericDateFormat Minute;
+        public NumericDateFormat? Minute;
 
         /// <summary>
         /// Specifies the formatting style for the seconds in date and time representations.
         /// Possible values include "Numeric" and "TwoDigit", determining how the day should be displayed.
         /// E.g., for the 2nd hour of the day, "Numeric" would display <c>2</c> while "TwoDigit" would display <c>02</c>.
         /// </summary>
-        public NumericDateFormat Second;
+        public NumericDateFormat? Second;
 
         /// <summary>
         /// The number of digits used to represent fractions of a second (any additional digits are truncated). Possible values are from 1 to 3.
         /// </summary>
-        public FractionalSecodsDigit FractionalSecondsDigit;
+        public FractionalSecodsDigit? FractionalSecondsDigit;
 
         /// <summary>
         /// Represents the format in which the time zone name is displayed.
         /// Possible values include "Long", "Short", "ShortOffset", "LongOffset", "ShortGeneric", and "LongGeneric".
         /// </summary>
-        public TimeZoneRepresentation TimeZoneName;
+        public TimeZoneRepresentation? TimeZoneName;
 
         #endregion
+
+
+        #region Style
+
+        /// <summary>
+        /// Specifies the style used to represent a date in text formatting.
+        /// </summary>
+        public DateTimeRepresentation? DateStyle;
+
+        /// <summary>
+        /// Specifies the style used to represent a time in text formatting.
+        /// </summary>
+        public DateTimeRepresentation? TimeStyle;
+
+        #endregion
+
+        /// <summary>
+        /// Can use the default formatter.
+        /// </summary>
+        public bool CanUseDefaultFormatter => Year == null && Weekday == null && Month == null
+                                                && Day == null && Hour == null &&  Hour12 == null
+                                                && Minute == null && Second == null && FractionalSecondsDigit == null;
+
+        /// <summary>
+        /// If <see cref="DateStyle"/> and/or <see cref="TimeStyle"/> is populated>.
+        /// </summary>
+        public DateTimeZoneFormat GetStyleFormat =>
+            DateStyle != null && TimeStyle != null
+                ? DateTimeZoneFormat.DateTime
+                : DateStyle != null
+                    ? DateTimeZoneFormat.Date
+                    : DateTimeZoneFormat.Time;
+
+        /// <summary>
+        /// Helper to pick a date/time format to customize.
+        /// </summary>
+        public DateTimeZoneFormat GetStyleFields
+        {
+            get
+            {
+                var time = (Hour != null || Minute != null || Second != null || FractionalSecondsDigit != null) ? 2 : 0;
+                var date = (Year != null || Month != null || Day != null || Weekday != null) ? 1 : 0;
+                return (DateTimeZoneFormat)(date + time);
+            }
+        }
 
         /// <summary>
         /// Converts a dictionary of named arguments into an instance of <see cref="FluentDateTimeOptions"/>.
@@ -215,18 +344,13 @@ namespace Linguini.Shared.Types.Bundle
                 }
             }
 
-            if (namedArgs.TryGetValue("hourCycle", out var ft2) &&
-                ft2 is FluentString hourCycleStr && hourCycleStr.TryIntoHourCycle(out var hourCycleValue))
-            {
-                dateTimeOptions.HourCycle = hourCycleValue;
-            }
 
             if (namedArgs.TryGetValue("weekday", out var ft3) &&
                 ft3 is FluentString weekdayStr && weekdayStr.TryIntoDateTextFormat(out var weekday))
             {
                 dateTimeOptions.Weekday = weekday;
             }
-            
+
 
             if (namedArgs.TryGetValue("year", out var ft5) &&
                 ft5 is FluentString yearStr && yearStr.TryIntoNumericFormat(out var year))
@@ -275,6 +399,21 @@ namespace Linguini.Shared.Types.Bundle
             {
                 dateTimeOptions.TimeZoneName = timeZoneName;
             }
+
+            if (namedArgs.TryGetValue("dateStyle", out var ft13) &&
+                ft13 is FluentString dateStyleReprStr &&
+                dateStyleReprStr.TryIntoDateTimeRepresentation(out var dateStyleRepr))
+            {
+                dateTimeOptions.DateStyle = dateStyleRepr;
+            }
+
+            if (namedArgs.TryGetValue("timeStyle", out var ft14) &&
+                ft14 is FluentString timeStyleReprStr &&
+                timeStyleReprStr.TryIntoDateTimeRepresentation(out var timeStyleRepr))
+            {
+                dateTimeOptions.TimeStyle = timeStyleRepr;
+            }
+
 
             return dateTimeOptions;
         }
@@ -355,7 +494,7 @@ namespace Linguini.Shared.Types.Bundle
     public enum MonthFormat : byte
     {
         /// <summary>
-        /// Full numeric representation of month. E.g. <c>1</c> for <c>January</c>.
+        /// Full numeric representation of the month. E.g. <c>1</c> for <c>January</c>.
         /// </summary>
         Numeric = 1,
 
@@ -435,6 +574,53 @@ namespace Linguini.Shared.Types.Bundle
         /// Long generic non-location format (e.g., <c>Pacific Time</c>, <c>Nordamerikanische Westküstenzeit</c>)
         /// </summary>
         LongGeneric = 6
+    }
+
+    /// <summary>
+    /// Which format to use when representing <see cref="FluentDateTime"/>
+    /// </summary>
+    public enum DateTimeZoneFormat : byte
+    {
+        /// <summary>
+        /// The date part.
+        /// </summary>
+        Date = 1,
+
+        /// <summary>
+        /// The time part.
+        /// </summary>
+        Time = 2,
+
+        /// <summary>
+        /// Date and time part.
+        /// </summary>
+        DateTime = 3,
+    }
+
+    /// <summary>
+    /// The localized representation of the date/time.
+    /// </summary>
+    public enum DateTimeRepresentation : byte
+    {
+        /// <summary>
+        /// Full representation of date/time.
+        /// </summary>
+        Full = 1,
+
+        /// <summary>
+        /// Long representation of date/time.
+        /// </summary>
+        Long = 2,
+
+        /// <summary>
+        /// Medium representation of date/time.
+        /// </summary>
+        Medium = 3,
+
+        /// <summary>
+        /// Short representation of date/time.
+        /// </summary>
+        Short = 4,
     }
 
     /// <summary>
@@ -645,6 +831,42 @@ namespace Linguini.Shared.Types.Bundle
                     break;
                 case "longGeneric":
                     style = TimeZoneRepresentation.LongGeneric;
+                    conversionSuccess = true;
+                    break;
+                default:
+                    style = default;
+                    conversionSuccess = false;
+                    break;
+            }
+
+            return conversionSuccess;
+        }
+
+        /// <summary>
+        /// Attempts to convert the current <see cref="FluentString"/> instance into a corresponding <see cref="DateTimeRepresentation"/> value.
+        /// </summary>
+        /// <param name="fs">The <see cref="FluentString"/> instance to convert.</param>
+        /// <param name="style">When the method returns <c>true</c>, contains the <see cref="DateTimeRepresentation"/> value that corresponds to the string representation, if the conversion was successful; otherwise, contains the default value of <see cref="DateTimeRepresentation"/>.</param>
+        /// <returns><c>true</c> if the conversion is successful; otherwise, <c>false</c>.</returns>
+        public static bool TryIntoDateTimeRepresentation(this FluentString fs, out DateTimeRepresentation style)
+        {
+            bool conversionSuccess;
+            switch ((string)fs)
+            {
+                case "full":
+                    style = DateTimeRepresentation.Full;
+                    conversionSuccess = true;
+                    break;
+                case "long":
+                    style = DateTimeRepresentation.Long;
+                    conversionSuccess = true;
+                    break;
+                case "short":
+                    style = DateTimeRepresentation.Short;
+                    conversionSuccess = true;
+                    break;
+                case "medium":
+                    style = DateTimeRepresentation.Medium;
                     conversionSuccess = true;
                     break;
                 default:

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 
@@ -12,6 +13,8 @@ namespace Linguini.Bundle
     /// </summary>
     public class FluentContext : IFluentContext
     {
+        private string? _dateFormatStr;
+
         /// <inheritdoc />
         public LangLocId Locale { get; }
 
@@ -19,16 +22,22 @@ namespace Linguini.Bundle
         public CultureInfo Culture { get; }
 
         /// <inheritdoc />
-        public FluentNumberOptions? NumberOptions { get; }
+        public FluentNumberOptions NumberOptions { get; }
 
         /// <inheritdoc />
-        public FluentDateTimeOptions? DateTimeOptions { get; }
+        public FluentDateTimeOptions DateTimeOptions { get; }
 
         /// <inheritdoc />
-        public string? NumFormatStr { get; }
+        public string? NumFormatStr { get;  }
+
+        /// <inheritdoc />
+        public string? DateFormatStr { get;  }
 
         /// <inheritdoc />
         public NumberFormatInfo NumberFormatInfo { get; }
+
+        /// <inheritdoc />
+        public DateTimeFormatInfo DateFormatInfo { get; }
 
 
         /// <summary>
@@ -37,14 +46,16 @@ namespace Linguini.Bundle
         /// given CultureInfo.
         /// </summary>
         /// <param name="culture">Culture upon which the other fields will be set.</param>
-        public FluentContext(CultureInfo culture)
+        public FluentContext(CultureInfo culture, DateTimeFormatInfo dateFormatInfo)
         {
-            Culture = culture;
+            Culture = (CultureInfo)culture.Clone();
             Locale = LangLocId.FromCultureInfo(Culture);
             NumberOptions = new FluentNumberOptions();
             DateTimeOptions = new FluentDateTimeOptions();
             NumFormatStr = null;
+            DateFormatStr = null;
             NumberFormatInfo = Culture.NumberFormat;
+            DateFormatInfo = Culture.DateTimeFormat;
         }
 
         /// <summary>
@@ -60,14 +71,156 @@ namespace Linguini.Bundle
         {
             Culture = (CultureInfo)CultureInfo.GetCultureInfo(locale.ToString()).Clone();
             Locale = locale;
-            NumberOptions = numberOptions;
-            DateTimeOptions = dateTimeOptions;
-            var info = Culture.NumberFormat;
-            NumberFormatInfo = Culture.NumberFormat;
-            // TODO set from Fluent options
-            NumFormatStr = ProcessNumberOptions(numberOptions, ref info);
+            var numInfo = Culture.NumberFormat;
+            var dateInfo = Culture.DateTimeFormat;
+            NumberOptions = numberOptions ?? new FluentNumberOptions();
+            DateTimeOptions = dateTimeOptions ?? new FluentDateTimeOptions();
+
+            NumFormatStr = ProcessNumberOptions(NumberOptions, ref numInfo);
+            DateFormatStr = ProcessDateTimeOptions(DateTimeOptions, ref dateInfo);
+            Culture.DateTimeFormat = dateInfo;
+            Culture.NumberFormat = numInfo;
+            DateFormatInfo = dateInfo;
+            NumberFormatInfo = numInfo;
         }
 
+        private static string? ProcessDateTimeOptions(FluentDateTimeOptions dateTimeOptions, ref DateTimeFormatInfo info)
+        {
+            if (dateTimeOptions.CanUseDefaultFormatter)
+            {
+                var fmt = new StringBuilder();
+
+                if (dateTimeOptions.GetStyleFormat == DateTimeZoneFormat.Date)
+                {
+                    FormatDate(fmt, info, dateTimeOptions.DateStyle);
+                }
+                else if (dateTimeOptions.GetStyleFormat == DateTimeZoneFormat.Time)
+                {
+                    FormatTime(fmt, info, dateTimeOptions.TimeStyle);
+                }
+                else if (dateTimeOptions.GetStyleFormat == DateTimeZoneFormat.DateTime &&
+                         (dateTimeOptions.DateStyle == DateTimeRepresentation.Full ||
+                          dateTimeOptions.TimeStyle == DateTimeRepresentation.Full))
+                {
+                    fmt.Append(info.FullDateTimePattern);
+                }
+                else
+                {
+                    FormatDate(fmt, info, dateTimeOptions.DateStyle);
+                    fmt.Append(" ");
+                    FormatTime(fmt, info, dateTimeOptions.TimeStyle);
+                }
+                
+                return fmt.ToString();
+            }
+            return FullFormatDateTime(dateTimeOptions, info);
+        }
+
+        private static string? FullFormatDateTime(FluentDateTimeOptions dateTimeOptions, DateTimeFormatInfo info)
+        {
+            
+            switch (dateTimeOptions.GetStyleFields)
+            {
+                case DateTimeZoneFormat.Time:
+                    return ExtractTimeFmt(info.LongTimePattern, dateTimeOptions);
+                case DateTimeZoneFormat.Date:
+                    return ExtractDateFmt(dateTimeOptions, info);
+                case DateTimeZoneFormat.DateTime:
+                    var time = ExtractTimeFmt(info.LongTimePattern, dateTimeOptions);;
+                    var dateFmt = ExtractDateFmt(dateTimeOptions, info);
+                    return $"{dateFmt} {time}";
+            }
+
+            return null;
+        }
+
+        private static string ExtractTimeFmt(string timeFmt, FluentDateTimeOptions dateTimeOptions)
+        {
+            var newFmtSb = new StringBuilder();
+            var h = dateTimeOptions.Hour12  == true 
+                ? "h" : "H";
+            
+            var hourStr = dateTimeOptions.Hour switch
+            {
+                NumericDateFormat.Numeric => $"{h}",
+                NumericDateFormat.TwoDigit => $"{h}{h}",
+                _ => "",
+            };
+            var minStr = dateTimeOptions.Minute switch
+            {
+                NumericDateFormat.TwoDigit => ":mm",
+                NumericDateFormat.Numeric => ":m",
+                _ => "",
+            };
+            var secStr = dateTimeOptions.Second switch
+            {
+                NumericDateFormat.TwoDigit => ":ss",
+                NumericDateFormat.Numeric => ":s",
+                _ => "",
+            };
+            var fracStr = dateTimeOptions.FractionalSecondsDigit switch
+            {
+                FractionalSecodsDigit.OneDigit => ".f",
+                FractionalSecodsDigit.TwoDigits => ".f",
+                FractionalSecodsDigit.ThreeDigits => ".f",
+                _ => ""
+            };
+            var dayPart =  dateTimeOptions.Hour12 == true ? " tt" : "";
+            newFmtSb.Append(hourStr);
+            newFmtSb.Append(minStr);
+            newFmtSb.Append(secStr);
+            newFmtSb.Append(fracStr);
+            newFmtSb.Append(dayPart);
+
+
+            return newFmtSb.ToString();
+        }
+        
+        private static string ExtractDateFmt(FluentDateTimeOptions dateTimeOptions, DateTimeFormatInfo info)
+        {
+            var newTimeFmt = info.FullDateTimePattern;
+            if (dateTimeOptions.Hour12 == true)
+            {
+                newTimeFmt += " tt";
+            }
+
+            return newTimeFmt;
+        }
+
+        private static void FormatDate(StringBuilder sb, DateTimeFormatInfo dateTimeFormatInfo,
+            DateTimeRepresentation? dateStyle)
+        {
+            switch (dateStyle)
+            {
+                case DateTimeRepresentation.Full:
+                case DateTimeRepresentation.Long:
+                    sb.Append(dateTimeFormatInfo.LongDatePattern);
+                    break;
+                case DateTimeRepresentation.Medium:
+                    sb.Append(dateTimeFormatInfo.RFC1123Pattern);
+                    break;
+                case DateTimeRepresentation.Short:
+                    sb.Append(dateTimeFormatInfo.ShortDatePattern);
+                    break;
+            }
+        }
+
+        private static void FormatTime(StringBuilder sb, DateTimeFormatInfo dateTimeFormatInfo,
+            DateTimeRepresentation? timeStyle)
+        {
+            switch (timeStyle)
+            {
+                case DateTimeRepresentation.Full:
+                case DateTimeRepresentation.Long:
+                    sb.Append(dateTimeFormatInfo.LongTimePattern);
+                    break;
+                case DateTimeRepresentation.Medium:
+                case DateTimeRepresentation.Short:
+                    sb.Append(dateTimeFormatInfo.ShortDatePattern);
+                    break;
+            }
+        }
+        
         /// <summary>
         /// Processes the given number formatting options and updates the provided NumberFormatInfo accordingly.
         /// Returns a string representation of the number format pattern if applicable based on the options and style.

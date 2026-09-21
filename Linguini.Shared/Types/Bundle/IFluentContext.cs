@@ -14,17 +14,18 @@ namespace Linguini.Shared.Types.Bundle
         /// It's similar to BCP-47 language tag but doesn't implement the full specification, like the variant subtag.
         /// </summary>
         public LangLocId Locale { get; }
+
         /// <summary>
         /// Culture represents the culture-specific options used during localization. It's set based on the <see cref="Locale"/>.
         /// </summary>
         public CultureInfo Culture { get; }
-        
+
         /// <summary>
         /// NumberOptions represents the Localization-specific options used during number formatting. If present,
         /// it overrides the default options set by the culture.
         /// </summary>
         public FluentNumberOptions NumberOptions { get; }
-        
+
         /// <summary>
         /// DateTimeOptions represents the Localization-specific options used during date-time formatting. If present,
         /// it overrides the default options set by the culture.
@@ -37,11 +38,19 @@ namespace Linguini.Shared.Types.Bundle
         public string? NumFormatStr { get; }
         
         /// <summary>
+        /// Formatting string used to format dates. If present, it overrides the default options set by the <see cref="DateTimeFormatInfo"/>.
+        /// </summary>
+        public string? DateFormatStr { get; }
+        
+        /// <summary>
         /// Number formatter for FluentNumbers
         /// </summary>
         public NumberFormatInfo NumberFormatInfo { get; }
-        
 
+        /// <summary>
+        /// Date formatter for FluentDates
+        /// </summary>
+        public DateTimeFormatInfo DateFormatInfo { get; }
     }
 
     /// <summary>
@@ -56,7 +65,7 @@ namespace Linguini.Shared.Types.Bundle
         public static readonly InvariantContext Default = new();
 
         /// <inheritdoc />
-        public LangLocId Locale { get;  }
+        public LangLocId Locale { get; }
 
         /// <inheritdoc />
         public CultureInfo Culture { get; }
@@ -71,7 +80,13 @@ namespace Linguini.Shared.Types.Bundle
         public string? NumFormatStr { get; }
         
         /// <inheritdoc />
+        public string? DateFormatStr { get; }
+
+        /// <inheritdoc />
         public NumberFormatInfo NumberFormatInfo { get; }
+
+        /// <inheritdoc />
+        public DateTimeFormatInfo DateFormatInfo { get; }
 
         /// <summary>
         /// Private constructor to prevent instantiation from outside.
@@ -82,8 +97,8 @@ namespace Linguini.Shared.Types.Bundle
             Culture = CultureInfo.InvariantCulture;
             NumberOptions = new FluentNumberOptions();
             DateTimeOptions = new FluentDateTimeOptions();
-            NumFormatStr = null;
             NumberFormatInfo = Culture.NumberFormat;
+            DateFormatInfo = Culture.DateTimeFormat;
         }
     }
 }
