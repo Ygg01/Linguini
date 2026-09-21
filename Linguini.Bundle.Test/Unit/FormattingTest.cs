@@ -84,6 +84,26 @@ namespace Linguini.Bundle.Test.Unit
 
         private static IEnumerable<TestCaseData> TestDateFormatCases()
         {
+            // Style formatting
+            yield return new TestCaseData(
+                new DateTimeOffset(2026, 2, 1, 1, 3, 4, TimeSpan.Zero),
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                {
+                    DateStyle = DateTimeRepresentation.Long,
+                })).Returns("Sunday, February 1, 2026");
+            yield return new TestCaseData(
+                new DateTimeOffset(2027, 2, 1, 1, 3, 4, TimeSpan.Zero),
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                {
+                    TimeStyle = DateTimeRepresentation.Medium,
+                })).Returns("1:03 AM");
+            yield return new TestCaseData(
+                new DateTimeOffset(2028, 2, 1, 1, 3, 4, TimeSpan.Zero),
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                {
+                    DateStyle = DateTimeRepresentation.Short,
+                    TimeStyle = DateTimeRepresentation.Short,
+                })).Returns("2/1/2028 1:03 AM");
             // Time formatting
             yield return new TestCaseData(
                 new DateTimeOffset(2023, 2, 1, 1, 3, 4, TimeSpan.Zero),
@@ -124,10 +144,35 @@ namespace Linguini.Bundle.Test.Unit
                     Month = MonthFormat.Long,
                 })).Returns("February 1");
         }
+        
+        private static IEnumerable<TestCaseData> TestDateStyleCases()
+        {
+            // Style formatting
+            yield return new TestCaseData(
+                new DateTimeOffset(2026, 2, 1, 1, 3, 4, TimeSpan.Zero),
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                {
+                    DateStyle = DateTimeRepresentation.Long,
+                })).Returns("Sunday, February 1, 2026");
+            yield return new TestCaseData(
+                new DateTimeOffset(2027, 2, 1, 14, 3, 4, TimeSpan.Zero),
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                {
+                    TimeStyle = DateTimeRepresentation.Medium,
+                })).Returns("2:03 PM");
+            yield return new TestCaseData(
+                new DateTimeOffset(2028, 2, 1, 1, 3, 4, TimeSpan.Zero),
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                {
+                    DateStyle = DateTimeRepresentation.Short,
+                    TimeStyle = DateTimeRepresentation.Short,
+                })).Returns("2/1/2028 1:03 AM");
+        }
 
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(TestDateFormatCases))]
+        [TestCaseSource(nameof(TestDateStyleCases))]
         public string TestDateFormat(DateTimeOffset input, IFluentContext context)
         {
             var fn = (FluentDateTime)input;

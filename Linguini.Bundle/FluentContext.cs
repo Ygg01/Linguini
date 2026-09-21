@@ -14,7 +14,6 @@ namespace Linguini.Bundle
     /// </summary>
     public class FluentContext : IFluentContext
     {
-        private string? _dateFormatStr;
 
         /// <inheritdoc />
         public LangLocId Locale { get; }
@@ -29,7 +28,7 @@ namespace Linguini.Bundle
         public FluentDateTimeOptions DateTimeOptions { get; }
 
         /// <inheritdoc />
-        public string? NumFormatStr { get;  }
+        public string? NumFormatStr { get; set; }
 
         /// <inheritdoc />
         public string? DateFormatStr { get; set; }
@@ -40,24 +39,7 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public DateTimeFormatInfo DateFormatInfo { get; }
 
-
-        /// <summary>
-        /// Constructs a FluentContext from a CultureInfo.
-        /// <see cref="LangLocId"/> will be instatiated from the culture parameter. Other fields will be derived from the
-        /// given CultureInfo.
-        /// </summary>
-        /// <param name="culture">Culture upon which the other fields will be set.</param>
-        public FluentContext(CultureInfo culture, DateTimeFormatInfo dateFormatInfo)
-        {
-            Culture = (CultureInfo)culture.Clone();
-            Locale = LangLocId.FromCultureInfo(Culture);
-            NumberOptions = new FluentNumberOptions();
-            DateTimeOptions = new FluentDateTimeOptions();
-            NumFormatStr = null;
-            DateFormatStr = null;
-            NumberFormatInfo = Culture.NumberFormat;
-            DateFormatInfo = Culture.DateTimeFormat;
-        }
+        
 
         /// <summary>
         /// Represents a context that encapsulates culture-specific localization settings and options
@@ -165,7 +147,7 @@ namespace Linguini.Bundle
                     break;
                 case DateTimeRepresentation.Medium:
                 case DateTimeRepresentation.Short:
-                    sb.Append(dateTimeFormatInfo.ShortDatePattern);
+                    sb.Append(dateTimeFormatInfo.ShortTimePattern);
                     break;
             }
         }
@@ -536,15 +518,6 @@ namespace Linguini.Bundle
             return a < b
                 ? 0
                 : a - b;
-        }
-
-        /// <summary>
-        /// Clones the current context into a new instance.
-        /// </summary>
-        /// <returns>Cloned instance</returns>
-        public FluentContext Clone()
-        {
-            return new FluentContext(Locale, NumberOptions, DateTimeOptions);
         }
     }
 }

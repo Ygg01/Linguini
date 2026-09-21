@@ -35,7 +35,7 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         /// Formatting string used to format numbers. If present, it overrides the default options set by the <see cref="NumberFormatInfo"/>.
         /// </summary>
-        public string? NumFormatStr { get; }
+        public string? NumFormatStr { get; set; }
         
         /// <summary>
         /// Formatting string used to format dates. If present, it overrides the default options set by the <see cref="DateTimeFormatInfo"/>.
@@ -74,10 +74,10 @@ namespace Linguini.Shared.Types.Bundle
         public FluentNumberOptions NumberOptions { get; }
 
         /// <inheritdoc />
-        public FluentDateTimeOptions? DateTimeOptions { get; }
+        public FluentDateTimeOptions DateTimeOptions { get; }
 
         /// <inheritdoc />
-        public string? NumFormatStr { get; }
+        public string? NumFormatStr { get; set; }
         
         /// <inheritdoc />
         public string? DateFormatStr { get; set; }

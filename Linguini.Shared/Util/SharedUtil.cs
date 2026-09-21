@@ -29,18 +29,6 @@ namespace Linguini.Shared.Util
                 _ => false,
             };
         }
-        
-        /// <summary>
-        /// Returns if the integer is in the range of <see cref="int"/>s provided. Range is inclusive on both sides.
-        /// </summary>
-        /// <param name="self">number being checked for being in range</param>
-        /// <param name="start">start of range</param>
-        /// <param name="end">end of range</param>
-        /// <returns>true if <c>self</c> is in range of <c>start</c> and <c>end</c> (both inclusive); false otherwise</returns>
-        public static bool InRange(this int self, int start, int end)
-        {
-            return self >= start && self <= end;
-        }
 
         /// <summary>
         /// Returns if the <see cref="ulong"/> is in the range of <see cref="int"/>s provided. Range is inclusive on both sides.

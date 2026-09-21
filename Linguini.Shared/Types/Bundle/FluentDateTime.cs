@@ -51,6 +51,10 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc/>
         public string AsString(IFluentContext context)
         {
+            if (context.DateFormatStr != null)
+            {
+                return Date.ToString(context.DateFormatStr, context.DateFormatInfo);
+            }
             // Can we reuse a formatter?
             if (context.DateTimeOptions.CanUseDefaultFormatter)
             {
@@ -112,6 +116,12 @@ namespace Linguini.Shared.Types.Bundle
             return Date.ToString(context.DateFormatStr, context.DateFormatInfo);
         }
 
+        /// <summary>
+        /// Extracts a time format string based on the specified formatting options and culture-specific information.
+        /// </summary>
+        /// <param name="dateTimeOptions">The formatting options specifying which components of the time (hour, minute, second, fractional seconds) should be included and how they should be formatted.</param>
+        /// <param name="info">The culture-specific <see cref="DateTimeFormatInfo"/> that provides data, such as time separators and AM/PM designators.</param>
+        /// <returns>A string representing the formatted time pattern based on the provided options and culture-specific information.</returns>
         public static string ExtractTimeFmt(FluentDateTimeOptions dateTimeOptions, DateTimeFormatInfo info)
         {
             var timeFmt = new StringBuilder();
