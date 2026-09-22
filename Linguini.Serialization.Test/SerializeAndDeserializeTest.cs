@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Serialization.Converters;
 using Linguini.Syntax.Ast;
+using Linguini.Syntax.Parser.Error;
 using NUnit.Framework;
 using Attribute = Linguini.Syntax.Ast.Attribute;
 
@@ -34,6 +35,29 @@ public class SerializeAndDeserializeTest
 
     public static IEnumerable<object> AstExamples()
     {
+        // Errors
+        yield return ParseError.DuplicatedNamedArgument("aa", 3, 2);
+        yield return ParseError.ExpectedCharRange("abc", 34, 19);
+        yield return ParseError.ExpectedInlineExpression(3, 2);
+        yield return ParseError.ExpectedLiteral(2, 44);
+        yield return ParseError.ExpectedMessageField("z".AsMemory(), 2, 4, 6);
+        yield return ParseError.ExpectedToken('c', '?', 3, 11);
+        yield return ParseError.ExpectedTermField("z", 0, 41, 13245);
+        yield return ParseError.ExpectedSimpleExpressionAsSelector(33, 431);
+        yield return ParseError.ForbiddenCallee(45, 390);
+        yield return ParseError.InvalidUnicodeEscapeSequence("zxc", 634, 72);
+        yield return ParseError.MessageAttributeAsSelector(11, 96);
+        yield return ParseError.MissingDefaultVariant(04, 78);
+        yield return ParseError.MessageReferenceAsSelector(2222, 112);
+        yield return ParseError.MissingValue(0, 2);
+        yield return ParseError.MultipleDefaultVariants(94, 1113);
+        yield return ParseError.PositionalArgumentFollowsNamed(48, 888);
+        yield return ParseError.TermAttributeAsPlaceable(39, 912);
+        yield return ParseError.TermReferenceAsSelector(44, 13);
+        yield return ParseError.UnknownEscapeSequence('?', 123, 44);
+        yield return ParseError.UnbalancedClosingBrace(33, 1134);
+        yield return ParseError.UnterminatedStringLiteral(87, 99);
+        // Other serializers
         yield return new Attribute("desc", new PatternBuilder("description"));
         yield return new CallArgumentsBuilder()
             .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))

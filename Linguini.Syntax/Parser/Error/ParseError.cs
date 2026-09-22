@@ -45,6 +45,24 @@ namespace Linguini.Syntax.Parser.Error
         }
 
         /// <summary>
+        /// Serializes a parse error with the specified details.
+        /// </summary>
+        /// <param name="kind">The type of error being represented.</param>
+        /// <param name="message">A descriptive message providing details about the error.</param>
+        /// <param name="position">The range in the source text where the error occurred.</param>
+        /// <param name="slice">An optional portion of the source showing the relevant context of the error.</param>
+        /// <param name="row">The row number in the source text where the error occurred.</param>
+        /// <returns>A new instance of ParseError with the specified information.</returns>
+        public static ParseError SerializeParseError(ErrorType kind, string message, Range position, Range? slice,
+            int row)
+        {
+            return new ParseError(kind, message, position, row)
+            {
+                Slice = slice
+            };
+        }
+
+        /// <summary>
         /// Creates a ParseError that indicates an expected token error.
         /// </summary>
         /// <param name="expected">The character that was expected.</param>
