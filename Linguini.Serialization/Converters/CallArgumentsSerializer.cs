@@ -75,6 +75,11 @@ namespace Linguini.Serialization.Converters
             JsonSerializerOptions options,
             [NotNullWhen(true)] out CallArguments? callArguments)
         {
+            if (!el.TryGetProperty("type", out var typeEl) || !"CallArguments".Equals(typeEl.GetString()))
+            {
+                callArguments = null;
+                return false;
+            }
             if (!el.TryGetProperty("positional", out var positional) || !el.TryGetProperty("named", out var named))
             {
                 throw new JsonException("CallArguments fields `positional` and `named` properties are mandatory");

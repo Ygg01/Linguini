@@ -17,8 +17,22 @@ namespace Linguini.Serialization.Converters
             return ProcessJunk(JsonSerializer.Deserialize<JsonElement>(ref reader, options));
         }
 
-        internal static Junk ProcessJunk(JsonElement el)
+        /// <summary>
+        /// Processes a JSON element to deserialize an object of type <c>Junk</c>.
+        /// </summary>
+        /// <param name="el">The JSON element to process and convert into a <c>Junk</c> object.</param>
+        /// <returns>A <c>Junk</c> instance containing the deserialized data from the JSON element.</returns>
+        /// <exception cref="JsonException">
+        /// Thrown when the JSON element does not have the required properties.
+        /// </exception>
+        public static Junk ProcessJunk(JsonElement el)
         {
+            if (!el.TryGetProperty("type", out var typeEl) || !"Junk".Equals(typeEl.GetString()))
+            {
+                throw new JsonException("Junk must have type");
+            }
+            
+
             if (!el.TryGetProperty("content", out var content))
             {
                 throw new JsonException("Junk must have content");

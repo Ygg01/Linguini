@@ -63,6 +63,10 @@ namespace Linguini.Serialization.Converters
                     }
                 }
             }
+            else
+            {
+                throw new JsonException("Invalid JSON structure for Resource object.");
+            }
 
             return new Resource(body, error);
         }
@@ -221,7 +225,7 @@ namespace Linguini.Serialization.Converters
             {
                 "DynamicReference" => DynamicReferenceSerializer.ProcessDynamicReference(el, options),
                 "FunctionReference" => FunctionReferenceSerializer.ProcessFunctionReference(el, options),
-                "MessageReference" => MessageReferenceSerializer.ProcessMessageReference(el, options),
+                "MessageReference" => MessageReferenceSerializer.ProcessMessageReference(el),
                 "NumberLiteral" => ProcessNumberLiteral(el, options),
                 "Placeable" => PlaceableSerializer.ProcessPlaceable(el, options),
                 "TermReference" => TermReferenceSerializer.ProcessTermReference(el, options),
@@ -250,15 +254,15 @@ namespace Linguini.Serialization.Converters
             {
                 "DynamicReference" => DynamicReferenceSerializer.ProcessDynamicReference(el, options),
                 "FunctionReference" => FunctionReferenceSerializer.ProcessFunctionReference(el, options),
-                "MessageReference" => MessageReferenceSerializer.ProcessMessageReference(el, options),
+                "MessageReference" => MessageReferenceSerializer.ProcessMessageReference(el),
                 "NumberLiteral" => ProcessNumberLiteral(el, options),
                 "Placeable" => PlaceableSerializer.ProcessPlaceable(el, options),
                 "TermReference" => TermReferenceSerializer.ProcessTermReference(el, options),
                 "TextLiteral" => ProcessTextLiteral(el, options),
                 "VariableReference" => VariableReferenceSerializer.ProcessVariableReference(el, options),
-                _ => throw new JsonException($"Unexpected value {type}")
+                _ => null
             };
-            return true;
+            return o != null;
         }
     }
 }

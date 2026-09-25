@@ -11,7 +11,7 @@ namespace Linguini.Serialization.Converters
     /// <remarks>
     /// This class is used to convert MessageReference objects to and from JSON representations.
     /// It customizes the serialization behavior to include specific properties and handles
-    /// deserialization to ensure expected MessageReference structure.
+    /// deserialization to ensure the expected MessageReference structure.
     /// </remarks>
     public class MessageReferenceSerializer : JsonConverter<MessageReference>
     {
@@ -19,7 +19,7 @@ namespace Linguini.Serialization.Converters
         public override MessageReference Read(ref Utf8JsonReader reader, Type typeToConvert,
             JsonSerializerOptions options)
         {
-            return ProcessMessageReference(JsonSerializer.Deserialize<JsonElement>(ref reader, options), options);
+            return ProcessMessageReference(JsonSerializer.Deserialize<JsonElement>(ref reader, options));
         }
 
         /// <inheritdoc />
@@ -41,12 +41,10 @@ namespace Linguini.Serialization.Converters
 
         /// Processes the given JsonElement to create a MessageReference.
         /// <param name="el">The JsonElement representing the serialized MessageReference.</param>
-        /// <param name="options">The JsonSerializerOptions used during deserialization.</param>
         /// <returns>A fully constructed MessageReference instance.</returns>
         /// <exception cref="JsonException">Thrown when the required <c>id</c>
         /// field is missing or invalid in the JsonElement.</exception>
-        public static MessageReference ProcessMessageReference(JsonElement el,
-            JsonSerializerOptions options)
+        public static MessageReference ProcessMessageReference(JsonElement el)
         {
             if (el.TryGetProperty("id", out var getProp)
                 && IdentifierSerializer.TryGetIdentifier(getProp, out var ident))

@@ -43,6 +43,30 @@ namespace Linguini.Syntax.Ast
             Entries = body;
             Errors = errors;
         }
+        /// <inheritdoc/>
+        public virtual bool Equals(Resource? other)
+        {
+            if (other is null) return false;
+            if (ReferenceEquals(this, other)) return true;
+            
+            return Entries.SequenceEqual(other.Entries);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Entries);
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var sb = new StringBuilder("Resource (");
+            sb.AppendJoin(", ", Entries);
+            sb.Append(')');
+            return sb.ToString();
+        }
+
     }
 
     /// <summary>
@@ -306,7 +330,7 @@ namespace Linguini.Syntax.Ast
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((AstMessage)obj);
+            return Equals((AstTerm)obj);
         }
 
         /// <inheritdoc />
@@ -345,6 +369,19 @@ namespace Linguini.Syntax.Ast
                 _id = new Identifier(id)
             };
         }
+        
+        /// <summary>
+        ///     Creates a new instance of the <see cref="AstTermBuilder" /> class with the specified identifier.
+        /// </summary>
+        /// <param name="id">The <see cref="Identifier" /> used to initialize the builder.</param>
+        /// <returns>A new instance of <see cref="AstTermBuilder" />.</returns>
+        public static AstTermBuilder Builder(Identifier id)
+        {
+            return new AstTermBuilder
+            {
+                _id = id
+            };
+        }
 
         /// <summary>
         ///     Assigns a <see cref="Pattern" /> to the message builder.
@@ -354,6 +391,17 @@ namespace Linguini.Syntax.Ast
         public AstTermBuilder SetPattern(PatternBuilder patternBuilder)
         {
             _pattern = patternBuilder.Build();
+            return this;
+        }
+        
+        /// <summary>
+        ///     Assigns a <see cref="Pattern" /> to the message builder.
+        /// </summary>
+        /// <param name="pattern">The <see cref="Pattern" /> to be associated with this message builder.</param>
+        /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
+        public AstTermBuilder SetPattern(Pattern pattern)
+        {
+            _pattern = pattern;
             return this;
         }
 
