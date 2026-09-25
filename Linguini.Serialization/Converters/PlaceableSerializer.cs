@@ -14,7 +14,22 @@ namespace Linguini.Serialization.Converters
         /// <inheritdoc />
         public override Placeable Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
+            if (!el.TryGetProperty("type", out JsonElement value) || value.ValueKind != JsonValueKind.String ||
+                value.GetString() != "Placeable")
+            {
+                throw new JsonException("Placeable must contain a type field with `Placeable`");
+            }
+
+            var exp = el.GetProperty("expression");
+            if (exp.TryGetProperty("selector", out _))
+            {
+                return new Placeable(SelectExpressionSerializer.ProcessSelectExpression(exp, options));
+            }
+
+            return ResourceSerializer.TryReadInlineExpression(exp, options, out var inlineExpression)
+                ? new Placeable(inlineExpression)
+                 : throw new JsonException("Placeable must contain a selector or inline expression");
         }
 
         /// <inheritdoc />

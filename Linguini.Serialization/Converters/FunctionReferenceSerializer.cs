@@ -46,7 +46,7 @@ namespace Linguini.Serialization.Converters
             JsonSerializerOptions options)
         {
             if (!el.TryGetProperty("id", out JsonElement value) ||
-                !IdentifierSerializer.TryGetIdentifier(value, options, out var ident))
+                !IdentifierSerializer.TryGetIdentifier(value, out var ident))
             {
                 throw new JsonException("Function reference must contain `id` field");
             }

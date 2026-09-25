@@ -56,7 +56,7 @@ namespace Linguini.Serialization.Converters
             [NotNullWhen(true)] out NamedArgument? o)
         {
             if (el.TryGetProperty("name", out var namedArg)
-                && IdentifierSerializer.TryGetIdentifier(namedArg, options, out var id)
+                && IdentifierSerializer.TryGetIdentifier(namedArg, out var id)
                 && el.TryGetProperty("value", out var valueArg)
                 && ResourceSerializer.TryReadInlineExpression(valueArg, options, out var inline)
                )

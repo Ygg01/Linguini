@@ -59,6 +59,7 @@ public class SerializeAndDeserializeTest
         yield return ParseError.UnterminatedStringLiteral(87, 99);
         // Other serializers
         yield return new Attribute("desc", new PatternBuilder("description"));
+        yield return new Placeable(InlineExpressionBuilder.CreateMessageReference("x").Build());
         yield return new CallArgumentsBuilder()
             .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
             .AddNamedArg("y", 3)
@@ -72,18 +73,27 @@ public class SerializeAndDeserializeTest
             .AddNamedArg("test", InlineExpressionBuilder.CreateTermReference("x", "y"))
             .Build()
         );
+        yield return new Resource(
+            new List<IEntry>
+            {
+                AstTermBuilder.Builder("id").SetPattern(new PatternBuilder("test")).Build(),
+                new AstComment(CommentLevel.Comment, new() { "test".AsMemory() }),
+                new Junk("junkie"),
+                AstMessageBuilder.Builder("message").SetPattern(new PatternBuilder("xyz")).Build()
+            },
+            new List<ParseError> { });
         yield return new Identifier("test");
         yield return new Junk("Test".AsMemory());
         yield return new MessageReference("message", "attribute");
         yield return new AstMessage(
-            new Identifier("x"), 
-            new PatternBuilder(3).Build(), 
+            new Identifier("x"),
+            new PatternBuilder(3).Build(),
             new List<Attribute>()
             {
                 new("attr1", new PatternBuilder("value1")),
                 new("attr2", new PatternBuilder("value2"))
-            }, 
-            AstLocation.Empty, 
+            },
+            AstLocation.Empty,
             new(CommentLevel.ResourceComment, new()
             {
                 "test".AsMemory()

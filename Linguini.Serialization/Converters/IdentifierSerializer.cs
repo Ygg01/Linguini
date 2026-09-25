@@ -78,10 +78,9 @@ namespace Linguini.Serialization.Converters
         /// Attempts to extract an <see cref="Identifier"/> from a JSON element.
         /// </summary>
         /// <param name="el">The JSON element to process.</param>
-        /// <param name="options">The JSON serializer options to be applied.</param>
         /// <param name="ident">When the method returns <c>true</c>, contains the extracted <see cref="Identifier"/>, if successful.</param>
         /// <returns><c>true</c> if the <see cref="Identifier"/> was successfully extracted; otherwise, <c>false</c>.</returns>
-        public static bool TryGetIdentifier(JsonElement el, JsonSerializerOptions options,
+        public static bool TryGetIdentifier(JsonElement el, 
             [NotNullWhen(true)] out Identifier? ident)
         {
             if (!el.TryGetProperty("name", out var valueElement) || valueElement.ValueKind != JsonValueKind.String)

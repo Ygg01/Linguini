@@ -14,18 +14,18 @@ namespace Linguini.Serialization.Converters
         /// <inheritdoc />
         public override Junk Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return ProcessJunk(JsonSerializer.Deserialize<JsonElement>(ref reader, options), options);
+            return ProcessJunk(JsonSerializer.Deserialize<JsonElement>(ref reader, options));
         }
 
-        private Junk ProcessJunk(JsonElement el, JsonSerializerOptions options)
+        internal static Junk ProcessJunk(JsonElement el)
         {
-            if (el.TryGetProperty("content", out var content))
+            if (!el.TryGetProperty("content", out var content))
             {
-                var str = content.GetString() ?? "";
-                return new Junk(str);
+                throw new JsonException("Junk must have content");
             }
 
-            throw new JsonException("Junk must have content");
+            var str = content.GetString() ?? "";
+            return new Junk(str);
         }
 
         /// <inheritdoc />

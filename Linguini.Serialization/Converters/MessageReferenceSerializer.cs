@@ -49,12 +49,12 @@ namespace Linguini.Serialization.Converters
             JsonSerializerOptions options)
         {
             if (el.TryGetProperty("id", out var getProp)
-                && IdentifierSerializer.TryGetIdentifier(getProp, options, out var ident))
+                && IdentifierSerializer.TryGetIdentifier(getProp, out var ident))
             {
                 Identifier? attr = null;
                 if (el.TryGetProperty("attribute", out var prop) && prop.ValueKind != JsonValueKind.Null)
                 {
-                    IdentifierSerializer.TryGetIdentifier(prop, options, out attr);
+                    IdentifierSerializer.TryGetIdentifier(prop, out attr);
                 }
 
                 return new MessageReference(ident, attr);

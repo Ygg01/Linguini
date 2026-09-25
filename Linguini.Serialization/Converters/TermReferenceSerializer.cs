@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
@@ -58,7 +57,7 @@ namespace Linguini.Serialization.Converters
             JsonSerializerOptions options)
         {
             if (!el.TryGetProperty("id", out JsonElement value) ||
-                !IdentifierSerializer.TryGetIdentifier(value, options, out var id))
+                !IdentifierSerializer.TryGetIdentifier(value, out var id))
             {
                 throw new JsonException("Term reference must contain at least `id` field");
             }
@@ -67,7 +66,7 @@ namespace Linguini.Serialization.Converters
             CallArguments? arguments = null;
             if (el.TryGetProperty("attribute", out var attr))
             {
-                IdentifierSerializer.TryGetIdentifier(attr, options, out attribute);
+                IdentifierSerializer.TryGetIdentifier(attr, out attribute);
             }
 
             if (el.TryGetProperty("arguments", out var callarg))

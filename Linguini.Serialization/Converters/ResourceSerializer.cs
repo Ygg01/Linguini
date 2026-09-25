@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
+using Linguini.Syntax.Parser.Error;
 
 namespace Linguini.Serialization.Converters
 {
@@ -17,18 +19,52 @@ namespace Linguini.Serialization.Converters
     /// </remarks>
     public class ResourceSerializer : JsonConverter<Resource>
     {
-
         /// <summary>
-        /// Read and convert the JSON to ResourceSerializer. NOT IMPLEMENTED!
+        /// Reads and converts a JSON representation into a <see cref="Resource"/> object.
         /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="typeToConvert"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <param name="reader">The <see cref="Utf8JsonReader"/> to read JSON data from.</param>
+        /// <param name="typeToConvert">The type of object to convert.</param>
+        /// <param name="options">The serialization options to use during the conversion.</param>
+        /// <returns>A <see cref="Resource"/> object parsed from the JSON data.</returns>
+        /// <exception cref="JsonException">
+        /// Thrown if the JSON data does not meet the required structure for a <see cref="Resource"/> object.
+        /// </exception>
         public override Resource Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
+            if (!el.TryGetProperty("type", out JsonElement typeStr) || typeStr.ValueKind != JsonValueKind.String || typeStr.GetString() != "Resource")
+            {
+                throw new JsonException("Resource must have valid `Resource` field");
+            }
+            
+            var body = new List<IEntry>();
+            var error = new List<ParseError>();
+            
+            if (el.TryGetProperty("body", out var bodyEl) && bodyEl.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var bodyArrayEl in bodyEl.EnumerateArray())
+                {
+                    if (CommentSerializer.TryReadComment(bodyArrayEl, out var comment))
+                    {
+                        body.Add(comment);
+                    }
+                    else if (MessageSerializer.TryGetAstMessage(bodyArrayEl, options, out var message))
+                    {
+                        body.Add(message);
+                    }
+                    else if (TermSerializer.TryGetAstTerm(bodyArrayEl, options, out var term))
+                    {
+                        body.Add(term);
+                    }
+                    else
+                    {
+                        var junk = JunkSerializer.ProcessJunk(bodyArrayEl);
+                        body.Add(junk);
+                    }
+                }
+            }
+
+            return new Resource(body, error);
         }
 
         /// <inheritdoc />

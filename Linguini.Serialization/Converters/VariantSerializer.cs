@@ -102,7 +102,7 @@ namespace Linguini.Serialization.Converters
         private static bool TryReadKey(JsonElement jsonKey, JsonSerializerOptions options,
             [NotNullWhen(true)] out (VariantType, ReadOnlyMemory<char>)? key)
         {
-            if (IdentifierSerializer.TryGetIdentifier(jsonKey, options, out var id))
+            if (IdentifierSerializer.TryGetIdentifier(jsonKey, out var id))
             {
                 key = (VariantType.Identifier, id.Name);
                 return true;

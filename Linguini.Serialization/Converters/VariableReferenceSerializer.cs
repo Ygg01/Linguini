@@ -45,7 +45,7 @@ namespace Linguini.Serialization.Converters
             JsonSerializerOptions options)
         {
             if (el.TryGetProperty("id", out var value) &&
-                IdentifierSerializer.TryGetIdentifier(value, options, out var ident))
+                IdentifierSerializer.TryGetIdentifier(value, out var ident))
             {
                 return new VariableReference(ident);
             }

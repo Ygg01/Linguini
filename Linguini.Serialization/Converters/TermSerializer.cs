@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
@@ -12,18 +13,20 @@ namespace Linguini.Serialization.Converters
     /// </summary>
     public class TermSerializer : JsonConverter<AstTerm>
     {
-
         /// <summary>
-        /// Read and convert the JSON to AstTerm. NOT IMPLEMENTED!
+        /// Reads and deserializes the JSON data into an <c>AstTerm</c> instance.
         /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="typeToConvert"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <param name="reader">The <c>Utf8JsonReader</c> used to read the JSON data.</param>
+        /// <param name="typeToConvert">The type of object to convert, expected to be <c>AstTerm</c>.</param>
+        /// <param name="options">The <c>JsonSerializerOptions</c> to assist in deserialization.</param>
+        /// <returns>The deserialized <c>AstTerm</c> object.</returns>
+        /// <exception cref="JsonException">Thrown if the JSON does not contain a valid <c>AstTerm</c> representation.</exception>
         public override AstTerm Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            var deserialize = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
+            return TryGetAstTerm(deserialize, options, out var term) 
+                ? term 
+                : throw new JsonException("Expected to parse the term");
         }
 
         /// <inheritdoc />
@@ -54,6 +57,49 @@ namespace Linguini.Serialization.Converters
             }
 
             writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Attempts to parse and convert a <c>JsonElement</c> instance into an <c>AstTerm</c> object.
+        /// </summary>
+        /// <param name="bodyArrayEl">The <c>JsonElement</c> representing the input data to be converted.</param>
+        /// <param name="options">The JSON serialization options used for deserialization.</param>
+        /// <param name="ast">
+        /// When this method returns, contains the resulting <c>AstTerm</c> object if the conversion
+        /// was successful, or <c>null</c> if it failed.
+        /// </param>
+        /// <returns><c>true</c> if the conversion was successful; otherwise, <c>false</c>.</returns>
+        /// <exception cref="JsonException">If error encountered.</exception>
+        public static bool TryGetAstTerm(JsonElement bodyArrayEl, JsonSerializerOptions options,
+            [NotNullWhen(true)] out AstTerm? ast)
+        {
+            if (!bodyArrayEl.TryGetProperty("type", out var termEl) || !"Term".Equals(termEl.GetString()))
+            {
+                ast = null;
+                return false;
+            }
+
+            if (!bodyArrayEl.TryGetProperty("id", out var idEl) ||
+                !IdentifierSerializer.TryGetIdentifier(idEl, out var id))
+            {
+                ast = null;
+                return false;
+            }
+
+            var term = AstTermBuilder.Builder(id);
+
+
+            if (!bodyArrayEl.TryGetProperty("value", out var valueEl) ||
+                !PatternSerializer.TryReadPattern(valueEl, options, out var pattern))
+            {
+                ast = null;
+                return false;
+            }
+
+            term.SetPattern(pattern);
+
+            ast = term.Build();
+            return true;
         }
     }
 }

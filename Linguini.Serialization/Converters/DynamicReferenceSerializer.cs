@@ -58,7 +58,7 @@ namespace Linguini.Serialization.Converters
             JsonSerializerOptions options)
         {
             if (!el.TryGetProperty("id", out var jsonId) ||
-                !IdentifierSerializer.TryGetIdentifier(jsonId, options, out var identifier))
+                !IdentifierSerializer.TryGetIdentifier(jsonId, out var identifier))
             {
                 throw new JsonException("Dynamic reference must contain at least `id` field");
             }
@@ -67,7 +67,7 @@ namespace Linguini.Serialization.Converters
             CallArguments? arguments = null;
             if (el.TryGetProperty("attribute", out var jsonAttribute))
             {
-                IdentifierSerializer.TryGetIdentifier(jsonAttribute, options, out attribute);
+                IdentifierSerializer.TryGetIdentifier(jsonAttribute, out attribute);
             }
 
             if (el.TryGetProperty("arguments", out var jsonArgs))

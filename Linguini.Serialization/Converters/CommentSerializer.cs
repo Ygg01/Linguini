@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -56,8 +57,8 @@ namespace Linguini.Serialization.Converters
                             break;
                         case "content":
                             var s = reader.GetString();
-                            content = s != null 
-                                ? s.Split().Select(x => x.AsMemory()).ToList() 
+                            content = s != null
+                                ? s.Split().Select(x => x.AsMemory()).ToList()
                                 // ReSharper disable once ArrangeObjectCreationWhenTypeNotEvident
                                 : new();
                             break;
@@ -98,6 +99,51 @@ namespace Linguini.Serialization.Converters
             writer.WritePropertyName("content");
             writer.WriteStringValue(comment.AsStr());
             writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Attempts to read a JSON element as an <see cref="AstComment"/> object.
+        /// </summary>
+        /// <param name="el">The JSON element to parse as a comment.</param>
+        /// <param name="ident">
+        /// When the method returns <c>true</c>, contains the parsed <see cref="AstComment"/> object.
+        /// When the method returns <c>false</c>, contains <c>null</c>.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the JSON element was successfully read as an <see cref="AstComment"/> object;
+        /// otherwise <c>false</c>.
+        /// </returns>
+        /// <exception cref="JsonException">Thrown when the JSON element is invalid or is missing required properties.</exception>
+        public static bool TryReadComment(JsonElement el, [NotNullWhen(true)] out AstComment? ident)
+        {
+            if (!el.TryGetProperty("type", out var typeStr) || typeStr.ValueKind != JsonValueKind.String ||
+                typeStr.GetString() is null || (typeStr.GetString() != "Comment" &&
+                                                typeStr.GetString() != "GroupComment" &&
+                                                typeStr.GetString() != "ResourceComment"))
+            {
+                ident = null;
+                return false;
+            }
+
+            var commentLevel = typeStr.GetString() switch
+            {
+                "Comment" => CommentLevel.Comment,
+                "GroupComment" => CommentLevel.GroupComment,
+                "ResourceComment" => CommentLevel.ResourceComment,
+                _ => CommentLevel.None,
+            };
+            if (el.TryGetProperty("content", out var contentStr))
+            {
+                var content = contentStr.GetString() ?? "";
+                ident = new AstComment(commentLevel, new List<ReadOnlyMemory<char>>
+                {
+                    content.AsMemory(),
+                });
+                return true;
+            }
+
+            ident = null;
+            return false;
         }
     }
 }
