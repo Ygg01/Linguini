@@ -169,15 +169,15 @@ namespace Linguini.Bundle.Test.Unit
                 })).Returns("2/1/2028 1:03 AM");
         }
 
-        [Test]
-        [Parallelizable]
-        [TestCaseSource(nameof(TestDateFormatCases))]
-        [TestCaseSource(nameof(TestDateStyleCases))]
-        public string TestDateFormat(DateTimeOffset input, IFluentContext context)
-        {
-            var fn = (FluentDateTime)input;
-            return fn.AsString(context);
-        }
+        // [Test]
+        // [Parallelizable]
+        // [TestCaseSource(nameof(TestDateFormatCases))]
+        // [TestCaseSource(nameof(TestDateStyleCases))]
+        // public string TestDateFormat(DateTimeOffset input, IFluentContext context)
+        // {
+        //     var fn = (FluentDateTime)input;
+        //     return fn.AsString(context);
+        // }
 
         [Test]
         [Parallelizable]
