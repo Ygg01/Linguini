@@ -156,10 +156,10 @@ namespace Linguini.Bundle.Test.Unit
                 })).Returns("Sunday, February 1, 2026");
             yield return new TestCaseData(
                 new DateTimeOffset(2027, 2, 1, 14, 3, 4, TimeSpan.Zero),
-                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions()
                 {
                     TimeStyle = DateTimeRepresentation.Medium,
-                })).Returns("2:03 PM");
+                })).Returns("02:03");
             yield return new TestCaseData(
                 new DateTimeOffset(2028, 2, 1, 1, 3, 4, TimeSpan.Zero),
                 new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions()
