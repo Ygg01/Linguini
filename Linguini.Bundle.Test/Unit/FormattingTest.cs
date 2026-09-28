@@ -191,8 +191,9 @@ namespace Linguini.Bundle.Test.Unit
             };
             var context = new FluentContext("en-US", dateTimeOptions: dateTimeOptions);
             var fn = (FluentDateTime)offset;
-            var actual =  fn.AsString(context);
-            var expected = "2/1/2028 1:03 AM";
+            var actual =  fn.AsString(context).ToCharArray();
+            var expected = "2/1/2028 1:03 AM".ToCharArray();
+            
             Assert.That(expected, Is.EqualTo(actual));
         }
     }
