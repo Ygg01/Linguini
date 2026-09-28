@@ -7,10 +7,12 @@ namespace Linguini.Serialization.Converters
 {
     /// <summary>
     /// Provides custom serialization and deserialization logic for the
-    /// <see cref="FunctionReference"/> class when using System.Text.Json.
+    /// <see cref="Syntax.Ast.FunctionReference"/> class when using System.Text.Json.
     /// </summary>
     public class FunctionReferenceSerializer : JsonConverter<FunctionReference>
     {
+        private const string FunctionReference = "FunctionReference";
+
         /// <inheritdoc />
         public override FunctionReference Read(ref Utf8JsonReader reader, Type typeToConvert,
             JsonSerializerOptions options)
@@ -24,7 +26,7 @@ namespace Linguini.Serialization.Converters
         {
             writer.WriteStartObject();
             writer.WritePropertyName("type");
-            writer.WriteStringValue("FunctionReference");
+            writer.WriteStringValue(FunctionReference);
             writer.WritePropertyName("id");
             JsonSerializer.Serialize(writer, value.Id, options);
             writer.WritePropertyName("arguments");
@@ -33,11 +35,11 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Processes a JSON element and deserializes it into a <see cref="FunctionReference"/> object.
+        /// Processes a JSON element and deserializes it into a <see cref="Syntax.Ast.FunctionReference"/> object.
         /// </summary>
         /// <param name="el">The JSON element representing the function reference.</param>
         /// <param name="options">The options to use when deserializing the JSON element.</param>
-        /// <returns>A deserialized <see cref="FunctionReference"/> object constructed from the provided JSON element.</returns>
+        /// <returns>A deserialized <see cref="Syntax.Ast.FunctionReference"/> object constructed from the provided JSON element.</returns>
         /// <exception cref="JsonException">
         /// Thrown when the JSON element does not contain the required <c>id</c> or <c>arguments</c> properties,
         /// or when the properties cannot be properly parsed into a valid function reference.
@@ -45,6 +47,10 @@ namespace Linguini.Serialization.Converters
         public static FunctionReference ProcessFunctionReference(JsonElement el,
             JsonSerializerOptions options)
         {
+            if (!el.TryGetProperty("type", out JsonElement typeEl) || !FunctionReference.Equals(typeEl.GetString()))
+            {
+                throw new JsonException("Function reference must contain correct type field");
+            }
             if (!el.TryGetProperty("id", out JsonElement value) ||
                 !IdentifierSerializer.TryGetIdentifier(value, out var ident))
             {

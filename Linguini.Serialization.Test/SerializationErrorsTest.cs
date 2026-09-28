@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 using Linguini.Serialization.Converters;
 using Linguini.Syntax.Ast;
 using NUnit.Framework;
+using Attribute = Linguini.Syntax.Ast.Attribute;
+
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 namespace Linguini.Serialization.Test;
@@ -90,6 +92,54 @@ public class SerializationErrorsTest
         ""variants"": 3
     }";
     
+    private const string FunctionRef1 = @"{
+        ""type"": ""FunctionReference"",
+        ""id"": {}
+    }";
+    
+    private const string FunctionRef2 = @"{
+        ""type"": ""FunctionReference"",
+        ""id"": {""type"":""Identifier"", ""name"": ""tist""},
+        ""arguments"": {}
+    }";
+    
+    private const string AttributeRef1 = @"{
+        ""type"": ""Attribute"",
+        ""id"": {""type"":""Identifier"", ""name"": ""tist""},
+        ""value"": []
+    }";
+    
+    private const string AttributeRef2 = @"{
+        ""type"": ""xxz"",
+        ""id"": {""type"":""Identifier"", ""name"": ""tist""},
+        ""value"": []
+    }";
+    
+
+    private const string AttributeRef3 = @"{
+        ""type"": ""Attribute"",
+        ""unknwon"": 3,
+        ""id"": {""type"":""Identifier"", ""name"": ""tist""},
+        ""value"": []
+    }";
+    
+    private const string NamedArgs1 = @"{
+        ""type"": ""Attribute"",
+        ""unknwon"": 3,
+        ""id"": {""type"":""Identifier"", ""name"": ""tist""},
+        ""value"": []
+    }";
+    
+    private const string Pattern = @"{
+        ""type"": ""Pattern"",
+        ""elements"": [
+            {
+                ""type"": ""Placeable"",
+                ""expression_not"": []
+            }
+        ]
+    }";
+
     private static IEnumerable<TestCaseData> ErrorExamples()
     {
         yield return new TestCaseData(MessageReference1, typeof(MessageReference)).Returns("JsonException");
@@ -97,13 +147,29 @@ public class SerializationErrorsTest
         yield return new TestCaseData(VariableReference1, typeof(VariableReference)).Returns("JsonException");
         yield return new TestCaseData(PlaceableError1, typeof(CallArguments)).Returns("JsonException");
         yield return new TestCaseData(CallArguments1, typeof(CallArguments)).Returns("JsonException");
+        // Function Selector test
         yield return new TestCaseData(JunkError1, typeof(SelectExpression)).Returns("JsonException");
         yield return new TestCaseData(Selector1, typeof(SelectExpression)).Returns("JsonException");
         yield return new TestCaseData(Selector2, typeof(SelectExpression)).Returns("JsonException");
         yield return new TestCaseData(Selector3, typeof(SelectExpression)).Returns("JsonException");
         yield return new TestCaseData(Selector4, typeof(SelectExpression)).Returns("JsonException");
         yield return new TestCaseData(Selector5, typeof(SelectExpression)).Returns("JsonException");
+        // Function Reference test
+        yield return new TestCaseData(JunkError1, typeof(FunctionReference)).Returns("JsonException");
+        yield return new TestCaseData(FunctionRef1, typeof(FunctionReference)).Returns("JsonException");
+        yield return new TestCaseData(FunctionRef2, typeof(FunctionReference)).Returns("JsonException");
+        // Attribute tests
+        yield return new TestCaseData(AttributeRef1, typeof(Attribute)).Returns("JsonException");
+        yield return new TestCaseData(AttributeRef2, typeof(Attribute)).Returns("JsonException");
+        yield return new TestCaseData(AttributeRef3, typeof(Attribute)).Returns("JsonException");
+        yield return new TestCaseData("[]", typeof(Attribute)).Returns("JsonException");
 
+        yield return new TestCaseData("{}", typeof(NamedArgument)).Returns("JsonException");
+        yield return new TestCaseData(NamedArgs1, typeof(NamedArgument)).Returns("JsonException");
+        
+        
+        yield return new TestCaseData(JunkError1, typeof(Placeable)).Returns("JsonException");
+        yield return new TestCaseData(Pattern, typeof(Pattern)).Returns("JsonException");
         
         yield return new TestCaseData(AstMessage1, typeof(AstMessage)).Returns("JsonException");
         yield return new TestCaseData(AstMessage2, typeof(AstMessage)).Returns("JsonException");
@@ -114,8 +180,14 @@ public class SerializationErrorsTest
         yield return new TestCaseData(Resource1, typeof(Resource)).Returns("JsonException");
     }
 
+    private static IEnumerable<TestCaseData> SingleExamples()
+    {
+        yield return new TestCaseData(Pattern, typeof(Pattern)).Returns("JsonException");
+    }
+
     [Test]
     [TestCaseSource(nameof(ErrorExamples))]
+    // [TestCaseSource(nameof(SingleExamples))]
     [Parallelizable]
     public string TestErrors(string jsonString, Type deserializeType)
     {

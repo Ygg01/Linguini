@@ -333,10 +333,10 @@ namespace Linguini.Syntax.Ast
         /// <param name="id">Dynamic reference id.</param>
         /// <param name="attribute">Optional dynamic reference attribute.</param>
         /// <param name="callArgumentsBuilder">Optional dynamic reference <see cref="CallArgumentsBuilder" />.</param>
-        public DynamicReference(string id, string? attribute, CallArgumentsBuilder? callArgumentsBuilder)
+        public DynamicReference(Identifier id, Identifier? attribute, CallArgumentsBuilder? callArgumentsBuilder)
         {
-            Id = new Identifier(id);
-            if (attribute != null) Attribute = new Identifier(attribute);
+            Id = id;
+            Attribute = attribute;
 
             if (callArgumentsBuilder != null) Arguments = callArgumentsBuilder.Build();
         }
@@ -894,7 +894,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="attribute">The optional attribute of the dynamic reference.</param>
         /// <param name="callArgumentsBuilder">The optional builder for call arguments.</param>
         /// <returns>An instance of <see cref="InlineExpressionBuilder" /> representing the dynamic reference.</returns>
-        public static InlineExpressionBuilder CreateDynamicReference(string id, string? attribute = null,
+        public static InlineExpressionBuilder CreateDynamicReference(Identifier id, Identifier? attribute = null,
             CallArgumentsBuilder? callArgumentsBuilder = null)
         {
             return new InlineExpressionBuilder(new DynamicReference(id, attribute, callArgumentsBuilder));

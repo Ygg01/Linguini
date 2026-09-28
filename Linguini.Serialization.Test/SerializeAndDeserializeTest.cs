@@ -73,6 +73,12 @@ public class SerializeAndDeserializeTest
             .AddNamedArg("test", InlineExpressionBuilder.CreateTermReference("x", "y"))
             .Build()
         );
+        var selectionBuilder = new SelectExpressionBuilder(new TermReference("x", "y"))
+            .AddVariant("x", new PatternBuilder("z"))
+            .SetDefault(0)
+            .Build();
+        yield return new Placeable(selectionBuilder);
+        yield return new NamedArgument("test", InlineExpressionBuilder.CreateDynamicReference("x", "y").Build());
         yield return new Resource(
             new List<IEntry>
             {

@@ -15,21 +15,12 @@ namespace Linguini.Serialization.Converters
         public override Placeable Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
-            if (!el.TryGetProperty("type", out JsonElement value) || value.ValueKind != JsonValueKind.String ||
-                value.GetString() != "Placeable")
+            if (TryProcessPlaceable(el, options, out var placeable))
             {
-                throw new JsonException("Placeable must contain a type field with `Placeable`");
+                return placeable;
             }
 
-            var exp = el.GetProperty("expression");
-            if (exp.TryGetProperty("selector", out _))
-            {
-                return new Placeable(SelectExpressionSerializer.ProcessSelectExpression(exp, options));
-            }
-
-            return ResourceSerializer.TryReadInlineExpression(exp, options, out var inlineExpression)
-                ? new Placeable(inlineExpression)
-                 : throw new JsonException("Placeable must contain a selector or inline expression");
+            throw new JsonException("Couldn't parse `Placeable`");
         }
 
         /// <inheritdoc />
@@ -71,9 +62,11 @@ namespace Linguini.Serialization.Converters
         public static bool TryProcessPlaceable(JsonElement el, JsonSerializerOptions options,
             [NotNullWhen(true)] out Placeable? placeable)
         {
-            if (!el.TryGetProperty("expression", out var expr))
+            if (!el.TryGetProperty("type", out var typeEl) || !"Placeable".Equals(typeEl.GetString()) 
+                || !el.TryGetProperty("expression", out var expr))
             {
-                throw new JsonException("Placeable must have `expression` value.");
+                placeable = null;
+                return false;
             }
 
             placeable = new Placeable(ResourceSerializer.ReadExpression(expr, options));
@@ -89,7 +82,10 @@ namespace Linguini.Serialization.Converters
         /// <exception cref="JsonException">Thrown if the JSON element cannot be processed into a valid <see cref="Placeable"/>.</exception>
         public static Placeable ProcessPlaceable(JsonElement el, JsonSerializerOptions options)
         {
-            if (!TryProcessPlaceable(el, options, out var placeable)) throw new JsonException("Expected placeable!");
+            if (!TryProcessPlaceable(el, options, out var placeable))
+            {
+                throw new JsonException("Expected placeable!");
+            }
 
             return placeable;
         }

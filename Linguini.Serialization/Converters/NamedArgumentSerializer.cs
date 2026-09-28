@@ -65,7 +65,8 @@ namespace Linguini.Serialization.Converters
                 return true;
             }
 
-            throw new JsonException("NamedArgument fields `name` and `value` properties are mandatory");
+            o = null;
+            return false;
         }
     }
 }
