@@ -65,37 +65,37 @@ namespace Linguini.Shared.Types
         /// <summary>
         /// Language identifier for English language of with an unspecified region.
         /// </summary>
-        public static readonly LangLocId EN = new LangLocId("en");
+        public static readonly LangLocId EN = new("en");
         
         /// <summary>
         /// Language identifier for French language of with an unspecified region.
         /// </summary>
-        public static readonly LangLocId FR = new LangLocId("fr");
+        public static readonly LangLocId FR = new("fr");
         
         /// <summary>
         /// Language identifier for Serbian language of with an unspecified region.
         /// </summary>
-        public static readonly LangLocId SR = new LangLocId("sr");
+        public static readonly LangLocId SR = new("sr");
 
         /// <summary>
         /// Language identifier for the Serbian language as used in the Cyrillic script region of Russia.
         /// </summary>
-        public static readonly LangLocId SR_RU = new LangLocId("sr", "RU");
+        public static readonly LangLocId SR_RU = new("sr", "RU");
 
         /// <summary>
         /// Language identifier for the Azerbaijani language as used in Iran.
         /// </summary>
-        public static readonly LangLocId AZ_IR = new LangLocId("az", "IR");
+        public static readonly LangLocId AZ_IR = new("az", "IR");
         
         /// <summary>
         /// Language identifier for the Chinese language as used in the United Kingdom.
         /// </summary>
-        public static readonly LangLocId ZH_GB = new LangLocId("zh", "GB");
+        public static readonly LangLocId ZH_GB = new("zh", "GB");
         
         /// <summary>
         /// Language identifier for the Chinese language as used in the United States.
         /// </summary>
-        public static readonly LangLocId ZH_US = new LangLocId("zh", "US");
+        public static readonly LangLocId ZH_US = new("zh", "US");
 
         private string _original;
         private ReadOnlyMemory<char> _language;

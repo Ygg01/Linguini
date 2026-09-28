@@ -52,7 +52,9 @@ namespace Linguini.Bundle
         public FluentContext(LangLocId locale, FluentNumberOptions? numberOptions = null,
             FluentDateTimeOptions? dateTimeOptions = null)
         {
-            Culture = (CultureInfo)CultureInfo.GetCultureInfo(locale.ToString()).Clone();
+            Culture =  locale == "root"
+                ? (CultureInfo) CultureInfo.InvariantCulture.Clone()
+                : (CultureInfo) CultureInfo.GetCultureInfo(locale.ToString()).Clone();
             Locale = locale;
             var numInfo = Culture.NumberFormat;
             var dateInfo = Culture.DateTimeFormat;

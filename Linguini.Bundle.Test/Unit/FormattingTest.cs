@@ -162,7 +162,7 @@ namespace Linguini.Bundle.Test.Unit
                 })).Returns("2:03 PM");
             yield return new TestCaseData(
                 new DateTimeOffset(2028, 2, 1, 1, 3, 4, TimeSpan.Zero),
-                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions()
                 {
                     DateStyle = DateTimeRepresentation.Short,
                     TimeStyle = DateTimeRepresentation.Short,
@@ -189,10 +189,10 @@ namespace Linguini.Bundle.Test.Unit
                 DateStyle = DateTimeRepresentation.Short,
                 TimeStyle = DateTimeRepresentation.Short,
             };
-            var context = new FluentContext("en-US", dateTimeOptions: dateTimeOptions);
+            var context = new FluentContext("root", dateTimeOptions: dateTimeOptions);
             var fn = (FluentDateTime)offset;
-            var actual =  fn.AsString(context).ToCharArray();
-            var expected = "2/1/2028 1:03 AM".ToCharArray();
+            var actual =  fn.AsString(context);
+            var expected = "02/01/2028 01:03";
             
             Assert.That(expected, Is.EqualTo(actual));
         }
