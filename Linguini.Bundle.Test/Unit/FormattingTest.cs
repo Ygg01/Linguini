@@ -178,5 +178,22 @@ namespace Linguini.Bundle.Test.Unit
             var fn = (FluentDateTime)input;
             return fn.AsString(context);
         }
+
+        [Test]
+        [Parallelizable]
+        public void TestDateBinary()
+        {
+            var offset = new DateTimeOffset(2028, 2, 1, 1, 3, 4, TimeSpan.Zero);
+            var dateTimeOptions = new FluentDateTimeOptions()
+            {
+                DateStyle = DateTimeRepresentation.Short,
+                TimeStyle = DateTimeRepresentation.Short,
+            };
+            var context = new FluentContext("en-US", dateTimeOptions: dateTimeOptions);
+            var fn = (FluentDateTime)offset;
+            var actual =  fn.AsString(context);
+            var expected = "2/1/2028 1:03 AM";
+            Assert.That(expected, Is.EqualTo(actual));
+        }
     }
 }
