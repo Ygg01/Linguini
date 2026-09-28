@@ -159,7 +159,7 @@ namespace Linguini.Bundle.Test.Unit
                 new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions()
                 {
                     TimeStyle = DateTimeRepresentation.Medium,
-                })).Returns("02:03");
+                })).Returns("14:03");
             yield return new TestCaseData(
                 new DateTimeOffset(2028, 2, 1, 1, 3, 4, TimeSpan.Zero),
                 new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions()
