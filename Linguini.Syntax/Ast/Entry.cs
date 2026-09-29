@@ -356,19 +356,6 @@ namespace Linguini.Syntax.Ast
             _pattern = new Pattern();
             _attributes = new List<Attribute>();
         }
-
-        /// <summary>
-        ///     Creates a new instance of the <see cref="AstTermBuilder" /> class with the specified identifier.
-        /// </summary>
-        /// <param name="id">The <see cref="Identifier" /> used to initialize the builder.</param>
-        /// <returns>A new instance of <see cref="AstTermBuilder" />.</returns>
-        public static AstTermBuilder Builder(string id)
-        {
-            return new AstTermBuilder
-            {
-                _id = new Identifier(id)
-            };
-        }
         
         /// <summary>
         ///     Creates a new instance of the <see cref="AstTermBuilder" /> class with the specified identifier.
@@ -417,6 +404,20 @@ namespace Linguini.Syntax.Ast
             _attributes.Add(attribute);
             return this;
         }
+        
+        /// <summary>
+        ///     Adds an attribute to the message builder.
+        /// </summary>
+        /// <param name="attribute">The <see cref="Attribute" /> to be added to the <see cref="AstMessage" />.</param>
+        /// <returns>
+        ///     The instance of <see cref="AstTermBuilder" /> for chaining method calls.
+        /// </returns>
+        public AstTermBuilder AddAttribute(IEnumerable<Attribute> attribute)
+        {
+            _attributes.AddRange(attribute);
+            return this;
+        }
+
 
 
         /// <summary>

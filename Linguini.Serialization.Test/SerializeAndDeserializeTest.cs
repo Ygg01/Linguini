@@ -19,23 +19,26 @@ public class SerializeAndDeserializeTest
     [Test]
     [TestCaseSource(nameof(AstExamples))]
     [Parallelizable]
-    public void RoundTripTest(object x)
+    public void RoundTripTest(object actual)
     {
         // Serialize the object to JSON string.
-        var jsonString = JsonSerializer.Serialize(x, Options);
+        var jsonString = JsonSerializer.Serialize(actual, Options);
 
         // Deserialize the JSON string back into an object.
-        Debug.Assert(x != null, nameof(x) + " != null");
-        var deserializedObject = JsonSerializer.Deserialize(jsonString, x.GetType(), Options);
+        Debug.Assert(actual != null, nameof(actual) + " != null");
+        var deserializedObject = JsonSerializer.Deserialize(jsonString, actual.GetType(), Options);
 
         // Now you have a 'deserializedObject' which should be equivalent to the original 'expected' object.
         Assert.That(deserializedObject, Is.Not.Null);
-        Assert.That(deserializedObject, Is.EqualTo(x));
+        Assert.That(deserializedObject, Is.EqualTo(actual));
     }
 
     public static IEnumerable<object> AstExamples()
     {
+        var errorWithSlice = ParseError.ExpectedCharRange("aZ", 3, 2);
+        errorWithSlice.Slice = new Range(2, 3);
         // Errors
+        yield return errorWithSlice;
         yield return ParseError.DuplicatedNamedArgument("aa", 3, 2);
         yield return ParseError.ExpectedCharRange("abc", 34, 19);
         yield return ParseError.ExpectedInlineExpression(3, 2);
@@ -99,6 +102,10 @@ public class SerializeAndDeserializeTest
         yield return new Identifier("test");
         yield return new Junk("Test".AsMemory());
         yield return new MessageReference("message", "attribute");
+        yield return AstTermBuilder.Builder("z")
+            .SetPattern(new PatternBuilder("x"))
+            .AddAttribute(Attribute.From("x0", new PatternBuilder(32)))
+            .Build();
         yield return new AstMessage(
             new Identifier("x"),
             new PatternBuilder(3).Build(),

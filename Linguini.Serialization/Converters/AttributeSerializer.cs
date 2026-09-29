@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Syntax.Ast;
@@ -73,6 +75,48 @@ namespace Linguini.Serialization.Converters
             writer.WritePropertyName("value");
             JsonSerializer.Serialize(writer, attribute.Value, options);
             writer.WriteEndObject();
+        }
+
+        /// <summary>
+        /// Attempts to parse a JSON element as an <see cref="Attribute"/> object.
+        /// </summary>
+        /// <param name="bodyEl">
+        /// The JSON element containing the attribute data.
+        /// </param>
+        /// <param name="options">
+        /// The serializer options to be used during the parsing process.
+        /// </param>
+        /// <param name="attribute">
+        /// When this method returns, contains the parsed <see cref="Attribute"/>
+        /// if parsing was successful; otherwise, <c>null</c>.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the JSON element was successfully parsed as an <see cref="Attribute"/>;
+        /// otherwise, <c>false</c>.
+        /// </returns>
+        public static bool TryGetAttribute(JsonElement bodyEl, JsonSerializerOptions options,
+            [NotNullWhen(true)] out Attribute? attribute)
+        {
+            if (!bodyEl.TryGetProperty("type", out var termEl) || !"Attribute".Equals(termEl.GetString()))
+            {
+                attribute = null;
+                return false;
+            }
+
+            if (!bodyEl.TryGetProperty("id", out var idEl) || !IdentifierSerializer.TryGetIdentifier(idEl, out var ident))
+            {
+                attribute = null;
+                return false;
+            }
+            
+            if (!bodyEl.TryGetProperty("value", out var valueEl) || !PatternSerializer.TryReadPattern(valueEl, options, out var pattern, out _))
+            {
+                attribute = null;
+                return false;
+            }
+
+            attribute = new Attribute(ident , pattern);
+            return true;
         }
     }
 }

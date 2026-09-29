@@ -97,6 +97,25 @@ namespace Linguini.Serialization.Converters
             }
 
             term.SetPattern(pattern);
+            
+            // Attributes are optional but have to be properly formatted.
+            if (bodyArrayEl.TryGetProperty("attributes", out var arrayEl) && arrayEl.ValueKind != JsonValueKind.Array)
+            {
+                ast = null;
+                return false;
+            }
+
+            foreach (var attrEl in arrayEl.EnumerateArray())
+            {
+                if (!AttributeSerializer.TryGetAttribute(attrEl, options, out var attribute))
+                {
+                    ast = null;
+                    return false;
+                }
+
+                term.AddAttribute(attribute);
+            }
+            
 
             ast = term.Build();
             return true;

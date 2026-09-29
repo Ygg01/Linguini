@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Linguini.Serialization.Converters;
 using Linguini.Syntax.Ast;
+using Linguini.Syntax.Parser.Error;
 using NUnit.Framework;
 using Attribute = Linguini.Syntax.Ast.Attribute;
 
@@ -165,6 +166,37 @@ public class SerializationErrorsTest
         ""value"": {""type"": ""Junk""}
     }";
     
+    private const string ParseError1 = @"{
+        ""kind"": ""ExpectedToken"",
+        ""message"": 3.9
+    }";
+    
+    private const string ParseError2 = @"{
+        ""kind"": ""Unknown"",
+        ""message"": ""This sucks""
+    }";
+    
+    private const string ParseError3 = @"{
+        ""kind"": ""ExpectedToken"",
+        ""message"": ""This sucks"",
+        ""row"": ""Should be number""
+    }";
+    
+    private const string ParseError4 = @"{
+        ""kind"": ""ExpectedToken"",
+        ""message"": ""This sucks"",
+        ""row"": 3,
+        ""position"": { ""start"": ""2"", ""end"": 3 }
+    }";
+    
+    private const string ParseError5 = @"{
+        ""kind"": ""ExpectedToken"",
+        ""message"": ""This sucks"",
+        ""row"": 3,
+        ""position"": { ""start"": 2, ""end"": 3 },
+        ""slice"": 3
+    }";
+    
     private static IEnumerable<TestCaseData> ErrorExamples()
     {
         yield return new TestCaseData(MessageReference1, typeof(MessageReference)).Returns("JsonException");
@@ -204,6 +236,11 @@ public class SerializationErrorsTest
         yield return new TestCaseData(Placeable1, typeof(CallArguments)).Returns("JsonException");
         yield return new TestCaseData(CallArguments1, typeof(CallArguments)).Returns("JsonException");
 
+        yield return new TestCaseData(ParseError1, typeof(ParseError)).Returns("JsonException");
+        yield return new TestCaseData(ParseError2, typeof(ParseError)).Returns("JsonException");
+        yield return new TestCaseData(ParseError3, typeof(ParseError)).Returns("JsonException");
+        yield return new TestCaseData(ParseError4, typeof(ParseError)).Returns("JsonException");
+        yield return new TestCaseData(ParseError5, typeof(ParseError)).Returns("JsonException");
         // Resource level
         yield return new TestCaseData(AstMessage1, typeof(AstMessage)).Returns("JsonException");
         yield return new TestCaseData(AstMessage2, typeof(AstMessage)).Returns("JsonException");
@@ -216,7 +253,7 @@ public class SerializationErrorsTest
 
     private static IEnumerable<TestCaseData> SingleExamples()
     {
-        yield return new TestCaseData(Variant2, typeof(Variant)).Returns("JsonException");
+        yield return new TestCaseData(ParseError4, typeof(ParseError)).Returns("JsonException");
     }
 
     [Test]
