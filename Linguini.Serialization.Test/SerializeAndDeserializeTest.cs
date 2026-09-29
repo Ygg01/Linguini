@@ -60,10 +60,17 @@ public class SerializeAndDeserializeTest
         // Other serializers
         yield return new Attribute("desc", new PatternBuilder("description"));
         yield return new Placeable(InlineExpressionBuilder.CreateMessageReference("x").Build());
-        yield return new CallArgumentsBuilder()
+        yield return new Placeable(InlineExpressionBuilder.CreateTextLiteral("32.0").Build());
+        yield return new Placeable(InlineExpressionBuilder
+            .CreateFunctionReference(
+                "func-ref",
+                new CallArgumentsBuilder().AddPositionalArg(3.09d))
+            .Build()
+        );
+        var callArgs = new CallArgumentsBuilder()
             .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
-            .AddNamedArg("y", 3)
-            .Build();
+            .AddNamedArg("y", 3);
+        yield return callArgs.Build();
         yield return new AstComment(CommentLevel.Comment, new() { "test".AsMemory() });
         yield return new DynamicReference("dyn", "attr", new CallArgumentsBuilder()
             .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
@@ -83,7 +90,8 @@ public class SerializeAndDeserializeTest
             new List<IEntry>
             {
                 AstTermBuilder.Builder("id").SetPattern(new PatternBuilder("test")).Build(),
-                new AstComment(CommentLevel.Comment, new() { "test".AsMemory() }),
+                new AstComment(CommentLevel.Comment, new() { "test2".AsMemory() }),
+                new AstComment(CommentLevel.GroupComment, new() { "test3".AsMemory() }),
                 new Junk("junkie"),
                 AstMessageBuilder.Builder("message").SetPattern(new PatternBuilder("xyz")).Build()
             },

@@ -57,8 +57,6 @@ namespace Linguini.Serialization.Converters
                     writer.WritePropertyName("type");
                     writer.WriteStringValue("NumberLiteral");
                     break;
-                default:
-                    throw new InvalidEnumArgumentException($"Unexpected argument `{value.Type}`");
             }
 
 
@@ -75,28 +73,32 @@ namespace Linguini.Serialization.Converters
         public static Variant ReadVariant(JsonElement el, JsonSerializerOptions options)
         {
             if (!el.TryGetProperty("type", out var jsonType)
-                && "Variant".Equals(jsonType.GetString()))
+                || !"Variant".Equals(jsonType.GetString()))
             {
                 throw new JsonException("Variant must have `type` equal to `Variant`.");
             }
 
-            if (el.TryGetProperty("key", out var jsonKey)
-                && TryReadKey(jsonKey, options, out var key))
+            if (!el.TryGetProperty("key", out var jsonKey)
+                || !TryReadKey(jsonKey, options, out var key))
             {
-                if (el.TryGetProperty("value", out var jsonValue)
-                    && PatternSerializer.TryReadPattern(jsonValue, options, out var pattern))
-                {
-                    var isDefault = false;
-                    if (el.TryGetProperty("default", out var jsonDefault))
-                    {
-                        isDefault = jsonDefault.ValueKind == JsonValueKind.True;
-                    }
-
-                    return new Variant(key.Value.Item1, key.Value.Item2, pattern, isDefault);
-                }
+                throw new JsonException("Variant must have `key` and `value`.");
             }
 
-            throw new JsonException("Variant must have `key` and `value`.");
+            string? errMsg = null;
+            if (!el.TryGetProperty("value", out var jsonValue)
+                || !PatternSerializer.TryReadPattern(jsonValue, options, out var pattern, out errMsg))
+            {
+                throw new JsonException(errMsg ?? "");
+            }
+
+            var isDefault = false;
+            if (el.TryGetProperty("default", out var jsonDefault))
+            {
+                isDefault = jsonDefault.ValueKind == JsonValueKind.True;
+            }
+
+            return new Variant(key.Value.Item1, key.Value.Item2, pattern, isDefault);
+
         }
 
         private static bool TryReadKey(JsonElement jsonKey, JsonSerializerOptions options,

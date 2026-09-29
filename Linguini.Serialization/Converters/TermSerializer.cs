@@ -90,7 +90,7 @@ namespace Linguini.Serialization.Converters
 
 
             if (!bodyArrayEl.TryGetProperty("value", out var valueEl) ||
-                !PatternSerializer.TryReadPattern(valueEl, options, out var pattern))
+                !PatternSerializer.TryReadPattern(valueEl, options, out var pattern, out _))
             {
                 ast = null;
                 return false;

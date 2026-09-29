@@ -139,23 +139,28 @@ namespace Linguini.Serialization.Converters
         /// When this method returns <c>true</c>, contains the deserialized <see cref="Pattern"/> object,
         /// if the deserialization is successful; otherwise, null.
         /// </param>
+        /// <param name="error">Errors message that can be displayed if return value is <c>false</c>.</param>
         /// <returns>
         /// <c>true</c> if the JSON element was successfully deserialized into a <see cref="Pattern"/> object;
         /// otherwise, <c>false</c>.
         /// </returns>
         public static bool TryReadPattern(JsonElement jsonValue, JsonSerializerOptions options,
-            [NotNullWhen(true)] out Pattern? pattern)
+            [NotNullWhen(true)] out Pattern? pattern, [NotNullWhen(false)] out string? error)
         {
             if (!jsonValue.TryGetProperty("type", out var jsonType)
                 && "Placeable".Equals(jsonType.GetString()))
             {
-                throw new JsonException("Placeable must have `type` equal to `Placeable`.");
+                pattern = null;
+                error = "Placeable must have `type` equal to `Placeable`.";
+                return false;
             }
 
             if (!jsonValue.TryGetProperty("elements", out var elements)
                 && elements.ValueKind != JsonValueKind.Array)
             {
-                throw new JsonException("Placeable must have an `elements` array.");
+                pattern = null;
+                error = "Placeable must have an `elements` array.";
+                return false;
             }
 
             var patternElements = new List<IPatternElement>();
@@ -179,6 +184,7 @@ namespace Linguini.Serialization.Converters
             }
 
             pattern = new Pattern(patternElements);
+            error = null;
             return true;
         }
     }

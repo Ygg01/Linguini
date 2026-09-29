@@ -92,8 +92,6 @@ namespace Linguini.Serialization.Converters
                 case CommentLevel.ResourceComment:
                     writer.WriteStringValue("ResourceComment");
                     break;
-                default:
-                    throw new InvalidEnumArgumentException($"Unexpected comment `{comment.CommentLevel}`");
             }
 
             writer.WritePropertyName("content");
