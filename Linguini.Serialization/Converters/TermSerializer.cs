@@ -99,21 +99,35 @@ namespace Linguini.Serialization.Converters
             term.SetPattern(pattern);
             
             // Attributes are optional but have to be properly formatted.
-            if (bodyArrayEl.TryGetProperty("attributes", out var arrayEl) && arrayEl.ValueKind != JsonValueKind.Array)
+            if (bodyArrayEl.TryGetProperty("attributes", out var arrayEl))
             {
-                ast = null;
-                return false;
-            }
+                if (arrayEl.ValueKind != JsonValueKind.Array)
+                {
+                    ast = null;
+                    return false;
+                }
+                
+                foreach (var attrEl in arrayEl.EnumerateArray())
+                {
+                    if (!AttributeSerializer.TryGetAttribute(attrEl, options, out var attribute))
+                    {
+                        ast = null;
+                        return false;
+                    }
 
-            foreach (var attrEl in arrayEl.EnumerateArray())
+                    term.AddAttribute(attribute);
+                }
+            }
+            
+            if (bodyArrayEl.TryGetProperty("comment", out var commentEl))
             {
-                if (!AttributeSerializer.TryGetAttribute(attrEl, options, out var attribute))
+                if (!CommentSerializer.TryReadComment(commentEl, out var astComment))
                 {
                     ast = null;
                     return false;
                 }
 
-                term.AddAttribute(attribute);
+                term.SetComment(astComment);
             }
             
 

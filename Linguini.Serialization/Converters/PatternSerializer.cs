@@ -146,9 +146,9 @@ namespace Linguini.Serialization.Converters
         /// </returns>
         public static bool TryReadPattern(JsonElement jsonValue, JsonSerializerOptions options,
             [NotNullWhen(true)] out Pattern? pattern, [NotNullWhen(false)] out string? error)
-        {
+            {
             if (!jsonValue.TryGetProperty("type", out var jsonType)
-                && "Placeable".Equals(jsonType.GetString()))
+                || !"Pattern".Equals(jsonType.GetString()))
             {
                 pattern = null;
                 error = "Placeable must have `type` equal to `Placeable`.";

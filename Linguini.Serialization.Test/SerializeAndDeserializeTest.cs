@@ -17,7 +17,9 @@ namespace Linguini.Serialization.Test;
 public class SerializeAndDeserializeTest
 {
     [Test]
-    [TestCaseSource(nameof(AstExamples))]
+    [TestCaseSource(nameof(SyntaxExamples))]
+    [TestCaseSource(nameof(ParseErrorExamples))]
+    [TestCaseSource(nameof(ResourcesExample))]
     [Parallelizable]
     public void RoundTripTest(object actual)
     {
@@ -33,7 +35,7 @@ public class SerializeAndDeserializeTest
         Assert.That(deserializedObject, Is.EqualTo(actual));
     }
 
-    public static IEnumerable<object> AstExamples()
+    public static IEnumerable<object> ParseErrorExamples()
     {
         var errorWithSlice = ParseError.ExpectedCharRange("aZ", 3, 2);
         errorWithSlice.Slice = new Range(2, 3);
@@ -60,6 +62,10 @@ public class SerializeAndDeserializeTest
         yield return ParseError.UnknownEscapeSequence('?', 123, 44);
         yield return ParseError.UnbalancedClosingBrace(33, 1134);
         yield return ParseError.UnterminatedStringLiteral(87, 99);
+    }
+
+    public static IEnumerable<object> SyntaxExamples()
+    {
         // Other serializers
         yield return new Attribute("desc", new PatternBuilder("description"));
         yield return new Placeable(InlineExpressionBuilder.CreateMessageReference("x").Build());
@@ -70,6 +76,11 @@ public class SerializeAndDeserializeTest
                 new CallArgumentsBuilder().AddPositionalArg(3.09d))
             .Build()
         );
+        var selectionBuilder = new SelectExpressionBuilder(new TermReference("x", "y"))
+            .AddVariant("x", new PatternBuilder("z"))
+            .SetDefault(0)
+            .Build();
+        yield return new Placeable(selectionBuilder);
         var callArgs = new CallArgumentsBuilder()
             .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
             .AddNamedArg("y", 3);
@@ -83,12 +94,22 @@ public class SerializeAndDeserializeTest
             .AddNamedArg("test", InlineExpressionBuilder.CreateTermReference("x", "y"))
             .Build()
         );
-        var selectionBuilder = new SelectExpressionBuilder(new TermReference("x", "y"))
-            .AddVariant("x", new PatternBuilder("z"))
-            .SetDefault(0)
-            .Build();
-        yield return new Placeable(selectionBuilder);
+        yield return new Identifier("test");
         yield return new NamedArgument("test", InlineExpressionBuilder.CreateDynamicReference("x", "y").Build());
+        yield return new MessageReference("message", "attribute");
+        yield return new PatternBuilder("text ").AddMessage("x").AddText(" more text").Build();
+        yield return new SelectExpressionBuilder(new VariableReference("x"))
+            .AddVariant("one", new PatternBuilder("select 1"))
+            .AddVariant("other", new PatternBuilder("select other"))
+            .SetDefault(1)
+            .Build();
+        yield return new TermReference("x", "y");
+        yield return new VariableReference("x");
+        yield return new Variant(2.0f, new PatternBuilder(3));
+    }
+
+    public static IEnumerable<object> ResourcesExample()
+    {
         yield return new Resource(
             new List<IEntry>
             {
@@ -99,11 +120,11 @@ public class SerializeAndDeserializeTest
                 AstMessageBuilder.Builder("message").SetPattern(new PatternBuilder("xyz")).Build()
             },
             new List<ParseError> { });
-        yield return new Identifier("test");
+ 
         yield return new Junk("Test".AsMemory());
-        yield return new MessageReference("message", "attribute");
         yield return AstTermBuilder.Builder("z")
             .SetPattern(new PatternBuilder("x"))
+            .SetComment("my comment")
             .AddAttribute(Attribute.From("x0", new PatternBuilder(32)))
             .Build();
         yield return new AstMessage(
@@ -119,16 +140,8 @@ public class SerializeAndDeserializeTest
             {
                 "test".AsMemory()
             }));
-        yield return new PatternBuilder("text ").AddMessage("x").AddText(" more text").Build();
-        yield return new SelectExpressionBuilder(new VariableReference("x"))
-            .AddVariant("one", new PatternBuilder("select 1"))
-            .AddVariant("other", new PatternBuilder("select other"))
-            .SetDefault(1)
-            .Build();
-        yield return new TermReference("x", "y");
-        yield return new VariableReference("x");
-        yield return new Variant(2.0f, new PatternBuilder(3));
     }
+
 
     private static readonly JsonSerializerOptions Options = new()
     {
