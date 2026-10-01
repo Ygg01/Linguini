@@ -187,19 +187,19 @@ namespace Linguini.Bundle.Errors
             return self switch
             {
                 FunctionReference funcRef => new ResolverFluentError($"Unknown function: {funcRef.Id}()",
-                    ErrorType.Reference, location),
+                                                                     ErrorType.Reference, location),
                 MessageReference msgRef when msgRef.Attribute == null => new ResolverFluentError(
                     $"Unknown message: {msgRef.Id}",
                     ErrorType.Reference, location),
                 MessageReference msgRef => new ResolverFluentError($"Unknown attribute: {msgRef.Id}.{msgRef.Attribute}",
-                    ErrorType.Reference, location),
+                                                                   ErrorType.Reference, location),
                 TermReference termReference when termReference.Attribute == null => new ResolverFluentError(
                     $"Unknown term: -{termReference.Id}", ErrorType.Reference, location),
                 TermReference termReference => new ResolverFluentError(
                     $"Unknown attribute: -{termReference.Id}.{termReference.Attribute}",
                     ErrorType.Reference, location),
                 VariableReference varRef => new ResolverFluentError($"Unknown variable: ${varRef.Id}",
-                    ErrorType.Reference, location),
+                                                                    ErrorType.Reference, location),
                 DynamicReference dynamicReference => new ResolverFluentError(
                     $"Unknown dynamic reference: $${dynamicReference.Id}", ErrorType.Reference, location),
                 _ => throw new ArgumentException($"Expected reference got ${self.GetType()}")
@@ -215,7 +215,7 @@ namespace Linguini.Bundle.Errors
         public static ResolverFluentError Cyclic(Pattern pattern, string? location = null)
         {
             return new ResolverFluentError($"Cyclic reference in {pattern.Stringify()} detected!", ErrorType.Cyclic,
-                location);
+                                           location);
         }
 
         /// <summary>
@@ -274,7 +274,7 @@ namespace Linguini.Bundle.Errors
             }
 
             return new ErrorSpan(_error.Row, _error.Slice.Value.Start.Value, _error.Slice.Value.End.Value,
-                _error.Position.Start.Value, _error.Position.End.Value);
+                                 _error.Position.Start.Value, _error.Position.End.Value);
         }
     }
 
@@ -313,9 +313,9 @@ namespace Linguini.Bundle.Errors
         {
             return self switch
             {
-                AstTerm => EntryKind.Term,
+                AstTerm    => EntryKind.Term,
                 AstMessage => EntryKind.Message,
-                _ => EntryKind.Func
+                _          => EntryKind.Func
             };
         }
     }

@@ -6,96 +6,46 @@ using System.Text.RegularExpressions;
 namespace Linguini.Shared.Types
 {
     /// <summary>
-    /// Represents the operands used in plural rule calculations to determine plural forms.
-    ///
-    /// See <a href="https://unicode.org/reports/tr35/tr35-numbers.html#Operands">CLDR Plural Operands</a> for more information.
+    ///     Represents the operands used in plural rule calculations to determine plural forms.
+    ///     See <a href="https://unicode.org/reports/tr35/tr35-numbers.html#Operands">CLDR Plural Operands</a> for more
+    ///     information.
     /// </summary>
     public class PluralOperands
     {
         /// <summary>
-        /// Compares this <see cref="PluralOperands"/> instance with other <see cref="PluralOperands"/> instance.
+        ///     Compact decimal exponent value: exponent of the power of 10 used in compact decimal formatting.
         /// </summary>
-        /// <param name="other">Another instance to compare it to</param>
-        /// <returns><c>true</c> if the operands are equal; otherwise, <c>false</c>.</returns>
-        protected bool Equals(PluralOperands other)
-        {
-            return N.Equals(other.N) && I == other.I && V == other.V && W == other.W && F == other.F && T == other.T && C == other.C;
-        }
-
-        
-        /// <inheritdoc/>
-        public override bool Equals(object? obj)
-        {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((PluralOperands)obj);
-        }
-
-        /// <inheritdoc/>
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(N, I, V, W, F, T, C);
-        }
+        public readonly long C;
 
         /// <summary>
-        /// Determines whether two <see cref="PluralOperands"/> instances are equal.
-        /// </summary>
-        /// <param name="left">The first instance of <see cref="PluralOperands"/> to compare.</param>
-        /// <param name="right">The second instance of <see cref="PluralOperands"/> to compare.</param>
-        /// <returns><c>true</c> if the specified instances are equal; otherwise, <c>false</c>.</returns>
-        public static bool operator ==(PluralOperands? left, PluralOperands? right)
-        {
-            return Equals(left, right);
-        }
-
-        /// <summary>
-        /// Determines whether two <see cref="PluralOperands"/> instances are not equal.
-        /// </summary>
-        /// <param name="left">The first instance of <see cref="PluralOperands"/> to compare.</param>
-        /// <param name="right">The second instance of <see cref="PluralOperands"/> to compare.</param>
-        /// <returns><c>true</c> if the specified instances are inequal; otherwise, <c>false</c>.</returns>
-        public static bool operator !=(PluralOperands? left, PluralOperands? right)
-        {
-            return !Equals(left, right);
-        }
-
-        /// <summary>
-        /// Absolute value of input
-        /// </summary>
-        public readonly double N;
-
-        /// <summary>
-        /// Integer value of input
-        /// </summary>
-        public readonly ulong I;
-
-        /// <summary>
-        /// Number of visible fraction digits with trailing zeros
-        /// </summary>
-        public readonly int V;
-
-        /// <summary>
-        /// Number of visible fraction digits without trailing zeros
-        /// </summary>
-        public readonly int W;
-
-        /// <summary>
-        /// Visible fraction digits with trailing zeros
+        ///     Visible fraction digits with trailing zeros
         /// </summary>
         public readonly long F;
 
         /// <summary>
-        /// Visible fraction digits without trailing zeros
+        ///     Integer value of input
+        /// </summary>
+        public readonly ulong I;
+
+        /// <summary>
+        ///     Absolute value of input
+        /// </summary>
+        public readonly double N;
+
+        /// <summary>
+        ///     Visible fraction digits without trailing zeros
         /// </summary>
         public readonly long T;
-        
-        /// <summary>
-        /// Compact decimal exponent value: exponent of the power of 10 used in compact decimal formatting.
-        /// </summary>
-        public readonly long C;
 
-        public bool IsInteger => F == 0 && W == 0;
+        /// <summary>
+        ///     Number of visible fraction digits with trailing zeros
+        /// </summary>
+        public readonly int V;
+
+        /// <summary>
+        ///     Number of visible fraction digits without trailing zeros
+        /// </summary>
+        public readonly int W;
 
         /// Represents the operands used for pluralization rules.
         /// This class encapsulates numeric values in different formats which are
@@ -118,6 +68,69 @@ namespace Linguini.Shared.Types
             C = c;
         }
 
+        public bool IsInteger => F == 0 && W == 0;
+
+        /// <summary>
+        ///     Compares this <see cref="PluralOperands" /> instance with other <see cref="PluralOperands" /> instance.
+        /// </summary>
+        /// <param name="other">Another instance to compare it to</param>
+        /// <returns><c>true</c> if the operands are equal; otherwise, <c>false</c>.</returns>
+        protected bool Equals(PluralOperands other)
+        {
+            return N.Equals(other.N) && I == other.I && V == other.V && W == other.W && F == other.F && T == other.T &&
+                   C == other.C;
+        }
+
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (obj is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((PluralOperands)obj);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(N, I, V, W, F, T, C);
+        }
+
+        /// <summary>
+        ///     Determines whether two <see cref="PluralOperands" /> instances are equal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="PluralOperands" /> to compare.</param>
+        /// <param name="right">The second instance of <see cref="PluralOperands" /> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are equal; otherwise, <c>false</c>.</returns>
+        public static bool operator ==(PluralOperands? left, PluralOperands? right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <summary>
+        ///     Determines whether two <see cref="PluralOperands" /> instances are not equal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="PluralOperands" /> to compare.</param>
+        /// <param name="right">The second instance of <see cref="PluralOperands" /> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are inequal; otherwise, <c>false</c>.</returns>
+        public static bool operator !=(PluralOperands? left, PluralOperands? right)
+        {
+            return !Equals(left, right);
+        }
+
         /// <inheritdoc />
         public override string ToString()
         {
@@ -126,18 +139,22 @@ namespace Linguini.Shared.Types
     }
 
     /// <summary>
-    /// Provides utility methods for converting various numeric and string types into instances of the
-    /// <see cref="PluralOperands"/> class for use in plural rule calculations.
+    ///     Provides utility methods for converting various numeric and string types into instances of the
+    ///     <see cref="PluralOperands" /> class for use in plural rule calculations.
     /// </summary>
     public static class PluralOperandsHelpers
     {
         /// <summary>
-        /// For given <see cref="string"/> input, will convert it to number and then try to find it's <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
+        ///     For given <see cref="string" /> input, will convert it to number and then try to find it's
+        ///     <see cref="PluralOperands" />
+        ///     necessary for determining plural forms for a given language.
         /// </summary>
-        /// <param name="strInput">number as a string, using <see cref="NumberFormatInfo.InvariantInfo"/> parsing rules.</param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
-        /// <returns>true if the number is parsable to a <see cref="PluralOperands"/>; false otherwise.</returns>
+        /// <param name="strInput">number as a string, using <see cref="NumberFormatInfo.InvariantInfo" /> parsing rules.</param>
+        /// <param name="operands">
+        ///     <c>out</c> parameter that is present when true, it describes number as a
+        ///     <see cref="PluralOperands" />
+        /// </param>
+        /// <returns>true if the number is parsable to a <see cref="PluralOperands" />; false otherwise.</returns>
         public static bool TryPluralOperands(this string strInput, [NotNullWhen(true)] out PluralOperands? operands)
         {
             // replace any 1c3 string to 1e3 which is a valid double
@@ -145,19 +162,19 @@ namespace Linguini.Shared.Types
             var expPosition = input.IndexOf('e');
             var minusStart = input.StartsWith("-") ? 1 : 0;
             var absStr = input.AsSpan()[minusStart..];
- 
+
             if (!double.TryParse(absStr.ToString(),
-                    NumberStyles.Float | NumberStyles.AllowThousands, NumberFormatInfo.InvariantInfo,
-                    out var absoluteValue))
+                                 NumberStyles.Float | NumberStyles.AllowThousands, NumberFormatInfo.InvariantInfo,
+                                 out var absoluteValue))
             {
                 operands = null;
                 return false;
             }
-            
+
             ulong intDigits = (uint)Math.Truncate(absoluteValue);
             var numFractionDigits0 = 0;
             var numFractionDigits = 0;
-            var fractionDigits0 = 0 ;
+            var fractionDigits0 = 0;
             var fractionDigits = 0;
             var exp = 0;
             var decPos = absStr.IndexOf('.');
@@ -169,7 +186,7 @@ namespace Linguini.Shared.Types
                 fixedDecPos += exp;
                 endDecPos = expPosition;
             }
-            
+
             if (decPos > -1 && fixedDecPos < absStr.Length)
             {
                 var decStr = absStr[fixedDecPos ..endDecPos];
@@ -191,7 +208,7 @@ namespace Linguini.Shared.Types
                 // }
             }
 
-            operands = new(
+            operands = new PluralOperands(
                 absoluteValue,
                 intDigits,
                 numFractionDigits0,
@@ -206,23 +223,30 @@ namespace Linguini.Shared.Types
         #region SIGNED_INTS
 
         /// <summary>
-        /// For given <see cref="sbyte"/> input, will convert it to number and then try to find its <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
+        ///     For given <see cref="sbyte" /> input, will convert it to number and then try to find its
+        ///     <see cref="PluralOperands" />
+        ///     necessary for determining plural forms for a given language.
         /// </summary>
-        /// <param name="input">number as a string, using <see cref="NumberFormatInfo.InvariantInfo"/> parsing rules.</param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
-        /// <returns>true if the number is parsable to a <see cref="PluralOperands"/>; false otherwise.</returns>
+        /// <param name="input">number as a string, using <see cref="NumberFormatInfo.InvariantInfo" /> parsing rules.</param>
+        /// <param name="operands">
+        ///     <c>out</c> parameter that is present when true, it describes number as a
+        ///     <see cref="PluralOperands" />
+        /// </param>
+        /// <returns>true if the number is parsable to a <see cref="PluralOperands" />; false otherwise.</returns>
         public static bool TryPluralOperands(this sbyte input, out PluralOperands? operands)
         {
             return Convert.ToInt64(input).TryPluralOperands(out operands);
         }
 
         /// <summary>
-        /// For given <see cref="short"/> input, will try to find its <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
+        ///     For given <see cref="short" /> input, will try to find its <see cref="PluralOperands" />
+        ///     necessary for determining plural forms for a given language.
         /// </summary>
-        /// <param name="input">number to convert to <see cref="PluralOperands"/></param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
+        /// <param name="input">number to convert to <see cref="PluralOperands" /></param>
+        /// <param name="operands">
+        ///     <c>out</c> parameter that is present when true, it describes number as a
+        ///     <see cref="PluralOperands" />
+        /// </param>
         /// <returns>true</returns>
         public static bool TryPluralOperands(this short input, [NotNullWhen(true)] out PluralOperands? operands)
         {
@@ -230,11 +254,14 @@ namespace Linguini.Shared.Types
         }
 
         /// <summary>
-        /// For given <see cref="int"/> input, will try to find its <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
+        ///     For given <see cref="int" /> input, will try to find its <see cref="PluralOperands" />
+        ///     necessary for determining plural forms for a given language.
         /// </summary>
-        /// <param name="input">number to convert to <see cref="PluralOperands"/></param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
+        /// <param name="input">number to convert to <see cref="PluralOperands" /></param>
+        /// <param name="operands">
+        ///     <c>out</c> parameter that is present when true, it describes number as a
+        ///     <see cref="PluralOperands" />
+        /// </param>
         /// <returns>true</returns>
         public static bool TryPluralOperands(this int input, [NotNullWhen(true)] out PluralOperands? operands)
         {
@@ -242,15 +269,18 @@ namespace Linguini.Shared.Types
         }
 
         /// <summary>
-        /// For given <see cref="long"/> input, will try to find its <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
+        ///     For given <see cref="long" /> input, will try to find its <see cref="PluralOperands" />
+        ///     necessary for determining plural forms for a given language.
         /// </summary>
-        /// <param name="input">number to convert to <see cref="PluralOperands"/></param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
+        /// <param name="input">number to convert to <see cref="PluralOperands" /></param>
+        /// <param name="operands">
+        ///     <c>out</c> parameter that is present when true, it describes number as a
+        ///     <see cref="PluralOperands" />
+        /// </param>
         /// <returns>true</returns>
         public static bool TryPluralOperands(this long input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            operands = new(
+            operands = new PluralOperands(
                 Convert.ToDouble(Math.Abs(input)),
                 Convert.ToUInt64(Math.Abs(input)),
                 0,
@@ -267,15 +297,18 @@ namespace Linguini.Shared.Types
         #region UNSIGNED_INTS
 
         /// <summary>
-        /// For given <see cref="byte"/> input, will try to find its <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
+        ///     For given <see cref="byte" /> input, will try to find its <see cref="PluralOperands" />
+        ///     necessary for determining plural forms for a given language.
         /// </summary>
-        /// <param name="input">number to convert to <see cref="PluralOperands"/></param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
+        /// <param name="input">number to convert to <see cref="PluralOperands" /></param>
+        /// <param name="operands">
+        ///     <c>out</c> parameter that is present when true, it describes number as a
+        ///     <see cref="PluralOperands" />
+        /// </param>
         /// <returns>true</returns>
         public static bool TryPluralOperands(this byte input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            operands = new(
+            operands = new PluralOperands(
                 Convert.ToDouble(input),
                 Convert.ToUInt64(input),
                 0,
@@ -288,15 +321,18 @@ namespace Linguini.Shared.Types
         }
 
         /// <summary>
-        /// For given <see cref="ushort"/> input, will try to find its <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
+        ///     For given <see cref="ushort" /> input, will try to find its <see cref="PluralOperands" />
+        ///     necessary for determining plural forms for a given language.
         /// </summary>
-        /// <param name="input">number to convert to <see cref="PluralOperands"/></param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
+        /// <param name="input">number to convert to <see cref="PluralOperands" /></param>
+        /// <param name="operands">
+        ///     <c>out</c> parameter that is present when true, it describes number as a
+        ///     <see cref="PluralOperands" />
+        /// </param>
         /// <returns>true</returns>
         public static bool TryPluralOperands(this ushort input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            operands = new(
+            operands = new PluralOperands(
                 Convert.ToDouble(input),
                 Convert.ToUInt64(input),
                 0,
@@ -309,15 +345,18 @@ namespace Linguini.Shared.Types
         }
 
         /// <summary>
-        /// For given <see cref="uint"/> input, will try to find its <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
+        ///     For given <see cref="uint" /> input, will try to find its <see cref="PluralOperands" />
+        ///     necessary for determining plural forms for a given language.
         /// </summary>
-        /// <param name="input">number to convert to <see cref="PluralOperands"/></param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
+        /// <param name="input">number to convert to <see cref="PluralOperands" /></param>
+        /// <param name="operands">
+        ///     <c>out</c> parameter that is present when true, it describes number as a
+        ///     <see cref="PluralOperands" />
+        /// </param>
         /// <returns>true</returns>
         public static bool TryPluralOperands(this uint input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            operands = new(
+            operands = new PluralOperands(
                 Convert.ToDouble(input),
                 Convert.ToUInt64(input),
                 0,
@@ -330,15 +369,18 @@ namespace Linguini.Shared.Types
         }
 
         /// <summary>
-        /// For given <see cref="ulong"/> input, will try to find its <see cref="PluralOperands"/>
-        /// necessary for determining plural forms for a given language.
+        ///     For given <see cref="ulong" /> input, will try to find its <see cref="PluralOperands" />
+        ///     necessary for determining plural forms for a given language.
         /// </summary>
-        /// <param name="input">number to convert to <see cref="PluralOperands"/></param>
-        /// <param name="operands"><c>out</c> parameter that is present when true, it describes number as a <see cref="PluralOperands"/></param>
+        /// <param name="input">number to convert to <see cref="PluralOperands" /></param>
+        /// <param name="operands">
+        ///     <c>out</c> parameter that is present when true, it describes number as a
+        ///     <see cref="PluralOperands" />
+        /// </param>
         /// <returns>true</returns>
         public static bool TryPluralOperands(this ulong input, [NotNullWhen(true)] out PluralOperands? operands)
         {
-            operands = new(
+            operands = new PluralOperands(
                 Convert.ToDouble(input),
                 Convert.ToUInt64(input),
                 0,
@@ -351,6 +393,5 @@ namespace Linguini.Shared.Types
         }
 
         #endregion
-
     }
 }

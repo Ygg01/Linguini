@@ -31,8 +31,15 @@ namespace Linguini.Bundle.Function
         {
             var num = args[0].ToFluentNumber();
 
-            if (num == null) return new FluentErrType();
-            if (namedArgs.Count <= 0) return num;
+            if (num == null)
+            {
+                return new FluentErrType();
+            }
+
+            if (namedArgs.Count <= 0)
+            {
+                return num;
+            }
 
             var numOptions = FluentNumberOptions.ToNumberOption(namedArgs);
             return num.WithFormatting(numOptions);
@@ -57,8 +64,16 @@ namespace Linguini.Bundle.Function
         public static IFluentType DateTime(IList<IFluentType> args, IDictionary<string, IFluentType> namedArgs)
         {
             var num = args[0].ToFluentDate();
-            if (num == null) return new FluentErrType();
-            if (namedArgs.Count <= 0) return num;
+            if (num == null)
+            {
+                return new FluentErrType();
+            }
+
+            if (namedArgs.Count <= 0)
+            {
+                return num;
+            }
+
             var numOptions = FluentDateTimeOptions.ToDateOptions(namedArgs);
             return num.WithFormatting(numOptions);
         }

@@ -41,8 +41,16 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(TextLiteral? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Value.Span.SequenceEqual(other.Value.Span);
         }
 
@@ -55,9 +63,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((TextLiteral)obj);
         }
 
@@ -111,8 +131,16 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(NumberLiteral? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Value.Span.SequenceEqual(other.Value.Span);
         }
 
@@ -125,9 +153,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((NumberLiteral)obj);
         }
 
@@ -179,17 +219,37 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(FunctionReference? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Id == other.Id && Arguments == other.Arguments;
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((FunctionReference)obj);
         }
 
@@ -242,23 +302,46 @@ namespace Linguini.Syntax.Ast
         public MessageReference(string id, string? attribute = null)
         {
             Id = new Identifier(id);
-            if (attribute != null) Attribute = new Identifier(attribute);
+            if (attribute != null)
+            {
+                Attribute = new Identifier(attribute);
+            }
         }
 
         /// <inheritdoc />
         public bool Equals(MessageReference? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Id == other.Id && Attribute == other.Attribute;
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((MessageReference)obj);
         }
 
@@ -321,9 +404,15 @@ namespace Linguini.Syntax.Ast
         public DynamicReference(string id, string? attribute = null, CallArguments? arguments = null)
         {
             Id = new Identifier(id);
-            if (attribute != null) Attribute = new Identifier(attribute);
+            if (attribute != null)
+            {
+                Attribute = new Identifier(attribute);
+            }
 
-            if (arguments != null) Arguments = arguments.Value;
+            if (arguments != null)
+            {
+                Arguments = arguments.Value;
+            }
         }
 
         /// <summary>
@@ -338,14 +427,25 @@ namespace Linguini.Syntax.Ast
             Id = id;
             Attribute = attribute;
 
-            if (callArgumentsBuilder != null) Arguments = callArgumentsBuilder.Build();
+            if (callArgumentsBuilder != null)
+            {
+                Arguments = callArgumentsBuilder.Build();
+            }
         }
 
         /// <inheritdoc />
         public bool Equals(DynamicReference? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Id == other.Id && Attribute == other.Attribute &&
                    Nullable.Equals(Arguments, other.Arguments);
         }
@@ -353,9 +453,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((DynamicReference)obj);
         }
 
@@ -411,9 +523,15 @@ namespace Linguini.Syntax.Ast
         public TermReference(string id, string? attribute = null, CallArguments? arguments = null)
         {
             Id = new Identifier(id);
-            if (attribute != null) Attribute = new Identifier(attribute);
+            if (attribute != null)
+            {
+                Attribute = new Identifier(attribute);
+            }
 
-            if (arguments != null) Arguments = arguments.Value;
+            if (arguments != null)
+            {
+                Arguments = arguments.Value;
+            }
         }
 
         /// <summary>
@@ -426,16 +544,30 @@ namespace Linguini.Syntax.Ast
         public TermReference(string id, string? attribute, CallArgumentsBuilder? argumentsBuilder)
         {
             Id = new Identifier(id);
-            if (attribute != null) Attribute = new Identifier(attribute);
+            if (attribute != null)
+            {
+                Attribute = new Identifier(attribute);
+            }
 
-            if (argumentsBuilder != null) Arguments = argumentsBuilder.Build();
+            if (argumentsBuilder != null)
+            {
+                Arguments = argumentsBuilder.Build();
+            }
         }
 
         /// <inheritdoc />
         public bool Equals(TermReference? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Id == other.Id && Attribute == other.Attribute &&
                    Nullable.Equals(Arguments, other.Arguments);
         }
@@ -443,9 +575,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((TermReference)obj);
         }
 
@@ -493,17 +637,37 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(VariableReference? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Identifier.Comparer.Equals(Id, other.Id);
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((VariableReference)obj);
         }
 
@@ -542,17 +706,37 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(Placeable? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Expression.Equals(other.Expression);
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((Placeable)obj);
         }
 
@@ -1061,8 +1245,16 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(SelectExpression? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return IInlineExpression.Comparer.Equals(Selector, other.Selector)
                    && Variants.SequenceEqual(other.Variants);
         }
@@ -1070,9 +1262,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((SelectExpression)obj);
         }
 
@@ -1285,8 +1489,16 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(Variant? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Type == other.Type && Key.Span.SequenceEqual(other.Key.Span) &&
                    InternalDefault == other.InternalDefault &&
                    InternalValue.Equals(other.InternalValue);
@@ -1295,9 +1507,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((Variant)obj);
         }
 

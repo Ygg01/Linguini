@@ -12,67 +12,66 @@ namespace Linguini.Bundle.Test.Unit
         private static IEnumerable<TestCaseData> TestNumberFormatCases()
         {
             // Simple Formats
-            yield return new TestCaseData(123, new FluentContext(LangLocId.EN, new FluentNumberOptions()
+            yield return new TestCaseData(123, new FluentContext(LangLocId.EN, new FluentNumberOptions
             {
                 MinimumFractionDigits = 2
             })).Returns("123.00");
-            
-            yield return new TestCaseData(123.1, new FluentContext(LangLocId.EN, new FluentNumberOptions()
+
+            yield return new TestCaseData(123.1, new FluentContext(LangLocId.EN, new FluentNumberOptions
             {
                 MinimumFractionDigits = 4
             })).Returns("123.1000");
-            
-            yield return new TestCaseData(11.1, new FluentContext(LangLocId.EN, new FluentNumberOptions()
+
+            yield return new TestCaseData(11.1, new FluentContext(LangLocId.EN, new FluentNumberOptions
             {
                 Style = FluentNumberStyle.Currency,
                 MinimumFractionDigits = 3
             })).Returns("¤11.100");
-            
+
             // Decimal complex formats
-            yield return new TestCaseData(123.45, new FluentContext(LangLocId.EN, new FluentNumberOptions()
+            yield return new TestCaseData(123.45, new FluentContext(LangLocId.EN, new FluentNumberOptions
             {
                 Style = FluentNumberStyle.Decimal,
                 MaximumFractionDigits = 1,
-                MinimumFractionDigits = 3,
+                MinimumFractionDigits = 3
             })).Returns("123.450");
-            yield return new TestCaseData(123.4567, new FluentContext(LangLocId.EN, new FluentNumberOptions()
+            yield return new TestCaseData(123.4567, new FluentContext(LangLocId.EN, new FluentNumberOptions
             {
                 Style = FluentNumberStyle.Decimal,
                 MaximumFractionDigits = 3,
-                MinimumFractionDigits = 1,
+                MinimumFractionDigits = 1
             })).Returns("123.457");
-            
+
             // Currency complex formats
-            yield return new TestCaseData(123.4567, new FluentContext("en-US", new FluentNumberOptions()
+            yield return new TestCaseData(123.4567, new FluentContext("en-US", new FluentNumberOptions
             {
                 Style = FluentNumberStyle.Currency,
                 MaximumFractionDigits = 3,
-                MinimumFractionDigits = 1,
+                MinimumFractionDigits = 1
             })).Returns("$123.457");
-            yield return new TestCaseData(-456.789, new FluentContext("en-US", new FluentNumberOptions()
+            yield return new TestCaseData(-456.789, new FluentContext("en-US", new FluentNumberOptions
             {
                 Style = FluentNumberStyle.Currency,
                 MaximumFractionDigits = 2,
-                MinimumFractionDigits = 1,
+                MinimumFractionDigits = 1
             })).Returns("-$456.79");
-            yield return new TestCaseData(-456.789, new FluentContext("en-US", new FluentNumberOptions()
+            yield return new TestCaseData(-456.789, new FluentContext("en-US", new FluentNumberOptions
             {
                 Style = FluentNumberStyle.Currency,
                 Currency = "USD",
                 MaximumFractionDigits = 2,
-                MinimumFractionDigits = 1,
+                MinimumFractionDigits = 1
             })).Returns("-USD456.79");
-            
+
             // Percent complex formats
-            yield return new TestCaseData(0.41789, new FluentContext("en-US", new FluentNumberOptions()
+            yield return new TestCaseData(0.41789, new FluentContext("en-US", new FluentNumberOptions
             {
                 Style = FluentNumberStyle.Percent,
                 MaximumFractionDigits = 2,
-                MinimumFractionDigits = 1,
+                MinimumFractionDigits = 1
             })).Returns("41.79%");
-            
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(TestNumberFormatCases))]
@@ -87,41 +86,41 @@ namespace Linguini.Bundle.Test.Unit
             // Style formatting
             yield return new TestCaseData(
                 new DateTimeOffset(2026, 2, 1, 1, 3, 4, TimeSpan.Zero),
-                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
-                    DateStyle = DateTimeRepresentation.Long,
+                    DateStyle = DateTimeRepresentation.Long
                 })).Returns("Sunday, February 1, 2026");
             yield return new TestCaseData(
                 new DateTimeOffset(2027, 2, 1, 1, 3, 4, TimeSpan.Zero),
-                new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions
                 {
-                    TimeStyle = DateTimeRepresentation.Medium,
+                    TimeStyle = DateTimeRepresentation.Medium
                 })).Returns("01:03");
             yield return new TestCaseData(
                 new DateTimeOffset(2028, 2, 1, 1, 3, 4, TimeSpan.Zero),
-                new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions
                 {
                     DateStyle = DateTimeRepresentation.Short,
-                    TimeStyle = DateTimeRepresentation.Short,
+                    TimeStyle = DateTimeRepresentation.Short
                 })).Returns("02/01/2028 01:03");
             // Time formatting
             yield return new TestCaseData(
                 new DateTimeOffset(2023, 2, 1, 1, 3, 4, TimeSpan.Zero),
-                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     Minute = NumericDateFormat.Numeric,
-                    Hour = NumericDateFormat.TwoDigit,
+                    Hour = NumericDateFormat.TwoDigit
                 })).Returns("01:3");
             yield return new TestCaseData(
                 new DateTimeOffset(2023, 2, 1, 2, 3, 4, TimeSpan.Zero),
-                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     Second = NumericDateFormat.TwoDigit,
-                    Hour = NumericDateFormat.TwoDigit,
+                    Hour = NumericDateFormat.TwoDigit
                 })).Returns("0204");
             yield return new TestCaseData(
                 new DateTimeOffset(2023, 2, 1, 12, 3, 4, TimeSpan.Zero),
-                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     Second = NumericDateFormat.TwoDigit,
                     Minute = NumericDateFormat.TwoDigit,
@@ -131,41 +130,41 @@ namespace Linguini.Bundle.Test.Unit
             // Date
             yield return new TestCaseData(
                 new DateTimeOffset(2021, 1, 1, 0, 0, 0, TimeSpan.Zero),
-                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     Year = NumericDateFormat.Numeric,
-                    Month = MonthFormat.TwoDigit,
+                    Month = MonthFormat.TwoDigit
                 })).Returns("01 2021");
             yield return new TestCaseData(
                 new DateTimeOffset(2022, 2, 1, 0, 0, 0, TimeSpan.Zero),
-                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     Day = NumericDateFormat.Numeric,
-                    Month = MonthFormat.Long,
+                    Month = MonthFormat.Long
                 })).Returns("February 1");
         }
-        
+
         private static IEnumerable<TestCaseData> TestDateStyleCases()
         {
             // Style formatting
             yield return new TestCaseData(
                 new DateTimeOffset(2026, 2, 1, 1, 3, 4, TimeSpan.Zero),
-                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
-                    DateStyle = DateTimeRepresentation.Long,
+                    DateStyle = DateTimeRepresentation.Long
                 })).Returns("Sunday, February 1, 2026");
             yield return new TestCaseData(
                 new DateTimeOffset(2027, 2, 1, 14, 3, 4, TimeSpan.Zero),
-                new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions
                 {
-                    TimeStyle = DateTimeRepresentation.Medium,
+                    TimeStyle = DateTimeRepresentation.Medium
                 })).Returns("14:03");
             yield return new TestCaseData(
                 new DateTimeOffset(2028, 2, 1, 1, 3, 4, TimeSpan.Zero),
-                new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions()
+                new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions
                 {
                     DateStyle = DateTimeRepresentation.Short,
-                    TimeStyle = DateTimeRepresentation.Short,
+                    TimeStyle = DateTimeRepresentation.Short
                 })).Returns("02/01/2028 01:03");
         }
 
@@ -178,6 +177,5 @@ namespace Linguini.Bundle.Test.Unit
             var fn = (FluentDateTime)input;
             return fn.AsString(context);
         }
-        
     }
 }

@@ -29,8 +29,8 @@ namespace Linguini.Bundle
         public bool EnableExtensions { get; init; }
 
         /// <summary>
-        /// Provides access to the underlying language context associated with this bundle.
-        /// The context contains locale, culture, and options for handling numbers in messages.
+        ///     Provides access to the underlying language context associated with this bundle.
+        ///     The context contains locale, culture, and options for handling numbers in messages.
         /// </summary>
         IFluentContext Context { get; }
 
@@ -51,8 +51,7 @@ namespace Linguini.Bundle
         string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors);
 
-        
-        
+
         /// <summary>
         ///     Converts a <see cref="Pattern" /> to a string using given arguments.
         /// </summary>
@@ -64,10 +63,10 @@ namespace Linguini.Bundle
             "Use TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args, out string? result, out IList<FluentError>? errors) instead.")]
         string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] ref IList<FluentError>? errors);
-        
+
 
         /// <summary>
-        /// Retrieves the textual representation of the given pattern without performing validation or error-checking.
+        ///     Retrieves the textual representation of the given pattern without performing validation or error-checking.
         /// </summary>
         /// <param name="pattern">The pattern representing the structure of the message.</param>
         /// <param name="args">Optional arguments used to format the pattern.</param>
@@ -76,36 +75,37 @@ namespace Linguini.Bundle
         string GetPatternUnchecked(Pattern pattern, IDictionary<string, IFluentType>? args);
 
         /// <summary>
-        /// Tries to retrieve and format a pattern based on the provided arguments.
+        ///     Tries to retrieve and format a pattern based on the provided arguments.
         /// </summary>
-        /// <param name="pattern">The <see cref="Pattern"/> object to be formatted.</param>
+        /// <param name="pattern">The <see cref="Pattern" /> object to be formatted.</param>
         /// <param name="args">An optional dictionary of arguments used to format the pattern.</param>
         /// <param name="result">The formatted pattern, if the operation succeeds; otherwise, null.</param>
         /// <param name="errors">
-        /// A list of <see cref="FluentError"/> objects if an error occurs; otherwise, null.
+        ///     A list of <see cref="FluentError" /> objects if an error occurs; otherwise, null.
         /// </param>
         /// <returns>True if the pattern was successfully retrieved and formatted; otherwise, false.</returns>
-        [Obsolete("Use TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args, out IList<FluentError>? errors, out string? result) instead.")]
+        [Obsolete(
+            "Use TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args, out IList<FluentError>? errors, out string? result) instead.")]
         bool TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(true)] out string? result,
             [NotNullWhen(false)] out IList<FluentError>? errors);
 
 
         /// <summary>
-        /// Tries to retrieve and format a pattern based on the provided arguments.
+        ///     Tries to retrieve and format a pattern based on the provided arguments.
         /// </summary>
-        /// <param name="pattern">The <see cref="Pattern"/> object to be formatted.</param>
+        /// <param name="pattern">The <see cref="Pattern" /> object to be formatted.</param>
         /// <param name="args">An optional dictionary of arguments used to format the pattern.</param>
         /// <param name="result">The formatted pattern, if the operation succeeds; otherwise, null.</param>
         /// <param name="errors">
-        /// A list of <see cref="FluentError"/> objects if an error occurs; otherwise, null.
+        ///     A list of <see cref="FluentError" /> objects if an error occurs; otherwise, null.
         /// </param>
         /// <returns>True if the pattern was successfully retrieved and formatted; otherwise, false.</returns>
         bool TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors,
             [NotNullWhen(true)] out string? result);
 
-        
+
         /// <summary>
         ///     Tries to get the AstMessage associated with the specified ident.
         /// </summary>
@@ -202,11 +202,17 @@ namespace Linguini.Bundle
         bool HasAttrMessage(string idWithAttr)
         {
             var attributes = idWithAttr.IndexOf('.');
-            if (attributes < 0) return HasMessage(idWithAttr);
+            if (attributes < 0)
+            {
+                return HasMessage(idWithAttr);
+            }
 
             var id = idWithAttr.AsSpan(0, attributes).ToString();
             var attr = idWithAttr.AsSpan(attributes + 1).ToString();
-            if (TryGetAstMessage(id, out var astMessage)) return astMessage.GetAttribute(attr) != null;
+            if (TryGetAstMessage(id, out var astMessage))
+            {
+                return astMessage.GetAttribute(attr) != null;
+            }
 
             return false;
         }
@@ -224,7 +230,10 @@ namespace Linguini.Bundle
             foreach (var (key, val) in args) dictionary.Add(key, val);
 
             TryGetAttrMessage(msgWithAttr, dictionary, out var errors, out var message);
-            if (errors is { Count: > 0 }) throw new LinguiniException(errors);
+            if (errors is { Count: > 0 })
+            {
+                throw new LinguiniException(errors);
+            }
 
             return message;
         }
@@ -385,7 +394,10 @@ namespace Linguini.Bundle
             IDictionary<string, IFluentType>? args = null)
         {
             bundle.TryGetMessage(id, attribute, args, out var errors, out var message);
-            if (errors is { Count: > 0 }) throw new LinguiniException(errors);
+            if (errors is { Count: > 0 })
+            {
+                throw new LinguiniException(errors);
+            }
 
             return message;
         }

@@ -7,7 +7,7 @@ using Linguini.Syntax.Parser.Error;
 namespace Linguini.Serialization.Converters
 {
     /// <summary>
-    /// A JSON converter for serializing and deserializing instances of the <see cref="ParseError"/> class.
+    ///     A JSON converter for serializing and deserializing instances of the <see cref="ParseError" /> class.
     /// </summary>
     public class ParseErrorSerializer : JsonConverter<ParseError>
     {
@@ -37,7 +37,9 @@ namespace Linguini.Serialization.Converters
         private static void WriteRange(Utf8JsonWriter writer, string name, Range? range)
         {
             if (range == null)
+            {
                 return;
+            }
 
             writer.WritePropertyName(name);
             writer.WriteStartObject();

@@ -13,18 +13,18 @@ using Attribute = Linguini.Syntax.Ast.Attribute;
 namespace Linguini.Syntax.Parser
 {
     /// <summary>
-    /// Zero copy parser for Fluent system.
+    ///     Zero copy parser for Fluent system.
     /// </summary>
     public class LinguiniParser
     {
-        private readonly ZeroCopyReader _reader;
-        private readonly bool _enableExperimental;
         private const string Cr = "\n";
+        private readonly bool _enableExperimental;
+        private readonly ZeroCopyReader _reader;
 
         /// <summary>
-        /// Parses Fluent resources using a zero copy reader.
+        ///     Parses Fluent resources using a zero copy reader.
         /// </summary>
-        /// <remarks>Obsoleted, use <see cref="FromFile"/></remarks>
+        /// <remarks>Obsoleted, use <see cref="FromFile" /></remarks>
         /// <param name="zeroCopyReader">Zero-copy reader</param>
         /// <param name="enableExperimental">Whether to use experimental features.</param>
         [Obsolete("Consider using LinguiniParser.FromFile factory method instead", true)]
@@ -35,7 +35,7 @@ namespace Linguini.Syntax.Parser
         }
 
         /// <summary>
-        /// Create new parser for <c>string</c>.
+        ///     Create new parser for <c>string</c>.
         /// </summary>
         /// <param name="input">Input to be parsed</param>
         /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
@@ -47,7 +47,7 @@ namespace Linguini.Syntax.Parser
 
 
         /// <summary>
-        /// Create new parser for <c>TextReader</c>
+        ///     Create new parser for <c>TextReader</c>
         /// </summary>
         /// <param name="input">TextReader to be parsed to Fluent AST.</param>
         /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
@@ -58,7 +58,7 @@ namespace Linguini.Syntax.Parser
         }
 
         /// <summary>
-        /// Create new parser for <c>TextReader</c>
+        ///     Create new parser for <c>TextReader</c>
         /// </summary>
         /// <param name="input">TextReader to be parsed to Fluent AST.</param>
         /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
@@ -73,7 +73,12 @@ namespace Linguini.Syntax.Parser
         }
 
         /// <summary>
-        /// Create new parser for<c>TextReader</c>
+        ///     Gets the read-only memory containing the parsed data from the zero-copy reader.
+        /// </summary>
+        public ReadOnlyMemory<char> GetReadonlyData => _reader.GetData;
+
+        /// <summary>
+        ///     Create new parser for<c>TextReader</c>
         /// </summary>
         /// <param name="input">Input text reader</param>
         /// <param name="inputName">name of file to be parsed </param>
@@ -84,7 +89,7 @@ namespace Linguini.Syntax.Parser
         }
 
         /// <summary>
-        /// Create new parser from filename.
+        ///     Create new parser from filename.
         /// </summary>
         /// <param name="filename">name of file to be parsed </param>
         /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
@@ -95,7 +100,7 @@ namespace Linguini.Syntax.Parser
         }
 
         /// <summary>
-        /// Create new parser from string fragment.
+        ///     Create new parser from string fragment.
         /// </summary>
         /// <param name="input">String to be parsed.</param>
         /// <param name="fragmentName">Optional fragment name of the string. Defaults to empty string.</param>
@@ -106,79 +111,9 @@ namespace Linguini.Syntax.Parser
             return new LinguiniParser(new StringReader(input), enableExperimental, fragmentName ?? "");
         }
 
-        /// <summary>
-        /// Gets the read-only memory containing the parsed data from the zero-copy reader.
-        /// </summary>
-        public ReadOnlyMemory<char> GetReadonlyData => _reader.GetData;
-
-        #region FastParse
 
         /// <summary>
-        /// Convert the previously set input to Fluent AST. 
-        /// </summary>
-        /// <returns>Fluent AST resource.</returns>
-        public Resource Parse()
-        {
-            var body = new List<IEntry>(6);
-            var errors = new List<ParseError>();
-
-            _reader.SkipBlankBlock();
-
-            while (_reader.IsNotEof)
-            {
-                var entryStart = _reader.Position;
-                var (entry, error) = GetEntryRuntime(entryStart);
-                if (entry is not null and not Junk)
-                {
-                    body.Add(entry);
-                }
-
-                if (error != null)
-                {
-                    AddError(error, entryStart, errors, body);
-                }
-
-                _reader.SkipBlankBlock();
-            }
-
-            return new Resource(body, errors);
-        }
-
-        private void SkipComment()
-        {
-            while (_reader.SeekEol())
-            {
-                if (_reader.TryPeekChar(out var c) && c == '#')
-                {
-                    _reader.Position += 1;
-                }
-                else
-                {
-                    return;
-                }
-            }
-        }
-
-        private (IEntry?, ParseError?) GetEntryRuntime(int entryStart)
-        {
-            if (!_reader.TryPeekChar(out var c)) return GetMessage(entryStart);
-            switch (c)
-            {
-                case '#':
-                    SkipComment();
-                    return (null, null);
-                case '-':
-                    return GetTerm(entryStart);
-                default:
-                    return GetMessage(entryStart);
-            }
-        }
-
-        #endregion
-
-
-        /// <summary>
-        /// Convert the previously set input to Fluent AST, ignoring comments.
+        ///     Convert the previously set input to Fluent AST, ignoring comments.
         /// </summary>
         /// <returns>Fluent AST resource.</returns>
         public Resource ParseWithComments()
@@ -193,7 +128,7 @@ namespace Linguini.Syntax.Parser
             while (_reader.IsNotEof)
             {
                 var entryStart = _reader.Position;
-                (IEntry entry, ParseError? error) = GetEntry(entryStart);
+                var (entry, error) = GetEntry(entryStart);
 
                 if (lastComment != null)
                 {
@@ -201,7 +136,8 @@ namespace Linguini.Syntax.Parser
                     {
                         case AstMessage message
                             when lastBlankCount < 2:
-                            entry = new AstMessage(message.Id, message.Value, message.Attributes, message.Location, lastComment);
+                            entry = new AstMessage(message.Id, message.Value, message.Attributes, message.Location,
+                                                   lastComment);
                             break;
                         case AstTerm term
                             when lastBlankCount < 2:
@@ -345,6 +281,73 @@ namespace Linguini.Syntax.Parser
             return (new AstMessage(id, pattern, attrs, AstLocation.FromReader(_reader), null), null);
         }
 
+        #region FastParse
+
+        /// <summary>
+        ///     Convert the previously set input to Fluent AST.
+        /// </summary>
+        /// <returns>Fluent AST resource.</returns>
+        public Resource Parse()
+        {
+            var body = new List<IEntry>(6);
+            var errors = new List<ParseError>();
+
+            _reader.SkipBlankBlock();
+
+            while (_reader.IsNotEof)
+            {
+                var entryStart = _reader.Position;
+                var (entry, error) = GetEntryRuntime(entryStart);
+                if (entry is not null and not Junk)
+                {
+                    body.Add(entry);
+                }
+
+                if (error != null)
+                {
+                    AddError(error, entryStart, errors, body);
+                }
+
+                _reader.SkipBlankBlock();
+            }
+
+            return new Resource(body, errors);
+        }
+
+        private void SkipComment()
+        {
+            while (_reader.SeekEol())
+                if (_reader.TryPeekChar(out var c) && c == '#')
+                {
+                    _reader.Position += 1;
+                }
+                else
+                {
+                    return;
+                }
+        }
+
+        private (IEntry?, ParseError?) GetEntryRuntime(int entryStart)
+        {
+            if (!_reader.TryPeekChar(out var c))
+            {
+                return GetMessage(entryStart);
+            }
+
+            switch (c)
+            {
+                case '#':
+                    SkipComment();
+                    return (null, null);
+                case '-':
+                    return GetTerm(entryStart);
+                default:
+                    return GetMessage(entryStart);
+            }
+        }
+
+        #endregion
+
 
         #region CommentSyntax
 
@@ -469,10 +472,7 @@ namespace Linguini.Syntax.Parser
         {
             // First character is already checked
             var ptr = _reader.Position;
-            while (_reader.TryPeekCharAt(ptr, out var c) && c.IsIdentifier())
-            {
-                ptr += 1;
-            }
+            while (_reader.TryPeekCharAt(ptr, out var c) && c.IsIdentifier()) ptr += 1;
 
             Identifier id = new(_reader.ReadSlice(_reader.Position - 1, ptr));
             _reader.Position = ptr;
@@ -499,7 +499,6 @@ namespace Linguini.Syntax.Parser
             }
 
             while (_reader.IsNotEof)
-            {
                 if (_reader.ReadCharIf('{'))
                 {
                     if (textElementRole == TextElementPosition.LineStart)
@@ -530,7 +529,7 @@ namespace Linguini.Syntax.Parser
                             pattern = null;
                             return false;
                         }
-                        
+
                         if (!TryCallArguments(!_enableExperimental, out var args, out error))
                         {
                             pattern = null;
@@ -602,42 +601,40 @@ namespace Linguini.Syntax.Parser
                             }
 
                             elements.Add(new TextElementPlaceholder(
-                                sliceStart,
-                                text.End,
-                                indent,
-                                textElementRole,
-                                text.TerminationReason == TextElementTermination.CRLF
-                            ));
+                                             sliceStart,
+                                             text.End,
+                                             indent,
+                                             textElementRole,
+                                             text.TerminationReason == TextElementTermination.CRLF
+                                         ));
                         }
                     }
                     // In case an empty newline is emitted, we create an artificial token to represent LINEFEED (`\n`)
                     else if (text.Start == text.End && text.TerminationReason == TextElementTermination.CRLF)
                     {
                         elements.Add(new TextElementPlaceholder(
-                            0,
-                            0,
-                            indent,
-                            textElementRole,
-                            true));
+                                         0,
+                                         0,
+                                         indent,
+                                         textElementRole,
+                                         true));
                     }
 
                     textElementRole = text.TerminationReason switch
                     {
-                        TextElementTermination.LF => TextElementPosition.LineStart,
-                        TextElementTermination.CRLF => TextElementPosition.LineStart,
+                        TextElementTermination.LF             => TextElementPosition.LineStart,
+                        TextElementTermination.CRLF           => TextElementPosition.LineStart,
                         TextElementTermination.PlaceableStart => TextElementPosition.Continuation,
-                        TextElementTermination.EndOfFile => TextElementPosition.Continuation,
-                        _ => textElementRole
+                        TextElementTermination.EndOfFile      => TextElementPosition.Continuation,
+                        _                                     => textElementRole
                     };
                 }
-            }
 
             if (lastNonBlank != null)
             {
                 List<IPatternElement> patterns = new(lastNonBlank.Value + 1);
 
                 for (var i = 0; i < lastNonBlank + 1; i++)
-                {
                     if (i < elements.Count)
                     {
                         var elem = elements[i];
@@ -689,7 +686,6 @@ namespace Linguini.Syntax.Parser
                             patterns.Add(new TextLiteral(value));
                         }
                     }
-                }
 
                 pattern = new Pattern(patterns);
                 error = null;
@@ -872,7 +868,7 @@ namespace Linguini.Syntax.Parser
                 return false;
             }
 
-            if (expr is TermReference { Attribute: { } })
+            if (expr is TermReference { Attribute: not null })
             {
                 expr = null;
                 error = ParseError.TermAttributeAsPlaceable(_reader.Position, _reader.Row);
@@ -895,7 +891,7 @@ namespace Linguini.Syntax.Parser
             if ('-' != _reader.PeekChar()
                 || '>' != _reader.PeekChar(1))
             {
-                if (inlineExpression is TermReference { Attribute: { } })
+                if (inlineExpression is TermReference { Attribute: not null })
                 {
                     error = ParseError.TermAttributeAsPlaceable(_reader.Position, _reader.Row);
                     retVal = null;
@@ -956,7 +952,7 @@ namespace Linguini.Syntax.Parser
 
             _reader.SkipBlank();
 
-            if (!TryGetVariants(out List<Variant> variants, out error))
+            if (!TryGetVariants(out var variants, out error))
             {
                 retVal = null;
                 return false;
@@ -1174,18 +1170,16 @@ namespace Linguini.Syntax.Parser
                         expr = new TermReference(id, attribute, args);
                         return true;
                     }
-                    else
-                    {
-                        _reader.Position -= 1;
-                        if (TryGetNumberLiteral(out var num, out error))
-                        {
-                            expr = new NumberLiteral(num);
-                            return true;
-                        }
 
-                        expr = null;
-                        return false;
+                    _reader.Position -= 1;
+                    if (TryGetNumberLiteral(out var num, out error))
+                    {
+                        expr = new NumberLiteral(num);
+                        return true;
                     }
+
+                    expr = null;
+                    return false;
                 }
 
                 if (_enableExperimental && '$' == peekChr && _reader.PeekChar(1) == '$')
@@ -1433,10 +1427,7 @@ namespace Linguini.Syntax.Parser
         private bool TrySkipDigits(out ParseError? error)
         {
             var start = _reader.Position;
-            while (_reader.TryPeekChar(out var c) && c.IsAsciiDigit())
-            {
-                _reader.Position += 1;
-            }
+            while (_reader.TryPeekChar(out var c) && c.IsAsciiDigit()) _reader.Position += 1;
 
             if (start == _reader.Position)
             {
@@ -1452,7 +1443,6 @@ namespace Linguini.Syntax.Parser
         {
             var start = _reader.Position;
             for (var i = 0; i < length; i++)
-            {
                 if (_reader.TryPeekChar(out var c) && c.IsAsciiHexdigit())
                 {
                     _reader.Position += 1;
@@ -1461,7 +1451,6 @@ namespace Linguini.Syntax.Parser
                 {
                     break;
                 }
-            }
 
             if (_reader.Position - start != length)
             {
@@ -1479,42 +1468,18 @@ namespace Linguini.Syntax.Parser
     }
 
     /// <summary>
-    /// A struct representing a slice of text with metadata about its location,
-    /// type, and termination reason within a parsed text document.
+    ///     A struct representing a slice of text with metadata about its location,
+    ///     type, and termination reason within a parsed text document.
     /// </summary>
     public class TextSlice
     {
         /// <summary>
-        /// Gets the starting position of the text slice within the input source.
-        /// </summary>
-        public int Start { get; }
-
-        /// <summary>
-        /// Gets the ending position of the text slice within the parsed text document.
-        /// </summary>
-        public int End { get; }
-
-        /// <summary>
-        /// Gets the type of the text element within a parsed text document, indicating
-        /// whether the slice represents blank or non-blank content.
-        /// </summary>
-        public TextElementType ElementType { get; }
-
-        /// <summary>
-        /// Gets the termination reason for the text element, indicating what caused the end
-        /// of this particular slice of text during parsing. This can include reasons such as a
-        /// line feed (LF), a carriage return with line feed (CRLF), the start of a placeable,
-        /// or the end of the file.
-        /// </summary>
-        public TextElementTermination TerminationReason { get; }
-
-        /// <summary>
-        /// Constructor representing a slice of text with associated metadata.
+        ///     Constructor representing a slice of text with associated metadata.
         /// </summary>
         /// <remarks>
-        /// The <see cref="TextSlice"/> class is used to store information
-        /// about a segment of text, including its start and end positions,
-        /// its type, and the reason for its termination within a parsed text structure.
+        ///     The <see cref="TextSlice" /> class is used to store information
+        ///     about a segment of text, including its start and end positions,
+        ///     its type, and the reason for its termination within a parsed text structure.
         /// </remarks>
         /// <param name="start">The starting position of the text slice in the source document.</param>
         /// <param name="end">The ending position of the text slice in the source document.</param>
@@ -1527,5 +1492,29 @@ namespace Linguini.Syntax.Parser
             ElementType = elementType;
             TerminationReason = terminationReason;
         }
+
+        /// <summary>
+        ///     Gets the starting position of the text slice within the input source.
+        /// </summary>
+        public int Start { get; }
+
+        /// <summary>
+        ///     Gets the ending position of the text slice within the parsed text document.
+        /// </summary>
+        public int End { get; }
+
+        /// <summary>
+        ///     Gets the type of the text element within a parsed text document, indicating
+        ///     whether the slice represents blank or non-blank content.
+        /// </summary>
+        public TextElementType ElementType { get; }
+
+        /// <summary>
+        ///     Gets the termination reason for the text element, indicating what caused the end
+        ///     of this particular slice of text during parsing. This can include reasons such as a
+        ///     line feed (LF), a carriage return with line feed (CRLF), the start of a placeable,
+        ///     or the end of the file.
+        /// </summary>
+        public TextElementTermination TerminationReason { get; }
     }
 }

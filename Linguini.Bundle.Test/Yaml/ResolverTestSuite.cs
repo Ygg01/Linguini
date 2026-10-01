@@ -6,44 +6,44 @@ namespace Linguini.Bundle.Test.Yaml
 {
     public class ResolverTestSuite
     {
+        public ResolverTestBundle? Bundle;
         public string Name = default!;
         public List<string> Resources = new();
-        public ResolverTestBundle? Bundle;
         public List<ResolverTest> Tests = new();
 
         public class ResolverTestBundle
         {
-            public List<string> Functions = new();
             public List<ResolverTestError> Errors = new();
+            public List<string> Functions = new();
+            public bool Override;
             public string? TransformFunc;
             public bool UseIsolating;
-            public bool Override;
         }
 
         public class ResolverTest
         {
-            public string TestName = default!;
             public List<ResolverAssert> Asserts = new();
             public ResolverTestBundle? Bundle;
-            public List<string> Resources = new();
             public List<ResolverTestError> ExpectedErrors = new();
+            public List<string> Resources = new();
+            public string TestName = default!;
         }
 
         public class ResolverAssert
         {
-            public string Id = default!;
-            public string? Attribute;
             public Dictionary<string, IFluentType> Args = new();
-            public string ExpectedValue = default!;
+            public string? Attribute;
             public List<ResolverTestError> ExpectedErrors = new();
+            public string ExpectedValue = default!;
+            public string Id = default!;
             public bool? Missing = null;
         }
 
 
         public class ResolverTestError
         {
-            public ErrorType Type;
             public string? Description;
+            public ErrorType Type;
         }
     }
 }

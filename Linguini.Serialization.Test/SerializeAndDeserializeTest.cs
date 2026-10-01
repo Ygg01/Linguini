@@ -71,10 +71,10 @@ public class SerializeAndDeserializeTest
         yield return new Placeable(InlineExpressionBuilder.CreateMessageReference("x").Build());
         yield return new Placeable(InlineExpressionBuilder.CreateTextLiteral("32.0").Build());
         yield return new Placeable(InlineExpressionBuilder
-            .CreateFunctionReference(
-                "func-ref",
-                new CallArgumentsBuilder().AddPositionalArg(3.09d))
-            .Build()
+                                       .CreateFunctionReference(
+                                           "func-ref",
+                                           new CallArgumentsBuilder().AddPositionalArg(3.09d))
+                                       .Build()
         );
         var selectionBuilder = new SelectExpressionBuilder(new TermReference("x", "y"))
             .AddVariant("x", new PatternBuilder("z"))
@@ -85,14 +85,15 @@ public class SerializeAndDeserializeTest
             .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
             .AddNamedArg("y", 3);
         yield return callArgs.Build();
-        yield return new AstComment(CommentLevel.Comment, new() { "test".AsMemory() });
+        yield return new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { "test".AsMemory() });
         yield return new DynamicReference("dyn", "attr", new CallArgumentsBuilder()
-            .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
-            .AddNamedArg("y", 3));
+                                              .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
+                                              .AddNamedArg("y", 3));
         yield return new FunctionReference("foo", new CallArgumentsBuilder()
-            .AddPositionalArg(3)
-            .AddNamedArg("test", InlineExpressionBuilder.CreateTermReference("x", "y"))
-            .Build()
+                                               .AddPositionalArg(3)
+                                               .AddNamedArg(
+                                                   "test", InlineExpressionBuilder.CreateTermReference("x", "y"))
+                                               .Build()
         );
         yield return new Identifier("test");
         yield return new NamedArgument("test", InlineExpressionBuilder.CreateDynamicReference("x", "y").Build());
@@ -114,13 +115,13 @@ public class SerializeAndDeserializeTest
             new List<IEntry>
             {
                 AstTermBuilder.Builder("id").SetPattern(new PatternBuilder("test")).Build(),
-                new AstComment(CommentLevel.Comment, new() { "test2".AsMemory() }),
-                new AstComment(CommentLevel.GroupComment, new() { "test3".AsMemory() }),
+                new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { "test2".AsMemory() }),
+                new AstComment(CommentLevel.GroupComment, new List<ReadOnlyMemory<char>> { "test3".AsMemory() }),
                 new Junk("junkie"),
                 AstMessageBuilder.Builder("message").SetPattern(new PatternBuilder("xyz")).Build()
             },
-            new List<ParseError> { });
- 
+            new List<ParseError>());
+
         yield return new Junk("Test".AsMemory());
         yield return AstTermBuilder.Builder("z")
             .SetPattern(new PatternBuilder("x"))
@@ -130,13 +131,13 @@ public class SerializeAndDeserializeTest
         yield return new AstMessage(
             new Identifier("x"),
             new PatternBuilder(3).Build(),
-            new List<Attribute>()
+            new List<Attribute>
             {
                 new("attr1", new PatternBuilder("value1")),
                 new("attr2", new PatternBuilder("value2"))
             },
             AstLocation.Empty,
-            new(CommentLevel.ResourceComment, new()
+            new AstComment(CommentLevel.ResourceComment, new List<ReadOnlyMemory<char>>
             {
                 "test".AsMemory()
             }));
@@ -170,7 +171,7 @@ public class SerializeAndDeserializeTest
             new TermReferenceSerializer(),
             new TermSerializer(),
             new VariantSerializer(),
-            new VariableReferenceSerializer(),
+            new VariableReferenceSerializer()
         }
     };
 }

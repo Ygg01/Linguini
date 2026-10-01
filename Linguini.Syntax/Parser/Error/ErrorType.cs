@@ -60,11 +60,11 @@ namespace Linguini.Syntax.Parser.Error
         /// <summary>
         ///     Expected a simple expression in selector.
         /// </summary>
-        /// <seealso cref="TextLiteral"/>
-        /// <seealso cref="NumberLiteral"/>
-        /// <seealso cref="VariableReference"/>
-        /// <seealso cref="FunctionReference"/>
-        /// <seealso cref="DynamicReference"/>
+        /// <seealso cref="TextLiteral" />
+        /// <seealso cref="NumberLiteral" />
+        /// <seealso cref="VariableReference" />
+        /// <seealso cref="FunctionReference" />
+        /// <seealso cref="DynamicReference" />
         ExpectedSimpleExpressionAsSelector,
 
         /// <summary>
@@ -76,42 +76,42 @@ namespace Linguini.Syntax.Parser.Error
         ///     Unicode sequences are expected to start with <c>\U</c> or <c>\u</c>
         /// </summary>
         UnknownEscapeSequence,
-        
+
         /// <summary>
         ///     Found Callee inside functional call.
         /// </summary>
         ForbiddenCallee,
-        
+
         /// <summary>
         ///     Expected a string or number literal, found other values instead.
         /// </summary>
         ExpectedLiteral,
-        
+
         /// <summary>
         ///     Expected an inline expression but found other values instead.
         /// </summary>
         ExpectedInlineExpression,
-        
+
         /// <summary>
         ///     Arguments in functions appear twice.
         /// </summary>
         DuplicatedNamedArgument,
-        
+
         /// <summary>
         ///     Positional arguments must appear first in function calls.
         /// </summary>
         PositionalArgumentFollowsNamed,
-        
+
         /// <summary>
         ///     Selectors had more than ONE default variant.
         /// </summary>
         MultipleDefaultVariants,
-        
+
         /// <summary>
         ///     Selectors had no default variant.
         /// </summary>
         MissingDefaultVariant,
-        
+
         /// <summary>
         ///     Only <c>\u</c> and <c>\U</c> are allowed as escape sequences.
         /// </summary>

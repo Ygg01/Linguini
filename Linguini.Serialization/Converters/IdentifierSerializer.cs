@@ -8,11 +8,11 @@ namespace Linguini.Serialization.Converters
 
 {
     /// <summary>
-    /// A JSON converter for serializing and deserializing instances of the <see cref="Identifier"/> class.
+    ///     A JSON converter for serializing and deserializing instances of the <see cref="Identifier" /> class.
     /// </summary>
     public class IdentifierSerializer : JsonConverter<Identifier>
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override Identifier Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
@@ -31,7 +31,7 @@ namespace Linguini.Serialization.Converters
 
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    string? propertyName = reader.GetString();
+                    var propertyName = reader.GetString();
 
                     reader.Read();
 
@@ -63,7 +63,7 @@ namespace Linguini.Serialization.Converters
             return new Identifier(id);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override void Write(Utf8JsonWriter writer, Identifier identifier, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
@@ -75,12 +75,15 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Attempts to extract an <see cref="Identifier"/> from a JSON element.
+        ///     Attempts to extract an <see cref="Identifier" /> from a JSON element.
         /// </summary>
         /// <param name="el">The JSON element to process.</param>
-        /// <param name="ident">When the method returns <c>true</c>, contains the extracted <see cref="Identifier"/>, if successful.</param>
-        /// <returns><c>true</c> if the <see cref="Identifier"/> was successfully extracted; otherwise, <c>false</c>.</returns>
-        public static bool TryGetIdentifier(JsonElement el, 
+        /// <param name="ident">
+        ///     When the method returns <c>true</c>, contains the extracted <see cref="Identifier" />, if
+        ///     successful.
+        /// </param>
+        /// <returns><c>true</c> if the <see cref="Identifier" /> was successfully extracted; otherwise, <c>false</c>.</returns>
+        public static bool TryGetIdentifier(JsonElement el,
             [NotNullWhen(true)] out Identifier? ident)
         {
             if (!el.TryGetProperty("name", out var valueElement) || valueElement.ValueKind != JsonValueKind.String)

@@ -19,7 +19,7 @@ using Linguini.Syntax.Parser;
 namespace Linguini.Bundle
 {
     /// <summary>
-    /// Abstract base class for Fluent message bundles.
+    ///     Abstract base class for Fluent message bundles.
     /// </summary>
     public abstract class FluentBundle : IEquatable<FluentBundle>, IReadBundle
     {
@@ -57,6 +57,25 @@ namespace Linguini.Bundle
         ///     elements count towards it). Useful for preventing billion laughs attack. Defaults to 100.
         /// </summary>
         public byte MaxPlaceable { get; internal init; } = 100;
+
+        /// <inheritdoc />
+        public bool Equals(FluentBundle? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return Culture.Equals(other.Culture) && Locales.SequenceEqual(other.Locales) &&
+                   UseIsolating == other.UseIsolating && Equals(TransformFunc, other.TransformFunc) &&
+                   Equals(FormatterFunc, other.FormatterFunc) && MaxPlaceable == other.MaxPlaceable &&
+                   EnableExtensions == other.EnableExtensions;
+        }
 
 
         /// <inheritdoc />
@@ -121,16 +140,16 @@ namespace Linguini.Bundle
         public abstract bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function);
 
         /// <summary>
-        /// Formats a Fluent pattern using the provided arguments and returns the formatted string.
+        ///     Formats a Fluent pattern using the provided arguments and returns the formatted string.
         /// </summary>
-        /// <param name="pattern">The <see cref="Pattern"/> to be formatted.</param>
+        /// <param name="pattern">The <see cref="Pattern" /> to be formatted.</param>
         /// <param name="args">The dictionary of arguments to be used for formatting.</param>
         /// <param name="errors">
-        /// When the formatting fails due to errors, this parameter is set to a list of FluentError instances
-        /// describing the encountered errors. Otherwise, it is set to null.
+        ///     When the formatting fails due to errors, this parameter is set to a list of FluentError instances
+        ///     describing the encountered errors. Otherwise, it is set to null.
         /// </param>
         /// <returns>
-        /// The formatted string if the pattern is successfully resolved; otherwise, null.
+        ///     The formatted string if the pattern is successfully resolved; otherwise, null.
         /// </returns>
         public string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] ref IList<FluentError>? errors)
@@ -141,7 +160,7 @@ namespace Linguini.Bundle
             return value;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public string GetPatternUnchecked(Pattern pattern, IDictionary<string, IFluentType>? args)
         {
             var scope = new Scope(this, args);
@@ -149,15 +168,15 @@ namespace Linguini.Bundle
             return scope.Errors.Count > 0 ? throw new LinguiniException(scope.Errors) : value;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
-            [NotNullWhen(true)] out string? result, 
+            [NotNullWhen(true)] out string? result,
             [NotNullWhen(false)] out IList<FluentError>? errors)
         {
             return TryGetPattern(pattern, args, out errors, out result);
         }
-        
-        /// <inheritdoc/>
+
+        /// <inheritdoc />
         public bool TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors,
             [NotNullWhen(true)] out string? result)
@@ -177,8 +196,9 @@ namespace Linguini.Bundle
             return true;
         }
 
-        /// <inheritdoc/>
-        /// Convenience method for calling <see cref="IReadBundle.FormatPattern"/>
+        /// <inheritdoc />
+        /// Convenience method for calling
+        /// <see cref="IReadBundle.FormatPattern" />
         public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors)
         {
@@ -207,12 +227,15 @@ namespace Linguini.Bundle
         public abstract IEnumerable<string> GetTermEnumerable();
 
         /// <summary>
-        ///  Parses a <see cref="string"/> input and adds the provided Resources to the bundle.
+        ///     Parses a <see cref="string" /> input and adds the provided Resources to the bundle.
         /// </summary>
         /// <param name="input">The string input representing a Fluent template.</param>
-        /// <param name="errors">Upon method completion, contains a list of any errors that occurred during the resource addition. If no errors occurred, the value is null.</param>
+        /// <param name="errors">
+        ///     Upon method completion, contains a list of any errors that occurred during the resource addition.
+        ///     If no errors occurred, the value is null.
+        /// </param>
         /// <returns>True if the resource was added successfully; otherwise, false.</returns>
-        /// <seealso cref="AddResource(string,out System.Collections.Generic.List{Linguini.Bundle.Errors.FluentError}?)"/>
+        /// <seealso cref="AddResource(string,out System.Collections.Generic.List{Linguini.Bundle.Errors.FluentError}?)" />
         public bool AddResource(string input, [NotNullWhen(false)] out List<FluentError>? errors)
         {
             var res = LinguiniParser.FromFragment(input, enableExperimental: EnableExtensions).Parse();
@@ -220,13 +243,13 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Parses a <see cref="TextReader"/> and adds it to the FluentBundle.
+        ///     Parses a <see cref="TextReader" /> and adds it to the FluentBundle.
         /// </summary>
-        /// <param name="reader">The <see cref="TextReader"/> representing the Fluent resource.</param>
+        /// <param name="reader">The <see cref="TextReader" /> representing the Fluent resource.</param>
         /// <param name="errors">The list of Fluent errors, if any.</param>
         /// <param name="inputName">Name of text reader if possible</param>
         /// <returns>True if the resource was added successfully; otherwise, false.</returns>
-        /// <seealso cref="AddResource(string,out System.Collections.Generic.List{Linguini.Bundle.Errors.FluentError}?)"/>
+        /// <seealso cref="AddResource(string,out System.Collections.Generic.List{Linguini.Bundle.Errors.FluentError}?)" />
         public bool AddResource(TextReader reader, [NotNullWhen(false)] out List<FluentError>? errors,
             string inputName = "????")
         {
@@ -235,10 +258,10 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Adds a resource to the FluentBundle.
+        ///     Adds a resource to the FluentBundle.
         /// </summary>
         /// <param name="resource">The input string containing the resource.</param>
-        /// <param name="errors">The list of <see cref="FluentError"/>s encountered during parsing, if any.</param>
+        /// <param name="errors">The list of <see cref="FluentError" />s encountered during parsing, if any.</param>
         /// <returns>True if the resource was successfully added; otherwise, false.</returns>
         public bool AddResource(Resource resource, [NotNullWhen(false)] out List<FluentError>? errors)
         {
@@ -281,7 +304,8 @@ namespace Linguini.Bundle
 
 
         /// <summary>
-        /// Adds a <c>string</c> resource to the FluentBundle, overriding any existing messages and terms with the same identifiers.
+        ///     Adds a <c>string</c> resource to the FluentBundle, overriding any existing messages and terms with the same
+        ///     identifiers.
         /// </summary>
         /// <param name="input">The resource content to add.</param>
         public void AddResourceOverriding(string input)
@@ -291,7 +315,8 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Adds a <see cref="TextReader"/> to the FluentBundle, overriding any existing messages and terms with the same identifiers.
+        ///     Adds a <see cref="TextReader" /> to the FluentBundle, overriding any existing messages and terms with the same
+        ///     identifiers.
         /// </summary>
         /// <param name="input">The text reader to be added to parsed and added to bundle.</param>
         /// <param name="filename">name by which the text reader will be referenced</param>
@@ -302,7 +327,8 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Adds a <see cref="Resource"/> to the FluentBundle, overriding any existing messages and terms with the same identifiers.
+        ///     Adds a <see cref="Resource" /> to the FluentBundle, overriding any existing messages and terms with the same
+        ///     identifiers.
         /// </summary>
         /// <param name="resource">The resource content to add.</param>
         public void AddResourceOverriding(Resource resource)
@@ -324,43 +350,43 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Tries to add a term to the bundle.
+        ///     Tries to add a term to the bundle.
         /// </summary>
         /// <param name="term">The term to add.</param>
         /// <param name="errors">A list to store any errors that occur during the <c>TryAdd</c> operation.</param>
-        /// <returns><see langword="true"/> if the term was added successfully, <see langword="false"/> otherwise.</returns>
+        /// <returns><see langword="true" /> if the term was added successfully, <see langword="false" /> otherwise.</returns>
         protected abstract bool TryAddTerm(AstTerm term, [NotNullWhen(false)] List<FluentError>? errors);
 
         /// <summary>
-        /// Tries to add a message to the bundle.
+        ///     Tries to add a message to the bundle.
         /// </summary>
         /// <param name="msg">The message to add.</param>
         /// <param name="errors">A list to store any errors that occur during the <c>TryAdd</c> operation.</param>
-        /// <returns><see langword="true"/> if the message was added successfully, <see langword="false"/> otherwise.</returns>
+        /// <returns><see langword="true" /> if the message was added successfully, <see langword="false" /> otherwise.</returns>
         protected abstract bool TryAddMessage(AstMessage msg, [NotNullWhen(false)] List<FluentError>? errors);
 
 
         /// <summary>
-        /// Tries to add a custom function to the FluentBundle. If it fails, it will return false.
+        ///     Tries to add a custom function to the FluentBundle. If it fails, it will return false.
         /// </summary>
         /// <param name="funcName">The name by which FluentBundle can refer to it.</param>
-        /// <param name="fluentFunction">The <see cref="ExternalFunction"/> that will be added.</param>
+        /// <param name="fluentFunction">The <see cref="ExternalFunction" /> that will be added.</param>
         /// <returns>True if the function was added successfully; otherwise, if for example function already exist, returns false.</returns>
         public abstract bool TryAddFunction(string funcName, ExternalFunction fluentFunction);
 
         /// <summary>
-        /// Adds a function to fluent Bundle unlike <see cref="TryAddFunction"/> it will not fail, but
-        /// override existing function.
+        ///     Adds a function to fluent Bundle unlike <see cref="TryAddFunction" /> it will not fail, but
+        ///     override existing function.
         /// </summary>
         /// <param name="funcName">The name of the function to insert or override.</param>
-        /// <param name="fluentFunction">The  <see cref="ExternalFunction"/> that will be inserted.</param>
+        /// <param name="fluentFunction">The  <see cref="ExternalFunction" /> that will be inserted.</param>
         public abstract void AddFunctionOverriding(string funcName, ExternalFunction fluentFunction);
 
         /// <summary>
-        /// Adds external function to the FluentBundle. If function already exist an exception will be raised.
+        ///     Adds external function to the FluentBundle. If function already exist an exception will be raised.
         /// </summary>
         /// <param name="funcName">The name of the function.</param>
-        /// <param name="fluentFunction">The <see cref="ExternalFunction"/>  to add.</param>
+        /// <param name="fluentFunction">The <see cref="ExternalFunction" />  to add.</param>
         public abstract void AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction);
 
         internal abstract IDictionary<string, AstMessage> GetMessagesDictionary();
@@ -384,7 +410,9 @@ namespace Linguini.Bundle
             errors = new List<FluentError>();
             foreach (var keyValue in functions)
                 if (!TryAddFunction(keyValue.Key, keyValue.Value))
+                {
                     errors.Add(new OverrideFluentError(keyValue.Key, EntryKind.Func));
+                }
         }
 
 
@@ -429,7 +457,7 @@ namespace Linguini.Bundle
         }
 
         /// <summary>
-        /// Converts the current object to a <see cref="FrozenBundle"/>.
+        ///     Converts the current object to a <see cref="FrozenBundle" />.
         /// </summary>
         /// <returns>A new instance of FrozenBundle.</returns>
         public FrozenBundle ToFrozenBundle()
@@ -438,22 +466,23 @@ namespace Linguini.Bundle
         }
 
         /// <inheritdoc />
-        public bool Equals(FluentBundle? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Culture.Equals(other.Culture) && Locales.SequenceEqual(other.Locales) &&
-                   UseIsolating == other.UseIsolating && Equals(TransformFunc, other.TransformFunc) &&
-                   Equals(FormatterFunc, other.FormatterFunc) && MaxPlaceable == other.MaxPlaceable &&
-                   EnableExtensions == other.EnableExtensions;
-        }
-
-        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((FluentBundle)obj);
         }
 
@@ -461,7 +490,7 @@ namespace Linguini.Bundle
         public override int GetHashCode()
         {
             return HashCode.Combine(Culture, Locales, UseIsolating, TransformFunc, FormatterFunc, MaxPlaceable,
-                EnableExtensions);
+                                    EnableExtensions);
         }
     }
 }

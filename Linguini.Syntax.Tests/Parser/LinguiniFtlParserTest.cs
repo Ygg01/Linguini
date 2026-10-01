@@ -16,7 +16,6 @@ namespace Linguini.Syntax.Tests.Parser
     [TestFixture]
     public class LinguiniFtlParserTest
     {
-
         private static string _baseTestDir = "";
 
         private static string BaseTestDir
@@ -35,7 +34,7 @@ namespace Linguini.Syntax.Tests.Parser
             }
         }
 
-        private static JsonSerializerOptions TestJsonOptions =
+        private static readonly JsonSerializerOptions TestJsonOptions =
             new()
             {
                 IgnoreReadOnlyFields = false,
@@ -63,8 +62,8 @@ namespace Linguini.Syntax.Tests.Parser
                     new TermReferenceSerializer(),
                     new TermSerializer(),
                     new VariantSerializer(),
-                    new VariableReferenceSerializer(),
-                },
+                    new VariableReferenceSerializer()
+                }
             };
 
         private static string GetFullPathFor(string file)
@@ -78,13 +77,13 @@ namespace Linguini.Syntax.Tests.Parser
 
         private static Resource ParseFtlFile(string path, bool enableExtensions = false)
         {
-            LinguiniParser parser = LinguiniParser.FromFile(path, enableExtensions);
+            var parser = LinguiniParser.FromFile(path, enableExtensions);
             return parser.ParseWithComments();
         }
 
         private static Resource ParseFtlFileFast(string path, bool enableExtensions = false)
         {
-            LinguiniParser parser = LinguiniParser.FromFile(path, enableExtensions);
+            var parser = LinguiniParser.FromFile(path, enableExtensions);
             return parser.Parse();
         }
 
@@ -212,7 +211,7 @@ namespace Linguini.Syntax.Tests.Parser
             var path = GetFullPathFor(file);
             var res = ParseFtlFile(@$"{path}.ftl", true);
             var ftlAstJson = JsonSerializer.Serialize(res, TestJsonOptions);
-        
+
             var expected = JToken.Parse(File.ReadAllText($@"{path}.json"));
             var actual = JToken.Parse(ftlAstJson);
             actual.Should().BeEquivalentTo(expected);

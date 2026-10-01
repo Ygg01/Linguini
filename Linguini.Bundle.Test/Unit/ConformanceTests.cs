@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
-using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 using NUnit.Framework;
 
@@ -32,6 +31,44 @@ term = term
             // Frozen experimental bundle
             yield return LinguiniBuilder.Builder(true).Locale("en-US").AddResource(Res1).UncheckedBuild()
                 .ToFrozenBundle();
+        }
+
+
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(AllBundles))]
+        public void FormatPattern(IReadBundle bundle)
+        {
+            var astMessage = AstMessageBuilder.Builder("term").SetPattern(new PatternBuilder("term")).Build();
+            // Pattern formatting
+            var pattern = bundle.FormatPattern(astMessage.Value, null, out var err);
+            Assert.That(err, Is.Null);
+            Assert.That(pattern, Is.EqualTo("term"));
+
+            // Check negative case
+            var nonExistentPattern = new PatternBuilder().AddMessage("nonExistent").Build();
+            var nonExistentMessage = bundle.FormatPattern(nonExistentPattern, null, out err);
+            Assert.That(nonExistentMessage, Is.EqualTo("{nonExistent}"));
+            Assert.That(err, Is.Not.Null);
+        }
+
+
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(AllBundles))]
+        public void FormatPatternErrRef(IReadBundle bundle)
+        {
+            IList<FluentError>? errors = null;
+            var astMessage = AstMessageBuilder.Builder("term").SetPattern(new PatternBuilder("term")).Build();
+            var formatted = bundle.FormatPatternErrRef(astMessage.Value, null, ref errors);
+            Assert.That(errors, Is.Null);
+            Assert.That(formatted, Is.EqualTo("term"));
+
+            // Check negative case
+            var pattern = new PatternBuilder().AddMessage("nonExistent").Build();
+            var message = bundle.FormatPatternErrRef(pattern, null, ref errors);
+            Assert.That(errors, Is.Not.Null);
+            Assert.That(message, Is.EqualTo("{nonExistent}"));
         }
 
         #region HasMethods
@@ -116,44 +153,6 @@ term = term
 
         #endregion
 
-
-        [Test]
-        [Parallelizable]
-        [TestCaseSource(nameof(AllBundles))]
-        public void FormatPattern(IReadBundle bundle)
-        {
-            var astMessage = AstMessageBuilder.Builder("term").SetPattern(new PatternBuilder("term")).Build();
-            // Pattern formatting
-            var pattern = bundle.FormatPattern(astMessage.Value, null, out var err);
-            Assert.That(err, Is.Null);
-            Assert.That(pattern, Is.EqualTo("term"));
-
-            // Check negative case
-            var nonExistentPattern = new PatternBuilder().AddMessage("nonExistent").Build();
-            var nonExistentMessage = bundle.FormatPattern(nonExistentPattern, null, out err);
-            Assert.That(nonExistentMessage, Is.EqualTo("{nonExistent}"));
-            Assert.That(err, Is.Not.Null);
-        }
-
-
-        [Test]
-        [Parallelizable]
-        [TestCaseSource(nameof(AllBundles))]
-        public void FormatPatternErrRef(IReadBundle bundle)
-        {
-            IList<FluentError>? errors = null;
-            var astMessage = AstMessageBuilder.Builder("term").SetPattern(new PatternBuilder("term")).Build();
-            var formatted = bundle.FormatPatternErrRef(astMessage.Value, null, ref errors);
-            Assert.That(errors, Is.Null);
-            Assert.That(formatted, Is.EqualTo("term"));
-
-            // Check negative case
-            var pattern = new PatternBuilder().AddMessage("nonExistent").Build();
-            var message = bundle.FormatPatternErrRef(pattern, null, ref errors);
-            Assert.That(errors, Is.Not.Null);
-            Assert.That(message, Is.EqualTo("{nonExistent}"));
-        }
-
         #region TryGetMethods
 
         [Test]
@@ -170,7 +169,7 @@ term = term
             // Check negative case
             var nonExistent = new PatternBuilder().AddMessage("nonExistent").Build();
             var wrong = bundle.TryGetPattern(nonExistent, null, out var formattedMessage2,
-                out IList<FluentError>? errors2);
+                                             out IList<FluentError>? errors2);
             Assert.That(wrong, Is.False);
             Assert.That(formattedMessage2, Is.Null);
             Assert.That(errors2, Is.Not.Empty);
@@ -228,7 +227,7 @@ term = term
             Assert.That(errors, Is.Not.Empty);
             Assert.That(missingMessage, Is.Null);
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(AllBundles))]
@@ -238,13 +237,13 @@ term = term
             Assert.That(res1, Is.True);
             Assert.That(errors1, Is.Null);
             Assert.That(message1, Is.EqualTo("3"));
-            
+
             var res2 = bundle.TryGetMessage("term", "xyz", null, out var errors2, out var message2);
             Assert.That(res2, Is.False);
             Assert.That(errors2, Is.Not.Empty);
             Assert.That(message2, Is.Null);
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(AllBundles))]
@@ -254,7 +253,7 @@ term = term
             Assert.That(res1, Is.True);
             Assert.That(errors1, Is.Null);
             Assert.That(message1, Is.EqualTo("3"));
-            
+
             var res2 = bundle.TryGetAttrMessage("term.xyz", null, out var errors2, out var message2);
             Assert.That(res2, Is.False);
             Assert.That(errors2, Is.Not.Empty);

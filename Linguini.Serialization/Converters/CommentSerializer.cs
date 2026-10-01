@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json;
@@ -10,12 +9,12 @@ using Linguini.Syntax.Ast;
 namespace Linguini.Serialization.Converters
 {
     /// <summary>
-    /// Provides a custom JSON converter for the <see cref="AstComment"/> type.
+    ///     Provides a custom JSON converter for the <see cref="AstComment" /> type.
     /// </summary>
     /// <remarks>
-    /// This class is used to serialize and deserialize comments within the Fluent resource syntax
-    /// represented by <see cref="AstComment"/>. It distinguishes between different
-    /// comment levels such as Comment, GroupComment, and ResourceComment.
+    ///     This class is used to serialize and deserialize comments within the Fluent resource syntax
+    ///     represented by <see cref="AstComment" />. It distinguishes between different
+    ///     comment levels such as Comment, GroupComment, and ResourceComment.
     /// </remarks>
     public class CommentSerializer : JsonConverter<AstComment>
     {
@@ -39,7 +38,7 @@ namespace Linguini.Serialization.Converters
 
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    string? propertyName = reader.GetString();
+                    var propertyName = reader.GetString();
 
                     reader.Read();
 
@@ -49,10 +48,10 @@ namespace Linguini.Serialization.Converters
                             var type = reader.GetString();
                             commentLevel = type switch
                             {
-                                "Comment" => CommentLevel.Comment,
-                                "GroupComment" => CommentLevel.GroupComment,
+                                "Comment"         => CommentLevel.Comment,
+                                "GroupComment"    => CommentLevel.GroupComment,
                                 "ResourceComment" => CommentLevel.ResourceComment,
-                                _ => CommentLevel.None,
+                                _                 => CommentLevel.None
                             };
                             break;
                         case "content":
@@ -100,16 +99,16 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Attempts to read a JSON element as an <see cref="AstComment"/> object.
+        ///     Attempts to read a JSON element as an <see cref="AstComment" /> object.
         /// </summary>
         /// <param name="el">The JSON element to parse as a comment.</param>
         /// <param name="ident">
-        /// When the method returns <c>true</c>, contains the parsed <see cref="AstComment"/> object.
-        /// When the method returns <c>false</c>, contains <c>null</c>.
+        ///     When the method returns <c>true</c>, contains the parsed <see cref="AstComment" /> object.
+        ///     When the method returns <c>false</c>, contains <c>null</c>.
         /// </param>
         /// <returns>
-        /// <c>true</c> if the JSON element was successfully read as an <see cref="AstComment"/> object;
-        /// otherwise <c>false</c>.
+        ///     <c>true</c> if the JSON element was successfully read as an <see cref="AstComment" /> object;
+        ///     otherwise <c>false</c>.
         /// </returns>
         /// <exception cref="JsonException">Thrown when the JSON element is invalid or is missing required properties.</exception>
         public static bool TryReadComment(JsonElement el, [NotNullWhen(true)] out AstComment? ident)
@@ -125,17 +124,17 @@ namespace Linguini.Serialization.Converters
 
             var commentLevel = typeStr.GetString() switch
             {
-                "Comment" => CommentLevel.Comment,
-                "GroupComment" => CommentLevel.GroupComment,
+                "Comment"         => CommentLevel.Comment,
+                "GroupComment"    => CommentLevel.GroupComment,
                 "ResourceComment" => CommentLevel.ResourceComment,
-                _ => CommentLevel.None,
+                _                 => CommentLevel.None
             };
             if (el.TryGetProperty("content", out var contentStr))
             {
                 var content = contentStr.GetString() ?? "";
                 ident = new AstComment(commentLevel, new List<ReadOnlyMemory<char>>
                 {
-                    content.AsMemory(),
+                    content.AsMemory()
                 });
                 return true;
             }

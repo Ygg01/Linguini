@@ -38,7 +38,7 @@ namespace PluralRules.Test.Types
                 Assert.That(t, Is.EqualTo(operands.T));
             }
         }
-        
+
         [Test]
         [Parallelizable]
         [SetCulture("de-DE")]
@@ -82,23 +82,23 @@ namespace PluralRules.Test.Types
         [TestCase(100000, 100000, 0, 0, 0, 0, -100000)]
         public void TestOperandsFromInt(double n, long i, int v, int w, long f, long t, long input)
         {
-            if (input >= SByte.MinValue && input <= SByte.MaxValue)
+            if (input >= sbyte.MinValue && input <= sbyte.MaxValue)
             {
-                sbyte byteInput = Convert.ToSByte(input);
+                var byteInput = Convert.ToSByte(input);
                 var x = byteInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
 
-            if (input >= Int16.MinValue && input <= Int16.MaxValue)
+            if (input >= short.MinValue && input <= short.MaxValue)
             {
-                short shortInput = Convert.ToInt16(input);
+                var shortInput = Convert.ToInt16(input);
                 var x = shortInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
 
-            if (input >= Int32.MinValue && input <= Int32.MaxValue)
+            if (input >= int.MinValue && input <= int.MaxValue)
             {
-                int intInput = Convert.ToInt32(input);
+                var intInput = Convert.ToInt32(input);
                 var x = intInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
@@ -121,23 +121,23 @@ namespace PluralRules.Test.Types
         [TestCase(10000000000000000000, 10000000000000000000, 0, 0, 0, 0, 10000000000000000000u)]
         public void TestOperandsFromUInt(double n, ulong i, int v, int w, long f, long t, ulong input)
         {
-            if (input <= Byte.MaxValue)
+            if (input <= byte.MaxValue)
             {
-                byte byteInput = Convert.ToByte(input);
+                var byteInput = Convert.ToByte(input);
                 var x = byteInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
 
-            if (input <= UInt16.MaxValue)
+            if (input <= ushort.MaxValue)
             {
-                ushort shortInput = Convert.ToUInt16(input);
+                var shortInput = Convert.ToUInt16(input);
                 var x = shortInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
 
-            if (input <= UInt32.MaxValue)
+            if (input <= uint.MaxValue)
             {
-                uint intInput = Convert.ToUInt32(input);
+                var intInput = Convert.ToUInt32(input);
                 var x = intInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
@@ -159,7 +159,7 @@ namespace PluralRules.Test.Types
         {
             if (input >= float.MinValue && input <= float.MaxValue)
             {
-                float floatInput = Convert.ToSingle(input, CultureInfo.InvariantCulture);
+                var floatInput = Convert.ToSingle(input, CultureInfo.InvariantCulture);
                 var x = floatInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
@@ -169,7 +169,7 @@ namespace PluralRules.Test.Types
                 CheckInput(n, i, v, w, f, t, x, operands);
             }
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCase("0.0", 0.0, 0u, 1, 0, 0, 0, 0)]
@@ -192,14 +192,16 @@ namespace PluralRules.Test.Types
         [TestCase("123c5", 12300000, 12300000u, 0, 0, 0, 0, 5)]
         [TestCase("1200.50", 1200.5, 1200u, 2, 1, 50, 5, 0)]
         [TestCase("1.20050e3", 1200.5, 1200u, 2, 1, 50, 5, 3)]
-        public void TestCase(string numberStr, double abs, ulong intDigit, int visibleFracDigit, int withoutZFracDigit, long fractionWithZ, long trailingZRemoved, long exp)
+        public void TestCase(string numberStr, double abs, ulong intDigit, int visibleFracDigit, int withoutZFracDigit,
+            long fractionWithZ, long trailingZRemoved, long exp)
         {
             var number = FluentNumber.FromString(numberStr);
 
             number.TryPluralOperands(out var actualPluralOperands);
-            var expectedPluralOperand = new PluralOperands(abs, intDigit, visibleFracDigit, withoutZFracDigit, fractionWithZ, trailingZRemoved, exp);
-            
-            
+            var expectedPluralOperand = new PluralOperands(abs, intDigit, visibleFracDigit, withoutZFracDigit,
+                                                           fractionWithZ, trailingZRemoved, exp);
+
+
             Assert.That(actualPluralOperands, Is.EqualTo(expectedPluralOperand));
         }
 
@@ -208,7 +210,7 @@ namespace PluralRules.Test.Types
         {
             Assert.That("foo".TryPluralOperands(out _), Is.False);
         }
-        
+
         private static void CheckInput(double n, long i, int v, int w, long f, long t, bool x,
             PluralOperands? operands)
         {
@@ -223,7 +225,7 @@ namespace PluralRules.Test.Types
                 Assert.That(t, Is.EqualTo(operands.T));
             }
         }
-        
+
         private static void CheckInput(double n, ulong i, int v, int w, long f, long t, bool x,
             PluralOperands? operands)
         {

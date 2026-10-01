@@ -6,12 +6,12 @@ using Linguini.Syntax.Ast;
 namespace Linguini.Serialization.Converters
 {
     /// <summary>
-    /// Provides custom JSON serialization and deserialization logic for the <see cref="MessageReference"/> class.
+    ///     Provides custom JSON serialization and deserialization logic for the <see cref="MessageReference" /> class.
     /// </summary>
     /// <remarks>
-    /// This class is used to convert MessageReference objects to and from JSON representations.
-    /// It customizes the serialization behavior to include specific properties and handles
-    /// deserialization to ensure the expected MessageReference structure.
+    ///     This class is used to convert MessageReference objects to and from JSON representations.
+    ///     It customizes the serialization behavior to include specific properties and handles
+    ///     deserialization to ensure the expected MessageReference structure.
     /// </remarks>
     public class MessageReferenceSerializer : JsonConverter<MessageReference>
     {
@@ -42,8 +42,10 @@ namespace Linguini.Serialization.Converters
         /// Processes the given JsonElement to create a MessageReference.
         /// <param name="el">The JsonElement representing the serialized MessageReference.</param>
         /// <returns>A fully constructed MessageReference instance.</returns>
-        /// <exception cref="JsonException">Thrown when the required <c>id</c>
-        /// field is missing or invalid in the JsonElement.</exception>
+        /// <exception cref="JsonException">
+        ///     Thrown when the required <c>id</c>
+        ///     field is missing or invalid in the JsonElement.
+        /// </exception>
         public static MessageReference ProcessMessageReference(JsonElement el)
         {
             if (el.TryGetProperty("id", out var getProp)

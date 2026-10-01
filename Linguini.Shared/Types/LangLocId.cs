@@ -9,42 +9,42 @@ using System.Text;
 namespace Linguini.Shared.Types
 {
     /// <summary>
-    /// Presents a BCP-47 <i>like</i> language tag. Essentially a triplet of language, script, and region.
+    ///     Presents a BCP-47 <i>like</i> language tag. Essentially a triplet of language, script, and region.
     /// </summary>
     public struct LangLocId : IEquatable<LangLocId>
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool Equals(LangLocId other)
         {
             return LanguageStr.Equals(other.LanguageStr, StringComparison.OrdinalIgnoreCase)
-                   && String.Equals(RegionStr, other.RegionStr, StringComparison.OrdinalIgnoreCase)
-                   && String.Equals(ScriptStr, other.ScriptStr, StringComparison.OrdinalIgnoreCase);
+                   && string.Equals(RegionStr, other.RegionStr, StringComparison.OrdinalIgnoreCase)
+                   && string.Equals(ScriptStr, other.ScriptStr, StringComparison.OrdinalIgnoreCase);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             return obj is LangLocId other && Equals(other);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return HashCode.Combine(Language, Region, Script);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override string ToString()
         {
             return _original;
         }
 
         /// <summary>
-        /// Defines an equality operator for comparing two instances of <see cref="LangLocId"/>
-        /// to determine if they are equal. The comparison is case-insensitive.
+        ///     Defines an equality operator for comparing two instances of <see cref="LangLocId" />
+        ///     to determine if they are equal. The comparison is case-insensitive.
         /// </summary>
-        /// <param name="left">The first <see cref="LangLocId"/> to compare.</param>
-        /// <param name="right">The second <see cref="LangLocId"/> to compare.</param>
+        /// <param name="left">The first <see cref="LangLocId" /> to compare.</param>
+        /// <param name="right">The second <see cref="LangLocId" /> to compare.</param>
         /// <returns>True if the two instances are equal; otherwise, false.</returns>
         public static bool operator ==(LangLocId left, LangLocId right)
         {
@@ -52,10 +52,10 @@ namespace Linguini.Shared.Types
         }
 
         /// <summary>
-        /// Determines whether two <see cref="LangLocId"/> instances are not equal.
+        ///     Determines whether two <see cref="LangLocId" /> instances are not equal.
         /// </summary>
-        /// <param name="left">The first <see cref="LangLocId"/> to compare.</param>
-        /// <param name="right">The second <see cref="LangLocId"/> to compare.</param>
+        /// <param name="left">The first <see cref="LangLocId" /> to compare.</param>
+        /// <param name="right">The second <see cref="LangLocId" /> to compare.</param>
         /// <returns>True if the two instances are inequal; otherwise, false.</returns>
         public static bool operator !=(LangLocId left, LangLocId right)
         {
@@ -63,77 +63,74 @@ namespace Linguini.Shared.Types
         }
 
         /// <summary>
-        /// Language identifier for English language of with an unspecified region.
+        ///     Language identifier for English language of with an unspecified region.
         /// </summary>
         public static readonly LangLocId EN = new("en");
-        
+
         /// <summary>
-        /// Language identifier for French language of with an unspecified region.
+        ///     Language identifier for French language of with an unspecified region.
         /// </summary>
         public static readonly LangLocId FR = new("fr");
-        
+
         /// <summary>
-        /// Language identifier for Serbian language of with an unspecified region.
+        ///     Language identifier for Serbian language of with an unspecified region.
         /// </summary>
         public static readonly LangLocId SR = new("sr");
 
         /// <summary>
-        /// Language identifier for the Serbian language as used in the Cyrillic script region of Russia.
+        ///     Language identifier for the Serbian language as used in the Cyrillic script region of Russia.
         /// </summary>
         public static readonly LangLocId SR_RU = new("sr", "RU");
 
         /// <summary>
-        /// Language identifier for the Azerbaijani language as used in Iran.
+        ///     Language identifier for the Azerbaijani language as used in Iran.
         /// </summary>
         public static readonly LangLocId AZ_IR = new("az", "IR");
-        
+
         /// <summary>
-        /// Language identifier for the Chinese language as used in the United Kingdom.
+        ///     Language identifier for the Chinese language as used in the United Kingdom.
         /// </summary>
         public static readonly LangLocId ZH_GB = new("zh", "GB");
-        
+
         /// <summary>
-        /// Language identifier for the Chinese language as used in the United States.
+        ///     Language identifier for the Chinese language as used in the United States.
         /// </summary>
         public static readonly LangLocId ZH_US = new("zh", "US");
 
         private string _original;
-        private ReadOnlyMemory<char> _language;
-        private ReadOnlyMemory<char>? _region;
-        private ReadOnlyMemory<char>? _script;
 
         /// <summary>
-        /// Represents the language component of a <see cref="LangLocId"/>, identifying the linguistic
-        /// aspect of a locale. For instance, <c>en</c> in <c>en-US</c> specifies English as the language.
+        ///     Represents the language component of a <see cref="LangLocId" />, identifying the linguistic
+        ///     aspect of a locale. For instance, <c>en</c> in <c>en-US</c> specifies English as the language.
         /// </summary>
-        public readonly ReadOnlyMemory<char> Language => _language;
+        public ReadOnlyMemory<char> Language { get; private set; }
 
         /// <summary>
-        /// Represents the region part of <see cref="LangLocId"/>, indicating the geographical or political region
-        /// associated with a particular language. For example, <c>US</c> in <c>en-US</c> specifies the United States
-        /// as the region for English.
+        ///     Represents the region part of <see cref="LangLocId" />, indicating the geographical or political region
+        ///     associated with a particular language. For example, <c>US</c> in <c>en-US</c> specifies the United States
+        ///     as the region for English.
         /// </summary>
-        public readonly ReadOnlyMemory<char>? Region => _region;
+        public ReadOnlyMemory<char>? Region { get; private set; }
 
         /// <summary>
-        /// Represents the script component of a <see cref="LangLocId"/>, identifying the writing system
-        /// or alphabet used to write the language. For example, <c>Latn</c> in <c>sr-Latn-RS</c> specifies
-        /// the Latin script for Serbian.
+        ///     Represents the script component of a <see cref="LangLocId" />, identifying the writing system
+        ///     or alphabet used to write the language. For example, <c>Latn</c> in <c>sr-Latn-RS</c> specifies
+        ///     the Latin script for Serbian.
         /// </summary>
-        public readonly ReadOnlyMemory<char>? Script => _script;
+        public ReadOnlyMemory<char>? Script { get; private set; }
 
         /// <summary>
-        /// Convenience for converting the <see cref="Language"/> to a string.
+        ///     Convenience for converting the <see cref="Language" /> to a string.
         /// </summary>
         public readonly string LanguageStr => Language.ToString();
 
         /// <summary>
-        /// Convenience for converting the <see cref="Region"/> to a string.
+        ///     Convenience for converting the <see cref="Region" /> to a string.
         /// </summary>
         public readonly string? RegionStr => Region?.ToString();
 
         /// <summary>
-        /// Convenience for converting the <see cref="Script"/> to a string.
+        ///     Convenience for converting the <see cref="Script" /> to a string.
         /// </summary>
         public readonly string? ScriptStr => Script?.ToString();
 
@@ -155,22 +152,25 @@ namespace Linguini.Shared.Types
                 regionMem = full.AsMemory(region.Value);
             }
 
-            return new LangLocId()
+            return new LangLocId
             {
                 _original = full,
-                _language = full.AsMemory(language),
-                _region = regionMem,
-                _script = scriptMem
+                Language = full.AsMemory(language),
+                Region = regionMem,
+                Script = scriptMem
             };
         }
 #pragma warning restore 1591
 
         /// <summary>
-        /// Presents a BCP-47 <i>like</i> language tag. Essentially a triplet of language, script, and region.
+        ///     Presents a BCP-47 <i>like</i> language tag. Essentially a triplet of language, script, and region.
         /// </summary>
         /// <param name="language">Language spooken. E.g. <c>en</c> for English</param>
         /// <param name="region">Which region the language is spoken in. E.g. <c>GB</c> in <c>en-GB</c> for region of Britain.</param>
-        /// <param name="script">Which script is used for writing the language. E.g. <c>Latn</c> for Latin alphabet used in <c>sr-Latn-RS</c>.</param>
+        /// <param name="script">
+        ///     Which script is used for writing the language. E.g. <c>Latn</c> for Latin alphabet used in
+        ///     <c>sr-Latn-RS</c>.
+        /// </param>
         public LangLocId(string language, string? region = null,
             string? script = null)
         {
@@ -200,7 +200,7 @@ namespace Linguini.Shared.Types
             }
 
             _original = sb.ToString();
-            _language = _original.AsMemory(langRange);
+            Language = _original.AsMemory(langRange);
 
             if (scriptRange != null)
             {
@@ -212,13 +212,13 @@ namespace Linguini.Shared.Types
                 regionMemory = _original.AsMemory(regionRange.Value);
             }
 
-            _script = scriptMemory;
-            _region = regionMemory;
+            Script = scriptMemory;
+            Region = regionMemory;
         }
 
 
         /// <summary>
-        /// Constructs a <see cref="LangLocId"/> from a <see cref="CultureInfo"/>.
+        ///     Constructs a <see cref="LangLocId" /> from a <see cref="CultureInfo" />.
         /// </summary>
         /// <param name="cultureInfo">Culture info used to calculate the language.</param>
         /// <returns></returns>
@@ -232,8 +232,8 @@ namespace Linguini.Shared.Types
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="LangLocId"/> with the same language and script values
-        /// as the current instance but with the region value removed.
+        ///     Creates a new instance of <see cref="LangLocId" /> with the same language and script values
+        ///     as the current instance but with the region value removed.
         /// </summary>
         /// <returns>A new LangLocId instance with the region cleared.</returns>
         public LangLocId ClearRegion()
@@ -242,7 +242,8 @@ namespace Linguini.Shared.Types
         }
 
         /// <summary>
-        /// Operator for converting string to <see cref="LangLocId"/>. Convenience for calling <see cref="LangLocParser.Parse"/>.
+        ///     Operator for converting string to <see cref="LangLocId" />. Convenience for calling
+        ///     <see cref="LangLocParser.Parse" />.
         /// </summary>
         /// <param name="unparsedLocale">string representing a locale.</param>
         /// <returns>LangLocId</returns>
@@ -253,51 +254,49 @@ namespace Linguini.Shared.Types
     }
 
     /// <summary>
-    /// Represents the LangLocParser class, which is responsible for the parsing
-    /// and processing of language tags and locale negotiation. This class is
-    /// used to handle operations related to language and region identifiers
-    /// for internationalization and localization purposes.
+    ///     Represents the LangLocParser class, which is responsible for the parsing
+    ///     and processing of language tags and locale negotiation. This class is
+    ///     used to handle operations related to language and region identifiers
+    ///     for internationalization and localization purposes.
     /// </summary>
     /// <remarks>
-    /// This class should conform to https://www.unicode.org/reports/tr35/#unicode_language_id
-    /// unicode_language_id = "root"
+    ///     This class should conform to https://www.unicode.org/reports/tr35/#unicode_language_id
+    ///     unicode_language_id = "root"
     ///     | (unicode_language_subtag (sep unicode_script_subtag)? (sep unicode_region_subtag)? (sep unicode_variant_subtag)*)
-    /// <br/>
-    /// unicode_language_subtag = alpha{2,3} | alpha{5,8}
-    /// <br/>
-    /// unicode_script_subtag   = alpha{4}
-    /// <br/>
-    /// unicode_region_subtag   = (alpha{2} | digit{3})
-    /// <br/>
-    /// unicode_variant_subtag  = (alphanum{5,8} | digit alphanum{3})
-    /// <br/>
-    /// sep                     = "-" | "_"
-    /// <br/>
-    /// alphanum                = alpha | digit
-    /// <br/>
-    /// alpha                   = "a".."z" | "A".."Z"
-    /// <br/>
-    /// digit                   = "0".."9"
+    ///     <br />
+    ///     unicode_language_subtag = alpha{2,3} | alpha{5,8}
+    ///     <br />
+    ///     unicode_script_subtag   = alpha{4}
+    ///     <br />
+    ///     unicode_region_subtag   = (alpha{2} | digit{3})
+    ///     <br />
+    ///     unicode_variant_subtag  = (alphanum{5,8} | digit alphanum{3})
+    ///     <br />
+    ///     sep                     = "-" | "_"
+    ///     <br />
+    ///     alphanum                = alpha | digit
+    ///     <br />
+    ///     alpha                   = "a".."z" | "A".."Z"
+    ///     <br />
+    ///     digit                   = "0".."9"
     /// </remarks>
     public class LangLocParser
     {
-
-
         /// <summary>
-        /// Attempts to parse a language-locale identifier string into a <see cref="LangLocId"/> object.
+        ///     Attempts to parse a language-locale identifier string into a <see cref="LangLocId" /> object.
         /// </summary>
         /// <param name="langLoc">
-        /// The language-locale identifier string to be parsed.
+        ///     The language-locale identifier string to be parsed.
         /// </param>
         /// <param name="errors">
-        /// A list of errors encountered during parsing, if any.
+        ///     A list of errors encountered during parsing, if any.
         /// </param>
         /// <param name="langLocId">
-        /// When this method returns, contains the parsed <see cref="LangLocId"/> object if successful,
-        /// or <c>null</c> if parsing fails.
+        ///     When this method returns, contains the parsed <see cref="LangLocId" /> object if successful,
+        ///     or <c>null</c> if parsing fails.
         /// </param>
         /// <returns>
-        /// <c>true</c> if the parsing was successful; otherwise, <c>false</c>.
+        ///     <c>true</c> if the parsing was successful; otherwise, <c>false</c>.
         /// </returns>
         public static bool TryParse(string? langLoc, out List<string> errors,
             [NotNullWhen(true)] out LangLocId? langLocId)
@@ -345,7 +344,7 @@ namespace Linguini.Shared.Types
                 return false;
             }
 
-            langLocId = LangLocId.CreateFromOffsets(langLoc, 0..languageEnd, regionRange, scriptRange);
+            langLocId = LangLocId.CreateFromOffsets(langLoc, ..languageEnd, regionRange, scriptRange);
             return true;
         }
 
@@ -364,7 +363,10 @@ namespace Linguini.Shared.Types
             }
 
             var length = TryReadAlpha(input, pos);
-            if (length != 4) return null;
+            if (length != 4)
+            {
+                return null;
+            }
 
             pos += length;
             oldPos = pos;
@@ -378,7 +380,10 @@ namespace Linguini.Shared.Types
             var pos = oldPos;
 
             // Don't read past the end of the string
-            if (pos >= input.Length) return null;
+            if (pos >= input.Length)
+            {
+                return null;
+            }
 
             if (input.Span[pos] == '-' || input.Span[pos] == '_')
             {
@@ -461,10 +466,10 @@ namespace Linguini.Shared.Types
 
 
         /// <summary>
-        /// Tries to parse a string into <see cref="LangLocId"/>. 
+        ///     Tries to parse a string into <see cref="LangLocId" />.
         /// </summary>
         /// <param name="unparsedLangLoc">Unparsed language location string</param>
-        /// <returns><see cref="LangLocId"/> if successful</returns>
+        /// <returns><see cref="LangLocId" /> if successful</returns>
         /// <exception cref="LangParseError">Throws error upon encountering errors</exception>
         public static LangLocId Parse(string? unparsedLangLoc)
         {
@@ -473,30 +478,41 @@ namespace Linguini.Shared.Types
                 throw new LangParseError("Unparsed language location string cannot be null");
             }
 
-            return LangLocParser.TryParse(unparsedLangLoc, out var errors, out var langLocId)
+            return TryParse(unparsedLangLoc, out var errors, out var langLocId)
                 ? langLocId.Value
                 : throw new LangParseError(errors);
         }
 
 
-        private static bool IsAscii(char c) => c <= '\u007F';
-        private static bool IsAsciiLetter(char c) => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-        private static bool IsAsciiDigit(char c) => c >= '0' && c <= '9';
+        private static bool IsAscii(char c)
+        {
+            return c <= '\u007F';
+        }
+
+        private static bool IsAsciiLetter(char c)
+        {
+            return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+        }
+
+        private static bool IsAsciiDigit(char c)
+        {
+            return c >= '0' && c <= '9';
+        }
     }
 
 
     /// <summary>
-    /// Represents an error that occurs during the parsing of a language location string.
+    ///     Represents an error that occurs during the parsing of a language location string.
     /// </summary>
     public class LangParseError : Exception
     {
         /// <summary>
-        /// A collection of error messages associated with the occurrence of one or more parsing failures.
+        ///     A collection of error messages associated with the occurrence of one or more parsing failures.
         /// </summary>
         public List<string> Errors;
 
         /// <summary>
-        /// Represents an error that occurs during the parsing of a language location string.
+        ///     Represents an error that occurs during the parsing of a language location string.
         /// </summary>
         /// <param name="error">One or more error messages</param>
         public LangParseError(params string[] error)
@@ -505,12 +521,12 @@ namespace Linguini.Shared.Types
         }
 
         /// <summary>
-        /// Represents an error that occurs during the parsing of a language location string.
+        ///     Represents an error that occurs during the parsing of a language location string.
         /// </summary>
         /// <param name="error">One or more error messages</param>
         public LangParseError(List<string> error)
         {
-            Errors = new(error);
+            Errors = new List<string>(error);
         }
     }
 }

@@ -8,8 +8,10 @@ using Linguini.Bundle.Types;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
+
 #if NET8_0_OR_GREATER
 using System.Collections.Frozen;
+
 #elif NET6_0_OR_GREATER
 using System.Collections.Immutable;
 #endif
@@ -18,42 +20,45 @@ using System.Collections.Immutable;
 namespace Linguini.Bundle
 {
     /// <summary>
-    /// Represents a frozen bundle i.e. a bundle to which no items can be added or removed.
-    ///
-    /// It properly works on net8.0 utilizing its FrozenDictionary implementation.
-    /// On other platforms it uses a very naive polyfill.
-    /// Frozen bundle implements the <see cref="IReadBundle"/> interface.
+    ///     Represents a frozen bundle i.e. a bundle to which no items can be added or removed.
+    ///     It properly works on net8.0 utilizing its FrozenDictionary implementation.
+    ///     On other platforms it uses a very naive polyfill.
+    ///     Frozen bundle implements the <see cref="IReadBundle" /> interface.
     /// </summary>
     public class FrozenBundle : IReadBundle
     {
         /// <summary>
-        /// <see cref="CultureInfo"/> of the bundle. Primary bundle locale
+        ///     <see cref="CultureInfo" /> of the bundle. Primary bundle locale
         /// </summary>
         public CultureInfo Culture { get; }
 
         /// <summary>
-        /// List of Locales. The first element is primary bundle locale, others are fallback locales.
+        ///     List of Locales. The first element is primary bundle locale, others are fallback locales.
         /// </summary>
         public List<LangLocId> Locales { get; init; }
 
         /// <summary>
-        /// When formatting patterns, FluentBundle inserts Unicode Directionality Isolation Marks to indicate that the direction of a placeable may differ from the surrounding message.
-        /// This is important for cases such as when a right-to-left username is presented in the left-to-right message.
+        ///     When formatting patterns, FluentBundle inserts Unicode Directionality Isolation Marks to indicate that the
+        ///     direction of a placeable may differ from the surrounding message.
+        ///     This is important for cases such as when a right-to-left username is presented in the left-to-right message.
         /// </summary>
         public bool UseIsolating { get; }
 
         /// <summary>
-        /// Specifies a method that will be applied only on values extending <see cref="IFluentType"/>. Useful for defining a special formatter for <see cref="FluentNumber"/>.
+        ///     Specifies a method that will be applied only on values extending <see cref="IFluentType" />. Useful for defining a
+        ///     special formatter for <see cref="FluentNumber" />.
         /// </summary>
         public Func<IFluentType, string>? FormatterFunc { get; }
 
         /// <summary>
-        /// Limit of placeable <see cref="AstTerm"/> within one <see cref="Pattern"/>, when fully expanded (all nested elements count towards it). Useful for preventing billion laughs attack. Defaults to 100.
+        ///     Limit of placeable <see cref="AstTerm" /> within one <see cref="Pattern" />, when fully expanded (all nested
+        ///     elements count towards it). Useful for preventing billion laughs attack. Defaults to 100.
         /// </summary>
         public byte MaxPlaceable { get; }
 
         /// <summary>
-        /// Specifies a method that will be applied only on values extending <see cref="IFluentType"/>. Useful for defining a special formatter for <see cref="FluentNumber"/>.
+        ///     Specifies a method that will be applied only on values extending <see cref="IFluentType" />. Useful for defining a
+        ///     special formatter for <see cref="FluentNumber" />.
         /// </summary>
         public Func<string, string>? TransformFunc { get; }
 
@@ -107,19 +112,19 @@ namespace Linguini.Bundle
             InternalContext = new FluentContext(LangLocId.FromCultureInfo(Culture));
         }
 #endif
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool EnableExtensions { get; init; }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IFluentContext Context => InternalContext;
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool HasMessage(string identifier)
         {
             return Messages.ContainsKey(identifier);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public string FormatPatternErrRef(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] ref IList<FluentError>? errors)
         {
@@ -128,8 +133,8 @@ namespace Linguini.Bundle
             errors = scope.Errors.Count == 0 ? null : scope.Errors;
             return value;
         }
-        
-        /// <inheritdoc/>
+
+        /// <inheritdoc />
         public string GetPatternUnchecked(Pattern pattern, IDictionary<string, IFluentType>? args)
         {
             var scope = new Scope(this, args);
@@ -137,15 +142,15 @@ namespace Linguini.Bundle
             return scope.Errors.Count > 0 ? throw new LinguiniException(scope.Errors) : value;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
-            [NotNullWhen(true)] out string? result, 
+            [NotNullWhen(true)] out string? result,
             [NotNullWhen(false)] out IList<FluentError>? errors)
         {
             return TryGetPattern(pattern, args, out errors, out result);
         }
-        
-        /// <inheritdoc/>
+
+        /// <inheritdoc />
         public bool TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors,
             [NotNullWhen(true)] out string? result)
@@ -164,52 +169,54 @@ namespace Linguini.Bundle
             errors = null;
             return true;
         }
-        
-        /// <inheritdoc/>
-        /// Convenience method for calling <see cref="IReadBundle.FormatPattern"/>
-        public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args, [NotNullWhen(false)] out IList<FluentError>? errors)
+
+        /// <inheritdoc />
+        /// Convenience method for calling
+        /// <see cref="IReadBundle.FormatPattern" />
+        public string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
+            [NotNullWhen(false)] out IList<FluentError>? errors)
         {
             errors = null;
             return FormatPatternErrRef(pattern, args, ref errors);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool TryGetAstMessage(string ident, [NotNullWhen(true)] out AstMessage? message)
         {
             return Messages.TryGetValue(ident, out message);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool TryGetAstTerm(string ident, [NotNullWhen(true)] out AstTerm? term)
         {
             return Terms.TryGetValue(ident, out term);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool TryGetFunction(Identifier id, [NotNullWhen(true)] out FluentFunction? function)
         {
             return Functions.TryGetValue(id.ToString(), out function);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool TryGetFunction(string funcName, [NotNullWhen(true)] out FluentFunction? function)
         {
             return Functions.TryGetValue(funcName, out function);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IEnumerable<string> GetMessageEnumerable()
         {
             return Messages.Keys;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IEnumerable<string> GetFuncEnumerable()
         {
             return Functions.Keys;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IEnumerable<string> GetTermEnumerable()
         {
             return Terms.Keys;

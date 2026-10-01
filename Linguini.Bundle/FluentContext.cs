@@ -1,19 +1,50 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 
 namespace Linguini.Bundle
 {
     /// <summary>
-    /// Represents a context for Fluent localization.
-    /// Provides access to locale, culture-specific options, and number/date formatting settings.
+    ///     Represents a context for Fluent localization.
+    ///     Provides access to locale, culture-specific options, and number/date formatting settings.
     /// </summary>
     public class FluentContext : IFluentContext
     {
+        /// <summary>
+        ///     Represents a context that encapsulates culture-specific localization settings and options
+        ///     for Fluent localization. This includes locale information, number and date formatting options,
+        ///     as well as the underlying culture settings.
+        /// </summary>
+        /// <param name="locale"><see cref="LangLocId" /> that determines the culture upon which the other fields will be set.</param>
+        /// <param name="numberOptions">
+        ///     Optional <see cref="FluentNumberOptions" /> that determines the number's formatting
+        ///     options.
+        /// </param>
+        /// <param name="dateTimeOptions">
+        ///     Optional <see cref="FluentDateTimeOptions" /> that determines the date's formatting
+        ///     options.
+        /// </param>
+        public FluentContext(LangLocId locale, FluentNumberOptions? numberOptions = null,
+            FluentDateTimeOptions? dateTimeOptions = null)
+        {
+            Culture = locale == "root"
+                ? (CultureInfo)CultureInfo.InvariantCulture.Clone()
+                : (CultureInfo)CultureInfo.GetCultureInfo(locale.ToString()).Clone();
+            Locale = locale;
+            var numInfo = Culture.NumberFormat;
+            var dateInfo = Culture.DateTimeFormat;
+            NumberOptions = numberOptions ?? new FluentNumberOptions();
+            DateTimeOptions = dateTimeOptions ?? new FluentDateTimeOptions();
+
+            NumFormatStr = ProcessNumberOptions(NumberOptions, ref numInfo);
+            DateFormatStr = ProcessDateTimeOptions(DateTimeOptions, ref dateInfo);
+            Culture.DateTimeFormat = dateInfo;
+            Culture.NumberFormat = numInfo;
+            DateFormatInfo = dateInfo;
+            NumberFormatInfo = numInfo;
+        }
 
         /// <inheritdoc />
         public LangLocId Locale { get; }
@@ -39,37 +70,8 @@ namespace Linguini.Bundle
         /// <inheritdoc />
         public DateTimeFormatInfo DateFormatInfo { get; }
 
-        
-
-        /// <summary>
-        /// Represents a context that encapsulates culture-specific localization settings and options
-        /// for Fluent localization. This includes locale information, number and date formatting options,
-        /// as well as the underlying culture settings.
-        /// </summary>
-        /// <param name="locale"><see cref="LangLocId"/> that determines the culture upon which the other fields will be set.</param>
-        /// <param name="numberOptions">Optional <see cref="FluentNumberOptions"/> that determines the number's formatting options.</param>
-        /// <param name="dateTimeOptions">Optional <see cref="FluentDateTimeOptions"/> that determines the date's formatting options.</param>
-        public FluentContext(LangLocId locale, FluentNumberOptions? numberOptions = null,
-            FluentDateTimeOptions? dateTimeOptions = null)
-        {
-            Culture =  locale == "root"
-                ? (CultureInfo) CultureInfo.InvariantCulture.Clone()
-                : (CultureInfo) CultureInfo.GetCultureInfo(locale.ToString()).Clone();
-            Locale = locale;
-            var numInfo = Culture.NumberFormat;
-            var dateInfo = Culture.DateTimeFormat;
-            NumberOptions = numberOptions ?? new FluentNumberOptions();
-            DateTimeOptions = dateTimeOptions ?? new FluentDateTimeOptions();
-
-            NumFormatStr = ProcessNumberOptions(NumberOptions, ref numInfo);
-            DateFormatStr = ProcessDateTimeOptions(DateTimeOptions, ref dateInfo);
-            Culture.DateTimeFormat = dateInfo;
-            Culture.NumberFormat = numInfo;
-            DateFormatInfo = dateInfo;
-            NumberFormatInfo = numInfo;
-        }
-
-        private static string? ProcessDateTimeOptions(FluentDateTimeOptions dateTimeOptions, ref DateTimeFormatInfo info)
+        private static string? ProcessDateTimeOptions(FluentDateTimeOptions dateTimeOptions,
+            ref DateTimeFormatInfo info)
         {
             if (dateTimeOptions.CanUseDefaultFormatter)
             {
@@ -95,15 +97,15 @@ namespace Linguini.Bundle
                     fmt.Append(" ");
                     FormatTime(fmt, info, dateTimeOptions.TimeStyle);
                 }
-                
+
                 return fmt.ToString();
             }
+
             return FullFormatDateTime(dateTimeOptions, info);
         }
 
         private static string? FullFormatDateTime(FluentDateTimeOptions dateTimeOptions, DateTimeFormatInfo info)
         {
-            
             switch (dateTimeOptions.GetStyleFields)
             {
                 case DateTimeZoneFormat.Time:
@@ -111,14 +113,15 @@ namespace Linguini.Bundle
                 case DateTimeZoneFormat.Date:
                     return FluentDateTime.ExtractDateFmt(dateTimeOptions, info);
                 case DateTimeZoneFormat.DateTime:
-                    var time = FluentDateTime.ExtractTimeFmt(dateTimeOptions, info);;
+                    var time = FluentDateTime.ExtractTimeFmt(dateTimeOptions, info);
+                    ;
                     var dateFmt = FluentDateTime.ExtractDateFmt(dateTimeOptions, info);
                     return $"{dateFmt} {time}";
             }
 
             return null;
         }
-        
+
 
         private static void FormatDate(StringBuilder sb, DateTimeFormatInfo dateTimeFormatInfo,
             DateTimeRepresentation? dateStyle)
@@ -153,16 +156,19 @@ namespace Linguini.Bundle
                     break;
             }
         }
-        
+
         /// <summary>
-        /// Processes the given number formatting options and updates the provided NumberFormatInfo accordingly.
-        /// Returns a string representation of the number format pattern if applicable based on the options and style.
+        ///     Processes the given number formatting options and updates the provided NumberFormatInfo accordingly.
+        ///     Returns a string representation of the number format pattern if applicable based on the options and style.
         /// </summary>
         /// <param name="numberOptions">The FluentNumberOptions that contain the desired formatting preferences.</param>
-        /// <param name="numberFormatInfo">A reference to the NumberFormatInfo that will be updated according to the specified options.</param>
+        /// <param name="numberFormatInfo">
+        ///     A reference to the NumberFormatInfo that will be updated according to the specified
+        ///     options.
+        /// </param>
         /// <returns>
-        /// A string that represents the number format pattern when applicable, or null if the given options
-        /// require no specific pattern.
+        ///     A string that represents the number format pattern when applicable, or null if the given options
+        ///     require no specific pattern.
         /// </returns>
         protected static string? ProcessNumberOptions(FluentNumberOptions? numberOptions,
             ref NumberFormatInfo numberFormatInfo)
@@ -176,17 +182,17 @@ namespace Linguini.Bundle
             {
                 return numberOptions.Style switch
                 {
-                    FluentNumberStyle.Decimal => FormatDecimal(numberOptions, ref numberFormatInfo),
+                    FluentNumberStyle.Decimal  => FormatDecimal(numberOptions, ref numberFormatInfo),
                     FluentNumberStyle.Currency => FormatCurrency(numberOptions, ref numberFormatInfo),
-                    FluentNumberStyle.Percent => FormatPercent(numberOptions, ref numberFormatInfo),
-                    _ => null,
+                    FluentNumberStyle.Percent  => FormatPercent(numberOptions, ref numberFormatInfo),
+                    _                          => null
                 };
             }
 
             if (numberOptions.UseGrouping == UseGrouping.False)
             {
                 return numberOptions.MinimumFractionDigits != null || numberOptions.MinimumFractionDigits > 0
-                    ? $"G{numberOptions.MinimumFractionDigits}" 
+                    ? $"G{numberOptions.MinimumFractionDigits}"
                     : "G";
             }
 
@@ -505,7 +511,7 @@ namespace Linguini.Bundle
         {
             var mandatoryFrac = numberOptions.MinimumFractionDigits ?? defaultMinimalFrac;
             var maxFracDigit = Math.Max(mandatoryFrac,
-                numberOptions.MaximumFractionDigits ?? 0);
+                                        numberOptions.MaximumFractionDigits ?? 0);
             var optionalFrac = SaturatingSubtract(maxFracDigit, mandatoryFrac);
 
             stringBuild.Append('0', numberOptions.MinimumIntegerDigits ?? 0);

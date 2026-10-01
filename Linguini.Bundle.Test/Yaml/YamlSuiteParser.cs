@@ -7,6 +7,7 @@ using Linguini.Bundle.Function;
 using Linguini.Bundle.Types;
 using NUnit.Framework;
 using YamlDotNet.RepresentationModel;
+
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 
 namespace Linguini.Bundle.Test.Yaml
@@ -22,8 +23,10 @@ namespace Linguini.Bundle.Test.Yaml
                 if (_baseTestDir == "")
                     // We discard the last three folders from WorkDirectory
                     // to get into common test directory
+                {
                     _baseTestDir = Path.GetFullPath(
                         Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", ".."));
+                }
 
                 return _baseTestDir;
             }
@@ -52,7 +55,10 @@ namespace Linguini.Bundle.Test.Yaml
             var files = Directory.GetFiles(GetFullPathFor("fixtures"));
             foreach (var path in files)
             {
-                if (path.Equals(defaultPath)) continue;
+                if (path.Equals(defaultPath))
+                {
+                    continue;
+                }
 
                 var (testSuites, suiteName) = ParseTest(path);
                 foreach (var testCase in testSuites)
@@ -73,7 +79,10 @@ namespace Linguini.Bundle.Test.Yaml
             var files = Directory.GetFiles(GetFullPathFor("linguini_ext"));
             foreach (var path in files)
             {
-                if (path.Equals(defaultPath)) continue;
+                if (path.Equals(defaultPath))
+                {
+                    continue;
+                }
 
                 var (testSuites, suiteName) = ParseTest(path);
                 foreach (var testCase in testSuites)
@@ -98,7 +107,10 @@ namespace Linguini.Bundle.Test.Yaml
             foreach (var res in parsedTestSuite.Resources)
             {
                 bundle.AddResource(res, out var err);
-                if (err != null) errors.AddRange(err);
+                if (err != null)
+                {
+                    errors.AddRange(err);
+                }
             }
 
             if (parsedTestSuite.Bundle != null)
@@ -124,6 +136,7 @@ namespace Linguini.Bundle.Test.Yaml
 
                 var transformFunc = parsedTestSuite.Bundle.TransformFunc;
                 if (transformFunc != null)
+                {
                     switch (transformFunc)
                     {
                         case "example":
@@ -132,6 +145,7 @@ namespace Linguini.Bundle.Test.Yaml
                         default:
                             throw new ArgumentException($"Unknown method {transformFunc}");
                     }
+                }
 
                 bundle.UseIsolating = parsedTestSuite.Bundle.UseIsolating;
                 AssertErrorCases(parsedTestSuite.Bundle.Errors, errors, parsedTestSuite.Name);
@@ -152,7 +166,10 @@ namespace Linguini.Bundle.Test.Yaml
                         else
                         {
                             testBundle.AddResource(res, out var errs);
-                            if (errs != null) errors.AddRange(errs);
+                            if (errs != null)
+                            {
+                                errors.AddRange(errs);
+                            }
                         }
                 }
 
@@ -165,8 +182,8 @@ namespace Linguini.Bundle.Test.Yaml
                     else
                     {
                         testBundle.TryGetMessage(assert.Id, assert.Attribute, assert.Args,
-                            out var errs,
-                            out var actualValue);
+                                                 out var errs,
+                                                 out var actualValue);
                         actualValue ??= "{???}";
                         Assert.That(actualValue, Is.EqualTo(assert.ExpectedValue), test.TestName);
                         AssertErrorCases(assert.ExpectedErrors, errs, test.TestName);
@@ -178,7 +195,9 @@ namespace Linguini.Bundle.Test.Yaml
             List<FluentError> errors)
         {
             if (!bundle.TryAddFunction(funcName, externalFunction))
+            {
                 errors.Add(new OverrideFluentError(funcName, EntryKind.Func));
+            }
         }
 
         private static string GetFullPathFor(string file)
@@ -202,7 +221,9 @@ namespace Linguini.Bundle.Test.Yaml
 
                 Assert.That(actualError.ErrorKind(), Is.EqualTo(expectedError.Type));
                 if (expectedError.Description != null)
+                {
                     Assert.That(actualError.ToString(), Is.EqualTo(expectedError.Description));
+                }
             }
         }
 
@@ -234,14 +255,20 @@ namespace Linguini.Bundle.Test.Yaml
             if (yamlBundle is YamlMappingNode map)
             {
                 if (map.TryGetNode("useIsolating", out YamlScalarNode? useIsolatingNode))
+                {
                     isIsolating = useIsolatingNode.AsBool();
+                }
 
                 if (map.TryGetNode("useExperimental", out YamlScalarNode? useExtensionsNode))
+                {
                     useExperimental = useExtensionsNode.AsBool();
+                }
 
                 if (map.TryGetNode("locales", out YamlSequenceNode? localesNode))
+                {
                     foreach (var localeNode in localesNode.Children)
                         locales.Add(localeNode.AsString());
+                }
             }
 
             var bundler = LinguiniBuilder.Builder(useExperimental)

@@ -14,27 +14,27 @@ namespace Linguini.Bundle.Test.Yaml
     public static class YamlHelpers
     {
         /**
-         * MIT License
-
-            Copyright (c) 2017 Space Wizards Federation
-
-            Permission is hereby granted, free of charge, to any person obtaining a copy
-            of this software and associated documentation files (the "Software"), to deal
-            in the Software without restriction, including without limitation the rights
-            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-            copies of the Software, and to permit persons to whom the Software is
-            furnished to do so, subject to the following conditions:
-
-            The above copyright notice and this permission notice shall be included in all
-            copies or substantial portions of the Software.
-
-            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-            SOFTWARE.
+         * * MIT License
+         * 
+         * Copyright (c) 2017 Space Wizards Federation
+         * 
+         * Permission is hereby granted, free of charge, to any person obtaining a copy
+         * of this software and associated documentation files (the "Software"), to deal
+         * in the Software without restriction, including without limitation the rights
+         * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+         * copies of the Software, and to permit persons to whom the Software is
+         * furnished to do so, subject to the following conditions:
+         * 
+         * The above copyright notice and this permission notice shall be included in all
+         * copies or substantial portions of the Software.
+         * 
+         * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+         * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+         * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+         * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+         * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+         * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+         * SOFTWARE.
          */
 
         #region ROBUSTLY_STOLEN
@@ -123,7 +123,7 @@ namespace Linguini.Bundle.Test.Yaml
                 testSuite.Resources.AddRange(res);
                 if (testSuite.Bundle == null)
                 {
-                    testSuite.Bundle = new();
+                    testSuite.Bundle = new ResolverTestSuite.ResolverTestBundle();
                 }
 
                 testSuite.Bundle.Errors.AddRange(errs);
@@ -143,10 +143,7 @@ namespace Linguini.Bundle.Test.Yaml
         private static List<ResolverTestSuite.ResolverTest> ProcessTests(YamlSequenceNode testsNode)
         {
             var testCollection = new List<ResolverTestSuite.ResolverTest>();
-            foreach (var test in testsNode.Children)
-            {
-                testCollection.Add(ProcessTest((YamlMappingNode)test));
-            }
+            foreach (var test in testsNode.Children) testCollection.Add(ProcessTest((YamlMappingNode)test));
 
             return testCollection;
         }
@@ -183,7 +180,6 @@ namespace Linguini.Bundle.Test.Yaml
         {
             var retVal = new List<ResolverTestSuite.ResolverAssert>();
             foreach (var assertNode in assertsNodes.Children)
-            {
                 if (assertNode is YamlMappingNode assertMap)
                 {
                     var resolverAssert = new ResolverTestSuite.ResolverAssert();
@@ -221,7 +217,6 @@ namespace Linguini.Bundle.Test.Yaml
 
                     retVal.Add(resolverAssert);
                 }
-            }
 
             return retVal;
         }
@@ -234,9 +229,9 @@ namespace Linguini.Bundle.Test.Yaml
                 var key = (YamlScalarNode)arg.Key;
                 var val = (YamlScalarNode)arg.Value;
                 IFluentType fluentVal;
-                if (Double.TryParse(val.AsString(),
-                        NumberStyles.Float | NumberStyles.AllowThousands, NumberFormatInfo.InvariantInfo,
-                        out var result))
+                if (double.TryParse(val.AsString(),
+                                    NumberStyles.Float | NumberStyles.AllowThousands, NumberFormatInfo.InvariantInfo,
+                                    out var result))
                 {
                     fluentVal = (FluentNumber)result;
                 }
@@ -256,11 +251,9 @@ namespace Linguini.Bundle.Test.Yaml
         {
             testBundle = new ResolverTestSuite.ResolverTestBundle();
             foreach (var bundleNode in bundles.Children)
-            {
                 if (bundleNode is YamlMappingNode bundleMap)
                 {
                     foreach (var keyValueNode in bundleMap.Children)
-                    {
                         if (keyValueNode.Key.ToString().Equals("functions"))
                         {
                             ProcessFunctions((YamlSequenceNode)keyValueNode.Value, out testBundle.Functions);
@@ -281,21 +274,17 @@ namespace Linguini.Bundle.Test.Yaml
                         {
                             testBundle.Override = keyValueNode.Value.AsBool();
                         }
-                    }
                 }
-            }
         }
 
         private static void ProcessFunctions(YamlSequenceNode functionsNode, out List<string> bundle)
         {
             bundle = new List<string>(functionsNode.Children.Count);
             foreach (var function in functionsNode)
-            {
                 if (function is YamlScalarNode funcName)
                 {
                     bundle.Add(funcName.Value!);
                 }
-            }
         }
 
         private static (List<string>, List<ResolverTestSuite.ResolverTestError>)
@@ -304,7 +293,6 @@ namespace Linguini.Bundle.Test.Yaml
             List<string> resource = new();
             List<ResolverTestSuite.ResolverTestError> errors = new();
             foreach (var resNode in returnNode.Children)
-            {
                 if (resNode is YamlMappingNode map)
                 {
                     if (map.TryGetNode("source", out YamlScalarNode sourceValue))
@@ -317,7 +305,6 @@ namespace Linguini.Bundle.Test.Yaml
                         errors = ProcessErrors(errorNode);
                     }
                 }
-            }
 
             return (resource, errors);
         }
@@ -326,7 +313,6 @@ namespace Linguini.Bundle.Test.Yaml
         {
             List<ResolverTestSuite.ResolverTestError> resolverTestErrors = new();
             foreach (var error in errorNode.Children)
-            {
                 if (error is YamlMappingNode errMap)
                 {
                     var err = new ResolverTestSuite.ResolverTestError();
@@ -342,7 +328,6 @@ namespace Linguini.Bundle.Test.Yaml
 
                     resolverTestErrors.Add(err);
                 }
-            }
 
             return resolverTestErrors;
         }

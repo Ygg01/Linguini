@@ -26,7 +26,7 @@ namespace Linguini.Bundle.Test.Unit
         {
             StringWriter stringWriter = new();
             UnicodeUtil.WriteUnescapedUnicode(input.AsMemory(), stringWriter);
-            
+
             Assert.That(expected, Is.EqualTo(stringWriter.ToString()));
         }
     }

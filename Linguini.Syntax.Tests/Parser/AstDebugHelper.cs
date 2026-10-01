@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Linguini.Syntax.Ast;
 
 namespace Linguini.Syntax.Tests.Parser
@@ -11,7 +12,6 @@ namespace Linguini.Syntax.Tests.Parser
             if (message.Value != null)
             {
                 foreach (var patternElement in message.Value.Elements)
-                {
                     switch (patternElement)
                     {
                         case TextLiteral textLiteral:
@@ -21,9 +21,8 @@ namespace Linguini.Syntax.Tests.Parser
                             Debug(placeable, stringBuilder);
                             break;
                     }
-                } 
             }
-            
+
             return stringBuilder.ToString();
         }
 
@@ -42,12 +41,12 @@ namespace Linguini.Syntax.Tests.Parser
 
         private static void Debug(IInlineExpression inlineExpression, StringBuilder stringBuilder)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         private static void Debug(SelectExpression selectExpression, StringBuilder stringBuilder)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

@@ -13,6 +13,7 @@ using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser.Error;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
+
 #pragma warning disable CS8604 // Possible null reference argument.
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 
@@ -236,7 +237,7 @@ new1  = new
                 .UncheckedBuild();
 
             Assert.That(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
-                Is.EqualTo(bundle.HasAttrMessage(idWithAttr)));
+                        Is.EqualTo(bundle.HasAttrMessage(idWithAttr)));
         }
 
         [Test]
@@ -253,7 +254,7 @@ new1  = new
                 .UncheckedBuild();
 
             Assert.That(bundle.TryGetAttrMessage(idWithAttr, null, out _, out _),
-                Is.EqualTo(bundle.HasAttrMessage(idWithAttr)));
+                        Is.EqualTo(bundle.HasAttrMessage(idWithAttr)));
         }
 
         public static IEnumerable<TestCaseData> TestBundleErrors
@@ -279,8 +280,7 @@ new1  = new
             Assert.That(error, Is.Not.Empty);
             return error.Select(e => e.GetSpan()).ToList();
         }
-        
-        
+
 
         [Test]
         public void TestDeepClone()

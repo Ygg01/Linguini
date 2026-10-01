@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -10,40 +9,40 @@ using Linguini.Syntax.Parser.Error;
 namespace Linguini.Serialization.Converters
 {
     /// <summary>
-    /// A serializer for the <see cref="Resource"/> class, used for handling JSON serialization and deserialization
-    /// of Fluent resource objects. It extends <see cref="System.Text.Json.Serialization.JsonConverter{T}"/>.
+    ///     A serializer for the <see cref="Resource" /> class, used for handling JSON serialization and deserialization
+    ///     of Fluent resource objects. It extends <see cref="System.Text.Json.Serialization.JsonConverter{T}" />.
     /// </summary>
     /// <remarks>
-    /// This class provides implementations for reading and writing JSON representations of Fluent resources.
-    /// It includes utilities for handling expressions, literals, and inline elements during serialization.
+    ///     This class provides implementations for reading and writing JSON representations of Fluent resources.
+    ///     It includes utilities for handling expressions, literals, and inline elements during serialization.
     /// </remarks>
     public class ResourceSerializer : JsonConverter<Resource>
     {
         /// <summary>
-        /// Reads and converts a JSON representation into a <see cref="Resource"/> object.
+        ///     Reads and converts a JSON representation into a <see cref="Resource" /> object.
         /// </summary>
-        /// <param name="reader">The <see cref="Utf8JsonReader"/> to read JSON data from.</param>
+        /// <param name="reader">The <see cref="Utf8JsonReader" /> to read JSON data from.</param>
         /// <param name="typeToConvert">The type of object to convert.</param>
         /// <param name="options">The serialization options to use during the conversion.</param>
-        /// <returns>A <see cref="Resource"/> object parsed from the JSON data.</returns>
+        /// <returns>A <see cref="Resource" /> object parsed from the JSON data.</returns>
         /// <exception cref="JsonException">
-        /// Thrown if the JSON data does not meet the required structure for a <see cref="Resource"/> object.
+        ///     Thrown if the JSON data does not meet the required structure for a <see cref="Resource" /> object.
         /// </exception>
         public override Resource Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
-            if (!el.TryGetProperty("type", out JsonElement typeStr) || typeStr.ValueKind != JsonValueKind.String || typeStr.GetString() != "Resource")
+            if (!el.TryGetProperty("type", out var typeStr) || typeStr.ValueKind != JsonValueKind.String ||
+                typeStr.GetString() != "Resource")
             {
                 throw new JsonException("Resource must have valid `Resource` field");
             }
-            
+
             var body = new List<IEntry>();
             var error = new List<ParseError>();
-            
+
             if (el.TryGetProperty("body", out var bodyEl) && bodyEl.ValueKind == JsonValueKind.Array)
             {
                 foreach (var bodyArrayEl in bodyEl.EnumerateArray())
-                {
                     if (CommentSerializer.TryReadComment(bodyArrayEl, out var comment))
                     {
                         body.Add(comment);
@@ -61,7 +60,6 @@ namespace Linguini.Serialization.Converters
                         var junk = JunkSerializer.ProcessJunk(bodyArrayEl);
                         body.Add(junk);
                     }
-                }
             }
             else
             {
@@ -80,7 +78,6 @@ namespace Linguini.Serialization.Converters
             writer.WritePropertyName("body");
             writer.WriteStartArray();
             foreach (var entry in value.Entries)
-            {
                 switch (entry)
                 {
                     case AstComment astComment:
@@ -96,17 +93,16 @@ namespace Linguini.Serialization.Converters
                         JsonSerializer.Serialize(writer, junk, options);
                         break;
                 }
-            }
 
             writer.WriteEndArray();
             writer.WriteEndObject();
         }
 
         /// <summary>
-        /// Writes an inline expression to a JSON writer.
+        ///     Writes an inline expression to a JSON writer.
         /// </summary>
         /// <param name="writer">The Utf8JsonWriter to which the inline expression will be written.</param>
-        /// <param name="value">The inline expression to write, implementing <see cref="IInlineExpression"/>.</param>
+        /// <param name="value">The inline expression to write, implementing <see cref="IInlineExpression" />.</param>
         /// <param name="options">The JSON serializer options to use during serialization.</param>
         public static void WriteInlineExpression(Utf8JsonWriter writer, IInlineExpression value,
             JsonSerializerOptions options)
@@ -156,28 +152,28 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Processes a JSON element to create a <see cref="TextLiteral"/> object.
+        ///     Processes a JSON element to create a <see cref="TextLiteral" /> object.
         /// </summary>
         /// <param name="el">
-        /// The JSON element containing the "value" property to be deserialized into a <see cref="TextLiteral"/>.
+        ///     The JSON element containing the "value" property to be deserialized into a <see cref="TextLiteral" />.
         /// </param>
         /// <param name="options">
-        /// The JSON serializer options to use during processing.
+        ///     The JSON serializer options to use during processing.
         /// </param>
         /// <returns>
-        /// A <see cref="TextLiteral"/> instance populated with the value extracted from the JSON element.
+        ///     A <see cref="TextLiteral" /> instance populated with the value extracted from the JSON element.
         /// </returns>
         public static TextLiteral ProcessTextLiteral(JsonElement el, JsonSerializerOptions options)
         {
-            return new(el.GetProperty("value").GetString() ?? "");
+            return new TextLiteral(el.GetProperty("value").GetString() ?? "");
         }
 
         /// <summary>
-        /// Processes a JSON element to extract a <see cref="NumberLiteral"/> object.
+        ///     Processes a JSON element to extract a <see cref="NumberLiteral" /> object.
         /// </summary>
         /// <param name="el">The JSON element containing the number literal to process.</param>
         /// <param name="options">Serialization options that influence how the processing is performed.</param>
-        /// <returns>A <see cref="NumberLiteral"/> object extracted from the input JSON element.</returns>
+        /// <returns>A <see cref="NumberLiteral" /> object extracted from the input JSON element.</returns>
         /// <exception cref="JsonException">Thrown if the input JSON element is not a valid number literal.</exception>
         public static NumberLiteral ProcessNumberLiteral(JsonElement el,
             JsonSerializerOptions options)
@@ -191,11 +187,14 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Attempts to read and process a JSON number literal from the given JSON element.
+        ///     Attempts to read and process a JSON number literal from the given JSON element.
         /// </summary>
         /// <param name="el">The JSON element to read the number literal from.</param>
         /// <param name="options">The JSON serializer options to use during processing.</param>
-        /// <param name="numberLiteral">When this method returns <c>true</c>, contains the processed number literal if successful, or null if the operation failed.</param>
+        /// <param name="numberLiteral">
+        ///     When this method returns <c>true</c>, contains the processed number literal if successful,
+        ///     or null if the operation failed.
+        /// </param>
         /// <returns>True if the number literal is successfully read and processed; otherwise, false.</returns>
         public static bool TryReadProcessNumberLiteral(JsonElement el, JsonSerializerOptions options,
             [NotNullWhen(true)] out NumberLiteral? numberLiteral)
@@ -212,12 +211,12 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Reads and deserializes a JSON element into an implementation of the <see cref="IExpression"/> interface
-        /// based on the specified "type" property in the JSON.
+        ///     Reads and deserializes a JSON element into an implementation of the <see cref="IExpression" /> interface
+        ///     based on the specified "type" property in the JSON.
         /// </summary>
         /// <param name="el">The JSON element containing data for deserialization.</param>
         /// <param name="options">The options used to customize the JSON serialization and deserialization behavior.</param>
-        /// <returns>An instance of an <see cref="IExpression"/> implementation corresponding to the type specified in the JSON.</returns>
+        /// <returns>An instance of an <see cref="IExpression" /> implementation corresponding to the type specified in the JSON.</returns>
         public static IExpression ReadExpression(JsonElement el, JsonSerializerOptions options)
         {
             var type = el.GetProperty("type").GetString();
@@ -238,12 +237,14 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Attempts to read an inline expression from the provided JSON element.
+        ///     Attempts to read an inline expression from the provided JSON element.
         /// </summary>
         /// <param name="el">The JSON element containing the data for the inline expression.</param>
         /// <param name="options">The JSON serializer options to customize reading behavior.</param>
-        /// <param name="o">When this method returns <c>true</c>, contains the parsed inline expression if the read operation is successful,
-        /// or null if the read fails.</param>
+        /// <param name="o">
+        ///     When this method returns <c>true</c>, contains the parsed inline expression if the read operation is successful,
+        ///     or null if the read fails.
+        /// </param>
         /// <returns>True if the inline expression is successfully read; otherwise, false.</returns>
         /// <exception cref="JsonException">Thrown when the JSON data is invalid or contains unexpected types.</exception>
         public static bool TryReadInlineExpression(JsonElement el, JsonSerializerOptions options,
@@ -252,15 +253,15 @@ namespace Linguini.Serialization.Converters
             var type = el.GetProperty("type").GetString();
             o = type switch
             {
-                "DynamicReference" => DynamicReferenceSerializer.ProcessDynamicReference(el, options),
+                "DynamicReference"  => DynamicReferenceSerializer.ProcessDynamicReference(el, options),
                 "FunctionReference" => FunctionReferenceSerializer.ProcessFunctionReference(el, options),
-                "MessageReference" => MessageReferenceSerializer.ProcessMessageReference(el),
-                "NumberLiteral" => ProcessNumberLiteral(el, options),
-                "Placeable" => PlaceableSerializer.ProcessPlaceable(el, options),
-                "TermReference" => TermReferenceSerializer.ProcessTermReference(el, options),
-                "TextLiteral" => ProcessTextLiteral(el, options),
+                "MessageReference"  => MessageReferenceSerializer.ProcessMessageReference(el),
+                "NumberLiteral"     => ProcessNumberLiteral(el, options),
+                "Placeable"         => PlaceableSerializer.ProcessPlaceable(el, options),
+                "TermReference"     => TermReferenceSerializer.ProcessTermReference(el, options),
+                "TextLiteral"       => ProcessTextLiteral(el, options),
                 "VariableReference" => VariableReferenceSerializer.ProcessVariableReference(el, options),
-                _ => null
+                _                   => null
             };
             return o != null;
         }

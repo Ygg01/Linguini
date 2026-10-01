@@ -19,7 +19,7 @@ namespace Linguini.Syntax.Tests.IO
         [TestCase("Северный поток", 'С')]
         public void TestPeekChar(string text, char expected)
         {
-            ZeroCopyReader reader = new ZeroCopyReader(text);
+            var reader = new ZeroCopyReader(text);
             Assert.That(expected == reader.PeekChar());
             Assert.That(expected == reader.PeekChar());
             Assert.That(expected == reader.PeekChar());
@@ -41,7 +41,7 @@ namespace Linguini.Syntax.Tests.IO
         [TestCase("", 'a', false, null)]
         public void TestExpectChar(string text, char expectedChr, bool expected, char? peek)
         {
-            ZeroCopyReader reader = new ZeroCopyReader(text);
+            var reader = new ZeroCopyReader(text);
             Assert.That(expected, Is.EqualTo(reader.ReadCharIf(expectedChr)));
             Assert.That(peek, Is.EqualTo(reader.PeekChar()));
         }
@@ -55,7 +55,7 @@ namespace Linguini.Syntax.Tests.IO
         [TestCase("Северный поток", 'С', 'е')]
         public void TestPeekGetChar(string text, char expected1, char expected2)
         {
-            ZeroCopyReader reader = new ZeroCopyReader(text);
+            var reader = new ZeroCopyReader(text);
             Assert.That(expected1 == reader.PeekChar());
             reader.Position += 1;
             Assert.That(expected2 == reader.PeekChar());
@@ -70,7 +70,7 @@ namespace Linguini.Syntax.Tests.IO
         [TestCase("Северный поток", 'С', 'е')]
         public void TestPeekCharOffset(string text, char expected1, char expected2)
         {
-            ZeroCopyReader reader = new ZeroCopyReader(text);
+            var reader = new ZeroCopyReader(text);
             Assert.That(expected1 == reader.PeekChar());
             Assert.That(expected2 == reader.PeekChar(1));
         }
@@ -84,7 +84,7 @@ namespace Linguini.Syntax.Tests.IO
         [TestCase("      \nか", 'か')]
         public void TestSkipBlank(string text, char postSkipChar)
         {
-            ZeroCopyReader reader = new ZeroCopyReader(text);
+            var reader = new ZeroCopyReader(text);
             reader.SkipBlankBlock();
             Assert.That(postSkipChar == reader.PeekChar());
         }
@@ -101,7 +101,7 @@ namespace Linguini.Syntax.Tests.IO
         [TestCase("bbbbb", false, 5, 1)]
         public void TestSeekEol(string text, bool expectedEol, int expectedPosition, int expectedRow)
         {
-            ZeroCopyReader reader = new ZeroCopyReader(text);
+            var reader = new ZeroCopyReader(text);
             var foundEol = reader.SeekEol();
             Assert.That(expectedEol, Is.EqualTo(foundEol));
             Assert.That(expectedPosition, Is.EqualTo(reader.Position));
@@ -114,12 +114,12 @@ namespace Linguini.Syntax.Tests.IO
         [TestCase("a", true, 'a')]
         public void TestTryReadChar(string text, bool isChar, char? expected1)
         {
-            ReadOnlyMemory<char> mem = new ReadOnlyMemory<char>(text.ToCharArray());
-            bool isThereChar = mem.TryReadChar(0, out var readChr);
+            var mem = new ReadOnlyMemory<char>(text.ToCharArray());
+            var isThereChar = mem.TryReadChar(0, out var readChr);
             Assert.That(isThereChar, Is.EqualTo(isChar));
             Assert.That(expected1 == readChr);
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCase("string", 0, 1, "s")]
@@ -137,7 +137,7 @@ namespace Linguini.Syntax.Tests.IO
         [TestCase("かんじ", 2, 3, "じ")]
         public void TestTryReadSliceOk(string text, int start, int end, string expected)
         {
-            ZeroCopyReader reader = new ZeroCopyReader(text);
+            var reader = new ZeroCopyReader(text);
             Assert.That(expected, Is.EqualTo(reader.ReadSliceToStr(start, end)));
             Assert.That(expected, Is.EqualTo(reader.ReadSlice(start, end).ToArray()));
         }

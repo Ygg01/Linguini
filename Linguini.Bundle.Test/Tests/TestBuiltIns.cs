@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
-using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 using NUnit.Framework;
 
@@ -19,7 +17,7 @@ namespace Linguini.Bundle.Test.Tests
             yield return new TestCaseData(
                 0.0,
                 "en-US",
-                new FluentNumberOptions()
+                new FluentNumberOptions
                 {
                     MinimumFractionDigits = 1
                 },
@@ -37,5 +35,4 @@ namespace Linguini.Bundle.Test.Tests
             Assert.That(actual, Is.EqualTo(expected));
         }
     }
-    
 }

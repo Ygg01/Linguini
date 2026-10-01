@@ -3,22 +3,22 @@
 namespace Linguini.Shared.Types.Bundle
 {
     /// <summary>
-    /// Fluent value representing lack of value
-    /// similar to <c>Nullable</c> or <c>Option</c> monad. 
+    ///     Fluent value representing lack of value
+    ///     similar to <c>Nullable</c> or <c>Option</c> monad.
     /// </summary>
     public record FluentNone : IFluentType
     {
         /// <summary>
-        /// Static value representing empty value.
+        ///     Static value representing empty value.
         /// </summary>
         public static readonly FluentNone None = new();
-        
+
         private FluentNone()
         {
         }
 
         /// <summary>
-        /// Method that for a given scope and 
+        ///     Method that for a given scope and
         /// </summary>
         /// <param name="other"></param>
         /// <param name="scope"></param>
@@ -28,20 +28,20 @@ namespace Linguini.Shared.Types.Bundle
             return SharedUtil.Matches(this, other, scope);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IFluentType Copy()
         {
             return None;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public string AsString(IFluentContext context)
         {
             return "{???}";
         }
 
         /// <summary>
-        /// Determines if type is an error. Fluent None isn't an error.
+        ///     Determines if type is an error. Fluent None isn't an error.
         /// </summary>
         /// <returns>false</returns>
         public bool IsError()

@@ -84,8 +84,16 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(Attribute? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Id.Equals(other.Id) && Value.Equals(other.Value);
         }
 
@@ -120,9 +128,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((Attribute)obj);
         }
 
@@ -138,10 +158,26 @@ namespace Linguini.Syntax.Ast
             /// <inheritdoc />
             public bool Equals(Attribute? x, Attribute? y)
             {
-                if (ReferenceEquals(x, y)) return true;
-                if (ReferenceEquals(x, null)) return false;
-                if (ReferenceEquals(y, null)) return false;
-                if (x.GetType() != y.GetType()) return false;
+                if (ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+
+                if (ReferenceEquals(x, null))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(y, null))
+                {
+                    return false;
+                }
+
+                if (x.GetType() != y.GetType())
+                {
+                    return false;
+                }
+
                 return x.Id == y.Id &&
                        x.Value.Equals(y.Value);
             }
@@ -197,15 +233,29 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(Pattern? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            if (Elements.Count != other.Elements.Count) return false;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (Elements.Count != other.Elements.Count)
+            {
+                return false;
+            }
 
             for (var index = 0; index < Elements.Count; index++)
             {
                 var patternElement = Elements[index];
                 var otherPatternElement = other.Elements[index];
-                if (!IPatternElement.PatternComparer.Equals(patternElement, otherPatternElement)) return false;
+                if (!IPatternElement.PatternComparer.Equals(patternElement, otherPatternElement))
+                {
+                    return false;
+                }
             }
 
             return true;
@@ -214,9 +264,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((Pattern)obj);
         }
 
@@ -471,8 +533,16 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(Identifier? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Comparer.Equals(this, other);
         }
 
@@ -531,8 +601,16 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
+            if (obj is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
             return obj.GetType() == GetType() && Equals((Identifier)obj);
         }
 
@@ -548,10 +626,26 @@ namespace Linguini.Syntax.Ast
             /// <inheritdoc />
             public bool Equals(Identifier? x, Identifier? y)
             {
-                if (ReferenceEquals(x, y)) return true;
-                if (ReferenceEquals(x, null)) return false;
-                if (ReferenceEquals(y, null)) return false;
-                if (x.GetType() != y.GetType()) return false;
+                if (ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+
+                if (ReferenceEquals(x, null))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(y, null))
+                {
+                    return false;
+                }
+
+                if (x.GetType() != y.GetType())
+                {
+                    return false;
+                }
+
                 return x.Name.Span.SequenceEqual(y.Name.Span);
             }
 
@@ -574,7 +668,6 @@ namespace Linguini.Syntax.Ast
     /// </remarks>
     public interface IExpression
     {
-
     }
 
     /// <summary>
@@ -662,15 +755,15 @@ namespace Linguini.Syntax.Ast
         {
             return (left, right) switch
             {
-                (DynamicReference l, DynamicReference r) => l.Equals(r),
+                (DynamicReference l, DynamicReference r)   => l.Equals(r),
                 (FunctionReference l, FunctionReference r) => l.Equals(r),
-                (MessageReference l, MessageReference r) => l.Equals(r),
-                (NumberLiteral l, NumberLiteral r) => l.Equals(r),
-                (Placeable l, Placeable r) => l.Equals(r),
-                (TermReference l, TermReference r) => l.Equals(r),
-                (TextLiteral l, TextLiteral r) => l.Equals(r),
+                (MessageReference l, MessageReference r)   => l.Equals(r),
+                (NumberLiteral l, NumberLiteral r)         => l.Equals(r),
+                (Placeable l, Placeable r)                 => l.Equals(r),
+                (TermReference l, TermReference r)         => l.Equals(r),
+                (TextLiteral l, TextLiteral r)             => l.Equals(r),
                 (VariableReference l, VariableReference r) => l.Equals(r),
-                _ => false
+                _                                          => false
             };
         }
 
@@ -679,15 +772,15 @@ namespace Linguini.Syntax.Ast
         {
             return obj switch
             {
-                DynamicReference dr => dr.GetHashCode(),
+                DynamicReference dr  => dr.GetHashCode(),
                 FunctionReference fr => fr.GetHashCode(),
-                MessageReference mr => mr.GetHashCode(),
-                NumberLiteral nl => nl.GetHashCode(),
-                Placeable p => p.GetHashCode(),
-                TermReference term => term.GetHashCode(),
-                TextLiteral tl => tl.GetHashCode(),
+                MessageReference mr  => mr.GetHashCode(),
+                NumberLiteral nl     => nl.GetHashCode(),
+                Placeable p          => p.GetHashCode(),
+                TermReference term   => term.GetHashCode(),
+                TextLiteral tl       => tl.GetHashCode(),
                 VariableReference vr => vr.GetHashCode(),
-                _ => throw new ArgumentOutOfRangeException(nameof(obj), obj, null)
+                _                    => throw new ArgumentOutOfRangeException(nameof(obj), obj, null)
             };
         }
     }
@@ -706,11 +799,12 @@ namespace Linguini.Syntax.Ast
         public static string Stringify(this Pattern? pattern)
         {
             var sb = new StringBuilder();
-            if (pattern == null || pattern.Elements.Count <= 0) return sb.ToString();
-            for (var i = 0; i < pattern.Elements.Count; i++)
+            if (pattern == null || pattern.Elements.Count <= 0)
             {
-                sb.Append(pattern.Elements[i]);
+                return sb.ToString();
             }
+
+            for (var i = 0; i < pattern.Elements.Count; i++) sb.Append(pattern.Elements[i]);
 
             return sb.ToString();
         }

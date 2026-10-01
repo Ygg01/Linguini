@@ -6,46 +6,46 @@ using Linguini.Shared.Types;
 namespace Linguini.Shared.Algorithm
 {
     /// <summary>
-    /// Defines the strategies used for language negotiation.
+    ///     Defines the strategies used for language negotiation.
     /// </summary>
     public enum NegotiationStrategy
     {
         /// <summary>
-        /// Filtering
+        ///     Filtering
         /// </summary>
         Filtering,
 
         /// <summary>
-        /// Tries to exact match the requested locale against the available locales.
+        ///     Tries to exact match the requested locale against the available locales.
         /// </summary>
         Matching,
-        
+
         /// <summary>
-        /// Lookup as defined in <a href="https://datatracker.ietf.org/doc/html/rfc4647#section-3.4">RFC 4647</a>.
+        ///     Lookup as defined in <a href="https://datatracker.ietf.org/doc/html/rfc4647#section-3.4">RFC 4647</a>.
         /// </summary>
-        Lookup,
+        Lookup
     }
 
 
     /// <summary>
-    /// Represents a language negotiation algorithm designed to match requested languages
-    /// against available languages based on various negotiation strategies.
+    ///     Represents a language negotiation algorithm designed to match requested languages
+    ///     against available languages based on various negotiation strategies.
     /// </summary>
     public class NegotiationAlgorithm
     {
         /// <summary>
-        /// Filters the requested language tags against the available language tags based
-        /// on the specified negotiation strategy, optionally utilizing a locale expander.
+        ///     Filters the requested language tags against the available language tags based
+        ///     on the specified negotiation strategy, optionally utilizing a locale expander.
         /// </summary>
         /// <param name="requested">The list of requested language tags.</param>
         /// <param name="available">The list of available language tags.</param>
         /// <param name="strategy">The negotiation strategy to apply during filtering.</param>
         /// <param name="localeExpander">
-        /// An optional locale expander object for expanding language ranges.
-        /// If not provided, a default instance is created.
+        ///     An optional locale expander object for expanding language ranges.
+        ///     If not provided, a default instance is created.
         /// </param>
         /// <returns>
-        /// A list of language tags that match the filtering conditions based on the specified strategy.
+        ///     A list of language tags that match the filtering conditions based on the specified strategy.
         /// </returns>
         public static List<LangLocId> FilterMatches(List<LangLocId> requested, List<LangLocId> available,
             NegotiationStrategy strategy, LocaleExpander? localeExpander = null)
@@ -160,7 +160,6 @@ namespace Linguini.Shared.Algorithm
 
                     if (strategy == NegotiationStrategy.Matching)
                     {
-                        continue;
                     }
                 }
             }
@@ -192,31 +191,34 @@ namespace Linguini.Shared.Algorithm
 
 
         /// <summary>
-        /// Negotiates a list of languages from the requested and available languages,
-        /// using a specified negotiation strategy. Optionally includes a default language
-        /// and uses a locale expander if provided.
+        ///     Negotiates a list of languages from the requested and available languages,
+        ///     using a specified negotiation strategy. Optionally includes a default language
+        ///     and uses a locale expander if provided.
         /// </summary>
         /// <param name="requested">The list of requested language tags.</param>
         /// <param name="available">The list of available language tags for negotiation.</param>
         /// <param name="strategy">The strategy to use for negotiating language matches.</param>
         /// <param name="defaultLanguage">
-        /// An optional default language to include in the result if no matches are found
-        /// or if not already present.
+        ///     An optional default language to include in the result if no matches are found
+        ///     or if not already present.
         /// </param>
         /// <param name="localeExpander">
-        /// An optional locale expander to expand the list of requested or available languages.
-        /// If not provided, expansion is skipped.
+        ///     An optional locale expander to expand the list of requested or available languages.
+        ///     If not provided, expansion is skipped.
         /// </param>
         /// <returns>
-        /// A list of negotiated language tags based on the specified negotiation strategy,
-        /// optionally including the default language if applicable.
+        ///     A list of negotiated language tags based on the specified negotiation strategy,
+        ///     optionally including the default language if applicable.
         /// </returns>
         public static List<LangLocId> NegotiateLanguages(List<LangLocId> requested, List<LangLocId> available,
             NegotiationStrategy strategy, LangLocId? defaultLanguage = null, LocaleExpander? localeExpander = null)
         {
             var supported = FilterMatches(requested, available, strategy, localeExpander);
 
-            if (defaultLanguage == null) return supported;
+            if (defaultLanguage == null)
+            {
+                return supported;
+            }
 
             if (strategy == NegotiationStrategy.Lookup)
             {
@@ -234,20 +236,20 @@ namespace Linguini.Shared.Algorithm
         }
 
 
-        static bool Matches(LangLocId lid1, LangLocId lid2, bool isRange1, bool isRange2)
+        private static bool Matches(LangLocId lid1, LangLocId lid2, bool isRange1, bool isRange2)
         {
             return (isRange1 && lid1.Language.IsEmpty)
                    || (isRange2 && lid2.Language.IsEmpty)
-                   || String.Equals(lid1.LanguageStr, lid2.LanguageStr, StringComparison.OrdinalIgnoreCase)
-                   && SubMatch(lid1.ScriptStr, lid2.ScriptStr, isRange1, isRange2)
-                   && SubMatch(lid1.RegionStr, lid2.RegionStr, isRange1, isRange2);
+                   || (string.Equals(lid1.LanguageStr, lid2.LanguageStr, StringComparison.OrdinalIgnoreCase)
+                       && SubMatch(lid1.ScriptStr, lid2.ScriptStr, isRange1, isRange2)
+                       && SubMatch(lid1.RegionStr, lid2.RegionStr, isRange1, isRange2));
         }
-        
-        static bool SubMatch(string? lid1, string? lid2, bool isRange1, bool isRange2)
+
+        private static bool SubMatch(string? lid1, string? lid2, bool isRange1, bool isRange2)
         {
             return (isRange1 && lid1 == null)
                    || (isRange2 && lid2 == null)
-                   || String.Equals(lid1, lid2, StringComparison.OrdinalIgnoreCase);
+                   || string.Equals(lid1, lid2, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

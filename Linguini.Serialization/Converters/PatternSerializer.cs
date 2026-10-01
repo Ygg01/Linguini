@@ -9,7 +9,7 @@ using Linguini.Syntax.Ast;
 namespace Linguini.Serialization.Converters
 {
     /// <summary>
-    /// Provides custom serialization and deserialization for the `Pattern` class.
+    ///     Provides custom serialization and deserialization for the `Pattern` class.
     /// </summary>
     public class PatternSerializer : JsonConverter<Pattern>
 
@@ -32,7 +32,7 @@ namespace Linguini.Serialization.Converters
 
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    string? propertyName = reader.GetString();
+                    var propertyName = reader.GetString();
 
                     reader.Read();
 
@@ -67,9 +67,15 @@ namespace Linguini.Serialization.Converters
 
             while (reader.Read())
             {
-                if (reader.TokenType == JsonTokenType.EndArray) break;
+                if (reader.TokenType == JsonTokenType.EndArray)
+                {
+                    break;
+                }
 
-                if (reader.TokenType != JsonTokenType.StartObject) continue;
+                if (reader.TokenType != JsonTokenType.StartObject)
+                {
+                    continue;
+                }
 
                 var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
                 builder.AddExpression(ReadPatternExpression(el, options));
@@ -82,8 +88,8 @@ namespace Linguini.Serialization.Converters
             return type switch
             {
                 "TextElement" => ResourceSerializer.ProcessTextLiteral(el, options),
-                "Placeable" => PlaceableSerializer.ProcessPlaceable(el, options),
-                _ => throw new JsonException($"Unexpected type `{type}`")
+                "Placeable"   => PlaceableSerializer.ProcessPlaceable(el, options),
+                _             => throw new JsonException($"Unexpected type `{type}`")
             };
         }
 
@@ -97,7 +103,6 @@ namespace Linguini.Serialization.Converters
             writer.WriteStartArray();
             StringBuilder? textLiteralBuffer = null;
             foreach (var patternElement in pattern.Elements)
-            {
                 if (patternElement is TextLiteral textLiteral)
                 {
                     textLiteralBuffer ??= new StringBuilder();
@@ -109,7 +114,6 @@ namespace Linguini.Serialization.Converters
                     textLiteralBuffer = null;
                     JsonSerializer.Serialize(writer, placeable, options);
                 }
-            }
 
             WriteMergedText(writer, textLiteralBuffer);
 
@@ -131,22 +135,22 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Attempts to deserialize a JSON element into a <see cref="Pattern"/> object based on a specific structure.
+        ///     Attempts to deserialize a JSON element into a <see cref="Pattern" /> object based on a specific structure.
         /// </summary>
         /// <param name="jsonValue">The JSON element to be deserialized.</param>
         /// <param name="options">The JSON serialization options used for deserialization.</param>
         /// <param name="pattern">
-        /// When this method returns <c>true</c>, contains the deserialized <see cref="Pattern"/> object,
-        /// if the deserialization is successful; otherwise, null.
+        ///     When this method returns <c>true</c>, contains the deserialized <see cref="Pattern" /> object,
+        ///     if the deserialization is successful; otherwise, null.
         /// </param>
         /// <param name="error">Errors message that can be displayed if return value is <c>false</c>.</param>
         /// <returns>
-        /// <c>true</c> if the JSON element was successfully deserialized into a <see cref="Pattern"/> object;
-        /// otherwise, <c>false</c>.
+        ///     <c>true</c> if the JSON element was successfully deserialized into a <see cref="Pattern" /> object;
+        ///     otherwise, <c>false</c>.
         /// </returns>
         public static bool TryReadPattern(JsonElement jsonValue, JsonSerializerOptions options,
             [NotNullWhen(true)] out Pattern? pattern, [NotNullWhen(false)] out string? error)
-            {
+        {
             if (!jsonValue.TryGetProperty("type", out var jsonType)
                 || !"Pattern".Equals(jsonType.GetString()))
             {

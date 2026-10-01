@@ -6,15 +6,15 @@ using System.Text;
 namespace Linguini.Shared.Util
 {
     /// <summary>
-    /// Provides utility methods for processing Unicode strings. Mainly escaping and unescaping strings.
+    ///     Provides utility methods for processing Unicode strings. Mainly escaping and unescaping strings.
     /// </summary>
     public static class UnicodeUtil
     {
-        const string UnknownChar = "�";
+        private const string UnknownChar = "�";
 
         /// <summary>
-        /// Method to unescape a given memory from a string literal
-        /// and write its converted content to a given writer.
+        ///     Method to unescape a given memory from a string literal
+        ///     and write its converted content to a given writer.
         /// </summary>
         /// <param name="value">Read-only memory containing escaped strings</param>
         /// <param name="writer">Writer to which we write the results of escaping</param>
@@ -36,6 +36,7 @@ namespace Linguini.Shared.Util
                 {
                     writer.Write(Encoding.UTF8.GetChars(bytes[start..ptr]));
                 }
+
                 // With this we skip double `\\`
                 ptr += 1;
 
@@ -76,15 +77,17 @@ namespace Linguini.Shared.Util
             // we get {c, a}
             // if out of are out of range just return Replacement character
             if (start >= bytes.Length || end > bytes.Length)
+            {
                 return UnknownChar;
+            }
 
             // this slices `004F` out of `\u004F`
             var codePointStr = Encoding.UTF8.GetString(bytes[start..end]);
-            
+
             // Convert a value (e.g. `004F`) from hexadecimal to int to get approximate codepoint
             // convert codepoint to string (because it can be more than one UTF16 char)
             return !int.TryParse(codePointStr, NumberStyles.HexNumber, NumberFormatInfo.InvariantInfo,
-                out var codePoint)
+                                 out var codePoint)
                 ? UnknownChar
                 : char.ConvertFromUtf32(codePoint);
         }

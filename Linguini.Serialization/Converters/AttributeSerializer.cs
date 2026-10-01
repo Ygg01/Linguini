@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -9,7 +8,7 @@ using Attribute = Linguini.Syntax.Ast.Attribute;
 namespace Linguini.Serialization.Converters
 {
     /// <summary>
-    /// Provides a custom JSON converter for serializing and deserializing instances of the <see cref="Attribute"/> class.
+    ///     Provides a custom JSON converter for serializing and deserializing instances of the <see cref="Attribute" /> class.
     /// </summary>
     public class AttributeSerializer : JsonConverter<Attribute>
     {
@@ -23,10 +22,9 @@ namespace Linguini.Serialization.Converters
 
             var id = new Identifier("");
             var value = new Pattern();
-            
+
             while (reader.Read())
             {
-
                 if (reader.TokenType == JsonTokenType.EndObject)
                 {
                     break;
@@ -34,18 +32,18 @@ namespace Linguini.Serialization.Converters
 
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    string? propertyName = reader.GetString();
+                    var propertyName = reader.GetString();
 
-                    reader.Read(); 
+                    reader.Read();
 
                     switch (propertyName)
                     {
                         case "id":
-                            id = JsonSerializer.Deserialize<Identifier>(ref reader, options); 
+                            id = JsonSerializer.Deserialize<Identifier>(ref reader, options);
                             break;
 
                         case "value":
-                            value = JsonSerializer.Deserialize<Pattern>(ref reader, options); 
+                            value = JsonSerializer.Deserialize<Pattern>(ref reader, options);
                             break;
                         case "type":
                             var typeField = reader.GetString();
@@ -54,6 +52,7 @@ namespace Linguini.Serialization.Converters
                                 throw new JsonException(
                                     $"Invalid type: Expected 'Attribute' found {typeField} instead");
                             }
+
                             break;
                         default:
                             throw new JsonException($"Unexpected property: {propertyName}");
@@ -78,21 +77,21 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Attempts to parse a JSON element as an <see cref="Attribute"/> object.
+        ///     Attempts to parse a JSON element as an <see cref="Attribute" /> object.
         /// </summary>
         /// <param name="bodyEl">
-        /// The JSON element containing the attribute data.
+        ///     The JSON element containing the attribute data.
         /// </param>
         /// <param name="options">
-        /// The serializer options to be used during the parsing process.
+        ///     The serializer options to be used during the parsing process.
         /// </param>
         /// <param name="attribute">
-        /// When this method returns, contains the parsed <see cref="Attribute"/>
-        /// if parsing was successful; otherwise, <c>null</c>.
+        ///     When this method returns, contains the parsed <see cref="Attribute" />
+        ///     if parsing was successful; otherwise, <c>null</c>.
         /// </param>
         /// <returns>
-        /// <c>true</c> if the JSON element was successfully parsed as an <see cref="Attribute"/>;
-        /// otherwise, <c>false</c>.
+        ///     <c>true</c> if the JSON element was successfully parsed as an <see cref="Attribute" />;
+        ///     otherwise, <c>false</c>.
         /// </returns>
         public static bool TryGetAttribute(JsonElement bodyEl, JsonSerializerOptions options,
             [NotNullWhen(true)] out Attribute? attribute)
@@ -103,19 +102,21 @@ namespace Linguini.Serialization.Converters
                 return false;
             }
 
-            if (!bodyEl.TryGetProperty("id", out var idEl) || !IdentifierSerializer.TryGetIdentifier(idEl, out var ident))
-            {
-                attribute = null;
-                return false;
-            }
-            
-            if (!bodyEl.TryGetProperty("value", out var valueEl) || !PatternSerializer.TryReadPattern(valueEl, options, out var pattern, out _))
+            if (!bodyEl.TryGetProperty("id", out var idEl) ||
+                !IdentifierSerializer.TryGetIdentifier(idEl, out var ident))
             {
                 attribute = null;
                 return false;
             }
 
-            attribute = new Attribute(ident , pattern);
+            if (!bodyEl.TryGetProperty("value", out var valueEl) ||
+                !PatternSerializer.TryReadPattern(valueEl, options, out var pattern, out _))
+            {
+                attribute = null;
+                return false;
+            }
+
+            attribute = new Attribute(ident, pattern);
             return true;
         }
     }

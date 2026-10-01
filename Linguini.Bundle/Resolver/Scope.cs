@@ -18,10 +18,6 @@ namespace Linguini.Bundle.Resolver
     /// </summary>
     public class Scope : IScope
     {
-        internal readonly Dictionary<string, IFluentType>? _args;
-        private readonly CultureInfo _culture;
-        private readonly List<FluentError> _errors;
-
         /// <summary>
         ///     Represents the primary bundle associated with the current scope.
         ///     The <c>Bundle</c> variable provides access to the underlying implementation of the <see cref="IReadBundle" />
@@ -32,6 +28,9 @@ namespace Linguini.Bundle.Resolver
 
         internal readonly int MaxPlaceable;
         internal readonly List<Pattern> Travelled;
+        internal readonly Dictionary<string, IFluentType>? _args;
+        private readonly CultureInfo _culture;
+        private readonly List<FluentError> _errors;
 
         private Dictionary<string, IFluentType>? _localNamedArguments;
         private List<IFluentType>? _localPositionalArguments;
@@ -98,7 +97,7 @@ namespace Linguini.Bundle.Resolver
         internal bool Dirty { get; set; }
 
         internal short Placeable { get; set; }
-        
+
         /// <summary>
         ///     Provides access to the collection of <see cref="FluentError" /> instances encountered during processing.
         ///     The <c>Errors</c> property is used to track and retrieve any errors that occur while resolving patterns or

@@ -333,10 +333,7 @@ namespace Linguini.Bundle.Builder
             /// <inheritdoc />
             public IResourceStep Locales(params string[] unparsedLocales)
             {
-                foreach (var unparsedLocale in unparsedLocales)
-                {
-                    _locales.Add(unparsedLocale);
-                }
+                foreach (var unparsedLocale in unparsedLocales) _locales.Add(unparsedLocale);
                 if (_locales.Count > 0)
                 {
                     _culture = new CultureInfo(_locales[0].ToString());
@@ -438,13 +435,11 @@ namespace Linguini.Bundle.Builder
                 }
 
                 foreach (var resource in _resources)
-                {
                     if (!bundle.AddResource(resource, out var resErr))
                     {
                         errors ??= new List<FluentError>();
                         errors.AddRange(resErr);
                     }
-                }
 
                 return (bundle, errors);
             }

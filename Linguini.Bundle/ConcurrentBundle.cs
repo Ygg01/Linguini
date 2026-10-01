@@ -15,64 +15,30 @@ using Linguini.Syntax.Ast;
 namespace Linguini.Bundle
 {
     /// <summary>
-    /// Represents a thread-safe implementation of the FluentBundle class.
-    ///
-    /// `ConcurrentBundle` implements the <see cref="IReadBundle"/> interface.
+    ///     Represents a thread-safe implementation of the FluentBundle class.
+    ///     `ConcurrentBundle` implements the <see cref="IReadBundle" /> interface.
     /// </summary>
     public sealed class ConcurrentBundle : FluentBundle, IEquatable<ConcurrentBundle>, IReadBundle
     {
         internal ConcurrentDictionary<string, FluentFunction> Functions = new();
-        internal ConcurrentDictionary<string, AstTerm> Terms = new();
         internal ConcurrentDictionary<string, AstMessage> Messages = new();
+        internal ConcurrentDictionary<string, AstTerm> Terms = new();
 
         /// <inheritdoc />
-        protected override void AddMessageOverriding(AstMessage message)
+        public bool Equals(ConcurrentBundle? other)
         {
-            Messages[message.GetId()] = message;
-        }
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
 
-        /// <inheritdoc />
-        protected override void AddTermOverriding(AstTerm term)
-        {
-            Terms[term.GetId()] = term;
-        }
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
 
-        /// <inheritdoc />
-        protected override bool TryAddTerm(AstTerm term, List<FluentError>? errors)
-        {
-            if (Terms.TryAdd(term.GetId(), term)) return true;
-            errors ??= new List<FluentError>();
-            errors.Add(new OverrideFluentError(term.GetId(), EntryKind.Term));
-            return false;
-        }
-
-        /// <inheritdoc />
-        protected override bool TryAddMessage(AstMessage message, List<FluentError>? errors)
-        {
-            if (Messages.TryAdd(message.GetId(), message)) return true;
-            errors ??= new List<FluentError>();
-            errors.Add(new OverrideFluentError(message.GetId(), EntryKind.Message));
-            return false;
-        }
-
-
-        /// <inheritdoc />
-        public override bool TryAddFunction(string funcName, ExternalFunction fluentFunction)
-        {
-            return Functions.TryAdd(funcName, fluentFunction);
-        }
-
-        /// <inheritdoc />
-        public override void AddFunctionOverriding(string funcName, ExternalFunction fluentFunction)
-        {
-            Functions[funcName] = fluentFunction;
-        }
-
-        /// <inheritdoc />
-        public override void AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction)
-        {
-            if (Functions.TryAdd(funcName, fluentFunction)) return;
-            throw new ArgumentException($"Function with name {funcName} already exist");
+            return base.Equals(other) && Functions.SequenceEqual(other.Functions) && Terms.SequenceEqual(other.Terms) &&
+                   Messages.SequenceEqual(other.Messages);
         }
 
         /// <inheritdoc />
@@ -118,25 +84,87 @@ namespace Linguini.Bundle
             return Terms.Keys;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
+        protected override void AddMessageOverriding(AstMessage message)
+        {
+            Messages[message.GetId()] = message;
+        }
+
+        /// <inheritdoc />
+        protected override void AddTermOverriding(AstTerm term)
+        {
+            Terms[term.GetId()] = term;
+        }
+
+        /// <inheritdoc />
+        protected override bool TryAddTerm(AstTerm term, List<FluentError>? errors)
+        {
+            if (Terms.TryAdd(term.GetId(), term))
+            {
+                return true;
+            }
+
+            errors ??= new List<FluentError>();
+            errors.Add(new OverrideFluentError(term.GetId(), EntryKind.Term));
+            return false;
+        }
+
+        /// <inheritdoc />
+        protected override bool TryAddMessage(AstMessage message, List<FluentError>? errors)
+        {
+            if (Messages.TryAdd(message.GetId(), message))
+            {
+                return true;
+            }
+
+            errors ??= new List<FluentError>();
+            errors.Add(new OverrideFluentError(message.GetId(), EntryKind.Message));
+            return false;
+        }
+
+
+        /// <inheritdoc />
+        public override bool TryAddFunction(string funcName, ExternalFunction fluentFunction)
+        {
+            return Functions.TryAdd(funcName, fluentFunction);
+        }
+
+        /// <inheritdoc />
+        public override void AddFunctionOverriding(string funcName, ExternalFunction fluentFunction)
+        {
+            Functions[funcName] = fluentFunction;
+        }
+
+        /// <inheritdoc />
+        public override void AddFunctionUnchecked(string funcName, ExternalFunction fluentFunction)
+        {
+            if (Functions.TryAdd(funcName, fluentFunction))
+            {
+                return;
+            }
+
+            throw new ArgumentException($"Function with name {funcName} already exist");
+        }
+
+        /// <inheritdoc />
         internal override IDictionary<string, AstMessage> GetMessagesDictionary()
         {
             return Messages;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         internal override IDictionary<string, AstTerm> GetTermsDictionary()
         {
             return Terms;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         internal override IDictionary<string, FluentFunction> GetFunctionDictionary()
         {
             return Functions;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override FluentBundle DeepClone()
         {
             return new ConcurrentBundle
@@ -150,26 +178,17 @@ namespace Linguini.Bundle
                 TransformFunc = (Func<string, string>?)TransformFunc?.Clone(),
                 FormatterFunc = (Func<IFluentType, string>?)FormatterFunc?.Clone(),
                 MaxPlaceable = MaxPlaceable,
-                EnableExtensions = EnableExtensions,
+                EnableExtensions = EnableExtensions
             };
         }
-        
-        /// <inheritdoc/>
-        public bool Equals(ConcurrentBundle? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return base.Equals(other) && Functions.SequenceEqual(other.Functions) && Terms.SequenceEqual(other.Terms) &&
-                   Messages.SequenceEqual(other.Messages);
-        }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            return ReferenceEquals(this, obj) || obj is ConcurrentBundle other && Equals(other);
+            return ReferenceEquals(this, obj) || (obj is ConcurrentBundle other && Equals(other));
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return HashCode.Combine(base.GetHashCode(), Functions, Terms, Messages);

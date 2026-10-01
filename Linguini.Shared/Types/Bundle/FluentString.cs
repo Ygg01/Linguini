@@ -5,14 +5,14 @@ using Linguini.Shared.Util;
 namespace Linguini.Shared.Types.Bundle
 {
     /// <summary>
-    /// Fluent representation of a string value. A thin wrapper around the value.
+    ///     Fluent representation of a string value. A thin wrapper around the value.
     /// </summary>
     public record FluentString : IFluentType
     {
         private readonly string _content;
 
         /// <summary>
-        /// Constructs a value from string.
+        ///     Constructs a value from string.
         /// </summary>
         /// <param name="content">string being wrapped</param>
         private FluentString(string content)
@@ -21,7 +21,7 @@ namespace Linguini.Shared.Types.Bundle
         }
 
         /// <summary>
-        /// Constructs a value from <see cref="ReadOnlySpan{T}"/>.
+        ///     Constructs a value from <see cref="ReadOnlySpan{T}" />.
         /// </summary>
         /// <param name="content">string being wrapped</param>
         public FluentString(ReadOnlySpan<char> content)
@@ -29,26 +29,33 @@ namespace Linguini.Shared.Types.Bundle
             _content = content.ToString();
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         string IFluentType.AsString(IFluentContext context)
         {
             return _content;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool IsError()
         {
             return false;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool Matches(IFluentType other, IScope scope)
         {
             return SharedUtil.Matches(this, other, scope);
         }
 
+
+        /// <inheritdoc />
+        public IFluentType Copy()
+        {
+            return new FluentString(_content);
+        }
+
         /// <summary>
-        /// Converts a <see cref="FluentString"/> to a <see cref="string"/>
+        ///     Converts a <see cref="FluentString" /> to a <see cref="string" />
         /// </summary>
         /// <param name="fs">value </param>
         /// <returns>the string being wrapped</returns>
@@ -58,9 +65,9 @@ namespace Linguini.Shared.Types.Bundle
         }
 
         /// <summary>
-        /// Converts a <see cref="string"/> to a <see cref="FluentString"/>
+        ///     Converts a <see cref="string" /> to a <see cref="FluentString" />
         /// </summary>
-        /// <param name="s">value to be wrapped in <see cref="FluentString"/></param>
+        /// <param name="s">value to be wrapped in <see cref="FluentString" /></param>
         /// <returns>the wrapper around FluentString</returns>
         public static implicit operator FluentString(string s)
         {
@@ -68,30 +75,23 @@ namespace Linguini.Shared.Types.Bundle
         }
 
         /// <summary>
-        /// Converts a <see cref="ReadOnlySpan{T}"/> to a <see cref="FluentString"/>
+        ///     Converts a <see cref="ReadOnlySpan{T}" /> to a <see cref="FluentString" />
         /// </summary>
-        /// <param name="s">value to be wrapped in <see cref="FluentString"/></param>
+        /// <param name="s">value to be wrapped in <see cref="FluentString" /></param>
         /// <returns>the wrapper around FluentString</returns>
         public static implicit operator FluentString(ReadOnlySpan<char> s)
         {
             return new FluentString(s.ToString());
         }
 
-
-        /// <inheritdoc/>
-        public IFluentType Copy()
-        {
-            return new FluentString(_content);
-        }
-
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return _content.GetHashCode();
         }
 
         /// <summary>
-        /// Helper methods to extract PluralCategory. <seealso cref="PluralCategoryHelper.TryPluralCategory"/>
+        ///     Helper methods to extract PluralCategory. <seealso cref="PluralCategoryHelper.TryPluralCategory" />
         /// </summary>
         /// <param name="category">Case-insensitive name of the Plural category</param>
         /// <returns><c>true</c> if it matches the <c>pluralCategory</c> value</returns>
@@ -100,7 +100,4 @@ namespace Linguini.Shared.Types.Bundle
             return _content.TryPluralCategory(out category);
         }
     }
-
-
-
 }

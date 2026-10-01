@@ -428,13 +428,13 @@ bar = Bar {""Baz""}
             Assert.That(bundle.TryGetMessage("foo", args, out _, out var actual));
             Assert.That(actual, Is.EqualTo("FAA"));
         }
-        
+
         private const string FormatterFuncs = @"
 foo = {""2""}
 bar = {2}
 baz = {NUMBER(3)}
 ";
-        
+
         [Test]
         [Parallelizable]
         public void TestFormatterFuncs()
@@ -450,10 +450,10 @@ baz = {NUMBER(3)}
             var args = new Dictionary<string, IFluentType>();
             Assert.That(bundle.TryGetMessage("foo", args, out _, out var actualFoo));
             Assert.That(actualFoo, Is.EqualTo("2"));
-            
+
             Assert.That(bundle.TryGetMessage("bar", args, out _, out var actualBar));
             Assert.That(actualBar, Is.EqualTo("X"));
-            
+
             Assert.That(bundle.TryGetMessage("bar", args, out _, out var actualBaz));
             Assert.That(actualBaz, Is.EqualTo("X"));
         }
@@ -463,7 +463,7 @@ baz = {NUMBER(3)}
             return arg switch
             {
                 FluentNumber _ => "X",
-                _ => arg.AsString()
+                _              => arg.AsString()
             };
         }
 

@@ -14,8 +14,6 @@ namespace Linguini.Syntax.Tests.Parser
     [TestOf(typeof(LinguiniParser))]
     public class LinguiniParserTest
     {
-        #region CommentTest
-
         [Test]
         [Parallelizable]
         [TestCase("# Comment")]
@@ -28,7 +26,7 @@ namespace Linguini.Syntax.Tests.Parser
         public void TestCommentParse(string input, CommentLevel expectedCommentLevel = CommentLevel.Comment,
             string expectedContent = "Comment")
         {
-            Resource parsed = LinguiniParser.FromFragment(input).ParseWithComments();
+            var parsed = LinguiniParser.FromFragment(input).ParseWithComments();
 
             Assert.That(parsed.Entries.Count, Is.EqualTo(1));
             if (parsed.Entries[0] is AstComment comment)
@@ -45,11 +43,11 @@ namespace Linguini.Syntax.Tests.Parser
         [Test]
         [Parallelizable]
         [TestCase("#Comment", ErrorType.ExpectedToken,
-            "Expected a token starting with  \" \" found \"C\" instead", 1, 2, 0, 8)]
+                  "Expected a token starting with  \" \" found \"C\" instead", 1, 2, 0, 8)]
         [TestCase("#Comment\n", ErrorType.ExpectedToken,
-            "Expected a token starting with  \" \" found \"C\" instead", 1, 2, 0, 9)]
+                  "Expected a token starting with  \" \" found \"C\" instead", 1, 2, 0, 9)]
         [TestCase("#Comment\r\n", ErrorType.ExpectedToken,
-            "Expected a token starting with  \" \" found \"C\" instead", 1, 2, 0, 10)]
+                  "Expected a token starting with  \" \" found \"C\" instead", 1, 2, 0, 10)]
         public void TestErrorCommentParse(string input, ErrorType expErrType, string expMsg, int start, int end,
             int sliceStart, int sliceEnd)
         {
@@ -60,10 +58,6 @@ namespace Linguini.Syntax.Tests.Parser
             Assert.That(new Range(start, end), Is.EqualTo(parsed.Errors[0].Position));
             Assert.That(new Range(sliceStart, sliceEnd), Is.EqualTo(parsed.Errors[0].Slice));
         }
-
-        #endregion
-
-        #region MessageTest
 
         [Test]
         [Parallelizable]
@@ -81,7 +75,7 @@ namespace Linguini.Syntax.Tests.Parser
             var parsed = LinguiniParser.FromFragment(input).ParseWithComments();
             Assert.That(0, Is.EqualTo(parsed.Errors.Count), "Failed, with errors");
             Assert.That(1, Is.EqualTo(parsed.Entries.Count));
-            if (parsed.Entries[0] is AstMessage { Value: { } } message)
+            if (parsed.Entries[0] is AstMessage { Value: not null } message)
             {
                 Assert.That(expName, Is.EqualTo(message.Id.ToString()));
                 Assert.That(expValue, Is.EqualTo(message.Value.Stringify()));
@@ -97,7 +91,7 @@ namespace Linguini.Syntax.Tests.Parser
         [TestCase("# comment\na = b", true, "a", "comment")]
         [TestCase("## comment\nhello = world", false, "hello", "comment")]
         [TestCase("# Msg Comment\n# with blank line.\n#\nhello = term",
-            true, "hello", "Msg Comment\nwith blank line.\n")]
+                  true, "hello", "Msg Comment\nwith blank line.\n")]
         public void TestMessageComment(string input, bool inMessage, string expMsg, string expComment)
         {
             var expBodySize = inMessage ? 1 : 2;
@@ -130,8 +124,6 @@ namespace Linguini.Syntax.Tests.Parser
                 }
             }
         }
-
-        #endregion
 
         [Test]
         [TestCase("# Term\r\n# blank line.\r\n#\r\n-term = Term", true, "term", "Term\nblank line.\n")]
@@ -183,7 +175,10 @@ namespace Linguini.Syntax.Tests.Parser
 
             if (res.Entries[0] is not AstMessage message
                 || message.Value.Elements[0] is not Placeable placeable
-                || placeable.Expression is not NumberLiteral numberLiteral) return;
+                || placeable.Expression is not NumberLiteral numberLiteral)
+            {
+                return;
+            }
 
             Assert.That(1, Is.EqualTo(message.Value.Elements.Count));
             Assert.That(message.Value.Elements[0], Is.InstanceOf<Placeable>());

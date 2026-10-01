@@ -7,14 +7,14 @@ using Linguini.Syntax.Ast;
 namespace Linguini.Serialization.Converters
 {
     /// <summary>
-    /// Provides custom JSON serialization and deserialization for the <c>AstTerm</c> class.
-    /// This class is a JSON converter that handles converting <c>AstTerm</c> instances
-    /// to and from JSON format during serialization and deserialization processes.
+    ///     Provides custom JSON serialization and deserialization for the <c>AstTerm</c> class.
+    ///     This class is a JSON converter that handles converting <c>AstTerm</c> instances
+    ///     to and from JSON format during serialization and deserialization processes.
     /// </summary>
     public class TermSerializer : JsonConverter<AstTerm>
     {
         /// <summary>
-        /// Reads and deserializes the JSON data into an <c>AstTerm</c> instance.
+        ///     Reads and deserializes the JSON data into an <c>AstTerm</c> instance.
         /// </summary>
         /// <param name="reader">The <c>Utf8JsonReader</c> used to read the JSON data.</param>
         /// <param name="typeToConvert">The type of object to convert, expected to be <c>AstTerm</c>.</param>
@@ -24,8 +24,8 @@ namespace Linguini.Serialization.Converters
         public override AstTerm Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var deserialize = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
-            return TryGetAstTerm(deserialize, options, out var term) 
-                ? term 
+            return TryGetAstTerm(deserialize, options, out var term)
+                ? term
                 : throw new JsonException("Expected to parse the term");
         }
 
@@ -42,10 +42,7 @@ namespace Linguini.Serialization.Converters
 
             writer.WritePropertyName("attributes");
             writer.WriteStartArray();
-            foreach (var attribute in term.Attributes)
-            {
-                JsonSerializer.Serialize(writer, attribute, options);
-            }
+            foreach (var attribute in term.Attributes) JsonSerializer.Serialize(writer, attribute, options);
 
             writer.WriteEndArray();
 
@@ -60,13 +57,13 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Attempts to parse and convert a <c>JsonElement</c> instance into an <c>AstTerm</c> object.
+        ///     Attempts to parse and convert a <c>JsonElement</c> instance into an <c>AstTerm</c> object.
         /// </summary>
         /// <param name="bodyArrayEl">The <c>JsonElement</c> representing the input data to be converted.</param>
         /// <param name="options">The JSON serialization options used for deserialization.</param>
         /// <param name="ast">
-        /// When this method returns, contains the resulting <c>AstTerm</c> object if the conversion
-        /// was successful, or <c>null</c> if it failed.
+        ///     When this method returns, contains the resulting <c>AstTerm</c> object if the conversion
+        ///     was successful, or <c>null</c> if it failed.
         /// </param>
         /// <returns><c>true</c> if the conversion was successful; otherwise, <c>false</c>.</returns>
         /// <exception cref="JsonException">If error encountered.</exception>
@@ -97,7 +94,7 @@ namespace Linguini.Serialization.Converters
             }
 
             term.SetPattern(pattern);
-            
+
             // Attributes are optional but have to be properly formatted.
             if (bodyArrayEl.TryGetProperty("attributes", out var arrayEl))
             {
@@ -106,7 +103,7 @@ namespace Linguini.Serialization.Converters
                     ast = null;
                     return false;
                 }
-                
+
                 foreach (var attrEl in arrayEl.EnumerateArray())
                 {
                     if (!AttributeSerializer.TryGetAttribute(attrEl, options, out var attribute))
@@ -118,7 +115,7 @@ namespace Linguini.Serialization.Converters
                     term.AddAttribute(attribute);
                 }
             }
-            
+
             if (bodyArrayEl.TryGetProperty("comment", out var commentEl))
             {
                 if (!CommentSerializer.TryReadComment(commentEl, out var astComment))
@@ -129,7 +126,7 @@ namespace Linguini.Serialization.Converters
 
                 term.SetComment(astComment);
             }
-            
+
 
             ast = term.Build();
             return true;

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -8,13 +7,13 @@ using Linguini.Syntax.Ast;
 namespace Linguini.Serialization.Converters
 {
     /// <summary>
-    /// Provides functionality to serialize and deserialize the <see cref="Variant"/> object.
+    ///     Provides functionality to serialize and deserialize the <see cref="Variant" /> object.
     /// </summary>
     /// <remarks>
-    /// This class is a custom JSON converter used to handle the serialization and deserialization
-    /// processes for the <see cref="Variant"/> type. It reads and writes JSON representations
-    /// of the <see cref="Variant"/> object in a structured format that includes type, key, value,
-    /// and whether the variant is the default.
+    ///     This class is a custom JSON converter used to handle the serialization and deserialization
+    ///     processes for the <see cref="Variant" /> type. It reads and writes JSON representations
+    ///     of the <see cref="Variant" /> object in a structured format that includes type, key, value,
+    ///     and whether the variant is the default.
     /// </remarks>
     public class VariantSerializer : JsonConverter<Variant>
     {
@@ -40,9 +39,9 @@ namespace Linguini.Serialization.Converters
         private static void WriteKey(Utf8JsonWriter writer, Variant value)
         {
             writer.WritePropertyName("key");
-            
+
             writer.WriteStartObject();
-            
+
             switch (value.Type)
             {
                 case VariantType.Identifier:
@@ -64,11 +63,12 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Reads and deserializes a <see cref="Variant"/> object from a JSON element using the specified <see cref="JsonSerializerOptions"/>.
+        ///     Reads and deserializes a <see cref="Variant" /> object from a JSON element using the specified
+        ///     <see cref="JsonSerializerOptions" />.
         /// </summary>
-        /// <param name="el">The JSON element containing the serialized data for a <see cref="Variant"/> object.</param>
-        /// <param name="options">The <see cref="JsonSerializerOptions"/> to control the deserialization process.</param>
-        /// <returns>A deserialized <see cref="Variant"/> object.</returns>
+        /// <param name="el">The JSON element containing the serialized data for a <see cref="Variant" /> object.</param>
+        /// <param name="options">The <see cref="JsonSerializerOptions" /> to control the deserialization process.</param>
+        /// <returns>A deserialized <see cref="Variant" /> object.</returns>
         /// <exception cref="JsonException">Thrown when the JSON data is invalid or required properties are missing.</exception>
         public static Variant ReadVariant(JsonElement el, JsonSerializerOptions options)
         {
@@ -98,7 +98,6 @@ namespace Linguini.Serialization.Converters
             }
 
             return new Variant(key.Value.Item1, key.Value.Item2, pattern, isDefault);
-
         }
 
         private static bool TryReadKey(JsonElement jsonKey, JsonSerializerOptions options,
@@ -119,6 +118,5 @@ namespace Linguini.Serialization.Converters
             key = null;
             return false;
         }
-
     }
 }

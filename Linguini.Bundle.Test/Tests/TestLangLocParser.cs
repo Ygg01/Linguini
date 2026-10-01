@@ -18,16 +18,14 @@ namespace Linguini.Bundle.Test.Tests
         {
             var result = LangLocParser.TryParse(
                 input,
-                out var _,
+                out _,
                 out var langLocId
             );
-            
+
             Assert.That(langLocId?.LanguageStr, Is.EqualTo(expectedLanguage));
             Assert.That(langLocId?.RegionStr, Is.EqualTo(expectedRegion));
             Assert.That(langLocId?.ScriptStr, Is.EqualTo(expectedScript));
             return result;
         }
     }
-    
-  
 }

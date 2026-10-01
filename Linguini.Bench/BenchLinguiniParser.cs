@@ -6,9 +6,8 @@ namespace Linguini.Bench
 {
     public class BenchLinguiniParser
     {
-        private string _largeFtl = "";
-
         [Params(1, 25, 50)] public int N;
+        private string _largeFtl = "";
 
         [GlobalSetup]
         public void Setup()
@@ -22,7 +21,7 @@ namespace Linguini.Bench
         public void BenchmarkParser()
         {
             LinguiniParser parser;
-            for (int i = 0; i < N; i++)
+            for (var i = 0; i < N; i++)
             {
                 parser = LinguiniParser.FromFragment(_largeFtl, "bench_ftl/large.ftl");
                 parser.Parse();

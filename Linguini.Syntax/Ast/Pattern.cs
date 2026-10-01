@@ -5,84 +5,86 @@ using System.Diagnostics.CodeAnalysis;
 namespace Linguini.Syntax.Ast
 {
     /// <summary>
-    /// Shows which position text element takes.
+    ///     Shows which position text element takes.
     /// </summary>
     public enum TextElementPosition : byte
     {
         /// <summary>
-        /// Element at start of the first line.
+        ///     Element at start of the first line.
         /// </summary>
         InitialLineStart,
-        
+
         /// <summary>
-        /// Text element at line start.
+        ///     Text element at line start.
         /// </summary>
         LineStart,
-        
+
         /// <summary>
-        /// Text element continues on line.
+        ///     Text element continues on line.
         /// </summary>
-        Continuation,
+        Continuation
     }
 
     /// <summary>
-    /// Determines how text elements ends.
+    ///     Determines how text elements ends.
     /// </summary>
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     public enum TextElementTermination : byte
     {
         /// <summary>
-        /// Newline text termination.
+        ///     Newline text termination.
         /// </summary>
         LF,
+
         /// <summary>
-        /// Carriage and Newline text termination.
+        ///     Carriage and Newline text termination.
         /// </summary>
         CRLF,
+
         /// <summary>
-        /// Placeable ends text.
+        ///     Placeable ends text.
         /// </summary>
         PlaceableStart,
-        
+
         /// <summary>
-        /// End of file text termination.
+        ///     End of file text termination.
         /// </summary>
         EndOfFile
     }
 
     /// <summary>
-    /// Determines if text element is blank or not.
+    ///     Determines if text element is blank or not.
     /// </summary>
     public enum TextElementType : byte
     {
         /// <summary>
-        /// Blank text element.
+        ///     Blank text element.
         /// </summary>
         Blank,
-        
+
         /// <summary>
-        /// Non-blank text element.
+        ///     Non-blank text element.
         /// </summary>
-        NonBlank,
+        NonBlank
     }
 
     /// <summary>
-    /// Common interface for Placeable text
+    ///     Common interface for Placeable text
     /// </summary>
-    /// <seealso cref="TextElementPlaceholder"/>
-    /// <seealso cref="Placeable"/>
+    /// <seealso cref="TextElementPlaceholder" />
+    /// <seealso cref="Placeable" />
     public interface IPatternElementPlaceholder
     {
     }
 
     /// <summary>
-    /// Interface for elements used in <see cref="Pattern"/>
+    ///     Interface for elements used in <see cref="Pattern" />
     /// </summary>
     public interface IPatternElement
     {
         /// <summary>
-        /// Provides a default instance of <see cref="PatternComparer"/> for comparing
-        /// two <see cref="Pattern"/> instances based on their equality logic.
+        ///     Provides a default instance of <see cref="PatternComparer" /> for comparing
+        ///     two <see cref="Pattern" /> instances based on their equality logic.
         /// </summary>
         public static PatternComparer PatternComparer = new();
     }
@@ -96,8 +98,8 @@ namespace Linguini.Syntax.Ast
             return (left, right) switch
             {
                 (TextLiteral l, TextLiteral r) => l.Equals(r),
-                (Placeable l, Placeable r) => l.Equals(r),
-                _ => false,
+                (Placeable l, Placeable r)     => l.Equals(r),
+                _                              => false
             };
         }
 
@@ -120,31 +122,7 @@ namespace Linguini.Syntax.Ast
     public class TextElementPlaceholder : IPatternElementPlaceholder
     {
         /// <summary>
-        /// Start of text slice
-        /// </summary>
-        public int Start { get; }
-
-        /// <summary>
-        /// End of text slice
-        /// </summary>
-        public int End { get; }
-        /// <summary>
-        /// Indent of Text element
-        /// </summary>
-        public int Indent { get; }
-        
-        /// <summary>
-        /// Text element position used in pattern processing
-        /// </summary>
-        public TextElementPosition Role { get; }
-        
-        /// <summary>
-        /// Boolean flag to add an EOL to text slice. It's used on Windows to make sure newlines are processed correctly
-        /// </summary>
-        public bool MissingEol { get; } 
-
-        /// <summary>
-        /// Constructs a text element placeholder
+        ///     Constructs a text element placeholder
         /// </summary>
         /// <param name="start">Start of text.</param>
         /// <param name="end">End of text.</param>
@@ -159,5 +137,30 @@ namespace Linguini.Syntax.Ast
             Role = role;
             MissingEol = missingEol;
         }
+
+        /// <summary>
+        ///     Start of text slice
+        /// </summary>
+        public int Start { get; }
+
+        /// <summary>
+        ///     End of text slice
+        /// </summary>
+        public int End { get; }
+
+        /// <summary>
+        ///     Indent of Text element
+        /// </summary>
+        public int Indent { get; }
+
+        /// <summary>
+        ///     Text element position used in pattern processing
+        /// </summary>
+        public TextElementPosition Role { get; }
+
+        /// <summary>
+        ///     Boolean flag to add an EOL to text slice. It's used on Windows to make sure newlines are processed correctly
+        /// </summary>
+        public bool MissingEol { get; }
     }
 }

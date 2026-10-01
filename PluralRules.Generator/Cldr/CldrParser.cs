@@ -5,555 +5,548 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace PluralRules.Generator.Cldr
+namespace PluralRules.Generator.Cldr;
+
+public struct CldrParser(string? input)
 {
-    public struct CldrParser(string? input)
+    private readonly string _input = input ?? "";
+    private int _pos = 0;
+
+    public Rule ParseRule()
     {
-        private readonly string _input = input ?? "";
-        private int _pos = 0;
+        var condition = ParseCondition();
+        var samples = TryParseSamples();
 
-        public Rule ParseRule()
-        {
-            var condition = ParseCondition();
-            var samples = TryParseSamples();
+        return new Rule(condition, samples);
+    }
 
-            return new Rule(condition, samples);
-        }
-
-        private Samples? TryParseSamples()
-        {
-            var integerSample = new List<SampleRange>();
-            var decimalSample = new List<SampleRange>();
-            SkipWhitespace();
-            if (TryConsume("@integer"))
-            {
-                SkipWhitespace();
-                integerSample = TryParseSampleList();
-            }
-
-            if (TryConsume("@decimal"))
-            {
-                SkipWhitespace();
-                decimalSample = TryParseSampleList();
-            }
-
-            if (decimalSample.Count == 0 && integerSample.Count == 0)
-            {
-                return null;
-            }
-
-            return new Samples(integerSample, decimalSample);
-        }
-
-        private List<SampleRange> TryParseSampleList()
-        {
-            var listSample = new List<SampleRange>();
-
-            while (TryParseSampleRange(out var sampleRange, listSample.Count > 0))
-            {
-                if (sampleRange == null)
-                {
-                    return listSample;
-                }
-
-                listSample.Add(sampleRange.Value);
-            }
-
-            TryConsume(',');
-            // We ignore the ellipsis in generation
-            TryConsume("...");
-            TryConsume('…');
-
-            return listSample;
-        }
-
-        private bool TryParseSampleRange(out SampleRange? o, bool isNotFirst)
+    private Samples? TryParseSamples()
+    {
+        var integerSample = new List<SampleRange>();
+        var decimalSample = new List<SampleRange>();
+        SkipWhitespace();
+        if (TryConsume("@integer"))
         {
             SkipWhitespace();
-            if (isNotFirst)
-            {
-                if (!TryConsume(','))
-                {
-                    o = null;
-                    return false;
-                }
+            integerSample = TryParseSampleList();
+        }
 
-                SkipWhitespace();
+        if (TryConsume("@decimal"))
+        {
+            SkipWhitespace();
+            decimalSample = TryParseSampleList();
+        }
+
+        if (decimalSample.Count == 0 && integerSample.Count == 0)
+        {
+            return null;
+        }
+
+        return new Samples(integerSample, decimalSample);
+    }
+
+    private List<SampleRange> TryParseSampleList()
+    {
+        var listSample = new List<SampleRange>();
+
+        while (TryParseSampleRange(out var sampleRange, listSample.Count > 0))
+        {
+            if (sampleRange == null)
+            {
+                return listSample;
             }
 
-            if (!TrySampleValue(out var endValue))
+            listSample.Add(sampleRange.Value);
+        }
+
+        TryConsume(',');
+        // We ignore the ellipsis in generation
+        TryConsume("...");
+        TryConsume('…');
+
+        return listSample;
+    }
+
+    private bool TryParseSampleRange(out SampleRange? o, bool isNotFirst)
+    {
+        SkipWhitespace();
+        if (isNotFirst)
+        {
+            if (!TryConsume(','))
             {
                 o = null;
                 return false;
             }
 
             SkipWhitespace();
-            if (!TryConsume('~'))
-            {
-                o = new SampleRange(endValue!.Value, null);
-                return true;
-            }
-
-            SkipWhitespace();
-            if (!TrySampleValue(out var upperVal))
-            {
-                o = null;
-                return false;
-            }
-
-            o = new SampleRange(endValue!.Value, upperVal);
-            return true;
         }
 
-        private bool TrySampleValue(out DecimalValue? value)
+        if (!TrySampleValue(out var endValue))
         {
-            var x = new StringBuilder();
-            if (!TryParseValueAsStr(out var preDot))
-            {
-                value = null;
-                return false;
-            }
-
-            x.Append(preDot);
-            if (TryConsume('.'))
-            {
-                if (!TryParseValueAsStr(out var postDot))
-                {
-                    value = null;
-                    return false;
-                }
-
-                x.Append('.');
-                x.Append(postDot);
-            }
-
-            if (!TryConsumeExp(x))
-            {
-                value = null;
-                return false;
-            }
-
-            var number = x.ToString();
-            if (number.Contains('e'))
-            {
-                number = Double.Parse(number).ToString(CultureInfo.InvariantCulture);
-            }
-
-            value = new DecimalValue(number);
-            return true;
-        }
-
-        private bool TryConsumeExp(StringBuilder x)
-        {
-            if (_pos + 1 <= _input.Length)
-            {
-                if (_input.AsMemory(_pos, 1).Span.IsOneOf('c', 'e'))
-                {
-                    _pos += 1;
-                    x.Append('e');
-
-                    if (TryParseDigitExp(out var digit))
-                    {
-                        x.Append(digit);
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        private bool TryParseDigitExp(out string val)
-        {
-            var startPos = _pos;
-            if (TryPeekCharSpan(out var startDigit)
-                && startDigit.IsDigitPos())
-            {
-                while (TryPeekCharSpan(out var span)
-                       && span.IsAsciiDigit())
-                {
-                    _pos += 1;
-                }
-
-                val = _input.Range(startPos, _pos);
-                return true;
-            }
-
-            val = "";
+            o = null;
             return false;
         }
 
-        private Condition ParseCondition()
+        SkipWhitespace();
+        if (!TryConsume('~'))
         {
-            var andConditions = new List<AndCondition>();
-            SkipWhitespace();
-            while (TryParseAndCondition(out var andCondition))
-            {
-                andConditions.Add(andCondition!.Value);
-                SkipWhitespace();
-                if (!TryConsume("or"))
-                {
-                    return new Condition(andConditions);
-                }
-
-                SkipWhitespace();
-            }
-
-            return new Condition(andConditions);
+            o = new SampleRange(endValue!.Value, null);
+            return true;
         }
 
-        private bool TryParseAndCondition(out AndCondition? conditions)
+        SkipWhitespace();
+        if (!TrySampleValue(out var upperVal))
         {
-            var relations = new List<Relation>();
-            SkipWhitespace();
-            while (ParseRelation(out var relation))
-            {
-                relations.Add(relation!.Value);
-                SkipWhitespace();
-                if (!TryConsume("and"))
-                {
-                    break;
-                }
-
-                SkipWhitespace();
-            }
-
-            conditions = relations.Count > 0 ? new AndCondition(relations) : null;
-            return conditions != null;
+            o = null;
+            return false;
         }
 
-        private bool ParseRelation(out Relation? relation)
+        o = new SampleRange(endValue!.Value, upperVal);
+        return true;
+    }
+
+    private bool TrySampleValue(out DecimalValue? value)
+    {
+        var x = new StringBuilder();
+        if (!TryParseValueAsStr(out var preDot))
         {
+            value = null;
+            return false;
+        }
+
+        x.Append(preDot);
+        if (TryConsume('.'))
+        {
+            if (!TryParseValueAsStr(out var postDot))
+            {
+                value = null;
+                return false;
+            }
+
+            x.Append('.');
+            x.Append(postDot);
+        }
+
+        if (!TryConsumeExp(x))
+        {
+            value = null;
+            return false;
+        }
+
+        var number = x.ToString();
+        if (number.Contains('e'))
+        {
+            number = double.Parse(number).ToString(CultureInfo.InvariantCulture);
+        }
+
+        value = new DecimalValue(number);
+        return true;
+    }
+
+    private bool TryConsumeExp(StringBuilder x)
+    {
+        if (_pos + 1 <= _input.Length)
+        {
+            if (_input.AsMemory(_pos, 1).Span.IsOneOf('c', 'e'))
+            {
+                _pos += 1;
+                x.Append('e');
+
+                if (TryParseDigitExp(out var digit))
+                {
+                    x.Append(digit);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private bool TryParseDigitExp(out string val)
+    {
+        var startPos = _pos;
+        if (TryPeekCharSpan(out var startDigit)
+            && startDigit.IsDigitPos())
+        {
+            while (TryPeekCharSpan(out var span)
+                   && span.IsAsciiDigit())
+                _pos += 1;
+
+            val = _input.Range(startPos, _pos);
+            return true;
+        }
+
+        val = "";
+        return false;
+    }
+
+    private Condition ParseCondition()
+    {
+        var andConditions = new List<AndCondition>();
+        SkipWhitespace();
+        while (TryParseAndCondition(out var andCondition))
+        {
+            andConditions.Add(andCondition!.Value);
             SkipWhitespace();
-            if (!TryParseExpr(out var expr))
+            if (!TryConsume("or"))
+            {
+                return new Condition(andConditions);
+            }
+
+            SkipWhitespace();
+        }
+
+        return new Condition(andConditions);
+    }
+
+    private bool TryParseAndCondition(out AndCondition? conditions)
+    {
+        var relations = new List<Relation>();
+        SkipWhitespace();
+        while (ParseRelation(out var relation))
+        {
+            relations.Add(relation!.Value);
+            SkipWhitespace();
+            if (!TryConsume("and"))
+            {
+                break;
+            }
+
+            SkipWhitespace();
+        }
+
+        conditions = relations.Count > 0 ? new AndCondition(relations) : null;
+        return conditions != null;
+    }
+
+    private bool ParseRelation(out Relation? relation)
+    {
+        SkipWhitespace();
+        if (!TryParseExpr(out var expr))
+        {
+            relation = null;
+            return false;
+        }
+
+        var list = new List<IRangeListItem>();
+        RelationType? type = null;
+        var negation = false;
+
+        SkipWhitespace();
+        if (TryConsume("is"))
+        {
+            type = RelationType.Is;
+            SkipWhitespace();
+        }
+
+        if (TryConsume("not"))
+        {
+            negation = true;
+            SkipWhitespace();
+        }
+
+        if (TryConsume("within"))
+        {
+            type = RelationType.Within;
+        }
+        else if (TryConsume("in"))
+        {
+            type = RelationType.In;
+        }
+        else if (TryConsume('='))
+        {
+            type = RelationType.Equal;
+        }
+        else if (TryConsume("!="))
+        {
+            negation = !negation;
+            type = RelationType.Equal;
+        }
+
+        SkipWhitespace();
+
+        if (type == RelationType.Is)
+        {
+            if (!TryParseValue(out var x))
             {
                 relation = null;
                 return false;
             }
 
-            var list = new List<IRangeListItem>();
-            RelationType? type = null;
-            var negation = false;
-
-            SkipWhitespace();
-            if (TryConsume("is"))
+            list.Add(x);
+        }
+        else
+        {
+            if (!TryParseRangeList(out list))
             {
-                type = RelationType.Is;
-                SkipWhitespace();
+                relation = null;
+                return false;
             }
-
-            if (TryConsume("not"))
-            {
-                negation = true;
-                SkipWhitespace();
-            }
-
-            if (TryConsume("within"))
-            {
-                type = RelationType.Within;
-            }
-            else if (TryConsume("in"))
-            {
-                type = RelationType.In;
-            }
-            else if (TryConsume('='))
-            {
-                type = RelationType.Equal;
-            }
-            else if (TryConsume("!="))
-            {
-                negation = !negation;
-                type = RelationType.Equal;
-            }
-
-            SkipWhitespace();
-
-            if (type == RelationType.Is)
-            {
-                if (!TryParseValue(out var x))
-                {
-                    relation = null;
-                    return false;
-                }
-
-                list.Add(x);
-            }
-            else
-            {
-                if (!TryParseRangeList(out list))
-                {
-                    relation = null;
-                    return false;
-                }
-            }
-
-            relation = new Relation(expr!.Value, type.GetOperator(negation), list);
-            return true;
         }
 
-        private bool TryParseRangeList(out List<IRangeListItem> list)
+        relation = new Relation(expr!.Value, type.GetOperator(negation), list);
+        return true;
+    }
+
+    private bool TryParseRangeList(out List<IRangeListItem> list)
+    {
+        list = new List<IRangeListItem>();
+        while (TryParseRangeItem(out var x, list.Count > 0)) list.Add(x!);
+
+        return true;
+    }
+
+    private bool TryParseRangeItem(out IRangeListItem? item, bool isNotFirst)
+    {
+        SkipWhitespace();
+        if (isNotFirst)
         {
-            list = new List<IRangeListItem>();
-            while (TryParseRangeItem(out var x, list.Count > 0))
-            {
-                list.Add(x!);
-            }
-
-            return true;
-        }
-
-        private bool TryParseRangeItem(out IRangeListItem? item, bool isNotFirst)
-        {
-            SkipWhitespace();
-            if (isNotFirst)
-            {
-                if (!TryConsume(","))
-                {
-                    item = null;
-                    return false;
-                }
-
-                SkipWhitespace();
-            }
-
-            if (!TryParseValue(out var start))
+            if (!TryConsume(","))
             {
                 item = null;
                 return false;
             }
 
             SkipWhitespace();
-            if (TryConsume(".."))
-            {
-                SkipWhitespace();
-                if (!TryParseValue(out var end))
-                {
-                    item = null;
-                    return false;
-                }
-
-                item = new RangeElem(start, end);
-                return true;
-            }
-
-            item = start;
-            return true;
         }
 
-        private bool TryParseExpr(out Expr? expr)
+        if (!TryParseValue(out var start))
+        {
+            item = null;
+            return false;
+        }
+
+        SkipWhitespace();
+        if (TryConsume(".."))
         {
             SkipWhitespace();
-            if (TryOperand(out var operand))
+            if (!TryParseValue(out var end))
             {
-                _pos += 1;
-
-                SkipWhitespace();
-
-                var modulus = ParseModulus();
-                expr = new Expr { Operand = operand!.Value, Modulus = modulus };
-                return true;
-            }
-
-            expr = null;
-            return false;
-        }
-
-        private DecimalValue? ParseModulus()
-        {
-            if (TryConsume("mod") || TryConsume('%'))
-            {
-                SkipWhitespace();
-                if (TryParseValue(out var val))
-                {
-                    return val;
-                }
-            }
-
-            return null;
-        }
-
-        private bool TryParseValue(out DecimalValue val)
-        {
-            var startPos = _pos;
-            while (TryPeekCharSpan(out var span)
-                   && span.IsAsciiDigit())
-            {
-                _pos += 1;
-            }
-
-            val = new DecimalValue(_input.Range(startPos, _pos));
-            return startPos != _pos;
-        }
-
-        private bool TryParseValueAsStr(out string val)
-        {
-            var startPos = _pos;
-            while (TryPeekCharSpan(out var span)
-                   && span.IsAsciiDigit())
-            {
-                _pos += 1;
-            }
-
-            val = _input.Range(startPos, _pos);
-            return startPos != _pos;
-        }
-
-
-        private bool TryPeekCharSpan(out ReadOnlySpan<char> span)
-        {
-            return _input.AsMemory().TryReadCharSpan(_pos, out span);
-        }
-
-        private bool TryOperand(out Operand? operand)
-        {
-            if (_pos < _input.Length)
-            {
-                var chr = _input[_pos];
-                operand = OperandExtension.FromChar(chr);
-                return operand != null;
-            }
-
-            operand = null;
-            return false;
-        }
-
-        private bool TryConsume(string consume)
-        {
-            if (_pos + consume.Length > _input.Length)
-            {
+                item = null;
                 return false;
             }
 
-            var span = _input.AsMemory(_pos, consume.Length).Span;
-            var areEqual = consume.Equals(span.ToString(), StringComparison.InvariantCulture);
-
-            if (areEqual)
-            {
-                _pos += consume.Length;
-            }
-
-            return areEqual;
-        }
-
-        private bool TryConsume(char consume)
-        {
-            if (_pos + 1 > _input.Length)
-            {
-                return false;
-            }
-
-            var span = _input.AsMemory(_pos, 1).Span;
-            var areEqual = span.IsEqual(consume);
-            if (areEqual)
-            {
-                _pos += 1;
-            }
-
-            return areEqual;
-        }
-
-        private void SkipWhitespace()
-        {
-            while (TryPeekCharSpan(out var span)
-                   && span.IsUnicodeWhiteSpace())
-            {
-                _pos += 1;
-            }
-        }
-    }
-
-    static class SpanUtil
-    {
-        private static int CharLength = 1;
-        private static readonly ReadOnlyMemory<char> Eof = ReadOnlyMemory<char>.Empty;
-
-        public static bool TryReadCharSpan(this ReadOnlyMemory<char> memory, int pos, out ReadOnlySpan<char> span)
-        {
-            span = Eof.Span;
-            if (pos + CharLength > memory.Length)
-            {
-                return false;
-            }
-
-            span = memory.Slice(pos, CharLength).Span;
+            item = new RangeElem(start, end);
             return true;
         }
 
-        public static bool IsUnicodeWhiteSpace(this ReadOnlySpan<char> charSpan)
-        {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var x = MemoryMarshal.GetReference(charSpan);
-            return IsInside(x, '\x09', '\x0D')
-                   || x is ' ' or '\u0085' or '\u200E' or '\u200F' or '\u2028' or '\u2029';
-        }
-
-        public static bool IsEqual(this ReadOnlySpan<char> charSpan, char c1)
-        {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            return MemoryMarshal.GetReference(charSpan) == c1;
-        }
-
-        public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2)
-        {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var x = MemoryMarshal.GetReference(charSpan);
-            return x == c1 || x == c2;
-        }
-
-
-        public static bool IsDigitPos(this ReadOnlySpan<char> charSpan)
-        {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var c = MemoryMarshal.GetReference(charSpan);
-            return IsInside(c, '1', '9');
-        }
-
-        public static bool IsAsciiDigit(this ReadOnlySpan<char> charSpan)
-        {
-            if (charSpan.Length != CharLength)
-            {
-                return false;
-            }
-
-            var c = MemoryMarshal.GetReference(charSpan);
-            return IsInside(c, '0', '9');
-        }
-
-        private static bool IsInside(char c, char min, char max) => (uint)(c - min) <= (uint)(max - min);
+        item = start;
+        return true;
     }
 
-    public static class StringExtensions
+    private bool TryParseExpr(out Expr? expr)
     {
-        public static string Range(this string input, int start, int end)
+        SkipWhitespace();
+        if (TryOperand(out var operand))
         {
-            return input.Substring(start, end - start);
+            _pos += 1;
+
+            SkipWhitespace();
+
+            var modulus = ParseModulus();
+            expr = new Expr { Operand = operand!.Value, Modulus = modulus };
+            return true;
         }
 
-        public static string FirstCharToUpper(this string input) =>
-            input switch
+        expr = null;
+        return false;
+    }
+
+    private DecimalValue? ParseModulus()
+    {
+        if (TryConsume("mod") || TryConsume('%'))
+        {
+            SkipWhitespace();
+            if (TryParseValue(out var val))
             {
-                null => throw new ArgumentNullException(nameof(input)),
-                "" => "",
-                _ => input.First().ToString().ToUpper() + input.Substring(1)
-            };
+                return val;
+            }
+        }
+
+        return null;
+    }
+
+    private bool TryParseValue(out DecimalValue val)
+    {
+        var startPos = _pos;
+        while (TryPeekCharSpan(out var span)
+               && span.IsAsciiDigit())
+            _pos += 1;
+
+        val = new DecimalValue(_input.Range(startPos, _pos));
+        return startPos != _pos;
+    }
+
+    private bool TryParseValueAsStr(out string val)
+    {
+        var startPos = _pos;
+        while (TryPeekCharSpan(out var span)
+               && span.IsAsciiDigit())
+            _pos += 1;
+
+        val = _input.Range(startPos, _pos);
+        return startPos != _pos;
+    }
+
+
+    private bool TryPeekCharSpan(out ReadOnlySpan<char> span)
+    {
+        return _input.AsMemory().TryReadCharSpan(_pos, out span);
+    }
+
+    private bool TryOperand(out Operand? operand)
+    {
+        if (_pos < _input.Length)
+        {
+            var chr = _input[_pos];
+            operand = OperandExtension.FromChar(chr);
+            return operand != null;
+        }
+
+        operand = null;
+        return false;
+    }
+
+    private bool TryConsume(string consume)
+    {
+        if (_pos + consume.Length > _input.Length)
+        {
+            return false;
+        }
+
+        var span = _input.AsMemory(_pos, consume.Length).Span;
+        var areEqual = consume.Equals(span.ToString(), StringComparison.InvariantCulture);
+
+        if (areEqual)
+        {
+            _pos += consume.Length;
+        }
+
+        return areEqual;
+    }
+
+    private bool TryConsume(char consume)
+    {
+        if (_pos + 1 > _input.Length)
+        {
+            return false;
+        }
+
+        var span = _input.AsMemory(_pos, 1).Span;
+        var areEqual = span.IsEqual(consume);
+        if (areEqual)
+        {
+            _pos += 1;
+        }
+
+        return areEqual;
+    }
+
+    private void SkipWhitespace()
+    {
+        while (TryPeekCharSpan(out var span)
+               && span.IsUnicodeWhiteSpace())
+            _pos += 1;
+    }
+}
+
+internal static class SpanUtil
+{
+    private static readonly int CharLength = 1;
+    private static readonly ReadOnlyMemory<char> Eof = ReadOnlyMemory<char>.Empty;
+
+    public static bool TryReadCharSpan(this ReadOnlyMemory<char> memory, int pos, out ReadOnlySpan<char> span)
+    {
+        span = Eof.Span;
+        if (pos + CharLength > memory.Length)
+        {
+            return false;
+        }
+
+        span = memory.Slice(pos, CharLength).Span;
+        return true;
+    }
+
+    public static bool IsUnicodeWhiteSpace(this ReadOnlySpan<char> charSpan)
+    {
+        if (charSpan.Length != CharLength)
+        {
+            return false;
+        }
+
+        var x = MemoryMarshal.GetReference(charSpan);
+        return IsInside(x, '\x09', '\x0D')
+               || x is ' ' or '\u0085' or '\u200E' or '\u200F' or '\u2028' or '\u2029';
+    }
+
+    public static bool IsEqual(this ReadOnlySpan<char> charSpan, char c1)
+    {
+        if (charSpan.Length != CharLength)
+        {
+            return false;
+        }
+
+        return MemoryMarshal.GetReference(charSpan) == c1;
+    }
+
+    public static bool IsOneOf(this ReadOnlySpan<char> charSpan, char c1, char c2)
+    {
+        if (charSpan.Length != CharLength)
+        {
+            return false;
+        }
+
+        var x = MemoryMarshal.GetReference(charSpan);
+        return x == c1 || x == c2;
+    }
+
+
+    public static bool IsDigitPos(this ReadOnlySpan<char> charSpan)
+    {
+        if (charSpan.Length != CharLength)
+        {
+            return false;
+        }
+
+        var c = MemoryMarshal.GetReference(charSpan);
+        return IsInside(c, '1', '9');
+    }
+
+    public static bool IsAsciiDigit(this ReadOnlySpan<char> charSpan)
+    {
+        if (charSpan.Length != CharLength)
+        {
+            return false;
+        }
+
+        var c = MemoryMarshal.GetReference(charSpan);
+        return IsInside(c, '0', '9');
+    }
+
+    private static bool IsInside(char c, char min, char max)
+    {
+        return (uint)(c - min) <= (uint)(max - min);
+    }
+}
+
+public static class StringExtensions
+{
+    public static string Range(this string input, int start, int end)
+    {
+        return input.Substring(start, end - start);
+    }
+
+    public static string FirstCharToUpper(this string input)
+    {
+        return input switch
+        {
+            null => throw new ArgumentNullException(nameof(input)),
+            ""   => "",
+            _    => input.First().ToString().ToUpper() + input.Substring(1)
+        };
     }
 }

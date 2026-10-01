@@ -7,7 +7,7 @@ namespace Linguini.Serialization.Converters
 
 {
     /// <summary>
-    /// A JSON converter responsible for serializing and deserializing objects of type <c>Junk</c>.
+    ///     A JSON converter responsible for serializing and deserializing objects of type <c>Junk</c>.
     /// </summary>
     public class JunkSerializer : JsonConverter<Junk>
     {
@@ -18,12 +18,12 @@ namespace Linguini.Serialization.Converters
         }
 
         /// <summary>
-        /// Processes a JSON element to deserialize an object of type <c>Junk</c>.
+        ///     Processes a JSON element to deserialize an object of type <c>Junk</c>.
         /// </summary>
         /// <param name="el">The JSON element to process and convert into a <c>Junk</c> object.</param>
         /// <returns>A <c>Junk</c> instance containing the deserialized data from the JSON element.</returns>
         /// <exception cref="JsonException">
-        /// Thrown when the JSON element does not have the required properties.
+        ///     Thrown when the JSON element does not have the required properties.
         /// </exception>
         public static Junk ProcessJunk(JsonElement el)
         {
@@ -31,7 +31,7 @@ namespace Linguini.Serialization.Converters
             {
                 throw new JsonException("Junk must have type");
             }
-            
+
 
             if (!el.TryGetProperty("content", out var content))
             {

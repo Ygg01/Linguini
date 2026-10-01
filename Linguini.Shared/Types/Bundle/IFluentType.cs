@@ -51,7 +51,7 @@
         private readonly string _error;
 
         /// <summary>
-        /// Default constructor.
+        ///     Default constructor.
         /// </summary>
         /// <param name="error">Error message string</param>
         public FluentErrType(string error = "")
@@ -70,7 +70,7 @@
         {
             return this;
         }
-        
+
 
         /// <summary>
         ///     Fluent representation of error is same in any culture

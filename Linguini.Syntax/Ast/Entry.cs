@@ -44,22 +44,29 @@ namespace Linguini.Syntax.Ast
             Errors = errors;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public virtual bool Equals(Resource? other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
 
             return Entries.SequenceEqual(other.Entries);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return HashCode.Combine(Entries);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override string ToString()
         {
             var sb = new StringBuilder("Resource (");
@@ -145,8 +152,16 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(AstMessage? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Identifier.Comparer.Equals(Id, other.Id) && Equals(Value, other.Value) &&
                    Attributes.SequenceEqual(other.Attributes, Attribute.Comparer) &&
                    Equals(InternalComment, other.InternalComment);
@@ -155,9 +170,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((AstMessage)obj);
         }
 
@@ -175,9 +202,9 @@ namespace Linguini.Syntax.Ast
     public class AstMessageBuilder
     {
         private readonly List<Attribute> _attributes;
+        private string? _comment;
         private Identifier _id;
         private Pattern? _pattern;
-        private string? _comment;
 
         internal AstMessageBuilder()
         {
@@ -248,7 +275,8 @@ namespace Linguini.Syntax.Ast
         public AstMessage Build()
         {
             return new AstMessage(_id, _pattern, _attributes, AstLocation.Empty,
-                new AstComment(CommentLevel.Comment, new() { _comment.AsMemory() }));
+                                  new AstComment(CommentLevel.Comment,
+                                                 new List<ReadOnlyMemory<char>> { _comment.AsMemory() }));
         }
     }
 
@@ -333,8 +361,16 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(AstTerm? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Identifier.Comparer.Equals(Id, other.Id) && Equals(Value, other.Value) &&
                    Attributes.SequenceEqual(other.Attributes, Attribute.Comparer) &&
                    Equals(InternalComment, other.InternalComment);
@@ -343,9 +379,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((AstTerm)obj);
         }
 
@@ -363,9 +411,9 @@ namespace Linguini.Syntax.Ast
     public class AstTermBuilder
     {
         private readonly List<Attribute> _attributes;
+        private AstComment? _comment;
         private Identifier _id;
         private Pattern _pattern;
-        private AstComment? _comment;
 
         internal AstTermBuilder()
         {
@@ -417,10 +465,10 @@ namespace Linguini.Syntax.Ast
         /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
         public AstTermBuilder SetComment(string comment)
         {
-            _comment = new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>>(){comment.AsMemory()});
+            _comment = new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { comment.AsMemory() });
             return this;
         }
-        
+
         /// <summary>
         ///     Assigns a comment to the term builder.
         /// </summary>
@@ -576,15 +624,34 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(AstComment? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            if (CommentLevel != other.CommentLevel) return false;
-            if (Content.Count != other.Content.Count) return false;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (CommentLevel != other.CommentLevel)
+            {
+                return false;
+            }
+
+            if (Content.Count != other.Content.Count)
+            {
+                return false;
+            }
+
             for (var i = 0; i < Content.Count; i++)
             {
                 var l = Content[i];
                 var r = other.Content[i];
-                if (!l.Span.SequenceEqual(r.Span)) return false;
+                if (!l.Span.SequenceEqual(r.Span))
+                {
+                    return false;
+                }
             }
 
             return true;
@@ -600,7 +667,10 @@ namespace Linguini.Syntax.Ast
             StringBuilder sb = new();
             for (var i = 0; i < Content.Count; i++)
             {
-                if (i > 0) sb.Append(lineEnd);
+                if (i > 0)
+                {
+                    sb.Append(lineEnd);
+                }
 
                 sb.Append(Content[i].Span.ToString());
             }
@@ -611,9 +681,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((AstComment)obj);
         }
 
@@ -675,8 +757,16 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(Junk? other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return Content.Span.SequenceEqual(other.Content.Span);
         }
 
@@ -692,9 +782,21 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((Junk)obj);
         }
 
