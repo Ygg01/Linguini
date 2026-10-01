@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -179,7 +178,7 @@ namespace Linguini.Serialization.Converters
         /// <param name="options">Serialization options that influence how the processing is performed.</param>
         /// <returns>A <see cref="NumberLiteral"/> object extracted from the input JSON element.</returns>
         /// <exception cref="JsonException">Thrown if the input JSON element is not a valid number literal.</exception>
-        public static NumberLiteral ProcessNumberLiteral(JsonElement el,
+        static NumberLiteral ProcessNumberLiteral(JsonElement el,
             JsonSerializerOptions options)
         {
             if (TryReadProcessNumberLiteral(el, options, out var numberLiteral))
