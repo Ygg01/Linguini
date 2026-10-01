@@ -63,6 +63,13 @@ public class SerializationErrorsTest
         ""type"": ""VariableReference"",
         ""attribute"": []
     }";
+    
+    private const string TermReference1 = @"{
+        ""type"": ""TermReference"",
+        ""id"":  {""type"": ""Identifier"", ""name"": ""msg-ref-id""},
+        ""attribute"": {""type"": ""Identifier"", ""name"": ""msg-ref""},
+        ""arguments"": 3
+    }";
 
     private const string CallArguments1 = @"{
         ""type"": ""CallArguments"",
@@ -228,8 +235,23 @@ public class SerializationErrorsTest
         },
         ""attributes"": {}
     }";
-
+    
     private const string AstTerm4 = @"{
+        ""type"": ""Term"",
+        ""id"": {""type"": ""Identifier"", ""name"": ""id-x"" },
+        ""value"": {  
+            ""type"": ""Pattern"",
+            ""elements"": [
+                {
+                    ""type"": ""TextLiteral"",
+                    ""value"": ""text""
+                }
+            ]
+        },
+        ""comment"": { ""type"": ""Comment"", ""unknown"": 2}
+    }";
+
+    private const string AstTerm5 = @"{
         ""type"": ""Term"",
         ""id"": {""type"": ""Identifier"", ""name"": ""id-x"" },
         ""value"": {  
@@ -245,8 +267,8 @@ public class SerializationErrorsTest
             {""type"": ""Attribute"", ""id"": {""type"": ""Identifier"", ""name"": ""attr-x"" }, ""value"": {} }
         ]
     }";
-
-    private const string AstTerm5 = @"{
+    
+    private const string AstTerm6 = @"{
         ""type"": ""Term"",
         ""id"": {""type"": ""Identifier"", ""name"": ""id-x"" },
         ""value"": {  
@@ -258,7 +280,26 @@ public class SerializationErrorsTest
                 }
             ]
         },
-        ""comment"": { ""type"": ""Comment"", ""unknown"": 2}
+        ""attributes"": [
+            {""type"": ""Attribute"", ""id"": {}, ""value"": {} }
+        ]
+    }";
+    
+    private const string AstTerm7 = @"{
+        ""type"": ""Term"",
+        ""id"": {""type"": ""Identifier"", ""name"": ""id-x"" },
+        ""value"": {  
+            ""type"": ""Pattern"",
+            ""elements"": [
+                {
+                    ""type"": ""TextLiteral"",
+                    ""value"": ""text""
+                }
+            ]
+        },
+        ""attributes"": [
+            {""type"": ""Identifier"", ""name"": ""Whoops"" }
+        ]
     }";
 
     private static IEnumerable<TestCaseData> ErrorRefExamples()
@@ -266,6 +307,10 @@ public class SerializationErrorsTest
         yield return new TestCaseData(MessageReference1, typeof(MessageReference)).Returns("JsonException");
         yield return new TestCaseData(DynamicReference1, typeof(DynamicReference)).Returns("JsonException");
         yield return new TestCaseData(VariableReference1, typeof(VariableReference)).Returns("JsonException");
+        yield return new TestCaseData("{}", typeof(TermReference)).Returns("JsonException");
+        yield return new TestCaseData(TermReference1, typeof(TermReference)).Returns("JsonException");
+        yield return new TestCaseData(VariableReference1, typeof(TermReference)).Returns("JsonException");
+
         // Function Reference test
         yield return new TestCaseData(Junk1, typeof(FunctionReference)).Returns("JsonException");
         yield return new TestCaseData(FunctionRef1, typeof(FunctionReference)).Returns("JsonException");
@@ -323,6 +368,9 @@ public class SerializationErrorsTest
         yield return new TestCaseData(AstTerm3, typeof(AstTerm)).Returns("JsonException");
         yield return new TestCaseData(AstTerm4, typeof(AstTerm)).Returns("JsonException");
         yield return new TestCaseData(AstTerm5, typeof(AstTerm)).Returns("JsonException");
+        yield return new TestCaseData(AstTerm6, typeof(AstTerm)).Returns("JsonException");
+        yield return new TestCaseData(AstTerm7, typeof(AstTerm)).Returns("JsonException");
+
         yield return new TestCaseData(AstMessage1, typeof(AstMessage)).Returns("JsonException");
         yield return new TestCaseData(AstMessage2, typeof(AstMessage)).Returns("JsonException");
         yield return new TestCaseData(Junk1, typeof(Junk)).Returns("JsonException");
@@ -335,7 +383,7 @@ public class SerializationErrorsTest
 
     private static IEnumerable<TestCaseData> SingleExamples()
     {
-        yield return new TestCaseData(AstTerm5, typeof(AstTerm)).Returns("JsonException");
+        yield return new TestCaseData(TermReference1, typeof(TermReference)).Returns("JsonException");
     }
 
     [Test]

@@ -86,6 +86,8 @@ public class SerializeAndDeserializeTest
             .AddNamedArg("y", 3);
         yield return callArgs.Build();
         yield return new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { "test".AsMemory() });
+        yield return new TermReference("dyn", "attr", new CallArgumentsBuilder());
+
         yield return new DynamicReference("dyn", "attr", new CallArgumentsBuilder()
                                               .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
                                               .AddNamedArg("y", 3));

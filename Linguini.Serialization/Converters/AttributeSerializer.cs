@@ -41,7 +41,6 @@ namespace Linguini.Serialization.Converters
                         case "id":
                             id = JsonSerializer.Deserialize<Identifier>(ref reader, options);
                             break;
-
                         case "value":
                             value = JsonSerializer.Deserialize<Pattern>(ref reader, options);
                             break;
