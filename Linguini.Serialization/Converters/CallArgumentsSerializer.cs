@@ -48,6 +48,7 @@ namespace Linguini.Serialization.Converters
             foreach (var namedArg in value.NamedArgs) JsonSerializer.Serialize(writer, namedArg, options);
 
             writer.WriteEndArray();
+            
             writer.WriteEndObject();
         }
 
@@ -83,10 +84,13 @@ namespace Linguini.Serialization.Converters
 
             var positionalArgs = new List<IInlineExpression>();
             foreach (var arg in positional.EnumerateArray())
+            {
                 if (ResourceSerializer.TryReadInlineExpression(arg, options, out var posArgs))
                 {
                     positionalArgs.Add(posArgs);
                 }
+            }
+                
 
             var namedArgs = new List<NamedArgument>();
             foreach (var arg in named.EnumerateArray())

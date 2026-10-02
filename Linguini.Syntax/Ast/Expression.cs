@@ -794,6 +794,12 @@ namespace Linguini.Syntax.Ast
     public readonly struct CallArguments : IEquatable<CallArguments>
     {
         /// <summary>
+        /// Better default for CallArguments
+        /// </summary>
+        public static readonly CallArguments Empty =
+            new(new List<IInlineExpression>(), new List<NamedArgument>());
+
+        /// <summary>
         ///     Represents a collection of positional arguments passed to a function or term call in Fluent syntax.
         ///     Each positional argument is an instance of <see cref="IInlineExpression" />, like a <see cref="NumberLiteral" /> or
         ///     <see cref="TextLiteral" />

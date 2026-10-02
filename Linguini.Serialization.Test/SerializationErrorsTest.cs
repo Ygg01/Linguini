@@ -174,6 +174,18 @@ public class SerializationErrorsTest
         ""elements"": {}
     }";
     
+    private const string Pattern5 = @"{
+        ""type"": ""Pattern"",
+        ""elements"": [
+            {
+                ""type"": ""NotPlaceable"",
+                ""expression_not"": [
+                    {""type"": ""Junk""}
+                ]
+            }
+        ]
+    }";
+    
     private const string Identifier1 = @"{
         ""type"": ""Identifier"",
         ""unknown"": null
@@ -386,6 +398,7 @@ public class SerializationErrorsTest
         yield return new TestCaseData(Pattern2, typeof(Pattern)).Returns("JsonException");
         yield return new TestCaseData(Pattern3, typeof(Pattern)).Returns("JsonException");
         yield return new TestCaseData(Pattern4, typeof(Pattern)).Returns("JsonException");
+        yield return new TestCaseData(Pattern5, typeof(Pattern)).Returns("JsonException");
 
         
         yield return new TestCaseData("[]", typeof(Identifier)).Returns("JsonException");
@@ -449,7 +462,7 @@ public class SerializationErrorsTest
     
     static IEnumerable<TestCaseData> SingleExamples()
     {
-        yield return new TestCaseData(AstMessage3, typeof(AstMessage)).Returns("JsonException");
+        yield return new TestCaseData(Pattern5, typeof(Pattern)).Returns("JsonException");
     }
     
     [Test]

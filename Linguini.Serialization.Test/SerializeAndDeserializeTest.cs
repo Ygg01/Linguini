@@ -86,6 +86,9 @@ public class SerializeAndDeserializeTest
             .AddNamedArg("y", 3);
         yield return callArgs.Build();
         yield return new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { "test".AsMemory() });
+        yield return new AstComment(CommentLevel.GroupComment, new List<ReadOnlyMemory<char>> { "test".AsMemory() });
+        yield return new AstComment(CommentLevel.ResourceComment, new List<ReadOnlyMemory<char>> { "test".AsMemory() });
+
         yield return new TermReference("dyn", "attr", new CallArgumentsBuilder());
 
         yield return new DynamicReference("dyn", "attr", new CallArgumentsBuilder()
@@ -116,6 +119,7 @@ public class SerializeAndDeserializeTest
         yield return new Resource(
             new List<IEntry>
             {
+                new AstComment(CommentLevel.ResourceComment, new List<ReadOnlyMemory<char>> { "test3".AsMemory() }),
                 AstTermBuilder.Builder("id").SetPattern(new PatternBuilder("test")).Build(),
                 new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { "test2".AsMemory() }),
                 new AstComment(CommentLevel.GroupComment, new List<ReadOnlyMemory<char>> { "test3".AsMemory() }),
@@ -123,7 +127,23 @@ public class SerializeAndDeserializeTest
                 AstMessageBuilder.Builder("message").SetPattern(new PatternBuilder("xyz")).Build()
             },
             new List<ParseError>());
-
+        var inlineExpressionBuilder = InlineExpressionBuilder
+            .CreateFunctionReference("x", new CallArgumentsBuilder()
+                                         .AddPositionalArg("e"));
+        yield return new Resource(
+            new List<IEntry>
+            {
+                AstMessageBuilder.Builder("message")
+                    .SetPattern(new PatternBuilder()
+                                    .AddNumberLiteral(3.0)
+                                    .AddPlaceable(PlaceableBuilder.InlineExpression(inlineExpressionBuilder).Build())
+                                    .AddFunctionReference("COUNT")
+                                    .AddTermReference("ref-term")
+                                    .AddDynamicReference("dyn-rf")
+                    )
+                    .Build()
+            },
+            new List<ParseError>());
         yield return new Junk("Test".AsMemory());
         yield return AstTermBuilder.Builder("z")
             .SetPattern(new PatternBuilder("x"))

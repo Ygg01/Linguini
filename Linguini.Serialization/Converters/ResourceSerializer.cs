@@ -175,11 +175,11 @@ namespace Linguini.Serialization.Converters
         /// <param name="options">Serialization options that influence how the processing is performed.</param>
         /// <returns>A <see cref="NumberLiteral" /> object extracted from the input JSON element.</returns>
         /// <exception cref="JsonException">Thrown if the input JSON element is not a valid number literal.</exception>
-        static NumberLiteral ProcessNumberLiteral(JsonElement el,
+        private static NumberLiteral ProcessNumberLiteral(JsonElement el,
             JsonSerializerOptions options)
         {
-            return TryReadProcessNumberLiteral(el, options, out var numberLiteral) 
-                ? numberLiteral 
+            return TryReadProcessNumberLiteral(el, options, out var numberLiteral)
+                ? numberLiteral
                 : throw new JsonException("Expected value to be a valid number");
         }
 
@@ -256,7 +256,8 @@ namespace Linguini.Serialization.Converters
                 "NumberLiteral"     => ProcessNumberLiteral(el, options),
                 "Placeable"         => PlaceableSerializer.ProcessPlaceable(el, options),
                 "TermReference"     => TermReferenceSerializer.ProcessTermReference(el, options),
-                "TextLiteral"       => ProcessTextLiteral(el, options),
+                "StringLiteral" or "TextElement"
+                    or "TextLiteral" => ProcessTextLiteral(el, options),
                 "VariableReference" => VariableReferenceSerializer.ProcessVariableReference(el, options),
                 _                   => null
             };

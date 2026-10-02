@@ -397,9 +397,9 @@ namespace Linguini.Syntax.Ast
         /// <param name="functionName">The name of the function reference.</param>
         /// <param name="funcArgs">The arguments of the function reference.</param>
         /// <returns>A <see cref="PatternBuilder" /> instance with the added function reference.</returns>
-        public PatternBuilder AddFunctionReference(string functionName, CallArguments funcArgs = default)
+        public PatternBuilder AddFunctionReference(string functionName, CallArguments? funcArgs = null)
         {
-            _patternElements.Add(new Placeable(new FunctionReference(functionName, funcArgs)));
+            _patternElements.Add(new Placeable(new FunctionReference(functionName, funcArgs ?? CallArguments.Empty)));
             return this;
         }
 
