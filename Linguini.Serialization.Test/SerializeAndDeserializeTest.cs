@@ -105,7 +105,11 @@ public class SerializeAndDeserializeTest
                                                .Build()
         );
         yield return new Identifier("test");
-        yield return new NamedArgument("test", InlineExpressionBuilder.CreateDynamicReference("x", "y").Build());
+        yield return new NamedArgument("arg1", InlineExpressionBuilder.CreateDynamicReference("x", "y").Build());
+        yield return new NamedArgument("arg2", InlineExpressionBuilder.CreateTermReference("term", "ref").Build());
+        yield return new NamedArgument("arg3", InlineExpressionBuilder.CreateFunctionReference("term", new CallArgumentsBuilder()).Build());
+        yield return new NamedArgument("arg4", InlineExpressionBuilder.CreatePlaceable(new Placeable(new TextLiteral("id"))).Build());
+        yield return new NamedArgument("arg5", InlineExpressionBuilder.CreateDynamicReference("x", "y").Build());
         yield return new MessageReference("message", "attribute");
         yield return new PatternBuilder("text ").AddMessage("x").AddText(" more text").Build();
         yield return new SelectExpressionBuilder(new VariableReference("x"))
