@@ -22,7 +22,7 @@ namespace Linguini.Serialization.Converters
                 throw new JsonException();
             }
 
-            var builder = new PatternBuilder();
+            var builder = Pattern.Builder();
             while (reader.Read())
             {
                 if (reader.TokenType == JsonTokenType.EndObject)
@@ -57,7 +57,7 @@ namespace Linguini.Serialization.Converters
             return builder.Build();
         }
 
-        private static void AddElements(ref Utf8JsonReader reader, PatternBuilder builder,
+        private static void AddElements(ref Utf8JsonReader reader, Pattern.PatternBuilder builder,
             JsonSerializerOptions options)
         {
             if (reader.TokenType != JsonTokenType.StartArray)
@@ -143,7 +143,7 @@ namespace Linguini.Serialization.Converters
         ///     When this method returns <c>true</c>, contains the deserialized <see cref="Pattern" /> object,
         ///     if the deserialization is successful; otherwise, null.
         /// </param>
-        /// <param name="error">Errors message that can be displayed if return value is <c>false</c>.</param>
+        /// <param name="error">Error message that can be displayed if the return value is <c>false</c>.</param>
         /// <returns>
         ///     <c>true</c> if the JSON element was successfully deserialized into a <see cref="Pattern" /> object;
         ///     otherwise, <c>false</c>.

@@ -230,11 +230,22 @@ namespace Linguini.Syntax.Ast
         /// <summary>
         ///     Assigns a <see cref="Pattern" /> to the message builder.
         /// </summary>
-        /// <param name="patternBuilder">The <see cref="PatternBuilder" /> to be associated with this message builder.</param>
+        /// <param name="patternBuilder">The <see cref="Pattern.PatternBuilder" /> to be associated with this message builder.</param>
         /// <returns>The current instance of <see cref="AstMessageBuilder" /> to allow for method chaining.</returns>
-        public AstMessageBuilder SetPattern(PatternBuilder patternBuilder)
+        public AstMessageBuilder SetPattern(Pattern.PatternBuilder patternBuilder)
         {
             _pattern = patternBuilder.Build();
+            return this;
+        }
+        
+        /// <summary>
+        ///     Assigns a <see cref="Pattern" /> to the message builder.
+        /// </summary>
+        /// <param name="pattern">The <see cref="Pattern" /> to be associated with this message builder.</param>
+        /// <returns>The current instance of <see cref="AstMessageBuilder" /> to allow for method chaining.</returns>
+        public AstMessageBuilder SetPattern(Pattern pattern)
+        {
+            _pattern = pattern;
             return this;
         }
 
@@ -439,9 +450,9 @@ namespace Linguini.Syntax.Ast
         /// <summary>
         ///     Assigns a <see cref="Pattern" /> to the term builder.
         /// </summary>
-        /// <param name="patternBuilder">The <see cref="PatternBuilder" /> to be associated with this term builder.</param>
+        /// <param name="patternBuilder">The <see cref="Pattern.PatternBuilder" /> to be associated with this term builder.</param>
         /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
-        public AstTermBuilder SetPattern(PatternBuilder patternBuilder)
+        public AstTermBuilder SetPattern(Pattern.PatternBuilder patternBuilder)
         {
             _pattern = patternBuilder.Build();
             return this;

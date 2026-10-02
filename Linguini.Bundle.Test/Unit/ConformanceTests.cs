@@ -39,14 +39,14 @@ term = term
         [TestCaseSource(nameof(AllBundles))]
         public void FormatPattern(IReadBundle bundle)
         {
-            var astMessage = AstMessageBuilder.Builder("term").SetPattern(new PatternBuilder("term")).Build();
+            var astMessage = AstMessageBuilder.Builder("term").SetPattern(Pattern.Builder().AddText("term")).Build();
             // Pattern formatting
             var pattern = bundle.FormatPattern(astMessage.Value, null, out var err);
             Assert.That(err, Is.Null);
             Assert.That(pattern, Is.EqualTo("term"));
 
             // Check negative case
-            var nonExistentPattern = new PatternBuilder().AddMessage("nonExistent").Build();
+            var nonExistentPattern = Pattern.Builder().AddMessage("nonExistent").Build();
             var nonExistentMessage = bundle.FormatPattern(nonExistentPattern, null, out err);
             Assert.That(nonExistentMessage, Is.EqualTo("{nonExistent}"));
             Assert.That(err, Is.Not.Null);
@@ -59,13 +59,13 @@ term = term
         public void FormatPatternErrRef(IReadBundle bundle)
         {
             IList<FluentError>? errors = null;
-            var astMessage = AstMessageBuilder.Builder("term").SetPattern(new PatternBuilder("term")).Build();
+            var astMessage = AstMessageBuilder.Builder("term").SetPattern(Pattern.Builder().AddText("term")).Build();
             var formatted = bundle.FormatPatternErrRef(astMessage.Value, null, ref errors);
             Assert.That(errors, Is.Null);
             Assert.That(formatted, Is.EqualTo("term"));
 
             // Check negative case
-            var pattern = new PatternBuilder().AddMessage("nonExistent").Build();
+            var pattern = Pattern.Builder().AddMessage("nonExistent").Build();
             var message = bundle.FormatPatternErrRef(pattern, null, ref errors);
             Assert.That(errors, Is.Not.Null);
             Assert.That(message, Is.EqualTo("{nonExistent}"));
@@ -141,13 +141,13 @@ term = term
         public void GetPatternUnchecked(IReadBundle bundle)
         {
             IList<FluentError>? errors = null;
-            var pattern = new PatternBuilder().AddMessage("term").Build();
+            var pattern = Pattern.Builder().AddMessage("term").Build();
             var formatted = bundle.GetPatternUnchecked(pattern, null);
             Assert.That(errors, Is.Null);
             Assert.That(formatted, Is.EqualTo("term"));
 
             // Check negative case
-            var nonExistent = new PatternBuilder().AddMessage("nonExistent").Build();
+            var nonExistent = Pattern.Builder().AddMessage("nonExistent").Build();
             Assert.Throws<LinguiniException>(() => bundle.GetPatternUnchecked(nonExistent, null));
         }
 
@@ -160,14 +160,14 @@ term = term
         [TestCaseSource(nameof(AllBundles))]
         public void TryGetPattern(IReadBundle bundle)
         {
-            var pattern = new PatternBuilder("term").Build();
+            var pattern = Pattern.Builder().AddText("term").Build();
             var result = bundle.TryGetPattern(pattern, null, out IList<FluentError>? errors1, out var formattedMessage);
             Assert.That(result, Is.True);
             Assert.That(formattedMessage, Is.EqualTo("term"));
             Assert.That(errors1, Is.Null);
 
             // Check negative case
-            var nonExistent = new PatternBuilder().AddMessage("nonExistent").Build();
+            var nonExistent = Pattern.Builder().AddMessage("nonExistent").Build();
             var wrong = bundle.TryGetPattern(nonExistent, null, out var formattedMessage2,
                                              out IList<FluentError>? errors2);
             Assert.That(wrong, Is.False);

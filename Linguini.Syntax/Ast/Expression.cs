@@ -1258,14 +1258,14 @@ namespace Linguini.Syntax.Ast
 
 
         /// <inheritdoc />
-        public IAddVariant AddVariant(string selector, PatternBuilder patternBuilder)
+        public IAddVariant AddVariant(string selector, Pattern.PatternBuilder patternBuilder)
         {
             _variants.Add(new Variant(selector, patternBuilder));
             return this;
         }
 
         /// <inheritdoc />
-        public IAddVariant AddVariant(float selector, PatternBuilder patternBuilder)
+        public IAddVariant AddVariant(float selector, Pattern.PatternBuilder patternBuilder)
         {
             _variants.Add(new Variant(selector, patternBuilder));
             return this;
@@ -1298,20 +1298,20 @@ namespace Linguini.Syntax.Ast
     public interface IAddVariant
     {
         /// <summary>
-        ///     Adds a textual selector to a <see cref="PatternBuilder" />
+        ///     Adds a textual selector to a <see cref="Pattern.PatternBuilder" />
         /// </summary>
         /// <param name="selector">Text used in selector.</param>
         /// <param name="patternBuilder">Pattern to which the selected builder will resolve.</param>
         /// <returns>A <see cref="SelectExpressionBuilder" /> with added variant.</returns>
-        public IAddVariant AddVariant(string selector, PatternBuilder patternBuilder);
+        public IAddVariant AddVariant(string selector, Pattern.PatternBuilder patternBuilder);
 
         /// <summary>
-        ///     Adds a numerical selector to a <see cref="PatternBuilder" />
+        ///     Adds a numerical selector to a <see cref="Pattern.PatternBuilder" />
         /// </summary>
         /// <param name="selector">Float used in selector.</param>
         /// <param name="patternBuilder">Pattern to which the selected builder will resolve.</param>
         /// <returns>A <see cref="SelectExpressionBuilder" /> with added variant.</returns>
-        public IAddVariant AddVariant(float selector, PatternBuilder patternBuilder);
+        public IAddVariant AddVariant(float selector, Pattern.PatternBuilder patternBuilder);
 
         /// <summary>
         ///     Sets the default selector to a given position.
@@ -1400,11 +1400,11 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        ///     Constructs a string keyed <c>Variant</c> with a given <see cref="PatternBuilder" /> as value.
+        ///     Constructs a string keyed <c>Variant</c> with a given <see cref="Pattern.PatternBuilder" /> as value.
         /// </summary>
         /// <param name="key">string used as a key.</param>
-        /// <param name="builder"><see cref="PatternBuilder" /> that represents value.</param>
-        public Variant(string key, PatternBuilder builder)
+        /// <param name="builder"><see cref="Pattern.PatternBuilder" /> that represents value.</param>
+        public Variant(string key, Pattern.PatternBuilder builder)
         {
             Type = VariantType.Identifier;
             Key = key.AsMemory();
@@ -1414,11 +1414,11 @@ namespace Linguini.Syntax.Ast
 
 
         /// <summary>
-        ///     Constructs a float keyed <c>Variant</c> with a given <see cref="PatternBuilder" /> as value.
+        ///     Constructs a float keyed <c>Variant</c> with a given <see cref="Pattern.PatternBuilder" /> as value.
         /// </summary>
         /// <param name="key">number used as a key.</param>
-        /// <param name="builder"><see cref="PatternBuilder" /> that represents value.</param>
-        public Variant(float key, PatternBuilder builder)
+        /// <param name="builder"><see cref="Pattern.PatternBuilder" /> that represents value.</param>
+        public Variant(float key, Pattern.PatternBuilder builder)
         {
             Type = VariantType.NumberLiteral;
             Key = key.ToString(CultureInfo.InvariantCulture).AsMemory();
@@ -1478,7 +1478,7 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return HashCode.Combine((int)Type, Key, InternalDefault, InternalValue);
+            return HashCode.Combine((int)Type, Key, InternalDefault, InternalValue.GetHashCode());
         }
     }
 }

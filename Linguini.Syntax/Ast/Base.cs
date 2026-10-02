@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 // ReSharper disable ClassNeverInstantiated.Global
@@ -71,11 +72,11 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        ///     Constructs an attribute from a <see cref="string" /> and a <see cref="PatternBuilder" />.
+        ///     Constructs an attribute from a <see cref="string" /> and a <see cref="Pattern.PatternBuilder" />.
         /// </summary>
         /// <param name="id">string identifier of the attribute</param>
-        /// <param name="builder"><see cref="PatternBuilder" /> that can be used to create a pattern programatically.</param>
-        public Attribute(Identifier id, PatternBuilder builder)
+        /// <param name="builder"><see cref="Pattern.PatternBuilder" /> that can be used to create a pattern programatically.</param>
+        public Attribute(Identifier id, Pattern.PatternBuilder builder)
         {
             Id = id;
             Value = builder.Build();
@@ -115,14 +116,14 @@ namespace Linguini.Syntax.Ast
         ///     The string identifier used to initialize the <see cref="Identifier" /> of the <see cref="Attribute" />
         ///     .
         /// </param>
-        /// <param name="patternBuilder">
-        ///     The <see cref="PatternBuilder" /> used to construct the <see cref="Pattern" /> of the
+        /// <param name="pattern">
+        ///     The <see cref="Pattern" /> used to construct the <see cref="Pattern" /> of the
         ///     <see cref="Attribute" />.
         /// </param>
         /// <returns>A newly constructed <see cref="Attribute" /> instance.</returns>
-        public static Attribute From(string id, PatternBuilder patternBuilder)
+        public static Attribute From(Identifier id, Pattern pattern)
         {
-            return new Attribute(new Identifier(id), patternBuilder.Build());
+            return new Attribute(id, pattern);
         }
 
         /// <inheritdoc />
@@ -215,6 +216,50 @@ namespace Linguini.Syntax.Ast
         public readonly List<IPatternElement> Elements;
 
         /// <summary>
+        /// Provides a builder instance for constructing <see cref="Pattern" /> objects.
+        /// </summary>
+        /// <returns>A new instance of <see cref="Pattern.PatternBuilder" /> for building
+        /// <see cref="Pattern" /> objects.</returns>
+        public static PatternBuilder Builder() => new();
+
+        /// <summary>
+        /// Constructs a <see cref="Pattern" /> instance from a string literal by wrapping the literal within a <see cref="TextLiteral" />.
+        /// </summary>
+        /// <param name="textLiteral">The string literal to include as a <see cref="TextLiteral" /> in the pattern</param>
+        /// <returns>A new <see cref="Pattern" /> instance containing the given string literal as its single element</returns>
+        public static Pattern From(string textLiteral)
+        {
+            var pattern = new Pattern();
+            pattern.Elements.Add(new TextLiteral(textLiteral));
+            return pattern;
+        }
+        
+        /// <summary>
+        /// Constructs a <see cref="Pattern" /> instance from a number literal by wrapping the literal within a <see cref="NumberLiteral" />.
+        /// </summary>
+        /// <param name="numberLiteral">The string literal to include as a <see cref="NumberLiteral" /> in the pattern</param>
+        /// <returns>A new <see cref="Pattern" /> instance containing the given number literal as its single element</returns>
+        public static Pattern From(double numberLiteral)
+        {
+            var pattern = new Pattern();
+            pattern.Elements.Add(new Placeable(new NumberLiteral(numberLiteral)));
+            return pattern;
+        }
+        
+        /// <summary>
+        /// Constructs a <see cref="Pattern" /> instance from a number literal by wrapping the literal within a <see cref="NumberLiteral" />.
+        /// </summary>
+        /// <param name="numberLiteral">The string literal to include as a <see cref="NumberLiteral" /> in the pattern</param>
+        /// <returns>A new <see cref="Pattern" /> instance containing the given number literal as its single element</returns>
+        public static Pattern From(int numberLiteral)
+        {
+            var pattern = new Pattern();
+            var intStr = numberLiteral.ToString(CultureInfo.InvariantCulture).AsMemory();
+            pattern.Elements.Add(new Placeable(new NumberLiteral(intStr)));
+            return pattern;
+        }
+        
+        /// <summary>
         ///     Basic constructor that takes a list of <see cref="IPatternElement" /> elements.
         /// </summary>
         public Pattern(List<IPatternElement> elements)
@@ -287,184 +332,186 @@ namespace Linguini.Syntax.Ast
         {
             return Elements.GetHashCode();
         }
-    }
-
-    /// <summary>
-    ///     Builder for <see cref="Pattern" />. Used to construct Patterns programmatically.
-    /// </summary>
-    public class PatternBuilder
-    {
-        private readonly List<IPatternElement> _patternElements = new();
 
         /// <summary>
-        ///     Default constructor.
+        ///     Builder for <see cref="Pattern" />. Used to construct Patterns programmatically.
         /// </summary>
-        public PatternBuilder()
+        public sealed class PatternBuilder
         {
-        }
+            private readonly List<IPatternElement> _patternElements = new();
 
-        /// <summary>
-        ///     Simple constructor that creates a <see cref="Pattern" /> with <see cref="TextLiteral" />.
-        /// </summary>
-        public PatternBuilder(string text)
-        {
-            _patternElements.Add(new TextLiteral(text));
-        }
+            /// <summary>
+            ///     Default constructor.
+            /// </summary>
+            internal PatternBuilder()
+            {
+            }
 
-        /// <summary>
-        ///     Simple constructor that creates a <see cref="Pattern" /> with <see cref="NumberLiteral" />.
-        /// </summary>
-        public PatternBuilder(float number)
-        {
-            _patternElements.Add(new Placeable(new NumberLiteral(number)));
-        }
+            /// <summary>
+            ///     Simple constructor that creates a <see cref="Pattern" /> with <see cref="TextLiteral" />.
+            /// </summary>
+            public PatternBuilder(string text)
+            {
+                _patternElements.Add(new TextLiteral(text));
+            }
 
-        /// <summary>
-        ///     Adds <c>textLiteral</c> to the pattern.
-        /// </summary>
-        /// <param name="textLiteral">string to be converted to <see cref="TextLiteral" /></param>
-        /// <returns><see cref="PatternBuilder" /> instance with the added <see cref="TextLiteral" />.</returns>
-        public PatternBuilder AddText(string textLiteral)
-        {
-            _patternElements.Add(new TextLiteral(textLiteral));
-            return this;
-        }
+            /// <summary>
+            ///     Simple constructor that creates a <see cref="Pattern" /> with <see cref="NumberLiteral" />.
+            /// </summary>
+            public PatternBuilder(float number)
+            {
+                _patternElements.Add(new Placeable(new NumberLiteral(number)));
+            }
 
-        /// <summary>
-        ///     Adds <c>number</c> to the pattern.
-        /// </summary>
-        /// <param name="number">string to be converted to <see cref="NumberLiteral" /></param>
-        /// <returns><see cref="PatternBuilder" /> instance with the added <see cref="NumberLiteral" />.</returns>
-        public PatternBuilder AddNumberLiteral(float number)
-        {
-            _patternElements.Add(new Placeable(new NumberLiteral(number)));
-            return this;
-        }
+            /// <summary>
+            ///     Adds <c>textLiteral</c> to the pattern.
+            /// </summary>
+            /// <param name="textLiteral">string to be converted to <see cref="TextLiteral" /></param>
+            /// <returns><see cref="PatternBuilder" /> instance with the added <see cref="TextLiteral" />.</returns>
+            public PatternBuilder AddText(string textLiteral)
+            {
+                _patternElements.Add(new TextLiteral(textLiteral));
+                return this;
+            }
 
-        /// <summary>
-        ///     Adds <c>number</c> to the pattern builder.
-        /// </summary>
-        /// <param name="number">string to be converted to <see cref="NumberLiteral" /></param>
-        /// <returns><see cref="PatternBuilder" /> instance with the added <see cref="NumberLiteral" />.</returns>
-        public PatternBuilder AddNumberLiteral(double number)
-        {
-            _patternElements.Add(new Placeable(new NumberLiteral(number)));
-            return this;
-        }
+            /// <summary>
+            ///     Adds <c>number</c> to the pattern.
+            /// </summary>
+            /// <param name="number">string to be converted to <see cref="NumberLiteral" /></param>
+            /// <returns><see cref="PatternBuilder" /> instance with the added <see cref="NumberLiteral" />.</returns>
+            public PatternBuilder AddNumberLiteral(float number)
+            {
+                _patternElements.Add(new Placeable(new NumberLiteral(number)));
+                return this;
+            }
 
-        /// <summary>
-        ///     Adds a message reference to the pattern builder.
-        /// </summary>
-        /// <param name="id">The identifier of the message to be referenced.</param>
-        /// <param name="attribute">The optional attribute of the message to be referenced.</param>
-        /// <returns>A <see cref="PatternBuilder" /> instance with the added message reference.</returns>
-        public PatternBuilder AddMessage(Identifier id, Identifier? attribute = null)
-        {
-            _patternElements.Add(new Placeable(new MessageReference(id, attribute)));
-            return this;
-        }
+            /// <summary>
+            ///     Adds <c>number</c> to the pattern builder.
+            /// </summary>
+            /// <param name="number">string to be converted to <see cref="NumberLiteral" /></param>
+            /// <returns><see cref="PatternBuilder" /> instance with the added <see cref="NumberLiteral" />.</returns>
+            public PatternBuilder AddNumberLiteral(double number)
+            {
+                _patternElements.Add(new Placeable(new NumberLiteral(number)));
+                return this;
+            }
 
-        /// <summary>
-        ///     Adds a term reference to the pattern builder.
-        /// </summary>
-        /// <param name="id">The identifier of the term to be referenced.</param>
-        /// <param name="attribute">The optional attribute of the message to be referenced.</param>
-        /// <param name="callArguments">The optional call arguments for a term.</param>
-        /// <returns>A <see cref="PatternBuilder" /> instance with the added term reference.</returns>
-        public PatternBuilder AddTermReference(Identifier id, Identifier? attribute = null, CallArguments? callArguments = null)
-        {
-            _patternElements.Add(new Placeable(new TermReference(id, attribute, callArguments)));
-            return this;
-        }
+            /// <summary>
+            ///     Adds a message reference to the pattern builder.
+            /// </summary>
+            /// <param name="id">The identifier of the message to be referenced.</param>
+            /// <param name="attribute">The optional attribute of the message to be referenced.</param>
+            /// <returns>A <see cref="PatternBuilder" /> instance with the added message reference.</returns>
+            public PatternBuilder AddMessage(Identifier id, Identifier? attribute = null)
+            {
+                _patternElements.Add(new Placeable(new MessageReference(id, attribute)));
+                return this;
+            }
 
-        /// <summary>
-        ///     Adds a dynamic reference to the pattern builder.
-        /// </summary>
-        /// <param name="id">The identifier of the dynamic reference.</param>
-        /// <param name="attribute">The optional attribute of the dynamic reference.</param>
-        /// <param name="callArguments">The optional call arguments for dynamic reference.</param>
-        /// <returns>A <see cref="PatternBuilder" /> instance with the added term reference.</returns>
-        public PatternBuilder AddDynamicReference(Identifier id, Identifier? attribute = null,
-            CallArguments? callArguments = null)
-        {
-            _patternElements.Add(new Placeable(new DynamicReference(id, attribute, callArguments)));
-            return this;
-        }
+            /// <summary>
+            ///     Adds a term reference to the pattern builder.
+            /// </summary>
+            /// <param name="id">The identifier of the term to be referenced.</param>
+            /// <param name="attribute">The optional attribute of the message to be referenced.</param>
+            /// <param name="callArguments">The optional call arguments for a term.</param>
+            /// <returns>A <see cref="PatternBuilder" /> instance with the added term reference.</returns>
+            public PatternBuilder AddTermReference(Identifier id, Identifier? attribute = null,
+                CallArguments? callArguments = null)
+            {
+                _patternElements.Add(new Placeable(new TermReference(id, attribute, callArguments)));
+                return this;
+            }
 
-        /// <summary>
-        ///     Adds a function reference to the pattern builder.
-        /// </summary>
-        /// <param name="functionName">The name of the function reference.</param>
-        /// <param name="funcArgs">The arguments of the function reference.</param>
-        /// <returns>A <see cref="PatternBuilder" /> instance with the added function reference.</returns>
-        public PatternBuilder AddFunctionReference(Identifier functionName, CallArguments? funcArgs = null)
-        {
-            _patternElements.Add(new Placeable(new FunctionReference(functionName, funcArgs ?? CallArguments.Empty)));
-            return this;
-        }
+            /// <summary>
+            ///     Adds a dynamic reference to the pattern builder.
+            /// </summary>
+            /// <param name="id">The identifier of the dynamic reference.</param>
+            /// <param name="attribute">The optional attribute of the dynamic reference.</param>
+            /// <param name="callArguments">The optional call arguments for dynamic reference.</param>
+            /// <returns>A <see cref="PatternBuilder" /> instance with the added term reference.</returns>
+            public PatternBuilder AddDynamicReference(Identifier id, Identifier? attribute = null,
+                CallArguments? callArguments = null)
+            {
+                _patternElements.Add(new Placeable(new DynamicReference(id, attribute, callArguments)));
+                return this;
+            }
 
-        /// <summary>
-        ///     Adds a function reference to the pattern builder.
-        /// </summary>
-        /// <param name="functionName">The name of the function reference.</param>
-        /// <param name="builder">A <see cref="CallArgumentsBuilder" /> that constructs the function arguments.</param>
-        /// <returns>A <see cref="PatternBuilder" /> instance with the added function reference.</returns>
-        public PatternBuilder AddFunctionReference(Identifier functionName, CallArgumentsBuilder builder)
-        {
-            _patternElements.Add(new Placeable(new FunctionReference(functionName, builder.Build())));
-            return this;
-        }
+            /// <summary>
+            ///     Adds a function reference to the pattern builder.
+            /// </summary>
+            /// <param name="functionName">The name of the function reference.</param>
+            /// <param name="funcArgs">The arguments of the function reference.</param>
+            /// <returns>A <see cref="PatternBuilder" /> instance with the added function reference.</returns>
+            public PatternBuilder AddFunctionReference(Identifier functionName, CallArguments? funcArgs = null)
+            {
+                _patternElements.Add(
+                    new Placeable(new FunctionReference(functionName, funcArgs ?? CallArguments.Empty)));
+                return this;
+            }
 
-        /// <summary>
-        ///     Adds a message reference to the pattern builder.
-        /// </summary>
-        /// <param name="messageId">The identifier of the message to be referenced.</param>
-        /// <param name="attribute">The optional attribute of the message to be referenced.</param>
-        /// <returns>A <see cref="PatternBuilder" /> instance with the added message reference.</returns>
-        public PatternBuilder AddMessageReference(Identifier messageId, Identifier? attribute = null)
-        {
-            _patternElements.Add(new Placeable(new MessageReference(messageId, attribute)));
-            return this;
-        }
+            /// <summary>
+            ///     Adds a function reference to the pattern builder.
+            /// </summary>
+            /// <param name="functionName">The name of the function reference.</param>
+            /// <param name="builder">A <see cref="CallArgumentsBuilder" /> that constructs the function arguments.</param>
+            /// <returns>A <see cref="PatternBuilder" /> instance with the added function reference.</returns>
+            public PatternBuilder AddFunctionReference(Identifier functionName, CallArgumentsBuilder builder)
+            {
+                _patternElements.Add(new Placeable(new FunctionReference(functionName, builder.Build())));
+                return this;
+            }
 
-        /// <summary>
-        ///     Adds a <see cref="SelectExpressionBuilder" />.
-        /// </summary>
-        /// <param name="selectExpressionBuilder">The <see cref="SelectExpressionBuilder" /> .</param>
-        /// <returns>A <see cref="PatternBuilder" /> instance with the added selection expression.</returns>
-        public PatternBuilder AddSelectExpression(SelectExpressionBuilder selectExpressionBuilder)
-        {
-            _patternElements.Add(new Placeable(selectExpressionBuilder.Build()));
-            return this;
-        }
+            /// <summary>
+            ///     Adds a message reference to the pattern builder.
+            /// </summary>
+            /// <param name="messageId">The identifier of the message to be referenced.</param>
+            /// <param name="attribute">The optional attribute of the message to be referenced.</param>
+            /// <returns>A <see cref="PatternBuilder" /> instance with the added message reference.</returns>
+            public PatternBuilder AddMessageReference(Identifier messageId, Identifier? attribute = null)
+            {
+                _patternElements.Add(new Placeable(new MessageReference(messageId, attribute)));
+                return this;
+            }
 
-        /// <summary>
-        ///     Adds a pattern element to the pattern.
-        /// </summary>
-        /// <param name="expr">The pattern element to be added to the pattern.</param>
-        /// <returns>A <see cref="PatternBuilder" /> instance with the added <see cref="IPatternElement" />.</returns>
-        public PatternBuilder AddExpression(IPatternElement expr)
-        {
-            _patternElements.Add(expr);
-            return this;
-        }
+            /// <summary>
+            ///     Adds a <see cref="SelectExpressionBuilder" />.
+            /// </summary>
+            /// <param name="selectExpressionBuilder">The <see cref="SelectExpressionBuilder" /> .</param>
+            /// <returns>A <see cref="PatternBuilder" /> instance with the added selection expression.</returns>
+            public PatternBuilder AddSelectExpression(SelectExpressionBuilder selectExpressionBuilder)
+            {
+                _patternElements.Add(new Placeable(selectExpressionBuilder.Build()));
+                return this;
+            }
 
-        /// <summary>
-        ///     Adds a specified <see cref="Placeable" /> to the pattern elements in the builder.
-        /// </summary>
-        /// <param name="placeable">The <see cref="Placeable" /> to be added.</param>
-        /// <returns>A <see cref="PatternBuilder" /> instance with the added <see cref="Placeable" />.</returns>
-        public PatternBuilder AddPlaceable(Placeable placeable)
-        {
-            _patternElements.Add(placeable);
-            return this;
-        }
+            /// <summary>
+            ///     Adds a pattern element to the pattern.
+            /// </summary>
+            /// <param name="expr">The pattern element to be added to the pattern.</param>
+            /// <returns>A <see cref="PatternBuilder" /> instance with the added <see cref="IPatternElement" />.</returns>
+            public PatternBuilder AddExpression(IPatternElement expr)
+            {
+                _patternElements.Add(expr);
+                return this;
+            }
 
-        /// Builds a new Pattern instance using the elements stored in the builder.
-        /// <returns>A Pattern object containing the collected elements.</returns>
-        public Pattern Build()
-        {
-            return new Pattern(_patternElements);
+            /// <summary>
+            ///     Adds a specified <see cref="Placeable" /> to the pattern elements in the builder.
+            /// </summary>
+            /// <param name="placeable">The <see cref="Placeable" /> to be added.</param>
+            /// <returns>A <see cref="PatternBuilder" /> instance with the added <see cref="Placeable" />.</returns>
+            public PatternBuilder AddPlaceable(Placeable placeable)
+            {
+                _patternElements.Add(placeable);
+                return this;
+            }
+
+            /// Builds a new Pattern instance using the elements stored in the builder.
+            /// <returns>A Pattern object containing the collected elements.</returns>
+            public Pattern Build()
+            {
+                return new Pattern(_patternElements);
+            }
         }
     }
 

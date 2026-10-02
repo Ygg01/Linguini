@@ -67,7 +67,7 @@ public class SerializeAndDeserializeTest
     public static IEnumerable<object> SyntaxExamples()
     {
         // Other serializers
-        yield return new Attribute("desc", new PatternBuilder("description"));
+        yield return new Attribute("desc", Pattern.From("description"));
         yield return new Placeable(InlineExpressionBuilder.CreateDynamicReference("dyn-r").Build());
         yield return new Placeable(InlineExpressionBuilder.CreateMessageReference("msg-r").Build());
         yield return new Placeable(InlineExpressionBuilder.CreateVariableReferences("var-r").Build());
@@ -81,7 +81,7 @@ public class SerializeAndDeserializeTest
                                        .Build()
         );
         var selectionBuilder = new SelectExpressionBuilder(new TermReference("x", "y"))
-            .AddVariant("x", new PatternBuilder("z"))
+            .AddVariant("x", Pattern.Builder().AddText("z"))
             .SetDefault(0)
             .Build();
         yield return new Placeable(selectionBuilder);
@@ -111,15 +111,15 @@ public class SerializeAndDeserializeTest
         yield return new NamedArgument("arg4", InlineExpressionBuilder.CreatePlaceable(new Placeable(new TextLiteral("id"))).Build());
         yield return new NamedArgument("arg5", InlineExpressionBuilder.CreateDynamicReference("x", "y").Build());
         yield return new MessageReference("message", "attribute");
-        yield return new PatternBuilder("text ").AddMessage("x").AddText(" more text").Build();
+        yield return Pattern.Builder().AddText("text ").AddMessage("x").AddText(" more text").Build();
         yield return new SelectExpressionBuilder(new VariableReference("x"))
-            .AddVariant("one", new PatternBuilder("select 1"))
-            .AddVariant("other", new PatternBuilder("select other"))
+            .AddVariant("one", Pattern.Builder().AddText("select 1"))
+            .AddVariant("other", Pattern.Builder().AddText("select other"))
             .SetDefault(1)
             .Build();
         yield return new TermReference("x", "y");
         yield return new VariableReference("x");
-        yield return new Variant(2.0f, new PatternBuilder(3));
+        yield return new Variant(2.0f, Pattern.Builder().AddNumberLiteral(3));
     }
 
     public static IEnumerable<object> ResourcesExample()
@@ -128,11 +128,11 @@ public class SerializeAndDeserializeTest
             new List<IEntry>
             {
                 new AstComment(CommentLevel.ResourceComment, new List<ReadOnlyMemory<char>> { "test3".AsMemory() }),
-                AstTermBuilder.Builder("id").SetPattern(new PatternBuilder("test")).Build(),
+                AstTermBuilder.Builder("id").SetPattern(Pattern.From("test")).Build(),
                 new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { "test2".AsMemory() }),
                 new AstComment(CommentLevel.GroupComment, new List<ReadOnlyMemory<char>> { "test3".AsMemory() }),
                 new Junk("junkie"),
-                AstMessageBuilder.Builder("message").SetPattern(new PatternBuilder("xyz")).Build()
+                AstMessageBuilder.Builder("message").SetPattern(Pattern.From("xyz")).Build()
             },
             new List<ParseError>());
         var inlineExpressionBuilder = InlineExpressionBuilder
@@ -142,7 +142,7 @@ public class SerializeAndDeserializeTest
             new List<IEntry>
             {
                 AstMessageBuilder.Builder("message")
-                    .SetPattern(new PatternBuilder()
+                    .SetPattern(Pattern.Builder()
                                     .AddNumberLiteral(3.0)
                                     .AddPlaceable(PlaceableBuilder.InlineExpression(inlineExpressionBuilder).Build())
                                     .AddFunctionReference("COUNT")
@@ -154,17 +154,17 @@ public class SerializeAndDeserializeTest
             new List<ParseError>());
         yield return new Junk("Test".AsMemory());
         yield return AstTermBuilder.Builder("z")
-            .SetPattern(new PatternBuilder("x"))
+            .SetPattern(Pattern.From("x"))
             .SetComment("my comment")
-            .AddAttribute(Attribute.From("x0", new PatternBuilder(32)))
+            .AddAttribute(Attribute.From("x0", Pattern.From(32)))
             .Build();
         yield return new AstMessage(
             new Identifier("x"),
-            new PatternBuilder(3).Build(),
+            Pattern.From(3),
             new List<Attribute>
             {
-                new("attr1", new PatternBuilder("value1")),
-                new("attr2", new PatternBuilder("value2"))
+                new("attr1", Pattern.From("value1")),
+                new("attr2", Pattern.From("value2"))
             },
             AstLocation.Empty,
             new AstComment(CommentLevel.ResourceComment, new List<ReadOnlyMemory<char>>

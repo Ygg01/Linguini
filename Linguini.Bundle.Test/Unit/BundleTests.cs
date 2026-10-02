@@ -190,7 +190,7 @@ new1  = new
             Parallel.For(0, 10, i => optBundle.AddResourceOverriding($"term-2= {i + 1}"));
             Assert.That(optBundle.HasMessage("term-1"));
 
-            // Frozen bundle are read only and should be thread-safe
+            // Frozen bundles are read-only and should be thread-safe
             var frozenBundle = optBundle.ToFrozenBundle();
             Parallel.For(0, 10, i => frozenBundle.TryGetAttrMessage("term-1", null, out _, out _));
         }
@@ -303,7 +303,7 @@ new1  = new
             var originalBundle = FluentBundle.MakeUnchecked(originalBundleOption);
             var clonedBundle = originalBundle.DeepClone();
 
-            // Assert that the original and cloned objects are not the same reference
+            // Assert that the original and cloned objects are different reference
             Assert.That(originalBundle, Is.Not.SameAs(clonedBundle));
 
             // Assert that the properties are copied properly
@@ -335,7 +335,7 @@ new1  = new
             var copyOfLocaleStep = localeStep.GetLocaleStepBuilder();
 
             var message = AstMessageBuilder.Builder("term")
-                .SetPattern(new PatternBuilder("baz"))
+                .SetPattern(Pattern.From("baz"))
                 .Build();
             var resource = new Resource(new List<IEntry> { message }, new List<ParseError>());
             var original2 = localeStep.Locale("en-US").AddResource("term = foo").UncheckedBuild();
