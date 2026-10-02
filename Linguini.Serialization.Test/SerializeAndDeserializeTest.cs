@@ -68,7 +68,11 @@ public class SerializeAndDeserializeTest
     {
         // Other serializers
         yield return new Attribute("desc", new PatternBuilder("description"));
-        yield return new Placeable(InlineExpressionBuilder.CreateMessageReference("x").Build());
+        yield return new Placeable(InlineExpressionBuilder.CreateDynamicReference("dyn-r").Build());
+        yield return new Placeable(InlineExpressionBuilder.CreateMessageReference("msg-r").Build());
+        yield return new Placeable(InlineExpressionBuilder.CreateVariableReferences("var-r").Build());
+        yield return new Placeable(InlineExpressionBuilder.CreateTermReference("term-r").Build());
+        yield return new Placeable(InlineExpressionBuilder.CreatePlaceable(new Placeable(new TextLiteral("id"))).Build());
         yield return new Placeable(InlineExpressionBuilder.CreateTextLiteral("32.0").Build());
         yield return new Placeable(InlineExpressionBuilder
                                        .CreateFunctionReference(

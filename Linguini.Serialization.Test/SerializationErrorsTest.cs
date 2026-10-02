@@ -390,9 +390,6 @@ public class SerializationErrorsTest
     private static IEnumerable<TestCaseData> ErrorArgumentsExamples()
     {
         yield return new TestCaseData("[]", typeof(Attribute)).Returns("JsonException");
-        yield return new TestCaseData("{}", typeof(NamedArgument)).Returns("JsonException");
-        yield return new TestCaseData(NamedArgs1, typeof(NamedArgument)).Returns("JsonException");
-        yield return new TestCaseData(Junk1, typeof(Placeable)).Returns("JsonException");
         yield return new TestCaseData("[]", typeof(Pattern)).Returns("JsonException");
         yield return new TestCaseData(Pattern1, typeof(Pattern)).Returns("JsonException");
         yield return new TestCaseData(Pattern2, typeof(Pattern)).Returns("JsonException");
@@ -405,8 +402,11 @@ public class SerializationErrorsTest
         yield return new TestCaseData(Junk1, typeof(Identifier)).Returns("JsonException");
         yield return new TestCaseData(Identifier1, typeof(Identifier)).Returns("JsonException");
         yield return new TestCaseData(Identifier2, typeof(Identifier)).Returns("JsonException");
+        
         yield return new TestCaseData(Placeable1, typeof(CallArguments)).Returns("JsonException");
         yield return new TestCaseData(CallArguments1, typeof(CallArguments)).Returns("JsonException");
+        yield return new TestCaseData("{}", typeof(NamedArgument)).Returns("JsonException");
+        yield return new TestCaseData(NamedArgs1, typeof(NamedArgument)).Returns("JsonException");
     }
 
     private static IEnumerable<TestCaseData> ErrorResourceExamples()
@@ -429,6 +429,7 @@ public class SerializationErrorsTest
         yield return new TestCaseData(AstMessage3, typeof(AstMessage)).Returns("JsonException");
 
         yield return new TestCaseData(Junk1, typeof(Junk)).Returns("JsonException");
+        yield return new TestCaseData(Junk1, typeof(Placeable)).Returns("JsonException");
         yield return new TestCaseData(Placeable1, typeof(Placeable)).Returns("JsonException");
         yield return new TestCaseData(Placeable2, typeof(Placeable)).Returns("JsonException");
         yield return new TestCaseData("{}", typeof(Resource)).Returns("JsonException");
