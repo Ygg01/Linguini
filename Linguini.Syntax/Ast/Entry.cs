@@ -439,7 +439,7 @@ namespace Linguini.Syntax.Ast
         ///     Provides functionality for constructing Fluent AST message entries, including identifiers, patterns, and
         ///     attributes.
         /// </summary>
-        public class AstTermBuilder
+        public sealed class AstTermBuilder
         {
             private readonly List<Attribute> _attributes;
             private AstComment? _comment;
