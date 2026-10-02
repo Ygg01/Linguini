@@ -77,7 +77,7 @@ public class SerializeAndDeserializeTest
         yield return new Placeable(InlineExpressionBuilder
                                        .CreateFunctionReference(
                                            "func-ref",
-                                           new CallArgumentsBuilder().AddPositionalArg(3.09d))
+                                           CallArguments.Builder().AddPositionalArg(3.09d))
                                        .Build()
         );
         var selectionBuilder = new SelectExpressionBuilder(new TermReference("x", "y"))
@@ -85,7 +85,7 @@ public class SerializeAndDeserializeTest
             .SetDefault(0)
             .Build();
         yield return new Placeable(selectionBuilder);
-        var callArgs = new CallArgumentsBuilder()
+        var callArgs = CallArguments.Builder()
             .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
             .AddNamedArg("y", 3);
         yield return callArgs.Build();
@@ -93,12 +93,12 @@ public class SerializeAndDeserializeTest
         yield return new AstComment(CommentLevel.GroupComment, new List<ReadOnlyMemory<char>> { "test".AsMemory() });
         yield return new AstComment(CommentLevel.ResourceComment, new List<ReadOnlyMemory<char>> { "test".AsMemory() });
 
-        yield return new TermReference("dyn", "attr", new CallArgumentsBuilder());
+        yield return new TermReference("dyn", "attr", CallArguments.Builder());
 
-        yield return new DynamicReference("dyn", "attr", new CallArgumentsBuilder()
+        yield return new DynamicReference("dyn", "attr", CallArguments.Builder()
                                               .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("x"))
                                               .AddNamedArg("y", 3));
-        yield return new FunctionReference("foo", new CallArgumentsBuilder()
+        yield return new FunctionReference("foo", CallArguments.Builder()
                                                .AddPositionalArg(3)
                                                .AddNamedArg(
                                                    "test", InlineExpressionBuilder.CreateTermReference("x", "y"))
@@ -107,7 +107,7 @@ public class SerializeAndDeserializeTest
         yield return new Identifier("test");
         yield return new NamedArgument("arg1", InlineExpressionBuilder.CreateDynamicReference("x", "y").Build());
         yield return new NamedArgument("arg2", InlineExpressionBuilder.CreateTermReference("term", "ref").Build());
-        yield return new NamedArgument("arg3", InlineExpressionBuilder.CreateFunctionReference("term", new CallArgumentsBuilder()).Build());
+        yield return new NamedArgument("arg3", InlineExpressionBuilder.CreateFunctionReference("term", CallArguments.Builder()).Build());
         yield return new NamedArgument("arg4", InlineExpressionBuilder.CreatePlaceable(new Placeable(new TextLiteral("id"))).Build());
         yield return new NamedArgument("arg5", InlineExpressionBuilder.CreateDynamicReference("x", "y").Build());
         yield return new MessageReference("message", "attribute");
@@ -136,8 +136,7 @@ public class SerializeAndDeserializeTest
             },
             new List<ParseError>());
         var inlineExpressionBuilder = InlineExpressionBuilder
-            .CreateFunctionReference("x", new CallArgumentsBuilder()
-                                         .AddPositionalArg("e"));
+            .CreateFunctionReference("x", CallArguments.Builder().AddPositionalArg("e"));
         yield return new Resource(
             new List<IEntry>
             {

@@ -453,9 +453,9 @@ namespace Linguini.Syntax.Ast
             ///     Adds a function reference to the pattern builder.
             /// </summary>
             /// <param name="functionName">The name of the function reference.</param>
-            /// <param name="builder">A <see cref="CallArgumentsBuilder" /> that constructs the function arguments.</param>
+            /// <param name="builder">A <see cref="CallArguments.CallArgumentsBuilder" /> that constructs the function arguments.</param>
             /// <returns>A <see cref="PatternBuilder" /> instance with the added function reference.</returns>
-            public PatternBuilder AddFunctionReference(Identifier functionName, CallArgumentsBuilder builder)
+            public PatternBuilder AddFunctionReference(Identifier functionName, CallArguments.CallArgumentsBuilder builder)
             {
                 _patternElements.Add(new Placeable(new FunctionReference(functionName, builder.Build())));
                 return this;

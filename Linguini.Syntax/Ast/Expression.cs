@@ -389,8 +389,9 @@ namespace Linguini.Syntax.Ast
         /// </summary>
         /// <param name="id">Dynamic reference id.</param>
         /// <param name="attribute">Optional dynamic reference attribute.</param>
-        /// <param name="callArgumentsBuilder">Optional dynamic reference <see cref="CallArgumentsBuilder" />.</param>
-        public DynamicReference(Identifier id, Identifier? attribute, CallArgumentsBuilder? callArgumentsBuilder)
+        /// <param name="callArgumentsBuilder">Optional dynamic reference <see cref="CallArguments.CallArgumentsBuilder" />.</param>
+        public DynamicReference(Identifier id, Identifier? attribute,
+            CallArguments.CallArgumentsBuilder? callArgumentsBuilder)
         {
             Id = id;
             Attribute = attribute;
@@ -487,8 +488,8 @@ namespace Linguini.Syntax.Ast
         /// </summary>
         /// <param name="id">Dynamic reference id.</param>
         /// <param name="attribute">Optional dynamic reference attribute.</param>
-        /// <param name="argumentsBuilder">Optional dynamic reference <see cref="CallArgumentsBuilder" />.</param>
-        public TermReference(Identifier id, Identifier? attribute, CallArgumentsBuilder? argumentsBuilder)
+        /// <param name="argumentsBuilder">Optional dynamic reference <see cref="CallArguments.CallArgumentsBuilder" />.</param>
+        public TermReference(Identifier id, Identifier? attribute, CallArguments.CallArgumentsBuilder? argumentsBuilder)
         {
             Id = id;
             Attribute = attribute;
@@ -712,7 +713,7 @@ namespace Linguini.Syntax.Ast
 
     /// <summary>
     ///     Represents the arguments passed to a function or term call in Fluent syntax.
-    ///     This includes a collection of positional arguments and a collection of named arguments.
+    ///     This includes a collection of positional arguments and collection of named arguments.
     /// </summary>
     public readonly struct CallArguments : IEquatable<CallArguments>
     {
@@ -746,6 +747,13 @@ namespace Linguini.Syntax.Ast
             PositionalArgs = positionalArgs;
             NamedArgs = namedArgs;
         }
+
+        /// <summary>
+        /// Provides access to a builder instance for constructing <see cref="CallArguments"/> objects.
+        /// The builder allows incremental addition of positional and named arguments, enabling a
+        /// step-by-step assembly of the final <see cref="CallArguments"/> structure.
+        /// </summary>
+        public static CallArgumentsBuilder Builder() => new();
 
         /// <inheritdoc />
         public bool Equals(CallArguments other)
@@ -790,6 +798,132 @@ namespace Linguini.Syntax.Ast
         public static bool operator !=(CallArguments left, CallArguments right)
         {
             return !left.Equals(right);
+        }
+
+        /// <summary>
+        ///     Builder for creating <see cref="CallArguments" />
+        /// </summary>
+        public class CallArgumentsBuilder
+        {
+            private readonly List<NamedArgument> _namedArgs = new();
+            private readonly List<IInlineExpression> _positionalArgs = new();
+            
+            internal CallArgumentsBuilder()
+            {
+            }
+
+            /// <summary>
+            ///     Adds an <see cref="InlineExpressionBuilder">inline expression</see> as a positional argument.
+            /// </summary>
+            /// <param name="arg"><see cref="InlineExpressionBuilder" /> as a positional argument</param>
+            /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="IInlineExpression" />.</returns>
+            public CallArgumentsBuilder AddPositionalArg(InlineExpressionBuilder arg)
+            {
+                _positionalArgs.Add(arg.Build());
+                return this;
+            }
+
+            /// <summary>
+            ///     Adds an <see cref="string" /> as a positional argument.
+            /// </summary>
+            /// <param name="text"><see cref="string" /> as a positional argument.</param>
+            /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="string" />.</returns>
+            public CallArgumentsBuilder AddPositionalArg(string text)
+            {
+                _positionalArgs.Add(new TextLiteral(text));
+                return this;
+            }
+
+            /// <summary>
+            ///     Adds an <see cref="double" /> as a positional argument.
+            /// </summary>
+            /// <param name="number"><see cref="double" /> as a positional argument.</param>
+            /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="double" />.</returns>
+            public CallArgumentsBuilder AddPositionalArg(double number)
+            {
+                _positionalArgs.Add(new NumberLiteral(number));
+                return this;
+            }
+
+            /// <summary>
+            ///     Adds an <see cref="float" /> as a positional argument.
+            /// </summary>
+            /// <param name="number"><see cref="float" /> as a positional argument.</param>
+            /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="float" />.</returns>
+            public CallArgumentsBuilder AddPositionalArg(float number)
+            {
+                _positionalArgs.Add(new NumberLiteral(number));
+                return this;
+            }
+
+            /// <summary>
+            ///     Adds an <see cref="InlineExpressionBuilder">inline expression</see> as a named argument.
+            /// </summary>
+            /// <param name="identifier">name of named argument</param>
+            /// <param name="inlineExpression"><see cref="InlineExpressionBuilder" /> as a value of named argument.</param>
+            /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="IInlineExpression" />.</returns>
+            public CallArgumentsBuilder AddNamedArg(Identifier identifier, InlineExpressionBuilder inlineExpression)
+            {
+                _namedArgs.Add(new NamedArgument(identifier, inlineExpression.Build()));
+                return this;
+            }
+
+            /// <summary>
+            ///     Adds an <see cref="IInlineExpression">inline expression</see> as a named argument.
+            /// </summary>
+            /// <param name="identifier">name of named argument</param>
+            /// <param name="inlineExpression"><see cref="InlineExpressionBuilder" /> as a value of named argument.</param>
+            /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="IInlineExpression" />.</returns>
+            public CallArgumentsBuilder AddNamedArg(Identifier identifier, IInlineExpression inlineExpression)
+            {
+                _namedArgs.Add(new NamedArgument(identifier, inlineExpression));
+                return this;
+            }
+
+            /// <summary>
+            ///     Adds a <see cref="string" /> as a named argument.
+            /// </summary>
+            /// <param name="identifier">name of named argument</param>
+            /// <param name="text"><see cref="string" /> as a value of named argument.</param>
+            /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="string" />.</returns>
+            public CallArgumentsBuilder AddNamedArg(Identifier identifier, string text)
+            {
+                _namedArgs.Add(new NamedArgument(identifier, new TextLiteral(text)));
+                return this;
+            }
+
+            /// <summary>
+            ///     Adds a <see cref="float" /> as a named argument.
+            /// </summary>
+            /// <param name="identifier">name of named argument</param>
+            /// <param name="number"><see cref="float" /> as a value of named argument.</param>
+            /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="float" />.</returns>
+            public CallArgumentsBuilder AddNamedArg(Identifier identifier, float number)
+            {
+                _namedArgs.Add(new NamedArgument(identifier, new NumberLiteral(number)));
+                return this;
+            }
+
+            /// <summary>
+            ///     Adds a <see cref="double" /> as a named argument.
+            /// </summary>
+            /// <param name="identifier">name of named argument</param>
+            /// <param name="number"><see cref="double" /> as a value of named argument.</param>
+            /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="double" />.</returns>
+            public CallArgumentsBuilder AddNamedArg(Identifier identifier, double number)
+            {
+                _namedArgs.Add(new NamedArgument(identifier, new NumberLiteral(number)));
+                return this;
+            }
+
+            /// <summary>
+            ///     Builds a new CallArgument instance using the elements stored in the builder.
+            /// </summary>
+            /// <returns>A <see cref="CallArguments" /> object containing collected elements.</returns>
+            public CallArguments Build()
+            {
+                return new CallArguments(_positionalArgs, _namedArgs);
+            }
         }
     }
 
@@ -865,127 +999,6 @@ namespace Linguini.Syntax.Ast
         }
     }
 
-    /// <summary>
-    ///     Builder for creating <see cref="CallArguments" />
-    /// </summary>
-    public class CallArgumentsBuilder
-    {
-        private readonly List<NamedArgument> _namedArgs = new();
-        private readonly List<IInlineExpression> _positionalArgs = new();
-
-        /// <summary>
-        ///     Adds an <see cref="InlineExpressionBuilder">inline expression</see> as a positional argument.
-        /// </summary>
-        /// <param name="arg"><see cref="InlineExpressionBuilder" /> as a positional argument</param>
-        /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="IInlineExpression" />.</returns>
-        public CallArgumentsBuilder AddPositionalArg(InlineExpressionBuilder arg)
-        {
-            _positionalArgs.Add(arg.Build());
-            return this;
-        }
-
-        /// <summary>
-        ///     Adds an <see cref="string" /> as a positional argument.
-        /// </summary>
-        /// <param name="text"><see cref="string" /> as a positional argument.</param>
-        /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="string" />.</returns>
-        public CallArgumentsBuilder AddPositionalArg(string text)
-        {
-            _positionalArgs.Add(new TextLiteral(text));
-            return this;
-        }
-
-        /// <summary>
-        ///     Adds an <see cref="double" /> as a positional argument.
-        /// </summary>
-        /// <param name="number"><see cref="double" /> as a positional argument.</param>
-        /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="double" />.</returns>
-        public CallArgumentsBuilder AddPositionalArg(double number)
-        {
-            _positionalArgs.Add(new NumberLiteral(number));
-            return this;
-        }
-
-        /// <summary>
-        ///     Adds an <see cref="float" /> as a positional argument.
-        /// </summary>
-        /// <param name="number"><see cref="float" /> as a positional argument.</param>
-        /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="float" />.</returns>
-        public CallArgumentsBuilder AddPositionalArg(float number)
-        {
-            _positionalArgs.Add(new NumberLiteral(number));
-            return this;
-        }
-
-        /// <summary>
-        ///     Adds an <see cref="InlineExpressionBuilder">inline expression</see> as a named argument.
-        /// </summary>
-        /// <param name="identifier">name of named argument</param>
-        /// <param name="inlineExpression"><see cref="InlineExpressionBuilder" /> as a value of named argument.</param>
-        /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="IInlineExpression" />.</returns>
-        public CallArgumentsBuilder AddNamedArg(Identifier identifier, InlineExpressionBuilder inlineExpression)
-        {
-            _namedArgs.Add(new NamedArgument(identifier, inlineExpression.Build()));
-            return this;
-        }
-
-        /// <summary>
-        ///     Adds an <see cref="IInlineExpression">inline expression</see> as a named argument.
-        /// </summary>
-        /// <param name="identifier">name of named argument</param>
-        /// <param name="inlineExpression"><see cref="InlineExpressionBuilder" /> as a value of named argument.</param>
-        /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="IInlineExpression" />.</returns>
-        public CallArgumentsBuilder AddNamedArg(Identifier identifier, IInlineExpression inlineExpression)
-        {
-            _namedArgs.Add(new NamedArgument(identifier, inlineExpression));
-            return this;
-        }
-
-        /// <summary>
-        ///     Adds a <see cref="string" /> as a named argument.
-        /// </summary>
-        /// <param name="identifier">name of named argument</param>
-        /// <param name="text"><see cref="string" /> as a value of named argument.</param>
-        /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="string" />.</returns>
-        public CallArgumentsBuilder AddNamedArg(Identifier identifier, string text)
-        {
-            _namedArgs.Add(new NamedArgument(identifier, new TextLiteral(text)));
-            return this;
-        }
-
-        /// <summary>
-        ///     Adds a <see cref="float" /> as a named argument.
-        /// </summary>
-        /// <param name="identifier">name of named argument</param>
-        /// <param name="number"><see cref="float" /> as a value of named argument.</param>
-        /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="float" />.</returns>
-        public CallArgumentsBuilder AddNamedArg(Identifier identifier, float number)
-        {
-            _namedArgs.Add(new NamedArgument(identifier, new NumberLiteral(number)));
-            return this;
-        }
-
-        /// <summary>
-        ///     Adds a <see cref="double" /> as a named argument.
-        /// </summary>
-        /// <param name="identifier">name of named argument</param>
-        /// <param name="number"><see cref="double" /> as a value of named argument.</param>
-        /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="double" />.</returns>
-        public CallArgumentsBuilder AddNamedArg(Identifier identifier, double number)
-        {
-            _namedArgs.Add(new NamedArgument(identifier, new NumberLiteral(number)));
-            return this;
-        }
-
-        /// <summary>
-        ///     Builds a new CallArgument instance using the elements stored in the builder.
-        /// </summary>
-        /// <returns>A <see cref="CallArguments" /> object containing collected elements.</returns>
-        public CallArguments Build()
-        {
-            return new CallArguments(_positionalArgs, _namedArgs);
-        }
-    }
 
     /// <summary>
     ///     Builder for creating <see cref="IInlineExpression" />
@@ -1008,7 +1021,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="callArgumentsBuilder">The optional builder for call arguments.</param>
         /// <returns>An instance of <see cref="InlineExpressionBuilder" /> representing the dynamic reference.</returns>
         public static InlineExpressionBuilder CreateDynamicReference(Identifier id, Identifier? attribute = null,
-            CallArgumentsBuilder? callArgumentsBuilder = null)
+            CallArguments.CallArgumentsBuilder? callArgumentsBuilder = null)
         {
             return new InlineExpressionBuilder(new DynamicReference(id, attribute, callArgumentsBuilder));
         }
@@ -1021,7 +1034,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="callArgumentsBuilder">The optional builder for call arguments.</param>
         /// <returns>An instance of <see cref="InlineExpressionBuilder" /> representing the function reference.</returns>
         public static InlineExpressionBuilder CreateFunctionReference(Identifier id,
-            CallArgumentsBuilder callArgumentsBuilder)
+            CallArguments.CallArgumentsBuilder callArgumentsBuilder)
         {
             return new InlineExpressionBuilder(new FunctionReference(id, callArgumentsBuilder.Build()));
         }
@@ -1089,7 +1102,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="callArgumentsBuilder">The optional builder for call arguments.</param>
         /// <returns>An instance of <see cref="InlineExpressionBuilder" /> representing the term reference.</returns>
         public static InlineExpressionBuilder CreateTermReference(Identifier id, Identifier? attribute = null,
-            CallArgumentsBuilder? callArgumentsBuilder = null)
+            CallArguments.CallArgumentsBuilder? callArgumentsBuilder = null)
         {
             return new InlineExpressionBuilder(new TermReference(id, attribute, callArgumentsBuilder));
         }
