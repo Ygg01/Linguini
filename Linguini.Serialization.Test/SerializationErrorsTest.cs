@@ -144,7 +144,7 @@ public class SerializationErrorsTest
         ""value"": []
     }";
 
-    private const string Pattern = @"{
+    private const string Pattern1 = @"{
         ""type"": ""Pattern"",
         ""elements"": [
             {
@@ -152,6 +152,16 @@ public class SerializationErrorsTest
                 ""expression_not"": []
             }
         ]
+    }";
+    
+    private const string Pattern2 = @"{
+        ""type"": ""Pattern2"",
+        ""elements"": []
+    }";
+    
+    private const string Pattern3 = @"{
+        ""type"": ""Pattern"",
+        ""elements"": [""aaa""]
     }";
 
     private const string Identifier1 = @"{
@@ -302,6 +312,16 @@ public class SerializationErrorsTest
         ]
     }";
 
+    private const string AstComment1 = @"{
+        ""type"": ""SuperComment"",
+        ""content"": ""aaa""
+    }";
+    
+    private const string AstComment2 = @"{
+        ""type"": ""Comment"",
+        ""whippie"": []
+    }";
+
     private static IEnumerable<TestCaseData> ErrorRefExamples()
     {
         yield return new TestCaseData(MessageReference1, typeof(MessageReference)).Returns("JsonException");
@@ -351,7 +371,12 @@ public class SerializationErrorsTest
         yield return new TestCaseData("{}", typeof(NamedArgument)).Returns("JsonException");
         yield return new TestCaseData(NamedArgs1, typeof(NamedArgument)).Returns("JsonException");
         yield return new TestCaseData(Junk1, typeof(Placeable)).Returns("JsonException");
-        yield return new TestCaseData(Pattern, typeof(Pattern)).Returns("JsonException");
+        yield return new TestCaseData("[]", typeof(Pattern)).Returns("JsonException");
+        yield return new TestCaseData(Pattern1, typeof(Pattern)).Returns("JsonException");
+        yield return new TestCaseData(Pattern2, typeof(Pattern)).Returns("JsonException");
+        yield return new TestCaseData(Pattern3, typeof(Pattern)).Returns("JsonException");
+
+        
         yield return new TestCaseData("[]", typeof(Identifier)).Returns("JsonException");
         yield return new TestCaseData(Junk1, typeof(Identifier)).Returns("JsonException");
         yield return new TestCaseData(Identifier1, typeof(Identifier)).Returns("JsonException");
@@ -362,6 +387,10 @@ public class SerializationErrorsTest
 
     private static IEnumerable<TestCaseData> ErrorResourceExamples()
     {
+        yield return new TestCaseData("[]", typeof(AstComment)).Returns("JsonException");
+        yield return new TestCaseData(AstComment1, typeof(AstComment)).Returns("JsonException");
+        yield return new TestCaseData(AstComment2, typeof(AstComment)).Returns("JsonException");
+
         // Resource level
         yield return new TestCaseData(AstTerm1, typeof(AstTerm)).Returns("JsonException");
         yield return new TestCaseData(AstTerm2, typeof(AstTerm)).Returns("JsonException");
@@ -373,6 +402,7 @@ public class SerializationErrorsTest
 
         yield return new TestCaseData(AstMessage1, typeof(AstMessage)).Returns("JsonException");
         yield return new TestCaseData(AstMessage2, typeof(AstMessage)).Returns("JsonException");
+        
         yield return new TestCaseData(Junk1, typeof(Junk)).Returns("JsonException");
         yield return new TestCaseData(Placeable1, typeof(Placeable)).Returns("JsonException");
         yield return new TestCaseData(Placeable2, typeof(Placeable)).Returns("JsonException");
@@ -381,10 +411,7 @@ public class SerializationErrorsTest
         yield return new TestCaseData(Resource2, typeof(Resource)).Returns("JsonException");
     }
 
-    private static IEnumerable<TestCaseData> SingleExamples()
-    {
-        yield return new TestCaseData(TermReference1, typeof(TermReference)).Returns("JsonException");
-    }
+
 
     [Test]
     [TestCaseSource(nameof(ErrorResourceExamples))]
@@ -407,11 +434,17 @@ public class SerializationErrorsTest
         return "";
     }
 
+    
+    static IEnumerable<TestCaseData> SingleExamples()
+    {
+        yield return new TestCaseData(Pattern3, typeof(Pattern)).Returns("JsonException");
+    }
+    
     [Test]
     [TestCaseSource(nameof(SingleExamples))]
     [Parallelizable]
     public string TestSingleErrors(string jsonString, Type deserializeType)
-    {
+    { 
         try
         {
             JsonSerializer.Deserialize(jsonString, deserializeType, Options);

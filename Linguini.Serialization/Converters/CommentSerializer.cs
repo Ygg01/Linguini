@@ -104,7 +104,7 @@ namespace Linguini.Serialization.Converters
         /// <param name="el">The JSON element to parse as a comment.</param>
         /// <param name="ident">
         ///     When the method returns <c>true</c>, contains the parsed <see cref="AstComment" /> object.
-        ///     When the method returns <c>false</c>, contains <c>null</c>.
+        ///     When the method returns <c>false</c>, it contains <c>null</c>.
         /// </param>
         /// <returns>
         ///     <c>true</c> if the JSON element was successfully read as an <see cref="AstComment" /> object;

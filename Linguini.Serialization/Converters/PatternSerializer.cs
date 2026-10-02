@@ -74,7 +74,7 @@ namespace Linguini.Serialization.Converters
 
                 if (reader.TokenType != JsonTokenType.StartObject)
                 {
-                    continue;
+                    throw new JsonException("Expected a pattern element object");
                 }
 
                 var el = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
