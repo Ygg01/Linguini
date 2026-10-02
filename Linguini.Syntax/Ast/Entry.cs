@@ -115,17 +115,6 @@ namespace Linguini.Syntax.Ast
         public readonly Pattern? Value;
 
         /// <summary>
-        /// A builder class to create and configure instances of <see cref="AstMessage" />.
-        /// </summary>
-        /// <remarks>
-        /// Provides a fluent API for constructing <see cref="AstMessage" /> objects by setting
-        /// properties such as the identifier, pattern, attributes, and comments. This builder
-        /// simplifies the creation of well-formed Fluent messages while providing flexibility
-        /// for customization.
-        /// </remarks>
-        public static AstMessageBuilder Builder(Identifier id) => new (id);
-
-        /// <summary>
         ///     Basic constructor for <c>AstMessage</c>
         /// </summary>
         /// <param name="id">Identifier of the message</param>
@@ -178,6 +167,20 @@ namespace Linguini.Syntax.Ast
                    Equals(InternalComment, other.InternalComment);
         }
 
+        /// <summary>
+        ///     A builder class to create and configure instances of <see cref="AstMessage" />.
+        /// </summary>
+        /// <remarks>
+        ///     Provides a fluent API for constructing <see cref="AstMessage" /> objects by setting
+        ///     properties such as the identifier, pattern, attributes, and comments. This builder
+        ///     simplifies the creation of well-formed Fluent messages while providing flexibility
+        ///     for customization.
+        /// </remarks>
+        public static AstMessageBuilder Builder(Identifier id)
+        {
+            return new AstMessageBuilder(id);
+        }
+
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
@@ -209,11 +212,11 @@ namespace Linguini.Syntax.Ast
         ///     Provides functionality for constructing Fluent AST message entries, including identifiers, patterns, and
         ///     attributes.
         /// </summary>
-        public class AstMessageBuilder
+        public sealed class AstMessageBuilder
         {
             private readonly List<Attribute> _attributes;
-            private string? _comment;
-            private Identifier _id;
+            private AstComment? _comment;
+            private readonly Identifier _id;
             private Pattern? _pattern;
 
             internal AstMessageBuilder(Identifier id)
@@ -223,7 +226,7 @@ namespace Linguini.Syntax.Ast
                 _attributes = new List<Attribute>();
                 _comment = null;
             }
-            
+
 
             /// <summary>
             ///     Assigns a <see cref="Pattern" /> to the message builder.
@@ -267,12 +270,24 @@ namespace Linguini.Syntax.Ast
             /// <returns>
             ///     The instance of <see cref="AstMessageBuilder" /> for chaining method calls.
             /// </returns>
-            public AstMessageBuilder SetComment(string comment)
+            public AstMessageBuilder SetComment(AstComment comment)
             {
                 _comment = comment;
                 return this;
             }
 
+            /// <summary>
+            ///     Adds a comment to the message builder.
+            /// </summary>
+            /// <param name="comment">The <see cref="Attribute" /> to be added to the <see cref="AstMessage" />.</param>
+            /// <returns>
+            ///     The instance of <see cref="AstMessageBuilder" /> for chaining method calls.
+            /// </returns>
+            public AstMessageBuilder SetComment(string comment)
+            {
+                _comment = new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { comment.AsMemory() });
+                return this;
+            }
 
             /// <summary>
             ///     Constructs an <see cref="AstMessage" /> instance using the configured identifier, pattern, and
@@ -283,9 +298,7 @@ namespace Linguini.Syntax.Ast
             /// </returns>
             public AstMessage Build()
             {
-                return new AstMessage(_id, _pattern, _attributes, AstLocation.Empty,
-                                      new AstComment(CommentLevel.Comment,
-                                                     new List<ReadOnlyMemory<char>> { _comment.AsMemory() }));
+                return new AstMessage(_id, _pattern, _attributes, AstLocation.Empty, _comment);
             }
         }
     }
@@ -356,6 +369,14 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
+        /// Creates a new instance of <see cref="AstTermBuilder" /> with the specified identifier.
+        /// </summary>
+        /// <param name="id">The <see cref="Identifier" /> representing the message identifier to initialize the builder.</param>
+        /// <param name="pattern">The <see cref="Pattern" /> to be associated with this term builder.</param>
+        /// <returns>A new <see cref="AstTermBuilder" /> instance.</returns>
+        public static AstTermBuilder Builder(Identifier id, Pattern pattern) => new(id, pattern);
+
+        /// <summary>
         ///     Represents an optional comment associated with a specific term in the Fluent AST.
         /// </summary>
         /// <remarks>
@@ -413,123 +434,111 @@ namespace Linguini.Syntax.Ast
         {
             return HashCode.Combine(Id, Value, Attributes, Comment);
         }
-    }
-
-    /// <summary>
-    ///     Provides functionality for constructing Fluent AST message entries, including identifiers, patterns, and
-    ///     attributes.
-    /// </summary>
-    public class AstTermBuilder
-    {
-        private readonly List<Attribute> _attributes;
-        private AstComment? _comment;
-        private Identifier _id;
-        private Pattern _pattern;
-
-        internal AstTermBuilder()
-        {
-            _id = new Identifier("");
-            _pattern = new Pattern();
-            _attributes = new List<Attribute>();
-            _comment = null;
-        }
 
         /// <summary>
-        ///     Creates a new instance of the <see cref="AstTermBuilder" /> class with the specified identifier.
-        /// </summary>
-        /// <param name="id">The <see cref="Identifier" /> used to initialize the builder.</param>
-        /// <returns>A new instance of <see cref="AstTermBuilder" />.</returns>
-        public static AstTermBuilder Builder(Identifier id)
-        {
-            return new AstTermBuilder
-            {
-                _id = id
-            };
-        }
-
-        /// <summary>
-        ///     Assigns a <see cref="Pattern" /> to the term builder.
-        /// </summary>
-        /// <param name="patternBuilder">The <see cref="Pattern.PatternBuilder" /> to be associated with this term builder.</param>
-        /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
-        public AstTermBuilder SetPattern(Pattern.PatternBuilder patternBuilder)
-        {
-            _pattern = patternBuilder.Build();
-            return this;
-        }
-
-        /// <summary>
-        ///     Assigns a <see cref="Pattern" /> to the term builder.
-        /// </summary>
-        /// <param name="pattern">The <see cref="Pattern" /> to be associated with this message builder.</param>
-        /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
-        public AstTermBuilder SetPattern(Pattern pattern)
-        {
-            _pattern = pattern;
-            return this;
-        }
-
-        /// <summary>
-        ///     Assigns a string as a comment to the term builder.
-        /// </summary>
-        /// <param name="comment">Adds a comment to this term builder.</param>
-        /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
-        public AstTermBuilder SetComment(string comment)
-        {
-            _comment = new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { comment.AsMemory() });
-            return this;
-        }
-
-        /// <summary>
-        ///     Assigns a comment to the term builder.
-        /// </summary>
-        /// <param name="comment">Adds a comment to this term builder.</param>
-        /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
-        public AstTermBuilder SetComment(AstComment comment)
-        {
-            _comment = comment;
-            return this;
-        }
-
-        /// <summary>
-        ///     Adds an attribute to the term builder.
-        /// </summary>
-        /// <param name="attribute">The <see cref="Attribute" /> to be added to the <see cref="AstMessage" />.</param>
-        /// <returns>
-        ///     The instance of <see cref="AstTermBuilder" /> for chaining method calls.
-        /// </returns>
-        public AstTermBuilder AddAttribute(Attribute attribute)
-        {
-            _attributes.Add(attribute);
-            return this;
-        }
-
-        /// <summary>
-        ///     Adds an attribute to the term builder.
-        /// </summary>
-        /// <param name="attributes">The <see cref="Attribute" /> to be added to the <see cref="AstTerm" />.</param>
-        /// <returns>
-        ///     The instance of <see cref="AstTermBuilder" /> for chaining method calls.
-        /// </returns>
-        public AstTermBuilder AddAttributes(IEnumerable<Attribute> attributes)
-        {
-            _attributes.AddRange(attributes);
-            return this;
-        }
-
-
-        /// <summary>
-        ///     Constructs an <see cref="AstMessage" /> instance using the configured identifier, pattern, and
+        ///     Provides functionality for constructing Fluent AST message entries, including identifiers, patterns, and
         ///     attributes.
         /// </summary>
-        /// <returns>
-        ///     A newly built <see cref="AstMessage" /> object containing the specified properties.
-        /// </returns>
-        public AstTerm Build()
+        public class AstTermBuilder
         {
-            return new AstTerm(_id, _pattern, _attributes, AstLocation.Empty, _comment);
+            private readonly List<Attribute> _attributes;
+            private AstComment? _comment;
+            private Identifier _id;
+            private Pattern _pattern;
+
+            internal AstTermBuilder(Identifier id, Pattern pattern)
+            {
+                _id = id;
+                _pattern = pattern;
+                _attributes = new List<Attribute>();
+                _comment = null;
+            }
+
+            /// <summary>
+            ///     Assigns a <see cref="Pattern" /> to the term builder.
+            /// </summary>
+            /// <param name="patternBuilder">The <see cref="Pattern.PatternBuilder" /> to be associated with this term builder.</param>
+            /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
+            public AstTermBuilder SetPattern(Pattern.PatternBuilder patternBuilder)
+            {
+                _pattern = patternBuilder.Build();
+                return this;
+            }
+
+            /// <summary>
+            ///     Assigns a <see cref="Pattern" /> to the term builder.
+            /// </summary>
+            /// <param name="pattern">The <see cref="Pattern" /> to be associated with this message builder.</param>
+            /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
+            public AstTermBuilder SetPattern(Pattern pattern)
+            {
+                _pattern = pattern;
+                return this;
+            }
+
+            /// <summary>
+            ///     Assigns a string as a comment to the term builder.
+            /// </summary>
+            /// <param name="comment">Adds a comment to this term builder.</param>
+            /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
+            public AstTermBuilder SetComment(string comment)
+            {
+                _comment = new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { comment.AsMemory() });
+                return this;
+            }
+
+            /// <summary>
+            ///     Assigns a comment to the term builder.
+            /// </summary>
+            /// <param name="comment">Adds a comment to this term builder.</param>
+            /// <returns>The current instance of <see cref="AstTermBuilder" /> to allow for method chaining.</returns>
+            public AstTermBuilder SetComment(AstComment comment)
+            {
+                _comment = comment;
+                return this;
+            }
+
+            /// <summary>
+            ///     Adds an attribute to the term builder.
+            /// </summary>
+            /// <param name="attribute">The <see cref="Attribute" /> to be added to the <see cref="AstMessage" />.</param>
+            /// <returns>
+            ///     The instance of <see cref="AstTermBuilder" /> for chaining method calls.
+            /// </returns>
+            public AstTermBuilder AddAttribute(Attribute attribute)
+            {
+                _attributes.Add(attribute);
+                return this;
+            }
+
+            /// <summary>
+            ///     Adds an attribute to the term builder.
+            /// </summary>
+            /// <param name="attributes">The <see cref="Attribute" /> to be added to the <see cref="AstTerm" />.</param>
+            /// <returns>
+            ///     The instance of <see cref="AstTermBuilder" /> for chaining method calls.
+            /// </returns>
+            public AstTermBuilder AddAttributes(IEnumerable<Attribute> attributes)
+            {
+                _attributes.AddRange(attributes);
+                return this;
+            }
+
+
+            /// <summary>
+            ///     Constructs an <see cref="AstMessage" /> instance using the configured identifier, pattern, and
+            ///     attributes.
+            /// </summary>
+            /// <returns>
+            ///     A newly built <see cref="AstMessage" /> object containing the specified properties.
+            /// </returns>
+            public AstTerm Build()
+            {
+                return new AstTerm(_id, _pattern, _attributes, AstLocation.Empty, _comment);
+            }
         }
     }
+
 
     /// <summary>
     ///     Represents the location of an AST node, providing debugging information

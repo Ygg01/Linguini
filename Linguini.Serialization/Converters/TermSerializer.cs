@@ -83,8 +83,6 @@ namespace Linguini.Serialization.Converters
                 return false;
             }
 
-            var term = AstTermBuilder.Builder(id);
-
 
             if (!bodyArrayEl.TryGetProperty("value", out var valueEl) ||
                 !PatternSerializer.TryReadPattern(valueEl, options, out var pattern, out _))
@@ -92,8 +90,7 @@ namespace Linguini.Serialization.Converters
                 ast = null;
                 return false;
             }
-
-            term.SetPattern(pattern);
+            var term = AstTerm.Builder(id, pattern);
 
             // Attributes are optional but have to be properly formatted.
             if (bodyArrayEl.TryGetProperty("attributes", out var arrayEl))

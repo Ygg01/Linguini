@@ -128,7 +128,7 @@ public class SerializeAndDeserializeTest
             new List<IEntry>
             {
                 new AstComment(CommentLevel.ResourceComment, new List<ReadOnlyMemory<char>> { "test3".AsMemory() }),
-                AstTermBuilder.Builder("id").SetPattern(Pattern.From("test")).Build(),
+                AstTerm.Builder("id", Pattern.From("test")).Build(),
                 new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { "test2".AsMemory() }),
                 new AstComment(CommentLevel.GroupComment, new List<ReadOnlyMemory<char>> { "test3".AsMemory() }),
                 new Junk("junkie"),
@@ -153,8 +153,7 @@ public class SerializeAndDeserializeTest
             },
             new List<ParseError>());
         yield return new Junk("Test".AsMemory());
-        yield return AstTermBuilder.Builder("z")
-            .SetPattern(Pattern.From("x"))
+        yield return AstTerm.Builder("z", Pattern.From("x"))
             .SetComment("my comment")
             .AddAttribute(Attribute.From("x0", Pattern.From(32)))
             .Build();
