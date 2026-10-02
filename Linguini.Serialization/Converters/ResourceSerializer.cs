@@ -178,12 +178,9 @@ namespace Linguini.Serialization.Converters
         static NumberLiteral ProcessNumberLiteral(JsonElement el,
             JsonSerializerOptions options)
         {
-            if (TryReadProcessNumberLiteral(el, options, out var numberLiteral))
-            {
-                return numberLiteral;
-            }
-
-            throw new JsonException("Expected value to be a valid number");
+            return TryReadProcessNumberLiteral(el, options, out var numberLiteral) 
+                ? numberLiteral 
+                : throw new JsonException("Expected value to be a valid number");
         }
 
         /// <summary>

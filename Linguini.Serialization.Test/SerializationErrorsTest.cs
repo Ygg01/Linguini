@@ -53,6 +53,11 @@ public class SerializationErrorsTest
         ""type"": ""Message""
     }";
 
+    private const string AstMessage3 = @"{
+        ""type"": ""Message"",
+        ""id"": {""type"": ""Identifier"", ""name"": ""msg-id""},
+        ""value"": {""type"": ""Pattern"", ""elements"": {} }
+    }";
 
     private const string DynamicReference1 = @"{
         ""type"": ""MessageReference"",
@@ -164,6 +169,11 @@ public class SerializationErrorsTest
         ""elements"": [""aaa""]
     }";
 
+    private const string Pattern4 = @"{
+        ""type"": ""Pattern"",
+        ""elements"": {}
+    }";
+    
     private const string Identifier1 = @"{
         ""type"": ""Identifier"",
         ""unknown"": null
@@ -375,6 +385,7 @@ public class SerializationErrorsTest
         yield return new TestCaseData(Pattern1, typeof(Pattern)).Returns("JsonException");
         yield return new TestCaseData(Pattern2, typeof(Pattern)).Returns("JsonException");
         yield return new TestCaseData(Pattern3, typeof(Pattern)).Returns("JsonException");
+        yield return new TestCaseData(Pattern4, typeof(Pattern)).Returns("JsonException");
 
         
         yield return new TestCaseData("[]", typeof(Identifier)).Returns("JsonException");
@@ -402,7 +413,8 @@ public class SerializationErrorsTest
 
         yield return new TestCaseData(AstMessage1, typeof(AstMessage)).Returns("JsonException");
         yield return new TestCaseData(AstMessage2, typeof(AstMessage)).Returns("JsonException");
-        
+        yield return new TestCaseData(AstMessage3, typeof(AstMessage)).Returns("JsonException");
+
         yield return new TestCaseData(Junk1, typeof(Junk)).Returns("JsonException");
         yield return new TestCaseData(Placeable1, typeof(Placeable)).Returns("JsonException");
         yield return new TestCaseData(Placeable2, typeof(Placeable)).Returns("JsonException");
@@ -437,7 +449,7 @@ public class SerializationErrorsTest
     
     static IEnumerable<TestCaseData> SingleExamples()
     {
-        yield return new TestCaseData(Pattern3, typeof(Pattern)).Returns("JsonException");
+        yield return new TestCaseData(AstMessage3, typeof(AstMessage)).Returns("JsonException");
     }
     
     [Test]

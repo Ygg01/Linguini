@@ -160,7 +160,7 @@ namespace Linguini.Serialization.Converters
             }
 
             if (!jsonValue.TryGetProperty("elements", out var elements)
-                && elements.ValueKind != JsonValueKind.Array)
+                || elements.ValueKind != JsonValueKind.Array)
             {
                 pattern = null;
                 error = "Placeable must have an `elements` array.";
