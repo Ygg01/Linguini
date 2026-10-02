@@ -195,7 +195,7 @@ namespace Linguini.Syntax.Ast
         public readonly Identifier Id;
 
         /// <summary>
-        ///     Constructs function reference from function name, and arguments.
+        ///     Constructs function reference from function name and arguments.
         /// </summary>
         /// <param name="id"><see cref="Identifier" /> as function name.</param>
         /// <param name="arguments">Function arguments.</param>
@@ -204,18 +204,7 @@ namespace Linguini.Syntax.Ast
             Id = id;
             Arguments = arguments;
         }
-
-        /// <summary>
-        ///     Constructs function reference from function name, and arguments.
-        /// </summary>
-        /// <param name="id">string as a function name.</param>
-        /// <param name="arguments">Function arguments.</param>
-        public FunctionReference(string id, CallArguments arguments)
-        {
-            Id = new Identifier(id);
-            Arguments = arguments;
-        }
-
+        
         /// <inheritdoc />
         public bool Equals(FunctionReference? other)
         {
@@ -299,9 +288,9 @@ namespace Linguini.Syntax.Ast
         /// </summary>
         /// <param name="id">Message identifier</param>
         /// <param name="attribute">Optional string attribute id.</param>
-        public MessageReference(string id, string? attribute = null)
+        public MessageReference(Identifier id, string? attribute = null)
         {
-            Id = new Identifier(id);
+            Id = id;
             if (attribute != null)
             {
                 Attribute = new Identifier(attribute);
@@ -375,7 +364,7 @@ namespace Linguini.Syntax.Ast
         public readonly Identifier? Attribute;
 
         /// <summary>
-        ///     Name of referenced message.
+        ///     Name of the referenced message.
         /// </summary>
         public readonly Identifier Id;
 
@@ -392,27 +381,6 @@ namespace Linguini.Syntax.Ast
             Id = id;
             Attribute = attribute;
             Arguments = arguments;
-        }
-
-        /// <summary>
-        ///     Constructs a dynamic reference in Fluent used to reference
-        ///     another term with possible call arguments and optional attribute.
-        /// </summary>
-        /// <param name="id">Dynamic reference id</param>
-        /// <param name="attribute">Optional dynamic reference attribute</param>
-        /// <param name="arguments">Optional dynamic reference call arguments</param>
-        public DynamicReference(string id, string? attribute = null, CallArguments? arguments = null)
-        {
-            Id = new Identifier(id);
-            if (attribute != null)
-            {
-                Attribute = new Identifier(attribute);
-            }
-
-            if (arguments != null)
-            {
-                Arguments = arguments.Value;
-            }
         }
 
         /// <summary>
@@ -479,7 +447,7 @@ namespace Linguini.Syntax.Ast
     }
 
     /// <summary>
-    ///     Represents a terfm reference in Fluent syntax.
+    ///     Represents a term reference in Fluent syntax.
     ///     This class is used to another term with different call arguments.
     /// </summary>
     public class TermReference : IInlineExpression, IEquatable<TermReference>
@@ -495,7 +463,7 @@ namespace Linguini.Syntax.Ast
         public readonly Identifier? Attribute;
 
         /// <summary>
-        ///     Name of referenced message.
+        ///     Name of the referenced message.
         /// </summary>
         public readonly Identifier Id;
 
@@ -506,7 +474,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="id">dynamic message reference.</param>
         /// <param name="attribute">attributes of dynamic reference.</param>
         /// <param name="arguments">call arguments of dynamic reference.</param>
-        public TermReference(Identifier id, Identifier? attribute, CallArguments? arguments)
+        public TermReference(Identifier id, Identifier? attribute, CallArguments? arguments = null)
         {
             Id = id;
             Attribute = attribute;
@@ -517,37 +485,13 @@ namespace Linguini.Syntax.Ast
         ///     Constructs a dynamic reference in Fluent used to reference
         ///     another term with possible call arguments and optional attribute.
         /// </summary>
-        /// <param name="id">Dynamic reference id</param>
-        /// <param name="attribute">Optional dynamic reference attribute</param>
-        /// <param name="arguments">Optional dynamic reference call arguments</param>
-        public TermReference(string id, string? attribute = null, CallArguments? arguments = null)
-        {
-            Id = new Identifier(id);
-            if (attribute != null)
-            {
-                Attribute = new Identifier(attribute);
-            }
-
-            if (arguments != null)
-            {
-                Arguments = arguments.Value;
-            }
-        }
-
-        /// <summary>
-        ///     Constructs a dynamic reference in Fluent used to reference
-        ///     another term with possible call arguments and optional attribute.
-        /// </summary>
         /// <param name="id">Dynamic reference id.</param>
         /// <param name="attribute">Optional dynamic reference attribute.</param>
         /// <param name="argumentsBuilder">Optional dynamic reference <see cref="CallArgumentsBuilder" />.</param>
-        public TermReference(string id, string? attribute, CallArgumentsBuilder? argumentsBuilder)
+        public TermReference(Identifier id, Identifier? attribute, CallArgumentsBuilder? argumentsBuilder)
         {
-            Id = new Identifier(id);
-            if (attribute != null)
-            {
-                Attribute = new Identifier(attribute);
-            }
+            Id = id;
+            Attribute = attribute;
 
             if (argumentsBuilder != null)
             {
@@ -814,10 +758,10 @@ namespace Linguini.Syntax.Ast
         public readonly List<NamedArgument> NamedArgs;
 
         /// <summary>
-        ///     Constructs <c>CallArguments</c> from list of positional arguments and a list of named arguments.
+        ///     Constructs <c>CallArguments</c> from a list of positional arguments and a list of named arguments.
         /// </summary>
-        /// <param name="positionalArgs">positional arguments that are consumed in way they are given</param>
-        /// <param name="namedArgs">named arguments that are consumed depending on name provided</param>
+        /// <param name="positionalArgs">positional arguments that are consumed in the way they are given</param>
+        /// <param name="namedArgs">named arguments that are consumed depending on the name provided</param>
         public CallArguments(List<IInlineExpression> positionalArgs, List<NamedArgument> namedArgs)
         {
             PositionalArgs = positionalArgs;
@@ -872,7 +816,7 @@ namespace Linguini.Syntax.Ast
 
     /// <summary>
     ///     Represents a named argument in a function call or similar construct within Fluent syntax.
-    ///     This struct pairs an name with a value, encapsulating key-value associations typically used in named arguments.
+    ///     This struct pairs a name with a value, encapsulating key-value associations typically used in named arguments.
     /// </summary>
     public readonly struct NamedArgument : IEquatable<NamedArgument>
     {
@@ -1000,9 +944,9 @@ namespace Linguini.Syntax.Ast
         /// <param name="identifier">name of named argument</param>
         /// <param name="inlineExpression"><see cref="InlineExpressionBuilder" /> as a value of named argument.</param>
         /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="IInlineExpression" />.</returns>
-        public CallArgumentsBuilder AddNamedArg(string identifier, InlineExpressionBuilder inlineExpression)
+        public CallArgumentsBuilder AddNamedArg(Identifier identifier, InlineExpressionBuilder inlineExpression)
         {
-            _namedArgs.Add(new NamedArgument(new Identifier(identifier), inlineExpression.Build()));
+            _namedArgs.Add(new NamedArgument(identifier, inlineExpression.Build()));
             return this;
         }
 
@@ -1012,9 +956,9 @@ namespace Linguini.Syntax.Ast
         /// <param name="identifier">name of named argument</param>
         /// <param name="inlineExpression"><see cref="InlineExpressionBuilder" /> as a value of named argument.</param>
         /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="IInlineExpression" />.</returns>
-        public CallArgumentsBuilder AddNamedArg(string identifier, IInlineExpression inlineExpression)
+        public CallArgumentsBuilder AddNamedArg(Identifier identifier, IInlineExpression inlineExpression)
         {
-            _namedArgs.Add(new NamedArgument(new Identifier(identifier), inlineExpression));
+            _namedArgs.Add(new NamedArgument(identifier, inlineExpression));
             return this;
         }
 
@@ -1024,9 +968,9 @@ namespace Linguini.Syntax.Ast
         /// <param name="identifier">name of named argument</param>
         /// <param name="text"><see cref="string" /> as a value of named argument.</param>
         /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="string" />.</returns>
-        public CallArgumentsBuilder AddNamedArg(string identifier, string text)
+        public CallArgumentsBuilder AddNamedArg(Identifier identifier, string text)
         {
-            _namedArgs.Add(new NamedArgument(new Identifier(identifier), new TextLiteral(text)));
+            _namedArgs.Add(new NamedArgument(identifier, new TextLiteral(text)));
             return this;
         }
 
@@ -1036,9 +980,9 @@ namespace Linguini.Syntax.Ast
         /// <param name="identifier">name of named argument</param>
         /// <param name="number"><see cref="float" /> as a value of named argument.</param>
         /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="float" />.</returns>
-        public CallArgumentsBuilder AddNamedArg(string identifier, float number)
+        public CallArgumentsBuilder AddNamedArg(Identifier identifier, float number)
         {
-            _namedArgs.Add(new NamedArgument(new Identifier(identifier), new NumberLiteral(number)));
+            _namedArgs.Add(new NamedArgument(identifier, new NumberLiteral(number)));
             return this;
         }
 
@@ -1048,9 +992,9 @@ namespace Linguini.Syntax.Ast
         /// <param name="identifier">name of named argument</param>
         /// <param name="number"><see cref="double" /> as a value of named argument.</param>
         /// <returns><see cref="CallArgumentsBuilder" /> instance with the added <see cref="double" />.</returns>
-        public CallArgumentsBuilder AddNamedArg(string identifier, double number)
+        public CallArgumentsBuilder AddNamedArg(Identifier identifier, double number)
         {
-            _namedArgs.Add(new NamedArgument(new Identifier(identifier), new NumberLiteral(number)));
+            _namedArgs.Add(new NamedArgument(identifier, new NumberLiteral(number)));
             return this;
         }
 
@@ -1097,19 +1041,19 @@ namespace Linguini.Syntax.Ast
         /// <param name="id">The identifier of the function.</param>
         /// <param name="callArgumentsBuilder">The optional builder for call arguments.</param>
         /// <returns>An instance of <see cref="InlineExpressionBuilder" /> representing the function reference.</returns>
-        public static InlineExpressionBuilder CreateFunctionReference(string id,
+        public static InlineExpressionBuilder CreateFunctionReference(Identifier id,
             CallArgumentsBuilder callArgumentsBuilder)
         {
             return new InlineExpressionBuilder(new FunctionReference(id, callArgumentsBuilder.Build()));
         }
 
         /// <summary>
-        ///     Creates a message reference expression with the specified identifier, and an optional attribute.
+        ///     Creates a message reference expression with the specified identifier and an optional attribute.
         /// </summary>
         /// <param name="id">The identifier of the dynamic reference.</param>
         /// <param name="attribute">The optional attribute of the message reference.</param>
         /// <returns>An instance of <see cref="InlineExpressionBuilder" /> representing the message reference.</returns>
-        public static InlineExpressionBuilder CreateMessageReference(string id, string? attribute = null)
+        public static InlineExpressionBuilder CreateMessageReference(Identifier id, Identifier? attribute = null)
         {
             return new InlineExpressionBuilder(new MessageReference(id, attribute));
         }
@@ -1178,7 +1122,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="attribute">The optional attribute of the term reference.</param>
         /// <param name="callArgumentsBuilder">The optional builder for call arguments.</param>
         /// <returns>An instance of <see cref="InlineExpressionBuilder" /> representing the term reference.</returns>
-        public static InlineExpressionBuilder CreateTermReference(string id, string? attribute = null,
+        public static InlineExpressionBuilder CreateTermReference(Identifier id, Identifier? attribute = null,
             CallArgumentsBuilder? callArgumentsBuilder = null)
         {
             return new InlineExpressionBuilder(new TermReference(id, attribute, callArgumentsBuilder));
@@ -1198,7 +1142,7 @@ namespace Linguini.Syntax.Ast
         /// <summary>
         ///     Creates an instance of <see cref="InlineExpressionBuilder" /> containing a <see cref="VariableReference" />.
         /// </summary>
-        /// <param name="textLiteral">The text used to counstruct a <see cref="VariableReference" /> from.</param>
+        /// <param name="textLiteral">The text used to construct a <see cref="VariableReference" /> from.</param>
         /// <returns>An <see cref="InlineExpressionBuilder" /> wrapping the created <see cref="VariableReference" />.</returns>
         public static InlineExpressionBuilder CreateVariableReferences(string textLiteral)
         {
@@ -1238,7 +1182,7 @@ namespace Linguini.Syntax.Ast
         public readonly List<Variant> Variants;
 
         /// <summary>
-        ///     Consturcts a selection expression from a selector and a list of variants.
+        ///     Constructs a selection expression from a selector and a list of variants.
         /// </summary>
         /// <param name="selector"><see cref="IInlineExpression" /> used to determine which variant to use.</param>
         /// <param name="variants">List of variants to be chosen for evaluation.</param>
@@ -1370,7 +1314,7 @@ namespace Linguini.Syntax.Ast
         public IAddVariant AddVariant(float selector, PatternBuilder patternBuilder);
 
         /// <summary>
-        ///     Sets default selector to given position.
+        ///     Sets the default selector to a given position.
         /// </summary>
         /// <param name="defaultSelector">Which variant will become default (picked in case of no match).</param>
         /// <returns>A <see cref="SelectExpressionBuilder" /> with given default variant.</returns>
@@ -1418,7 +1362,7 @@ namespace Linguini.Syntax.Ast
         public readonly VariantType Type;
 
         /// <summary>
-        ///     Is the Variant picked when no other variant matches.
+        ///     Is the Variant picked when no other variant matches?
         /// </summary>
         protected internal bool InternalDefault;
 
@@ -1441,7 +1385,7 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        ///     Constructs a <c>Variant</c> from a type, key, pattern and if the variant is default.
+        ///     Constructs a <c>Variant</c> from a type, key, pattern, and if the variant is default.
         /// </summary>
         /// <param name="type">Which <see cref="VariantType" /> is this <c>Variant</c>.</param>
         /// <param name="key">Key of the <c>Variant</c>.</param>
@@ -1470,7 +1414,7 @@ namespace Linguini.Syntax.Ast
 
 
         /// <summary>
-        ///     Constructs a flaot keyed <c>Variant</c> with a given <see cref="PatternBuilder" /> as value.
+        ///     Constructs a float keyed <c>Variant</c> with a given <see cref="PatternBuilder" /> as value.
         /// </summary>
         /// <param name="key">number used as a key.</param>
         /// <param name="builder"><see cref="PatternBuilder" /> that represents value.</param>

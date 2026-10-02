@@ -75,9 +75,9 @@ namespace Linguini.Syntax.Ast
         /// </summary>
         /// <param name="id">string identifier of the attribute</param>
         /// <param name="builder"><see cref="PatternBuilder" /> that can be used to create a pattern programatically.</param>
-        public Attribute(string id, PatternBuilder builder)
+        public Attribute(Identifier id, PatternBuilder builder)
         {
-            Id = new Identifier(id);
+            Id = id;
             Value = builder.Build();
         }
 
@@ -358,7 +358,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="id">The identifier of the message to be referenced.</param>
         /// <param name="attribute">The optional attribute of the message to be referenced.</param>
         /// <returns>A <see cref="PatternBuilder" /> instance with the added message reference.</returns>
-        public PatternBuilder AddMessage(string id, string? attribute = null)
+        public PatternBuilder AddMessage(Identifier id, Identifier? attribute = null)
         {
             _patternElements.Add(new Placeable(new MessageReference(id, attribute)));
             return this;
@@ -371,7 +371,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="attribute">The optional attribute of the message to be referenced.</param>
         /// <param name="callArguments">The optional call arguments for a term.</param>
         /// <returns>A <see cref="PatternBuilder" /> instance with the added term reference.</returns>
-        public PatternBuilder AddTermReference(string id, string? attribute = null, CallArguments? callArguments = null)
+        public PatternBuilder AddTermReference(Identifier id, Identifier? attribute = null, CallArguments? callArguments = null)
         {
             _patternElements.Add(new Placeable(new TermReference(id, attribute, callArguments)));
             return this;
@@ -384,7 +384,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="attribute">The optional attribute of the dynamic reference.</param>
         /// <param name="callArguments">The optional call arguments for dynamic reference.</param>
         /// <returns>A <see cref="PatternBuilder" /> instance with the added term reference.</returns>
-        public PatternBuilder AddDynamicReference(string id, string? attribute = null,
+        public PatternBuilder AddDynamicReference(Identifier id, Identifier? attribute = null,
             CallArguments? callArguments = null)
         {
             _patternElements.Add(new Placeable(new DynamicReference(id, attribute, callArguments)));
@@ -397,7 +397,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="functionName">The name of the function reference.</param>
         /// <param name="funcArgs">The arguments of the function reference.</param>
         /// <returns>A <see cref="PatternBuilder" /> instance with the added function reference.</returns>
-        public PatternBuilder AddFunctionReference(string functionName, CallArguments? funcArgs = null)
+        public PatternBuilder AddFunctionReference(Identifier functionName, CallArguments? funcArgs = null)
         {
             _patternElements.Add(new Placeable(new FunctionReference(functionName, funcArgs ?? CallArguments.Empty)));
             return this;
@@ -409,7 +409,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="functionName">The name of the function reference.</param>
         /// <param name="builder">A <see cref="CallArgumentsBuilder" /> that constructs the function arguments.</param>
         /// <returns>A <see cref="PatternBuilder" /> instance with the added function reference.</returns>
-        public PatternBuilder AddFunctionReference(string functionName, CallArgumentsBuilder builder)
+        public PatternBuilder AddFunctionReference(Identifier functionName, CallArgumentsBuilder builder)
         {
             _patternElements.Add(new Placeable(new FunctionReference(functionName, builder.Build())));
             return this;
@@ -421,7 +421,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="messageId">The identifier of the message to be referenced.</param>
         /// <param name="attribute">The optional attribute of the message to be referenced.</param>
         /// <returns>A <see cref="PatternBuilder" /> instance with the added message reference.</returns>
-        public PatternBuilder AddMessageReference(string messageId, string? attribute = null)
+        public PatternBuilder AddMessageReference(Identifier messageId, Identifier? attribute = null)
         {
             _patternElements.Add(new Placeable(new MessageReference(messageId, attribute)));
             return this;
