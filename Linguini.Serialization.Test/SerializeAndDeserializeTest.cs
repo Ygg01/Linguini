@@ -144,7 +144,7 @@ public class SerializeAndDeserializeTest
                 AstMessage.Builder("message")
                     .SetPattern(Pattern.Builder()
                                     .AddNumberLiteral(3.0)
-                                    .AddPlaceable(PlaceableBuilder.InlineExpression(inlineExpressionBuilder).Build())
+                                    .AddPlaceable(Placeable.FromInline(inlineExpressionBuilder))
                                     .AddFunctionReference("COUNT")
                                     .AddTermReference("ref-term")
                                     .AddDynamicReference("dyn-rf")

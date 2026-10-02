@@ -204,7 +204,7 @@ namespace Linguini.Syntax.Ast
             Id = id;
             Arguments = arguments;
         }
-        
+
         /// <inheritdoc />
         public bool Equals(FunctionReference? other)
         {
@@ -639,6 +639,24 @@ namespace Linguini.Syntax.Ast
         public readonly IExpression Expression;
 
         /// <summary>
+        /// Constructs a <c>Placeable</c> from an <see cref="InlineExpressionBuilder" />.
+        /// </summary>
+        /// <param name="inlineExpr">The <see cref="InlineExpressionBuilder" /> used to build the placeable inline expression.</param>
+        /// <returns>A new instance of <see cref="Placeable" />.</returns>
+        public static Placeable FromInline(InlineExpressionBuilder inlineExpr) => new(inlineExpr.Build());
+
+        /// <summary>
+        /// Constructs a <c>Placeable</c> using a <see cref="SelectExpressionBuilder" />.
+        /// </summary>
+        /// <param name="selectExpr">
+        /// An instance of <see cref="SelectExpressionBuilder" /> used to build the <c>SelectExpression</c>.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="Placeable" /> initialized with the built <c>SelectExpression</c>.
+        /// </returns>
+        public static Placeable FromSelect(SelectExpressionBuilder selectExpr) => new(selectExpr.Build());
+
+        /// <summary>
         ///     Constructor for <c>Placeable</c>
         /// </summary>
         /// <param name="expression">Expression to be nested.</param>
@@ -691,45 +709,6 @@ namespace Linguini.Syntax.Ast
         }
     }
 
-    /// <summary>
-    ///     Builder for <see cref="Placeable" />
-    /// </summary>
-    public class PlaceableBuilder
-    {
-        private readonly IExpression _expression;
-
-        private PlaceableBuilder(IExpression expression)
-        {
-            _expression = expression;
-        }
-
-        /// <summary>
-        ///     Factory method for creating <c>PlaceableBuilder</c> from <see cref="InlineExpressionBuilder" />.
-        /// </summary>
-        /// <param name="inlineBuilder">Inline builder used for creation.</param>
-        /// <returns><see cref="PlaceableBuilder" /> instance created from <see cref="InlineExpressionBuilder" />.</returns>
-        public static PlaceableBuilder InlineExpression(InlineExpressionBuilder inlineBuilder)
-        {
-            return new PlaceableBuilder(inlineBuilder.Build());
-        }
-
-        /// <summary>
-        ///     Factory method for creating <c>PlaceableBuilder</c> from <see cref="SelectExpressionBuilder" />.
-        /// </summary>
-        /// <param name="selectorExpression">Selection expression builder used for creation.</param>
-        /// <returns><see cref="PlaceableBuilder" /> instance created from <see cref="SelectExpressionBuilder" />.</returns>
-        public static PlaceableBuilder InlineExpression(SelectExpressionBuilder selectorExpression)
-        {
-            return new PlaceableBuilder(selectorExpression.Build());
-        }
-
-        /// Builds a new Placeable instance using the elements stored in the builder.
-        /// <returns>A Placeable object containing the collected elements.</returns>
-        public Placeable Build()
-        {
-            return new Placeable(_expression);
-        }
-    }
 
     /// <summary>
     ///     Represents the arguments passed to a function or term call in Fluent syntax.
@@ -738,7 +717,7 @@ namespace Linguini.Syntax.Ast
     public readonly struct CallArguments : IEquatable<CallArguments>
     {
         /// <summary>
-        /// Better default for CallArguments
+        ///     Better default for CallArguments
         /// </summary>
         public static readonly CallArguments Empty =
             new(new List<IInlineExpression>(), new List<NamedArgument>());
@@ -1098,19 +1077,6 @@ namespace Linguini.Syntax.Ast
         public static InlineExpressionBuilder CreatePlaceable(Placeable placeable)
         {
             return new InlineExpressionBuilder(placeable);
-        }
-
-        /// <summary>
-        ///     Creates an <see cref="InlineExpressionBuilder" /> from a <see cref="PlaceableBuilder" />.
-        /// </summary>
-        /// <param name="placeable">The <see cref="PlaceableBuilder" /> used to initialize the builder.</param>
-        /// <returns>
-        ///     An instance of <see cref="InlineExpressionBuilder" /> initialized with the specified
-        ///     <see cref="PlaceableBuilder" />.
-        /// </returns>
-        public static InlineExpressionBuilder CreatePlaceable(PlaceableBuilder placeable)
-        {
-            return new InlineExpressionBuilder(placeable.Build());
         }
 
 
