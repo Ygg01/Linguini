@@ -132,7 +132,7 @@ public class SerializeAndDeserializeTest
                 new AstComment(CommentLevel.Comment, new List<ReadOnlyMemory<char>> { "test2".AsMemory() }),
                 new AstComment(CommentLevel.GroupComment, new List<ReadOnlyMemory<char>> { "test3".AsMemory() }),
                 new Junk("junkie"),
-                AstMessageBuilder.Builder("message").SetPattern(Pattern.From("xyz")).Build()
+                AstMessage.Builder("message").SetPattern(Pattern.From("xyz")).Build()
             },
             new List<ParseError>());
         var inlineExpressionBuilder = InlineExpressionBuilder
@@ -141,7 +141,7 @@ public class SerializeAndDeserializeTest
         yield return new Resource(
             new List<IEntry>
             {
-                AstMessageBuilder.Builder("message")
+                AstMessage.Builder("message")
                     .SetPattern(Pattern.Builder()
                                     .AddNumberLiteral(3.0)
                                     .AddPlaceable(PlaceableBuilder.InlineExpression(inlineExpressionBuilder).Build())

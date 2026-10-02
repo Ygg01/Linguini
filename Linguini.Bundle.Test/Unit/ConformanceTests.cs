@@ -39,7 +39,7 @@ term = term
         [TestCaseSource(nameof(AllBundles))]
         public void FormatPattern(IReadBundle bundle)
         {
-            var astMessage = AstMessageBuilder.Builder("term").SetPattern(Pattern.Builder().AddText("term")).Build();
+            var astMessage = AstMessage.Builder("term").SetPattern(Pattern.Builder().AddText("term")).Build();
             // Pattern formatting
             var pattern = bundle.FormatPattern(astMessage.Value, null, out var err);
             Assert.That(err, Is.Null);
@@ -59,7 +59,7 @@ term = term
         public void FormatPatternErrRef(IReadBundle bundle)
         {
             IList<FluentError>? errors = null;
-            var astMessage = AstMessageBuilder.Builder("term").SetPattern(Pattern.Builder().AddText("term")).Build();
+            var astMessage = AstMessage.Builder("term").SetPattern(Pattern.Builder().AddText("term")).Build();
             var formatted = bundle.FormatPatternErrRef(astMessage.Value, null, ref errors);
             Assert.That(errors, Is.Null);
             Assert.That(formatted, Is.EqualTo("term"));

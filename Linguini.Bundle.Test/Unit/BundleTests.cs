@@ -334,7 +334,7 @@ new1  = new
             var localeStep = LinguiniBuilder.Builder(true);
             var copyOfLocaleStep = localeStep.GetLocaleStepBuilder();
 
-            var message = AstMessageBuilder.Builder("term")
+            var message = AstMessage.Builder("term")
                 .SetPattern(Pattern.From("baz"))
                 .Build();
             var resource = new Resource(new List<IEntry> { message }, new List<ParseError>());
