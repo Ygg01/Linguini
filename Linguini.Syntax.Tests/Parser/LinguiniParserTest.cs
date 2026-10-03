@@ -32,7 +32,7 @@ namespace Linguini.Syntax.Tests.Parser
             if (parsed.Entries[0] is AstComment comment)
             {
                 Assert.That(expectedCommentLevel, Is.EqualTo(comment.CommentLevel));
-                Assert.That(expectedContent, Is.EqualTo(comment.AsStr()));
+                Assert.That(expectedContent, Is.EqualTo(comment.Content));
             }
             else
             {
@@ -103,7 +103,7 @@ namespace Linguini.Syntax.Tests.Parser
                 if (parsed.Entries[0] is AstMessage msg)
                 {
                     Assert.That(expMsg, Is.EqualTo(new string(msg.Id.Name.ToArray())));
-                    Assert.That(expComment, Is.EqualTo(msg.Comment.AsStr()));
+                    Assert.That(expComment, Is.EqualTo(msg.Comment.Content));
                 }
                 else
                 {
@@ -115,7 +115,7 @@ namespace Linguini.Syntax.Tests.Parser
                 if (parsed.Entries[0] is AstComment comment
                     && parsed.Entries[1] is AstMessage message)
                 {
-                    Assert.That(expComment, Is.EqualTo(comment.AsStr()));
+                    Assert.That(expComment, Is.EqualTo(comment.Content));
                     Assert.That(expMsg, Is.EqualTo(new string(message.Id.Name.ToArray())));
                 }
                 else
@@ -139,7 +139,7 @@ namespace Linguini.Syntax.Tests.Parser
                 if (parsed.Entries[0] is AstTerm term)
                 {
                     Assert.That(expTerm, Is.EqualTo(new string(term.Id.Name.ToArray())));
-                    Assert.That(expComment, Is.EqualTo(term.Comment.AsStr()));
+                    Assert.That(expComment, Is.EqualTo(term.Comment.Content));
                 }
                 else
                 {
@@ -151,7 +151,7 @@ namespace Linguini.Syntax.Tests.Parser
                 if (parsed.Entries[0] is AstComment comment
                     && parsed.Entries[1] is AstTerm term)
                 {
-                    Assert.That(expComment, Is.EqualTo(comment.AsStr()));
+                    Assert.That(expComment, Is.EqualTo(comment.Content));
                     Assert.That(expTerm, Is.EqualTo(new string(term.Id.Name.ToArray())));
                 }
                 else

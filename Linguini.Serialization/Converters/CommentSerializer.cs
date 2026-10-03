@@ -94,7 +94,7 @@ namespace Linguini.Serialization.Converters
             }
 
             writer.WritePropertyName("content");
-            writer.WriteStringValue(comment.AsStr());
+            writer.WriteStringValue(comment.Content);
             writer.WriteEndObject();
         }
 

@@ -215,8 +215,8 @@ namespace Linguini.Syntax.Ast
         public sealed class AstMessageBuilder
         {
             private readonly List<Attribute> _attributes;
-            private AstComment? _comment;
             private readonly Identifier _id;
+            private AstComment? _comment;
             private Pattern? _pattern;
 
             internal AstMessageBuilder(Identifier id)
@@ -369,14 +369,6 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="AstTermBuilder" /> with the specified identifier.
-        /// </summary>
-        /// <param name="id">The <see cref="Identifier" /> representing the message identifier to initialize the builder.</param>
-        /// <param name="pattern">The <see cref="Pattern" /> to be associated with this term builder.</param>
-        /// <returns>A new <see cref="AstTermBuilder" /> instance.</returns>
-        public static AstTermBuilder Builder(Identifier id, Pattern pattern) => new(id, pattern);
-
-        /// <summary>
         ///     Represents an optional comment associated with a specific term in the Fluent AST.
         /// </summary>
         /// <remarks>
@@ -406,6 +398,17 @@ namespace Linguini.Syntax.Ast
             return Identifier.Comparer.Equals(Id, other.Id) && Equals(Value, other.Value) &&
                    Attributes.SequenceEqual(other.Attributes, Attribute.Comparer) &&
                    Equals(InternalComment, other.InternalComment);
+        }
+
+        /// <summary>
+        ///     Creates a new instance of <see cref="AstTermBuilder" /> with the specified identifier.
+        /// </summary>
+        /// <param name="id">The <see cref="Identifier" /> representing the message identifier to initialize the builder.</param>
+        /// <param name="pattern">The <see cref="Pattern" /> to be associated with this term builder.</param>
+        /// <returns>A new <see cref="AstTermBuilder" /> instance.</returns>
+        public static AstTermBuilder Builder(Identifier id, Pattern pattern)
+        {
+            return new AstTermBuilder(id, pattern);
         }
 
         /// <inheritdoc />
@@ -443,7 +446,7 @@ namespace Linguini.Syntax.Ast
         {
             private readonly List<Attribute> _attributes;
             private AstComment? _comment;
-            private Identifier _id;
+            private readonly Identifier _id;
             private Pattern _pattern;
 
             internal AstTermBuilder(Identifier id, Pattern pattern)
@@ -622,7 +625,7 @@ namespace Linguini.Syntax.Ast
         /// <summary>
         ///     Represents the content of a Fluent AST comment as a collection of text lines.
         /// </summary>
-        public readonly List<ReadOnlyMemory<char>> Content;
+        public readonly string Content;
 
         /// <summary>
         ///     Constructs a Fluent AST comment, from level and content/
@@ -632,8 +635,22 @@ namespace Linguini.Syntax.Ast
         public AstComment(CommentLevel commentLevel, List<ReadOnlyMemory<char>> content)
         {
             CommentLevel = commentLevel;
+            var sb = new StringBuilder(content.Count * 80);
+            sb.AppendJoin("\n", content);
+            Content = sb.ToString();
+        }
+
+        /// <summary>
+        ///     Constructs a Fluent AST comment, from level and content/
+        /// </summary>
+        /// <param name="commentLevel">The level of the comment, represented as <see cref="CommentLevel" />.</param>
+        /// <param name="content">The content of the comment, stored as a list of lines.</param>
+        public AstComment(CommentLevel commentLevel, string content)
+        {
+            CommentLevel = commentLevel;
             Content = content;
         }
+
 
         /// <inheritdoc />
         public string GetId()
@@ -659,49 +676,15 @@ namespace Linguini.Syntax.Ast
                 return false;
             }
 
-            if (Content.Count != other.Content.Count)
-            {
-                return false;
-            }
 
-            for (var i = 0; i < Content.Count; i++)
-            {
-                var l = Content[i];
-                var r = other.Content[i];
-                if (!l.Span.SequenceEqual(r.Span))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return Content == other.Content;
         }
 
-        /// <summary>
-        ///     Converts the content of the comment into a single string, with each line separated by the specified line ending.
-        /// </summary>
-        /// <param name="lineEnd">The string used to separate lines in the output. The default value is a newline ("\n").</param>
-        /// <returns>A string representation of the comment content, where lines are joined by the specified line ending.</returns>
-        public string AsStr(string lineEnd = "\n")
-        {
-            StringBuilder sb = new();
-            for (var i = 0; i < Content.Count; i++)
-            {
-                if (i > 0)
-                {
-                    sb.Append(lineEnd);
-                }
-
-                sb.Append(Content[i].Span.ToString());
-            }
-
-            return sb.ToString();
-        }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj))
+            if (obj is null)
             {
                 return false;
             }
@@ -723,6 +706,32 @@ namespace Linguini.Syntax.Ast
         public override int GetHashCode()
         {
             return HashCode.Combine((int)CommentLevel, Content);
+        }
+
+        /// <summary>
+        ///     Determines whether two <see cref="AstComment" /> instances are equal.
+        /// </summary>
+        /// <param name="left">The left-hand side <see cref="AstComment" /> instance to compare.</param>
+        /// <param name="right">The right-hand side <see cref="AstComment" /> instance to compare.</param>
+        /// <returns>
+        ///     True if the specified <see cref="AstComment" /> instances are equal; otherwise, false.
+        /// </returns>
+        public static bool operator ==(AstComment? left, AstComment? right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <summary>
+        ///     Determines whether two <see cref="AstComment" /> instances are unequal.
+        /// </summary>
+        /// <param name="left">The left-hand side <see cref="AstComment" /> instance to compare.</param>
+        /// <param name="right">The right-hand side <see cref="AstComment" /> instance to compare.</param>
+        /// <returns>
+        ///     True if the specified <see cref="AstComment" /> instances are unequal; otherwise, false.
+        /// </returns>
+        public static bool operator !=(AstComment? left, AstComment? right)
+        {
+            return !Equals(left, right);
         }
     }
 
