@@ -20,42 +20,7 @@ namespace Linguini.Syntax.Parser
         private const string Cr = "\n";
         private readonly bool _enableExperimental;
         private readonly ZeroCopyReader _reader;
-
-        /// <summary>
-        ///     Parses Fluent resources using a zero copy reader.
-        /// </summary>
-        /// <remarks>Obsoleted, use <see cref="FromFile" /></remarks>
-        /// <param name="zeroCopyReader">Zero-copy reader</param>
-        /// <param name="enableExperimental">Whether to use experimental features.</param>
-        [Obsolete("Consider using LinguiniParser.FromFile factory method instead", true)]
-        public LinguiniParser(ZeroCopyReader zeroCopyReader, bool enableExperimental)
-        {
-            _reader = zeroCopyReader;
-            _enableExperimental = enableExperimental;
-        }
-
-        /// <summary>
-        ///     Create new parser for <c>string</c>.
-        /// </summary>
-        /// <param name="input">Input to be parsed</param>
-        /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
-        [Obsolete("Consider using LinguiniParser.FromFragement factory method instead", true)]
-        public LinguiniParser(string input, bool enableExperimental = false) : this(new ZeroCopyReader(input),
-            enableExperimental)
-        {
-        }
-
-
-        /// <summary>
-        ///     Create new parser for <c>TextReader</c>
-        /// </summary>
-        /// <param name="input">TextReader to be parsed to Fluent AST.</param>
-        /// <param name="enableExperimental">Using non-standard Fluent extensions</param>
-        [Obsolete("Consider using LinguiniParser.FromTextReader factory method instead", true)]
-        public LinguiniParser(TextReader input, bool enableExperimental = false) : this(input.ReadToEnd(),
-            enableExperimental)
-        {
-        }
+        
 
         /// <summary>
         ///     Create new parser for <c>TextReader</c>
