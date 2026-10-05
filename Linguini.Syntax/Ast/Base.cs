@@ -255,12 +255,6 @@ namespace Linguini.Syntax.Ast
                 return true;
             }
 
-            if (Elements.Count != other.Elements.Count)
-            {
-                return false;
-            }
-
-
             return Elements.SequenceEqual(other.Elements, IPatternElement.PatternComparer);
         }
 
@@ -343,19 +337,38 @@ namespace Linguini.Syntax.Ast
             var hash = new HashCode();
             foreach (var patternElement in Elements)
             {
-                switch (patternElement)
-                {
-                    case Placeable placeable:
-                        hash.Add(placeable);
-                        break;
-                    case TextLiteral textLiteral:
-                        hash.Add(textLiteral);
-                        break;
-                }
+                hash.Add(IPatternElement.PatternComparer.GetHashCode(patternElement));
             }
 
             return hash.ToHashCode();
         }
+        
+        /// <summary>
+        ///     Checks equality between two <see cref="Pattern" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="Pattern" /> to compare.</param>
+        /// <param name="right">The second <see cref="Pattern" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="Pattern" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(Pattern? left, Pattern? right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <summary>
+        ///     Checks inequality between two <see cref="Pattern" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="Pattern" /> to compare.</param>
+        /// <param name="right">The second <see cref="Pattern" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="Pattern" /> objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(Pattern? left, Pattern? right)
+        {
+            return !Equals(left, right);
+        }
+
 
         /// <summary>
         ///     Builder for <see cref="Pattern" />. Used to construct Patterns programmatically.

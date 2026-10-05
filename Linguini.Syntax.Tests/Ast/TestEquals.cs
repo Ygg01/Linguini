@@ -29,17 +29,17 @@ namespace Linguini.Syntax.Tests.Ast
         [TestCaseSource(nameof(AstCommentExample))]
         public void TestAstComment(AstComment comment, object? other, bool expected)
         {
-            if (other is AstComment otherComment)
+            switch (other)
             {
-                Assert.That(comment == otherComment, Is.EqualTo(expected));
-                Assert.That(comment != otherComment, Is.EqualTo(!expected));
-                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
-                Assert.That(comment.GetId() == otherComment.GetId());
-            }
-
-            if (other is null)
-            {
-                Assert.That(comment.Equals((AstComment?)other), Is.EqualTo(expected));
+                case AstComment otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    Assert.That(comment.GetId() == otherComment.GetId());
+                    break;
+                case null:
+                    Assert.That(comment.Equals((AstComment?)other), Is.EqualTo(expected));
+                    break;
             }
 
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
@@ -63,16 +63,16 @@ namespace Linguini.Syntax.Tests.Ast
         [TestCaseSource(nameof(AstLocData))]
         public void TestLocation(AstLocation comment, object? other, bool expected)
         {
-            if (other is AstLocation otherComment)
+            switch (other)
             {
-                Assert.That(comment == otherComment, Is.EqualTo(expected));
-                Assert.That(comment != otherComment, Is.EqualTo(!expected));
-                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
-            }
-
-            if (other is null)
-            {
-                Assert.That(comment.Equals((AstLocation?)other), Is.EqualTo(expected));
+                case AstLocation otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((AstLocation?)other), Is.EqualTo(expected));
+                    break;
             }
 
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
@@ -93,16 +93,16 @@ namespace Linguini.Syntax.Tests.Ast
         [TestCaseSource(nameof(AstTextData))]
         public void TestTextLiteral(TextLiteral comment, object? other, bool expected)
         {
-            if (other is TextLiteral otherComment)
+            switch (other)
             {
-                Assert.That(comment == otherComment, Is.EqualTo(expected));
-                Assert.That(comment != otherComment, Is.EqualTo(!expected));
-                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
-            }
-
-            if (other is null)
-            {
-                Assert.That(comment.Equals((TextLiteral?)other), Is.EqualTo(expected));
+                case TextLiteral otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((TextLiteral?)other), Is.EqualTo(expected));
+                    break;
             }
 
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
@@ -123,16 +123,16 @@ namespace Linguini.Syntax.Tests.Ast
         [TestCaseSource(nameof(AstNumberData))]
         public void TestNumberData(NumberLiteral comment, object? other, bool expected)
         {
-            if (other is NumberLiteral otherComment)
+            switch (other)
             {
-                Assert.That(comment == otherComment, Is.EqualTo(expected));
-                Assert.That(comment != otherComment, Is.EqualTo(!expected));
-                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
-            }
-
-            if (other is null)
-            {
-                Assert.That(comment.Equals((NumberLiteral?)other), Is.EqualTo(expected));
+                case NumberLiteral otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((NumberLiteral?)other), Is.EqualTo(expected));
+                    break;
             }
 
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
@@ -154,18 +154,18 @@ namespace Linguini.Syntax.Tests.Ast
         [TestCaseSource(nameof(IdentifierTestData))]
         public void TestIdentifier(Identifier comment, object? other, bool expected)
         {
-            if (other is Identifier otherComment)
+            switch (other)
             {
-                Assert.That(comment == otherComment, Is.EqualTo(expected));
-                Assert.That(comment != otherComment, Is.EqualTo(!expected));
-                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
-            }
-
-            if (other is null)
-            {
-                Assert.That(comment.Equals((Identifier?)other), Is.EqualTo(expected));
-                Assert.That(Identifier.Comparer.Equals(comment, null), Is.False);
-                Assert.That(Identifier.Comparer.Equals(null, comment), Is.False);
+                case Identifier otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((Identifier?)other), Is.EqualTo(expected));
+                    Assert.That(Identifier.Comparer.Equals(comment, null), Is.False);
+                    Assert.That(Identifier.Comparer.Equals(null, comment), Is.False);
+                    break;
             }
 
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
@@ -191,18 +191,59 @@ namespace Linguini.Syntax.Tests.Ast
         [TestCaseSource(nameof(AttributeTestData))]
         public void TestAttribute(Attribute comment, object? other, bool expected)
         {
-            if (other is Attribute otherComment)
+            switch (other)
             {
-                Assert.That(comment == otherComment, Is.EqualTo(expected));
-                Assert.That(comment != otherComment, Is.EqualTo(!expected));
-                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                case Attribute otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((Attribute?)other), Is.EqualTo(expected));
+                    Assert.That(Attribute.Comparer.Equals(comment, null), Is.False);
+                    Assert.That(Attribute.Comparer.Equals(null, comment), Is.False);
+                    break;
             }
 
-            if (other is null)
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        private static IEnumerable<TestCaseData> PatternTestData()
+        {
+            var same = Pattern.Builder()
+                .AddText("top")
+                .AddDynamicReference("dyn-ref")
+                .Build();
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, Pattern.From("top"), false);
+            yield return new TestCaseData(same, Pattern.From(30), false);
+            yield return new TestCaseData(same, Pattern.From(3.1), false);
+            yield return new TestCaseData(same, Pattern.Builder()
+                .AddText("top")
+                .AddDynamicReference("dyn-ref").Build(), 
+                true);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(PatternTestData))]
+        public void TestPattern(Pattern comment, object? other, bool expected)
+        {
+            switch (other)
             {
-                Assert.That(comment.Equals((Attribute?)other), Is.EqualTo(expected));
-                Assert.That(Attribute.Comparer.Equals(comment, null), Is.False);
-                Assert.That(Attribute.Comparer.Equals(null, comment), Is.False);
+                case Pattern otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((Pattern?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(comment, null), Is.False);
+                    Assert.That(Equals(null, comment), Is.False);
+                    break;
             }
 
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
