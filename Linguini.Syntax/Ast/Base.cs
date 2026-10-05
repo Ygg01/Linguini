@@ -353,22 +353,6 @@ namespace Linguini.Syntax.Ast
             }
 
             /// <summary>
-            ///     Simple constructor that creates a <see cref="Pattern" /> with <see cref="TextLiteral" />.
-            /// </summary>
-            public PatternBuilder(string text)
-            {
-                _patternElements.Add(new TextLiteral(text));
-            }
-
-            /// <summary>
-            ///     Simple constructor that creates a <see cref="Pattern" /> with <see cref="NumberLiteral" />.
-            /// </summary>
-            public PatternBuilder(float number)
-            {
-                _patternElements.Add(new Placeable(new NumberLiteral(number)));
-            }
-
-            /// <summary>
             ///     Adds <c>textLiteral</c> to the pattern.
             /// </summary>
             /// <param name="textLiteral">string to be converted to <see cref="TextLiteral" /></param>
@@ -539,6 +523,8 @@ namespace Linguini.Syntax.Ast
     /// <seealso cref="Linguini.Syntax.Ast.AstTerm" />
     public class Identifier : IEquatable<Identifier>
     {
+
+
         /// <summary>
         ///     Provides a default instance of <see cref="Identifier.IdentifierComparer" /> for comparing
         ///     two <see cref="Identifier" /> instances based on their contents.
@@ -585,19 +571,26 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public bool Equals(Identifier? other)
         {
-            if (ReferenceEquals(null, other))
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
+            if (other is null) return false;
+            if (ReferenceEquals(this, other)) return true;
             return Comparer.Equals(this, other);
         }
 
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Comparer.Equals(this, (Identifier?) obj);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return Comparer.GetHashCode(this);
+        }
+        
         /// <inheritdoc />
         public override string ToString()
         {
@@ -651,28 +644,6 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <inheritdoc />
-        public override bool Equals(object? obj)
-        {
-            if (obj is null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            return obj.GetType() == GetType() && Equals((Identifier)obj);
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            return Comparer.GetHashCode(this);
-        }
-
-        /// <inheritdoc />
         public class IdentifierComparer : IEqualityComparer<Identifier>
         {
             /// <inheritdoc />
@@ -692,11 +663,7 @@ namespace Linguini.Syntax.Ast
                 {
                     return false;
                 }
-
-                if (x.GetType() != y.GetType())
-                {
-                    return false;
-                }
+                
 
                 return x.Name.Span.SequenceEqual(y.Name.Span);
             }

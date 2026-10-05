@@ -86,7 +86,7 @@ namespace Linguini.Syntax.Ast
         {
             return Value.GetHashCode();
         }
-        
+
         /// <summary>
         ///     Determines whether two <see cref="TextLiteral" /> instances are equal.
         /// </summary>
@@ -201,6 +201,32 @@ namespace Linguini.Syntax.Ast
         public override int GetHashCode()
         {
             return Value.GetHashCode();
+        }
+
+        /// <summary>
+        ///     Compares two <see cref="CallArguments" /> instances for equality.
+        /// </summary>
+        /// <param name="left">The left-hand <see cref="CallArguments" /> to compare.</param>
+        /// <param name="right">The right-hand <see cref="CallArguments" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the two <see cref="CallArguments" /> instances are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(NumberLiteral? left, NumberLiteral? right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <summary>
+        ///     Compares two <see cref="NumberLiteral" /> instances for inequality.
+        /// </summary>
+        /// <param name="left">The left-hand <see cref="NumberLiteral" /> to compare.</param>
+        /// <param name="right">The right-hand <see cref="NumberLiteral" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the two <see cref="NumberLiteral" /> instances are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(NumberLiteral? left, NumberLiteral? right)
+        {
+            return !Equals(left, right);
         }
     }
 
@@ -833,7 +859,7 @@ namespace Linguini.Syntax.Ast
         {
             private readonly List<NamedArgument> _namedArgs = new();
             private readonly List<IInlineExpression> _positionalArgs = new();
-            
+
             internal CallArgumentsBuilder()
             {
             }

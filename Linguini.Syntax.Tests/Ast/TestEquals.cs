@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Linguini.Syntax.Ast;
+using Linguini.Syntax.IO;
 using NUnit.Framework;
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
@@ -48,11 +49,13 @@ namespace Linguini.Syntax.Tests.Ast
         private static IEnumerable<TestCaseData> AstLocData()
         {
             var same = AstLocation.FromRowAndFilename(3, "text.ftl");
+            var fromReader = AstLocation.FromReader(new ZeroCopyReader("aaaa"));
             yield return new TestCaseData(same, 3, false);
             yield return new TestCaseData(same, null, false);
             yield return new TestCaseData(same, same, true);
             yield return new TestCaseData(same, AstLocation.FromRowAndFilename(5, "text.ftl"), false);
             yield return new TestCaseData(same, AstLocation.FromRowAndFilename(3, "testing.ftl"), false);
+            yield return new TestCaseData(same, fromReader, false);
         }
         
         [Test]
@@ -101,6 +104,97 @@ namespace Linguini.Syntax.Tests.Ast
             if (other is null)
             {
                 Assert.That(comment.Equals((TextLiteral?)other), Is.EqualTo(expected));
+            }
+            
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        private static IEnumerable<TestCaseData> AstNumberData()
+        {
+            var same = new NumberLiteral(1);
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, new NumberLiteral(3.2), false);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(AstNumberData))]
+        public void TestNumberData(NumberLiteral comment, object? other, bool expected)
+        {
+            if (other is NumberLiteral otherComment)
+            {
+                Assert.That(comment == otherComment, Is.EqualTo(expected));
+                Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+            }
+
+            if (other is null)
+            {
+                Assert.That(comment.Equals((NumberLiteral?)other), Is.EqualTo(expected));
+            }
+            
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        
+        private static IEnumerable<TestCaseData> IdentifierTestData()
+        {
+            Identifier same = "aaa";
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, new Identifier("bbb"), false);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(IdentifierTestData))]
+        public void TestIdentifier(Identifier comment, object? other, bool expected)
+        {
+            if (other is Identifier otherComment)
+            {
+                Assert.That(comment == otherComment, Is.EqualTo(expected));
+                Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+            }
+
+            if (other is null)
+            {
+                Assert.That(comment.Equals((Identifier?)other), Is.EqualTo(expected));
+            }
+            
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        private static IEnumerable<TestCaseData> AttributeTestData()
+        {
+            var same = new Attribute("zzz", Pattern.Builder().AddText("top"));
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, new Identifier("bbb"), false);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(AttributeTestData))]
+        public void TestAttribute(Attribute comment, object? other, bool expected)
+        {
+            if (other is Attribute otherComment)
+            {
+                Assert.That(comment == otherComment, Is.EqualTo(expected));
+                Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+            }
+
+            if (other is null)
+            {
+                Assert.That(comment.Equals((Identifier?)other), Is.EqualTo(expected));
             }
             
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
