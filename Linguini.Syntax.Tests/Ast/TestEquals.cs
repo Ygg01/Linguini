@@ -16,14 +16,14 @@ namespace Linguini.Syntax.Tests.Ast
     {
         private static IEnumerable<TestCaseData> AstCommentExample()
         {
-            var same = new AstComment(CommentLevel.Comment, "comment"); 
+            var same = new AstComment(CommentLevel.Comment, "comment");
             yield return new TestCaseData(same, 3, false);
             yield return new TestCaseData(same, null, false);
             yield return new TestCaseData(same, same, true);
             yield return new TestCaseData(same, new AstComment(CommentLevel.GroupComment, "comment"), false);
             yield return new TestCaseData(same, new AstComment(CommentLevel.Comment, "commentzzzz"), false);
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(AstCommentExample))]
@@ -41,11 +41,11 @@ namespace Linguini.Syntax.Tests.Ast
             {
                 Assert.That(comment.Equals((AstComment?)other), Is.EqualTo(expected));
             }
-            
+
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
             Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
         }
-        
+
         private static IEnumerable<TestCaseData> AstLocData()
         {
             var same = AstLocation.FromRowAndFilename(3, "text.ftl");
@@ -57,7 +57,7 @@ namespace Linguini.Syntax.Tests.Ast
             yield return new TestCaseData(same, AstLocation.FromRowAndFilename(3, "testing.ftl"), false);
             yield return new TestCaseData(same, fromReader, false);
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(AstLocData))]
@@ -74,11 +74,11 @@ namespace Linguini.Syntax.Tests.Ast
             {
                 Assert.That(comment.Equals((AstLocation?)other), Is.EqualTo(expected));
             }
-            
+
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
             Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
         }
-        
+
         private static IEnumerable<TestCaseData> AstTextData()
         {
             var same = new TextLiteral("ex");
@@ -86,9 +86,8 @@ namespace Linguini.Syntax.Tests.Ast
             yield return new TestCaseData(same, null, false);
             yield return new TestCaseData(same, same, true);
             yield return new TestCaseData(same, new TextLiteral("heh"), false);
-
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(AstTextData))]
@@ -105,11 +104,11 @@ namespace Linguini.Syntax.Tests.Ast
             {
                 Assert.That(comment.Equals((TextLiteral?)other), Is.EqualTo(expected));
             }
-            
+
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
             Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
         }
-        
+
         private static IEnumerable<TestCaseData> AstNumberData()
         {
             var same = new NumberLiteral(1);
@@ -118,7 +117,7 @@ namespace Linguini.Syntax.Tests.Ast
             yield return new TestCaseData(same, same, true);
             yield return new TestCaseData(same, new NumberLiteral(3.2), false);
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(AstNumberData))]
@@ -135,12 +134,12 @@ namespace Linguini.Syntax.Tests.Ast
             {
                 Assert.That(comment.Equals((NumberLiteral?)other), Is.EqualTo(expected));
             }
-            
+
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
             Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
         }
-        
-        
+
+
         private static IEnumerable<TestCaseData> IdentifierTestData()
         {
             Identifier same = "aaa";
@@ -149,7 +148,7 @@ namespace Linguini.Syntax.Tests.Ast
             yield return new TestCaseData(same, same, true);
             yield return new TestCaseData(same, new Identifier("bbb"), false);
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(IdentifierTestData))]
@@ -165,21 +164,28 @@ namespace Linguini.Syntax.Tests.Ast
             if (other is null)
             {
                 Assert.That(comment.Equals((Identifier?)other), Is.EqualTo(expected));
+                Assert.That(Identifier.Comparer.Equals(comment, null), Is.False);
+                Assert.That(Identifier.Comparer.Equals(null, comment), Is.False);
             }
-            
+
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
             Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
         }
-        
+
         private static IEnumerable<TestCaseData> AttributeTestData()
         {
             var same = new Attribute("zzz", Pattern.Builder().AddText("top"));
             yield return new TestCaseData(same, 3, false);
             yield return new TestCaseData(same, null, false);
             yield return new TestCaseData(same, same, true);
-            yield return new TestCaseData(same, new Identifier("bbb"), false);
+            yield return new TestCaseData(same,
+                new Attribute("xyz", Pattern.From("top")), false);
+            yield return new TestCaseData(same,
+                new Attribute("zzz", Pattern.Builder().AddText("xxxx")), false);
+            yield return new TestCaseData(same, new
+                    Attribute("x1", Pattern.Builder().AddDynamicReference("dyn-rfe")), false);
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(AttributeTestData))]
@@ -194,9 +200,11 @@ namespace Linguini.Syntax.Tests.Ast
 
             if (other is null)
             {
-                Assert.That(comment.Equals((Identifier?)other), Is.EqualTo(expected));
+                Assert.That(comment.Equals((Attribute?)other), Is.EqualTo(expected));
+                Assert.That(Attribute.Comparer.Equals(comment, null), Is.False);
+                Assert.That(Attribute.Comparer.Equals(null, comment), Is.False);
             }
-            
+
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
             Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
         }

@@ -154,7 +154,7 @@ public class SerializeAndDeserializeTest
         yield return new Junk("Test".AsMemory());
         yield return AstTerm.Builder("z", Pattern.From("x"))
             .SetComment("my comment")
-            .AddAttribute(Attribute.From("x0", Pattern.From(32)))
+            .AddAttribute( new Attribute("x0", Pattern.From(32)))
             .Build();
         yield return new AstMessage(
             new Identifier("x"),

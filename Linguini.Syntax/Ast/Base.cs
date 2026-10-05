@@ -32,7 +32,7 @@ namespace Linguini.Syntax.Ast
         ///     It leverages the <see cref="AttributeComparer" /> implementation to perform custom
         ///     equality checks.
         /// </remarks>
-        public static AttributeComparer Comparer = new();
+        public static readonly AttributeComparer Comparer = new();
 
         /// <summary>
         ///     Represents the identifier name for an <see cref="Attribute" /> within the Fluent template.
@@ -100,6 +100,32 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
+        ///     Checks equality between two <see cref="Attribute" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="Attribute" /> to compare.</param>
+        /// <param name="right">The second <see cref="Attribute" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="Attribute" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(Attribute? left, Attribute? right)
+        {
+            return Comparer.Equals(left, right);
+        }
+
+        /// <summary>
+        ///     Checks inequality between two <see cref="Attribute" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="Attribute" /> to compare.</param>
+        /// <param name="right">The second <see cref="Attribute" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="Attribute" /> objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(Attribute? left, Attribute? right)
+        {
+            return !Comparer.Equals(left, right);
+        }
+
+        /// <summary>
         ///     Deconstructs the current instance into its component parts.
         /// </summary>
         /// <param name="id">The identifier associated with this attribute.</param>
@@ -109,23 +135,7 @@ namespace Linguini.Syntax.Ast
             id = Id;
             value = Value;
         }
-
-        /// <summary>
-        ///     Factory method for constructing an <see cref="Attribute" /> from the provided identifier and pattern builder.
-        /// </summary>
-        /// <param name="id">
-        ///     The string identifier used to initialize the <see cref="Identifier" /> of the <see cref="Attribute" />
-        ///     .
-        /// </param>
-        /// <param name="pattern">
-        ///     The <see cref="Pattern" /> used to construct the <see cref="Pattern" /> of the
-        ///     <see cref="Attribute" />.
-        /// </param>
-        /// <returns>A newly constructed <see cref="Attribute" /> instance.</returns>
-        public static Attribute From(Identifier id, Pattern pattern)
-        {
-            return new Attribute(id, pattern);
-        }
+        
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
@@ -151,7 +161,7 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, Value);
+            return Comparer.GetHashCode(this);
         }
 
         /// <inheritdoc />
@@ -217,50 +227,6 @@ namespace Linguini.Syntax.Ast
         public readonly List<IPatternElement> Elements;
 
         /// <summary>
-        /// Provides a builder instance for constructing <see cref="Pattern" /> objects.
-        /// </summary>
-        /// <returns>A new instance of <see cref="Pattern.PatternBuilder" /> for building
-        /// <see cref="Pattern" /> objects.</returns>
-        public static PatternBuilder Builder() => new();
-
-        /// <summary>
-        /// Constructs a <see cref="Pattern" /> instance from a string literal by wrapping the literal within a <see cref="TextLiteral" />.
-        /// </summary>
-        /// <param name="textLiteral">The string literal to include as a <see cref="TextLiteral" /> in the pattern</param>
-        /// <returns>A new <see cref="Pattern" /> instance containing the given string literal as its single element</returns>
-        public static Pattern From(string textLiteral)
-        {
-            var pattern = new Pattern();
-            pattern.Elements.Add(new Placeable(new TextLiteral(textLiteral)));
-            return pattern;
-        }
-        
-        /// <summary>
-        /// Constructs a <see cref="Pattern" /> instance from a number literal by wrapping the literal within a <see cref="NumberLiteral" />.
-        /// </summary>
-        /// <param name="numberLiteral">The string literal to include as a <see cref="NumberLiteral" /> in the pattern</param>
-        /// <returns>A new <see cref="Pattern" /> instance containing the given number literal as its single element</returns>
-        public static Pattern From(double numberLiteral)
-        {
-            var pattern = new Pattern();
-            pattern.Elements.Add(new Placeable(new NumberLiteral(numberLiteral)));
-            return pattern;
-        }
-        
-        /// <summary>
-        /// Constructs a <see cref="Pattern" /> instance from a number literal by wrapping the literal within a <see cref="NumberLiteral" />.
-        /// </summary>
-        /// <param name="numberLiteral">The string literal to include as a <see cref="NumberLiteral" /> in the pattern</param>
-        /// <returns>A new <see cref="Pattern" /> instance containing the given number literal as its single element</returns>
-        public static Pattern From(int numberLiteral)
-        {
-            var pattern = new Pattern();
-            var intStr = numberLiteral.ToString(CultureInfo.InvariantCulture).AsMemory();
-            pattern.Elements.Add(new Placeable(new NumberLiteral(intStr)));
-            return pattern;
-        }
-        
-        /// <summary>
         ///     Basic constructor that takes a list of <see cref="IPatternElement" /> elements.
         /// </summary>
         public Pattern(List<IPatternElement> elements)
@@ -293,9 +259,61 @@ namespace Linguini.Syntax.Ast
             {
                 return false;
             }
-            
+
 
             return Elements.SequenceEqual(other.Elements, IPatternElement.PatternComparer);
+        }
+
+        /// <summary>
+        ///     Provides a builder instance for constructing <see cref="Pattern" /> objects.
+        /// </summary>
+        /// <returns>
+        ///     A new instance of <see cref="Pattern.PatternBuilder" /> for building
+        ///     <see cref="Pattern" /> objects.
+        /// </returns>
+        public static PatternBuilder Builder()
+        {
+            return new PatternBuilder();
+        }
+
+        /// <summary>
+        ///     Constructs a <see cref="Pattern" /> instance from a string literal by wrapping the literal within a
+        ///     <see cref="TextLiteral" />.
+        /// </summary>
+        /// <param name="textLiteral">The string literal to include as a <see cref="TextLiteral" /> in the pattern</param>
+        /// <returns>A new <see cref="Pattern" /> instance containing the given string literal as its single element</returns>
+        public static Pattern From(string textLiteral)
+        {
+            var pattern = new Pattern();
+            pattern.Elements.Add(new Placeable(new TextLiteral(textLiteral)));
+            return pattern;
+        }
+
+        /// <summary>
+        ///     Constructs a <see cref="Pattern" /> instance from a number literal by wrapping the literal within a
+        ///     <see cref="NumberLiteral" />.
+        /// </summary>
+        /// <param name="numberLiteral">The string literal to include as a <see cref="NumberLiteral" /> in the pattern</param>
+        /// <returns>A new <see cref="Pattern" /> instance containing the given number literal as its single element</returns>
+        public static Pattern From(double numberLiteral)
+        {
+            var pattern = new Pattern();
+            pattern.Elements.Add(new Placeable(new NumberLiteral(numberLiteral)));
+            return pattern;
+        }
+
+        /// <summary>
+        ///     Constructs a <see cref="Pattern" /> instance from a number literal by wrapping the literal within a
+        ///     <see cref="NumberLiteral" />.
+        /// </summary>
+        /// <param name="numberLiteral">The string literal to include as a <see cref="NumberLiteral" /> in the pattern</param>
+        /// <returns>A new <see cref="Pattern" /> instance containing the given number literal as its single element</returns>
+        public static Pattern From(int numberLiteral)
+        {
+            var pattern = new Pattern();
+            var intStr = numberLiteral.ToString(CultureInfo.InvariantCulture).AsMemory();
+            pattern.Elements.Add(new Placeable(new NumberLiteral(intStr)));
+            return pattern;
         }
 
         /// <inheritdoc />
@@ -335,6 +353,7 @@ namespace Linguini.Syntax.Ast
                         break;
                 }
             }
+
             return hash.ToHashCode();
         }
 
@@ -444,7 +463,8 @@ namespace Linguini.Syntax.Ast
             /// <param name="functionName">The name of the function reference.</param>
             /// <param name="builder">A <see cref="CallArguments.CallArgumentsBuilder" /> that constructs the function arguments.</param>
             /// <returns>A <see cref="PatternBuilder" /> instance with the added function reference.</returns>
-            public PatternBuilder AddFunctionReference(Identifier functionName, CallArguments.CallArgumentsBuilder builder)
+            public PatternBuilder AddFunctionReference(Identifier functionName,
+                CallArguments.CallArgumentsBuilder builder)
             {
                 _patternElements.Add(new Placeable(new FunctionReference(functionName, builder.Build())));
                 return this;
@@ -523,8 +543,6 @@ namespace Linguini.Syntax.Ast
     /// <seealso cref="Linguini.Syntax.Ast.AstTerm" />
     public class Identifier : IEquatable<Identifier>
     {
-
-
         /// <summary>
         ///     Provides a default instance of <see cref="Identifier.IdentifierComparer" /> for comparing
         ///     two <see cref="Identifier" /> instances based on their contents.
@@ -582,7 +600,7 @@ namespace Linguini.Syntax.Ast
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Comparer.Equals(this, (Identifier?) obj);
+            return Comparer.Equals(this, (Identifier?)obj);
         }
 
         /// <inheritdoc />
@@ -590,7 +608,7 @@ namespace Linguini.Syntax.Ast
         {
             return Comparer.GetHashCode(this);
         }
-        
+
         /// <inheritdoc />
         public override string ToString()
         {
@@ -663,7 +681,7 @@ namespace Linguini.Syntax.Ast
                 {
                     return false;
                 }
-                
+
 
                 return x.Name.Span.SequenceEqual(y.Name.Span);
             }
@@ -774,15 +792,15 @@ namespace Linguini.Syntax.Ast
         {
             return (left, right) switch
             {
-                (DynamicReference l, DynamicReference r)   => l.Equals(r),
+                (DynamicReference l, DynamicReference r) => l.Equals(r),
                 (FunctionReference l, FunctionReference r) => l.Equals(r),
-                (MessageReference l, MessageReference r)   => l.Equals(r),
-                (NumberLiteral l, NumberLiteral r)         => l.Equals(r),
-                (Placeable l, Placeable r)                 => l.Equals(r),
-                (TermReference l, TermReference r)         => l.Equals(r),
-                (TextLiteral l, TextLiteral r)             => l.Equals(r),
+                (MessageReference l, MessageReference r) => l.Equals(r),
+                (NumberLiteral l, NumberLiteral r) => l.Equals(r),
+                (Placeable l, Placeable r) => l.Equals(r),
+                (TermReference l, TermReference r) => l.Equals(r),
+                (TextLiteral l, TextLiteral r) => l.Equals(r),
                 (VariableReference l, VariableReference r) => l.Equals(r),
-                _                                          => false
+                _ => false
             };
         }
 
@@ -791,15 +809,15 @@ namespace Linguini.Syntax.Ast
         {
             return obj switch
             {
-                DynamicReference dr  => dr.GetHashCode(),
+                DynamicReference dr => dr.GetHashCode(),
                 FunctionReference fr => fr.GetHashCode(),
-                MessageReference mr  => mr.GetHashCode(),
-                NumberLiteral nl     => nl.GetHashCode(),
-                Placeable p          => p.GetHashCode(),
-                TermReference term   => term.GetHashCode(),
-                TextLiteral tl       => tl.GetHashCode(),
+                MessageReference mr => mr.GetHashCode(),
+                NumberLiteral nl => nl.GetHashCode(),
+                Placeable p => p.GetHashCode(),
+                TermReference term => term.GetHashCode(),
+                TextLiteral tl => tl.GetHashCode(),
                 VariableReference vr => vr.GetHashCode(),
-                _                    => throw new ArgumentOutOfRangeException(nameof(obj), obj, null)
+                _ => throw new ArgumentOutOfRangeException(nameof(obj), obj, null)
             };
         }
     }
@@ -823,7 +841,10 @@ namespace Linguini.Syntax.Ast
                 return sb.ToString();
             }
 
-            for (var i = 0; i < pattern.Elements.Count; i++) sb.Append(pattern.Elements[i]);
+            for (var i = 0; i < pattern.Elements.Count; i++)
+            {
+                sb.Append(pattern.Elements[i]);
+            }
 
             return sb.ToString();
         }

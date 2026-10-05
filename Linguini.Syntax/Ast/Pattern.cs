@@ -86,7 +86,7 @@ namespace Linguini.Syntax.Ast
         ///     Provides a default instance of <see cref="PatternComparer" /> for comparing
         ///     two <see cref="Pattern" /> instances based on their equality logic.
         /// </summary>
-        public static PatternComparer PatternComparer = new();
+        public static readonly PatternComparer PatternComparer = new();
     }
 
     /// <inheritdoc />
