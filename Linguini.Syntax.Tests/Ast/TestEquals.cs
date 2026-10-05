@@ -1,4 +1,5 @@
-﻿using Linguini.Syntax.Ast;
+﻿using System.Collections.Generic;
+using Linguini.Syntax.Ast;
 using NUnit.Framework;
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
@@ -12,31 +13,98 @@ namespace Linguini.Syntax.Tests.Ast
     [Parallelizable]
     public class TestEquals
     {
-        [Test]
-        public void TestAstComment()
+        private static IEnumerable<TestCaseData> AstCommentExample()
         {
-            var comment1 = new AstComment(CommentLevel.Comment, "comment");
-            var same = new AstComment(CommentLevel.Comment, "comment");
-            var diffLvl = new AstComment(CommentLevel.GroupComment, "comment!");
-            var diffTxt = new AstComment(CommentLevel.Comment, "comment !!!!");
+            var same = new AstComment(CommentLevel.Comment, "comment"); 
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, new AstComment(CommentLevel.GroupComment, "comment"), false);
+            yield return new TestCaseData(same, new AstComment(CommentLevel.Comment, "commentzzzz"), false);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(AstCommentExample))]
+        public void TestAstComment(AstComment comment, object? other, bool expected)
+        {
+            if (other is AstComment otherComment)
+            {
+                Assert.That(comment == otherComment, Is.EqualTo(expected));
+                Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                Assert.That(comment.GetId() == otherComment.GetId());
+            }
 
-            Assert.That(comment1 != null, "Not equals null");
-            Assert.That(comment1 == comment1, "Equals comment");
-            Assert.That(comment1 == same, "Equals same comment");
+            if (other is null)
+            {
+                Assert.That(comment.Equals((AstComment?)other), Is.EqualTo(expected));
+            }
             
-            Assert.That(!comment1.Equals((object?)null), "Not equals object? null");
-            Assert.That(!comment1.Equals(null), "Not equals null");
-            Assert.That(comment1.Equals((object?)comment1), "Same object? ref");
-            Assert.That(comment1.Equals(comment1), "Same ref");
-            Assert.That(comment1.Equals(same), "Same fields");
-            Assert.That(comment1.Equals((object?)same), "Same object? fields");
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        private static IEnumerable<TestCaseData> AstLocData()
+        {
+            var same = AstLocation.FromRowAndFilename(3, "text.ftl");
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, AstLocation.FromRowAndFilename(5, "text.ftl"), false);
+            yield return new TestCaseData(same, AstLocation.FromRowAndFilename(3, "testing.ftl"), false);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(AstLocData))]
+        public void TestLocation(AstLocation comment, object? other, bool expected)
+        {
+            if (other is AstLocation otherComment)
+            {
+                Assert.That(comment == otherComment, Is.EqualTo(expected));
+                Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+            }
 
-            Assert.That(!comment1.Equals(diffLvl), "Different level");
-            Assert.That(!comment1.Equals(diffTxt), "Different level");
-            Assert.That(!comment1.Equals(3), "Not same hash values");
+            if (other is null)
+            {
+                Assert.That(comment.Equals((AstLocation?)other), Is.EqualTo(expected));
+            }
+            
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        private static IEnumerable<TestCaseData> AstTextData()
+        {
+            var same = new TextLiteral("ex");
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, new TextLiteral("heh"), false);
 
-            Assert.That(comment1.GetHashCode() == same.GetHashCode(), "Same value hash");
-            Assert.That(comment1.GetHashCode() != diffLvl.GetHashCode(), "Different level hash");
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(AstTextData))]
+        public void TestTextLiteral(TextLiteral comment, object? other, bool expected)
+        {
+            if (other is TextLiteral otherComment)
+            {
+                Assert.That(comment == otherComment, Is.EqualTo(expected));
+                Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+            }
+
+            if (other is null)
+            {
+                Assert.That(comment.Equals((TextLiteral?)other), Is.EqualTo(expected));
+            }
+            
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
         }
     }
 }

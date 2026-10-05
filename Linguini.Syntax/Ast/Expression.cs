@@ -86,6 +86,32 @@ namespace Linguini.Syntax.Ast
         {
             return Value.GetHashCode();
         }
+        
+        /// <summary>
+        ///     Determines whether two <see cref="TextLiteral" /> instances are equal.
+        /// </summary>
+        /// <param name="left">The left-hand side <see cref="TextLiteral" /> instance to compare.</param>
+        /// <param name="right">The right-hand side <see cref="TextLiteral" /> instance to compare.</param>
+        /// <returns>
+        ///     True if the specified <see cref="TextLiteral" /> instances are equal; otherwise, false.
+        /// </returns>
+        public static bool operator ==(TextLiteral? left, TextLiteral? right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <summary>
+        ///     Determines whether two <see cref="TextLiteral" /> instances are unequal.
+        /// </summary>
+        /// <param name="left">The left-hand side <see cref="TextLiteral" /> instance to compare.</param>
+        /// <param name="right">The right-hand side <see cref="TextLiteral" /> instance to compare.</param>
+        /// <returns>
+        ///     True if the specified <see cref="TextLiteral" /> instances are unequal; otherwise, false.
+        /// </returns>
+        public static bool operator !=(TextLiteral? left, TextLiteral? right)
+        {
+            return !Equals(left, right);
+        }
     }
 
 

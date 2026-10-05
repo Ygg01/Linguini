@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 // ReSharper disable ClassNeverInstantiated.Global
@@ -230,7 +231,7 @@ namespace Linguini.Syntax.Ast
         public static Pattern From(string textLiteral)
         {
             var pattern = new Pattern();
-            pattern.Elements.Add(new TextLiteral(textLiteral));
+            pattern.Elements.Add(new Placeable(new TextLiteral(textLiteral)));
             return pattern;
         }
         
@@ -292,18 +293,9 @@ namespace Linguini.Syntax.Ast
             {
                 return false;
             }
+            
 
-            for (var index = 0; index < Elements.Count; index++)
-            {
-                var patternElement = Elements[index];
-                var otherPatternElement = other.Elements[index];
-                if (!IPatternElement.PatternComparer.Equals(patternElement, otherPatternElement))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return Elements.SequenceEqual(other.Elements, IPatternElement.PatternComparer);
         }
 
         /// <inheritdoc />
@@ -330,7 +322,20 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return Elements.GetHashCode();
+            var hash = new HashCode();
+            foreach (var patternElement in Elements)
+            {
+                switch (patternElement)
+                {
+                    case Placeable placeable:
+                        hash.Add(placeable);
+                        break;
+                    case TextLiteral textLiteral:
+                        hash.Add(textLiteral);
+                        break;
+                }
+            }
+            return hash.ToHashCode();
         }
 
         /// <summary>
