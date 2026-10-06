@@ -271,7 +271,7 @@ namespace Linguini.Syntax.Tests.Ast
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(NamedArgumentTestData))]
-        public void TestPattern(NamedArgument comment, object? other, bool expected)
+        public void TestNamedArgs(NamedArgument comment, object? other, bool expected)
         {
             switch (other)
             {
@@ -476,6 +476,87 @@ namespace Linguini.Syntax.Tests.Ast
                     break;
                 case null:
                     Assert.That(comment.Equals((DynamicReference?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(comment, null), Is.False);
+                    Assert.That(Equals(null, comment), Is.False);
+                    break;
+            }
+
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+
+        private static IEnumerable<TestCaseData> FuncRefTestData()
+        {
+            var same = new FunctionReference("id", CallArguments.Builder().AddPositionalArg("aaa").Build());
+
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same,
+                new FunctionReference("id!!", CallArguments.Builder().AddPositionalArg("aaa").Build()), false);
+            yield return new TestCaseData(same,
+                new FunctionReference("id", CallArguments.Builder().AddPositionalArg(3.0f).Build()), false);
+            yield return new TestCaseData(same,
+                new FunctionReference("id", CallArguments.Builder().AddPositionalArg("aaa").Build()), true);
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(FuncRefTestData))]
+        public void TestDynRef(FunctionReference comment, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case FunctionReference otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((FunctionReference?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(comment, null), Is.False);
+                    Assert.That(Equals(null, comment), Is.False);
+                    break;
+            }
+
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        private static IEnumerable<TestCaseData> VariantTestData()
+        {
+            var patternBuilder = Pattern.Builder();
+            var same = new Variant("id", patternBuilder.Build());
+
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same,
+                new FunctionReference("id!!", CallArguments.Builder().AddPositionalArg("aaa").Build()), false);
+            yield return new TestCaseData(same,
+                new FunctionReference("id", CallArguments.Builder().AddPositionalArg(3.0f).Build()), false);
+            yield return new TestCaseData(same,
+                new FunctionReference("id", CallArguments.Builder().AddPositionalArg("aaa").Build()), true);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(VariantTestData))]
+        public void TestVariant(Variant comment, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case Variant otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((Variant?)other), Is.EqualTo(expected));
                     Assert.That(Equals(comment, null), Is.False);
                     Assert.That(Equals(null, comment), Is.False);
                     break;

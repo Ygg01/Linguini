@@ -119,7 +119,7 @@ public class SerializeAndDeserializeTest
             .Build();
         yield return new TermReference("x", "y");
         yield return new VariableReference("x");
-        yield return new Variant(2.0f, Pattern.Builder().AddNumberLiteral(3));
+        yield return new Variant(2.0f, Pattern.Builder().AddNumberLiteral(3).Build());
     }
 
     public static IEnumerable<object> ResourcesExample()

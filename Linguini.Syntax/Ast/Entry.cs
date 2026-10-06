@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Linguini.Syntax.IO;
@@ -732,6 +733,18 @@ namespace Linguini.Syntax.Ast
         public static bool operator !=(AstComment? left, AstComment? right)
         {
             return !Equals(left, right);
+        }
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var commentLvl = CommentLevel switch
+            {
+                CommentLevel.Comment => "#",
+                CommentLevel.GroupComment => "##",
+                CommentLevel.ResourceComment => "###",
+                _ => ""
+            };
+            return $"{commentLvl} {Content}";
         }
     }
 

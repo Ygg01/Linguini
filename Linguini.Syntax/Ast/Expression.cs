@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 
 // ReSharper disable UnusedMember.Global
 
@@ -293,6 +294,32 @@ namespace Linguini.Syntax.Ast
 
             return Equals((FunctionReference)obj);
         }
+        
+        /// <summary>
+        ///     Compares two <see cref="FunctionReference" /> instances for equality.
+        /// </summary>
+        /// <param name="left">The left-hand <see cref="FunctionReference" /> to compare.</param>
+        /// <param name="right">The right-hand <see cref="FunctionReference" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the two <see cref="FunctionReference" /> instances are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(FunctionReference? left, FunctionReference? right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <summary>
+        ///     Compares two <see cref="FunctionReference" /> instances for inequality.
+        /// </summary>
+        /// <param name="left">The left-hand <see cref="FunctionReference" /> to compare.</param>
+        /// <param name="right">The right-hand <see cref="FunctionReference" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the two <see cref="FunctionReference" /> instances are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(FunctionReference? left, FunctionReference? right)
+        {
+            return !Equals(left, right);
+        }
 
         /// <inheritdoc />
         public override int GetHashCode()
@@ -305,7 +332,7 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override string ToString()
         {
-            return Id + "()";
+            return Id + Arguments;
         }
     }
 
@@ -886,6 +913,8 @@ namespace Linguini.Syntax.Ast
         /// </summary>
         public readonly List<NamedArgument> NamedArgs;
 
+        private readonly string _representation;
+
         /// <summary>
         ///     Constructs <c>CallArguments</c> from a list of positional arguments and a list of named arguments.
         /// </summary>
@@ -895,6 +924,20 @@ namespace Linguini.Syntax.Ast
         {
             PositionalArgs = positionalArgs;
             NamedArgs = namedArgs;
+            var stringBuff = new StringBuilder();
+            stringBuff.Append('(');
+            stringBuff.AppendJoin(',', positionalArgs);
+            var sep = positionalArgs.Count == 0 ? "" : ",";
+            foreach (var namedArgument in namedArgs)
+            {
+                stringBuff.Append(sep);
+                stringBuff.Append(namedArgument.Name);
+                stringBuff.Append(": ");
+                stringBuff.Append(namedArgument.Value);
+                sep = ",";
+            }
+            stringBuff.Append(')');
+            _representation = stringBuff.ToString();
         }
 
         /// <summary>
@@ -1399,14 +1442,14 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public IAddVariant AddVariant(string selector, Pattern.PatternBuilder patternBuilder)
         {
-            _variants.Add(new Variant(selector, patternBuilder));
+            _variants.Add(new Variant(selector, patternBuilder.Build()));
             return this;
         }
 
         /// <inheritdoc />
         public IAddVariant AddVariant(float selector, Pattern.PatternBuilder patternBuilder)
         {
-            _variants.Add(new Variant(selector, patternBuilder));
+            _variants.Add(new Variant(selector, patternBuilder.Build()));
             return this;
         }
 
@@ -1539,29 +1582,29 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <summary>
-        ///     Constructs a string keyed <c>Variant</c> with a given <see cref="Pattern.PatternBuilder" /> as value.
+        ///     Constructs a string keyed <c>Variant</c> with a given <see cref="Pattern" /> as value.
         /// </summary>
         /// <param name="key">string used as a key.</param>
-        /// <param name="builder"><see cref="Pattern.PatternBuilder" /> that represents value.</param>
-        public Variant(string key, Pattern.PatternBuilder builder)
+        /// <param name="pattern"><see cref="Pattern" /> that represents value.</param>
+        public Variant(string key, Pattern pattern)
         {
             Type = VariantType.Identifier;
             Key = key.AsMemory();
-            InternalValue = builder.Build();
+            InternalValue = pattern;
             InternalDefault = false;
         }
 
 
         /// <summary>
-        ///     Constructs a float keyed <c>Variant</c> with a given <see cref="Pattern.PatternBuilder" /> as value.
+        ///     Constructs a float keyed <c>Variant</c> with a given <see cref="Pattern" /> as value.
         /// </summary>
         /// <param name="key">number used as a key.</param>
-        /// <param name="builder"><see cref="Pattern.PatternBuilder" /> that represents value.</param>
-        public Variant(float key, Pattern.PatternBuilder builder)
+        /// <param name="pattern"><see cref="Pattern" /> that represents value.</param>
+        public Variant(float key, Pattern pattern)
         {
             Type = VariantType.NumberLiteral;
             Key = key.ToString(CultureInfo.InvariantCulture).AsMemory();
-            InternalValue = builder.Build();
+            InternalValue = pattern;
             InternalDefault = false;
         }
 
