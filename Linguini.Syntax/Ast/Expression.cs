@@ -299,6 +299,8 @@ namespace Linguini.Syntax.Ast
         {
             return HashCode.Combine(Id, Arguments);
         }
+        
+        
 
         /// <inheritdoc />
         public override string ToString()
@@ -386,6 +388,32 @@ namespace Linguini.Syntax.Ast
             return Equals((MessageReference)obj);
         }
 
+        /// <summary>
+        ///     Checks equality between two <see cref="MessageReference" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="MessageReference" /> to compare.</param>
+        /// <param name="right">The second <see cref="MessageReference" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="MessageReference" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(MessageReference? left, MessageReference? right)
+        {
+            return Equals(left, right);
+        }
+        
+        /// <summary>
+        ///     Checks equality between two <see cref="MessageReference" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="MessageReference" /> to compare.</param>
+        /// <param name="right">The second <see cref="MessageReference" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="MessageReference" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(MessageReference? left, MessageReference? right)
+        {
+            return !Equals(left, right);
+        }
+        
         /// <inheritdoc />
         public override int GetHashCode()
         {
@@ -428,7 +456,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="id">dynamic message reference.</param>
         /// <param name="attribute">attributes of dynamic reference.</param>
         /// <param name="arguments">call arguments of dynamic reference.</param>
-        public DynamicReference(Identifier id, Identifier? attribute, CallArguments? arguments)
+        public DynamicReference(Identifier id, Identifier? attribute = null, CallArguments? arguments = null)
         {
             Id = id;
             Attribute = attribute;
@@ -491,6 +519,32 @@ namespace Linguini.Syntax.Ast
 
             return Equals((DynamicReference)obj);
         }
+        
+        /// <summary>
+        ///     Checks equality between two <see cref="DynamicReference" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="DynamicReference" /> to compare.</param>
+        /// <param name="right">The second <see cref="DynamicReference" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="DynamicReference" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(DynamicReference? left, DynamicReference? right)
+        {
+            return Equals(left, right);
+        }
+        
+        /// <summary>
+        ///     Checks equality between two <see cref="DynamicReference" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="DynamicReference" /> to compare.</param>
+        /// <param name="right">The second <see cref="DynamicReference" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="DynamicReference" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(DynamicReference? left, DynamicReference? right)
+        {
+            return !Equals(left, right);
+        }
 
         /// <inheritdoc />
         public override int GetHashCode()
@@ -527,7 +581,7 @@ namespace Linguini.Syntax.Ast
         /// <param name="id">dynamic message reference.</param>
         /// <param name="attribute">attributes of dynamic reference.</param>
         /// <param name="arguments">call arguments of dynamic reference.</param>
-        public TermReference(Identifier id, Identifier? attribute, CallArguments? arguments = null)
+        public TermReference(Identifier id, Identifier? attribute = null, CallArguments? arguments = null)
         {
             Id = id;
             Attribute = attribute;
@@ -589,6 +643,32 @@ namespace Linguini.Syntax.Ast
 
             return Equals((TermReference)obj);
         }
+        
+        /// <summary>
+        ///     Checks equality between two <see cref="TermReference" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="TermReference" /> to compare.</param>
+        /// <param name="right">The second <see cref="TermReference" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="TermReference" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(TermReference? left, TermReference? right)
+        {
+            return Equals(left, right);
+        }
+        
+        /// <summary>
+        ///     Checks equality between two <see cref="TermReference" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="TermReference" /> to compare.</param>
+        /// <param name="right">The second <see cref="TermReference" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="TermReference" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(TermReference? left, TermReference? right)
+        {
+            return !Equals(left, right);
+        }
 
         /// <inheritdoc />
         public override int GetHashCode()
@@ -620,15 +700,6 @@ namespace Linguini.Syntax.Ast
         public VariableReference(Identifier id)
         {
             Id = id;
-        }
-
-        /// <summary>
-        ///     Constructs a variable reference from <see cref="string" />.
-        /// </summary>
-        /// <param name="id">Identifier of a variable.</param>
-        public VariableReference(string id)
-        {
-            Id = new Identifier(id);
         }
 
         /// <inheritdoc />
@@ -672,6 +743,32 @@ namespace Linguini.Syntax.Ast
         public override int GetHashCode()
         {
             return Id.GetHashCode();
+        }
+        
+        /// <summary>
+        ///     Checks equality between two <see cref="VariableReference" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="VariableReference" /> to compare.</param>
+        /// <param name="right">The second <see cref="VariableReference" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="VariableReference" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(VariableReference? left, VariableReference? right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <summary>
+        ///     Checks inequality between two <see cref="VariableReference" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="VariableReference" /> to compare.</param>
+        /// <param name="right">The second <see cref="VariableReference" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="VariableReference" /> objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(VariableReference? left, VariableReference? right)
+        {
+            return !Equals(left, right);
         }
 
         /// <inheritdoc />
@@ -823,7 +920,18 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return HashCode.Combine(PositionalArgs, NamedArgs);
+            var hash = new HashCode();
+            foreach (var positionalArg in PositionalArgs)
+            {
+                hash.Add(positionalArg);
+            }
+
+            foreach (var namedArgument in NamedArgs)
+            {
+                hash.Add(namedArgument);
+            }
+
+            return hash.ToHashCode();
         }
 
         /// <summary>

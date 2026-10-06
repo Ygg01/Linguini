@@ -183,7 +183,7 @@ namespace Linguini.Syntax.Tests.Ast
             yield return new TestCaseData(same,
                 new Attribute("zzz", Pattern.Builder().AddText("xxxx")), false);
             yield return new TestCaseData(same, new
-                    Attribute("x1", Pattern.Builder().AddDynamicReference("dyn-rfe")), false);
+                Attribute("x1", Pattern.Builder().AddDynamicReference("dyn-rfe")), false);
         }
 
         [Test]
@@ -208,7 +208,7 @@ namespace Linguini.Syntax.Tests.Ast
             Assert.That(comment.Equals(other), Is.EqualTo(expected));
             Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
         }
-        
+
         private static IEnumerable<TestCaseData> PatternTestData()
         {
             var same = Pattern.Builder()
@@ -222,11 +222,11 @@ namespace Linguini.Syntax.Tests.Ast
             yield return new TestCaseData(same, Pattern.From(30), false);
             yield return new TestCaseData(same, Pattern.From(3.1), false);
             yield return new TestCaseData(same, Pattern.Builder()
-                .AddText("top")
-                .AddDynamicReference("dyn-ref").Build(), 
+                    .AddText("top")
+                    .AddDynamicReference("dyn-ref").Build(),
                 true);
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(PatternTestData))]
@@ -241,6 +241,241 @@ namespace Linguini.Syntax.Tests.Ast
                     break;
                 case null:
                     Assert.That(comment.Equals((Pattern?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(comment, null), Is.False);
+                    Assert.That(Equals(null, comment), Is.False);
+                    break;
+            }
+
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+
+        private static IEnumerable<TestCaseData> NamedArgumentTestData()
+        {
+            var same = new NamedArgument("id",
+                InlineExpressionBuilder.CreateDynamicReference("aa", "zz").Build()
+            );
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same,
+                new NamedArgument("id", InlineExpressionBuilder.CreateNumber(32.0).Build()), false);
+            yield return new TestCaseData(same,
+                new NamedArgument("wrong-id", InlineExpressionBuilder.CreateDynamicReference("aa", "zz").Build()),
+                false);
+            yield return new TestCaseData(same,
+                new NamedArgument("id", InlineExpressionBuilder.CreateDynamicReference("aa", "zz").Build()),
+                true);
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(NamedArgumentTestData))]
+        public void TestPattern(NamedArgument comment, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case NamedArgument otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((NamedArgument?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(comment, null), Is.False);
+                    Assert.That(Equals(null, comment), Is.False);
+                    break;
+            }
+
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+
+        private static IEnumerable<TestCaseData> CallArgumentTestData()
+        {
+            var builder = CallArguments.Builder()
+                .AddNamedArg("dyn-ref", InlineExpressionBuilder.CreateDynamicReference("dyn", "ref"))
+                .AddPositionalArg(InlineExpressionBuilder.CreateMessageReference("msg", "atr"))
+                .AddNamedArg("name-tref", InlineExpressionBuilder.CreateTermReference("term").Build())
+                .AddNamedArg("name-fl", 3.0f)
+                .AddNamedArg("name-str", "name")
+                .AddNamedArg("name-dbl", 2.0d);
+
+            var same = builder.Build();
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same, builder.Build(), true);
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(CallArgumentTestData))]
+        public void TestCallArguments(CallArguments comment, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case CallArguments otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((CallArguments?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(comment, null), Is.False);
+                    Assert.That(Equals(null, comment), Is.False);
+                    break;
+            }
+
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+
+        private static IEnumerable<TestCaseData> TermRefTestData()
+        {
+            var callArgs = CallArguments.Builder()
+                .AddPositionalArg(2.0f)
+                .AddPositionalArg(20d)
+                .AddPositionalArg("aaa");
+            var same = new TermReference("id", "attr", callArgs);
+
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same, new TermReference("id!!", "attr", callArgs), false);
+            yield return new TestCaseData(same, new TermReference("id", "attr!!", callArgs), false);
+            yield return new TestCaseData(same, new TermReference("id", "attr", callArgs.Build()), true);
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(TermRefTestData))]
+        public void TestTermRef(TermReference comment, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case TermReference otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((TermReference?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(comment, null), Is.False);
+                    Assert.That(Equals(null, comment), Is.False);
+                    break;
+            }
+
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+
+        private static IEnumerable<TestCaseData> MsgRefTestData()
+        {
+            var same = new MessageReference("id", "attr");
+
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same, new MessageReference("id!!", "attr"), false);
+            yield return new TestCaseData(same, new MessageReference("id", "attr!!"), false);
+            yield return new TestCaseData(same, new MessageReference("id", "attr"), true);
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(MsgRefTestData))]
+        public void TestTermRef(MessageReference comment, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case MessageReference otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((MessageReference?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(comment, null), Is.False);
+                    Assert.That(Equals(null, comment), Is.False);
+                    break;
+            }
+
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+
+        private static IEnumerable<TestCaseData> VarRefTestData()
+        {
+            var same = new VariableReference("id");
+
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same, new VariableReference("id!!"), false);
+            yield return new TestCaseData(same, new VariableReference("id"), true);
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(VarRefTestData))]
+        public void TestVarRef(VariableReference comment, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case VariableReference otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((VariableReference?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(comment, null), Is.False);
+                    Assert.That(Equals(null, comment), Is.False);
+                    break;
+            }
+
+            Assert.That(comment.Equals(other), Is.EqualTo(expected));
+            Assert.That(comment.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+
+        private static IEnumerable<TestCaseData> DynRefTestData()
+        {
+            var same = new DynamicReference("id", "attr", CallArguments.Builder().AddPositionalArg("aaa"));
+
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same, new DynamicReference("id!!"), false);
+            yield return new TestCaseData(same, new DynamicReference("id", "attr"), false);
+            yield return new TestCaseData(same,
+                new DynamicReference("id", "attr", CallArguments.Builder().AddPositionalArg("aaa").Build()), true);
+        }
+
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(DynRefTestData))]
+        public void TestDynRef(DynamicReference comment, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case DynamicReference otherComment:
+                    Assert.That(comment == otherComment, Is.EqualTo(expected));
+                    Assert.That(comment != otherComment, Is.EqualTo(!expected));
+                    Assert.That(comment.Equals(otherComment), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(comment.Equals((DynamicReference?)other), Is.EqualTo(expected));
                     Assert.That(Equals(comment, null), Is.False);
                     Assert.That(Equals(null, comment), Is.False);
                     break;
