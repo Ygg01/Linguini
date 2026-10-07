@@ -986,6 +986,12 @@ namespace Linguini.Syntax.Ast
             return hash.ToHashCode();
         }
 
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return _representation;
+        }
+
         /// <summary>
         ///     Compares two <see cref="CallArguments" /> instances for equality.
         /// </summary>
