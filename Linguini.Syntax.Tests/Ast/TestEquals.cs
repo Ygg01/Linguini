@@ -2,6 +2,8 @@
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.IO;
 using NUnit.Framework;
+using System;
+using Attribute = Linguini.Syntax.Ast.Attribute;
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 // ReSharper disable SuspiciousTypeConversion.Global
@@ -605,6 +607,42 @@ namespace Linguini.Syntax.Tests.Ast
                     break;
                 case null:
                     Assert.That(variant.Equals((SelectExpression?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(variant, null), Is.False);
+                    Assert.That(Equals(null, variant), Is.False);
+                    break;
+            }
+
+            Assert.That(variant.Equals(other), Is.EqualTo(expected));
+            Assert.That(variant.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        private static IEnumerable<TestCaseData> JunkTestData()
+        {
+            var same = new Junk("content");
+            var same2 = new Junk("content".AsMemory());
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same, new Junk("aaaa"), false);
+            yield return new TestCaseData(same, same2, true);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(JunkTestData))]
+        public void TestJunk(Junk variant, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case Junk otherObj:
+                    Assert.That(variant == otherObj, Is.EqualTo(expected));
+                    Assert.That(variant != otherObj, Is.EqualTo(!expected));
+                    Assert.That(variant.Equals(otherObj), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(variant.Equals((Junk?)other), Is.EqualTo(expected));
                     Assert.That(Equals(variant, null), Is.False);
                     Assert.That(Equals(null, variant), Is.False);
                     break;

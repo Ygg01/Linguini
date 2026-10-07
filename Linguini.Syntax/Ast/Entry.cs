@@ -841,6 +841,28 @@ namespace Linguini.Syntax.Ast
 
             return Equals((Junk)obj);
         }
+        
+        /// <summary>
+        ///     Determines whether two <see cref="Junk" /> instances are equal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="Junk" /> to compare.</param>
+        /// <param name="right">The second instance of <see cref="Junk" /> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are equal; otherwise, <c>false</c>.</returns>
+        public static bool operator ==(Junk? left, Junk? right)
+        {
+            return Equals(left, right);
+        }
+        
+        /// <summary>
+        ///     Determines whether two <see cref="Junk" /> instances are equal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="Junk" /> to compare.</param>
+        /// <param name="right">The second instance of <see cref="Junk" /> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are equal; otherwise, <c>false</c>.</returns>
+        public static bool operator !=(Junk? left, Junk? right)
+        {
+            return !Equals(left, right);
+        }
 
         /// <inheritdoc />
         public override int GetHashCode()
