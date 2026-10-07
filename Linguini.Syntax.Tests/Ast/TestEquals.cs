@@ -213,20 +213,24 @@ namespace Linguini.Syntax.Tests.Ast
 
         private static IEnumerable<TestCaseData> PatternTestData()
         {
-            var same = Pattern.Builder()
-                .AddText("top")
-                .AddDynamicReference("dyn-ref")
-                .Build();
+            var builder = Pattern.Builder()
+                    .AddText("top")
+                    .AddDynamicReference("dyn-ref")
+                    .AddNumberLiteral(3.0f)
+                    .AddMessage("zz")
+                .AddNumberLiteral(3.0d)
+                .AddFunctionReference("COUNT", CallArguments.Builder())
+                .AddPlaceable(Placeable.FromInline(InlineExpressionBuilder.CreateDynamicReference("zz-to")))
+                .AddExpression(new TextLiteral("literal"))
+                ;
+            var same = builder.Build();
             yield return new TestCaseData(same, 3, false);
             yield return new TestCaseData(same, null, false);
             yield return new TestCaseData(same, same, true);
             yield return new TestCaseData(same, Pattern.From("top"), false);
             yield return new TestCaseData(same, Pattern.From(30), false);
             yield return new TestCaseData(same, Pattern.From(3.1), false);
-            yield return new TestCaseData(same, Pattern.Builder()
-                    .AddText("top")
-                    .AddDynamicReference("dyn-ref").Build(),
-                true);
+            yield return new TestCaseData(same, builder.Build(), true);
         }
 
         [Test]
@@ -702,7 +706,9 @@ namespace Linguini.Syntax.Tests.Ast
         {
             var builder = AstMessage.Builder("term-id")
                 .SetPattern(Pattern.Builder().AddText("zztop"))
-                .AddAttribute("attr1", Pattern.Builder().AddTermReference("term-rf"))
+                .SetComment("aaaa cik")
+                .SetComment(new AstComment(CommentLevel.None, "test"))
+                .AddAttribute(new Attribute("attr1", Pattern.Builder().AddTermReference("term-rf")))
                 .AddAttribute("attr2", Pattern.Builder().AddText("zero one").AddVariableRef("zed1"));
             var same = builder.Build();
             var same2 = builder.Build();
@@ -729,6 +735,44 @@ namespace Linguini.Syntax.Tests.Ast
                     break;
                 case null:
                     Assert.That(variant.Equals((AstMessage?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(variant, null), Is.False);
+                    Assert.That(Equals(null, variant), Is.False);
+                    break;
+            }
+
+            Assert.That(variant.Equals(other), Is.EqualTo(expected));
+            Assert.That(variant.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        private static IEnumerable<TestCaseData> PlaceableTestData()
+        {
+            var builder = InlineExpressionBuilder.CreateDynamicReference("dyn-ref");
+            var same = Placeable.FromInline(builder);
+            var same2 = Placeable.FromInline(builder);
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same, Placeable.FromSelect(SelectExpression.Builder(builder.Build())), false);
+            yield return new TestCaseData(same, same2, true);
+        }
+
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(PlaceableTestData))]
+        public void TestPlaceable(Placeable variant, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case Placeable otherObj:
+                    Assert.That(variant == otherObj, Is.EqualTo(expected));
+                    Assert.That(variant != otherObj, Is.EqualTo(!expected));
+                    Assert.That(variant.Equals(otherObj), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(variant.Equals((Placeable?)other), Is.EqualTo(expected));
                     Assert.That(Equals(variant, null), Is.False);
                     Assert.That(Equals(null, variant), Is.False);
                     break;

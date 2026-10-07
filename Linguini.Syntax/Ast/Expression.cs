@@ -331,7 +331,7 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override string ToString()
         {
-            return Id +"()";
+            return Id + "()";
         }
     }
 
@@ -571,11 +571,11 @@ namespace Linguini.Syntax.Ast
         {
             return !Equals(left, right);
         }
-        
+
         /// <inheritdoc />
         public override string ToString()
         {
-            var attr = Attribute != null 
+            var attr = Attribute != null
                 ? "." + Attribute
                 : "";
             return $"$${Id}{attr}{Arguments}";
@@ -839,7 +839,8 @@ namespace Linguini.Syntax.Ast
         /// <returns>
         /// A new <see cref="Placeable" /> initialized with the built <c>SelectExpression</c>.
         /// </returns>
-        public static Placeable FromSelect(SelectExpression.SelectExpressionBuilder selectExpr) => new(selectExpr.Build());
+        public static Placeable FromSelect(SelectExpression.SelectExpressionBuilder selectExpr) =>
+            new(selectExpr.Build());
 
         /// <summary>
         ///     Constructor for <c>Placeable</c>
@@ -885,6 +886,32 @@ namespace Linguini.Syntax.Ast
             }
 
             return Equals((Placeable)obj);
+        }
+
+        /// <summary>
+        ///     Checks equality between two <see cref="Placeable" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="Placeable" /> to compare.</param>
+        /// <param name="right">The second <see cref="Placeable" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="Placeable" /> objects are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(Placeable? left, Placeable? right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <summary>
+        ///     Checks inequality between two <see cref="Placeable" /> objects.
+        /// </summary>
+        /// <param name="left">The first <see cref="Placeable" /> to compare.</param>
+        /// <param name="right">The second <see cref="Placeable" /> to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="Placeable" /> objects are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(Placeable? left, Placeable? right)
+        {
+            return !Equals(left, right);
         }
 
         /// <inheritdoc />
@@ -1215,7 +1242,7 @@ namespace Linguini.Syntax.Ast
         {
             return !(left == right);
         }
-        
+
         /// <inheritdoc/>
         public override string ToString()
         {
@@ -1452,7 +1479,7 @@ namespace Linguini.Syntax.Ast
         {
             return HashCode.Combine(Selector, Variants);
         }
-        
+
         /// <summary>
         ///     Determines whether two specified <c>SelectExpression</c> instances are equal.
         /// </summary>
@@ -1511,6 +1538,7 @@ namespace Linguini.Syntax.Ast
                 {
                     _default_set = _variants.Count;
                 }
+
                 return this;
             }
 
@@ -1721,7 +1749,7 @@ namespace Linguini.Syntax.Ast
 
             return Equals((Variant)obj);
         }
-        
+
         /// <summary>
         ///     Determines whether two specified <c>Variant</c> instances are equal.
         /// </summary>
