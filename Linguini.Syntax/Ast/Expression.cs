@@ -1494,7 +1494,7 @@ namespace Linguini.Syntax.Ast
             ///     Creates selection builder from <see cref="IInlineExpression" />
             /// </summary>
             /// <param name="selector">Expression to be used as a selector</param>
-            public SelectExpressionBuilder(IInlineExpression selector)
+            internal SelectExpressionBuilder(IInlineExpression selector)
             {
                 _selector = selector;
             }

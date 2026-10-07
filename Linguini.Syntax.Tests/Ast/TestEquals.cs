@@ -529,11 +529,18 @@ namespace Linguini.Syntax.Tests.Ast
         
         private static IEnumerable<TestCaseData> VariantTestData()
         {
+            var selectExpr = SelectExpression.Builder(new TextLiteral("zzz"))
+                .AddVariant("aaa", Pattern.Builder().AddText("zyx"))
+                .SetDefault();
             var patternBuilder = Pattern.Builder()
-                .AddTermReference("id", "aaa");
+                .AddTermReference("id", "aaa")
+                .AddFunctionReference("COUNT")
+                .AddMessageReference("my-msg");
             var patternBuilder2 = Pattern.Builder()
                 .AddTermReference("id", "aaa")
-                .AddText("AAAB");
+                .AddFunctionReference("COUNT")
+                .AddMessageReference("my-msg")
+                .AddSelectExpression(selectExpr);
             var same = new Variant("id", patternBuilder.Build());
 
 

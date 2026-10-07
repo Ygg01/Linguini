@@ -80,7 +80,7 @@ public class SerializeAndDeserializeTest
                                            CallArguments.Builder().AddPositionalArg(3.09d))
                                        .Build()
         );
-        var selectionBuilder = new SelectExpression.SelectExpressionBuilder(new TermReference("x", "y"))
+        var selectionBuilder = SelectExpression.Builder(new TermReference("x", "y"))
             .AddVariant("x", Pattern.Builder().AddText("z"))
             .SetDefault(0)
             .Build();
@@ -112,7 +112,7 @@ public class SerializeAndDeserializeTest
         yield return new NamedArgument("arg5", InlineExpressionBuilder.CreateDynamicReference("x", "y").Build());
         yield return new MessageReference("message", "attribute");
         yield return Pattern.Builder().AddText("text ").AddMessage("x").AddText(" more text").Build();
-        yield return new SelectExpression.SelectExpressionBuilder(new VariableReference("x"))
+        yield return SelectExpression.Builder(new VariableReference("x"))
             .AddVariant("one", Pattern.Builder().AddText("select 1"))
             .AddVariant("other", Pattern.Builder().AddText("select other"))
             .SetDefault(1)
