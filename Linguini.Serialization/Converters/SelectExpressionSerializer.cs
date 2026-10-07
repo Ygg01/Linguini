@@ -64,17 +64,20 @@ namespace Linguini.Serialization.Converters
                 throw new JsonException("No inline expression found!");
             }
 
+            var selectorBuilder = SelectExpression.Builder(selector);
 
             if (el.TryGetProperty("variants", out var variantsProp) && variantsProp.ValueKind != JsonValueKind.Array)
             {
                 throw new JsonException("Select `variants` must be a an array");
             }
 
-            var variants = new List<Variant>();
             foreach (var variantEl in variantsProp.EnumerateArray())
-                variants.Add(VariantSerializer.ReadVariant(variantEl, options));
+            {
+                var variant = VariantSerializer.ReadVariant(variantEl, options);
+                selectorBuilder.AddVariant(variant);
+            }
 
-            return new SelectExpression(selector, variants);
+            return selectorBuilder.Build();
         }
     }
 }

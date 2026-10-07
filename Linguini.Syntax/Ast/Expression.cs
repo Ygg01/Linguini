@@ -294,7 +294,7 @@ namespace Linguini.Syntax.Ast
 
             return Equals((FunctionReference)obj);
         }
-        
+
         /// <summary>
         ///     Compares two <see cref="FunctionReference" /> instances for equality.
         /// </summary>
@@ -326,8 +326,7 @@ namespace Linguini.Syntax.Ast
         {
             return HashCode.Combine(Id, Arguments);
         }
-        
-        
+
 
         /// <inheritdoc />
         public override string ToString()
@@ -427,7 +426,7 @@ namespace Linguini.Syntax.Ast
         {
             return Equals(left, right);
         }
-        
+
         /// <summary>
         ///     Checks equality between two <see cref="MessageReference" /> objects.
         /// </summary>
@@ -440,7 +439,7 @@ namespace Linguini.Syntax.Ast
         {
             return !Equals(left, right);
         }
-        
+
         /// <inheritdoc />
         public override int GetHashCode()
         {
@@ -546,7 +545,7 @@ namespace Linguini.Syntax.Ast
 
             return Equals((DynamicReference)obj);
         }
-        
+
         /// <summary>
         ///     Checks equality between two <see cref="DynamicReference" /> objects.
         /// </summary>
@@ -559,7 +558,7 @@ namespace Linguini.Syntax.Ast
         {
             return Equals(left, right);
         }
-        
+
         /// <summary>
         ///     Checks equality between two <see cref="DynamicReference" /> objects.
         /// </summary>
@@ -670,7 +669,7 @@ namespace Linguini.Syntax.Ast
 
             return Equals((TermReference)obj);
         }
-        
+
         /// <summary>
         ///     Checks equality between two <see cref="TermReference" /> objects.
         /// </summary>
@@ -683,7 +682,7 @@ namespace Linguini.Syntax.Ast
         {
             return Equals(left, right);
         }
-        
+
         /// <summary>
         ///     Checks equality between two <see cref="TermReference" /> objects.
         /// </summary>
@@ -771,7 +770,7 @@ namespace Linguini.Syntax.Ast
         {
             return Id.GetHashCode();
         }
-        
+
         /// <summary>
         ///     Checks equality between two <see cref="VariableReference" /> objects.
         /// </summary>
@@ -823,15 +822,15 @@ namespace Linguini.Syntax.Ast
         public static Placeable FromInline(InlineExpressionBuilder inlineExpr) => new(inlineExpr.Build());
 
         /// <summary>
-        /// Constructs a <c>Placeable</c> using a <see cref="SelectExpressionBuilder" />.
+        /// Constructs a <c>Placeable</c> using a <see cref="SelectExpression.SelectExpressionBuilder" />.
         /// </summary>
         /// <param name="selectExpr">
-        /// An instance of <see cref="SelectExpressionBuilder" /> used to build the <c>SelectExpression</c>.
+        /// An instance of <see cref="SelectExpression.SelectExpressionBuilder" /> used to build the <c>SelectExpression</c>.
         /// </param>
         /// <returns>
         /// A new <see cref="Placeable" /> initialized with the built <c>SelectExpression</c>.
         /// </returns>
-        public static Placeable FromSelect(SelectExpressionBuilder selectExpr) => new(selectExpr.Build());
+        public static Placeable FromSelect(SelectExpression.SelectExpressionBuilder selectExpr) => new(selectExpr.Build());
 
         /// <summary>
         ///     Constructor for <c>Placeable</c>
@@ -936,6 +935,7 @@ namespace Linguini.Syntax.Ast
                 stringBuff.Append(namedArgument.Value);
                 sep = ",";
             }
+
             stringBuff.Append(')');
             _representation = stringBuff.ToString();
         }
@@ -1364,11 +1364,25 @@ namespace Linguini.Syntax.Ast
         public readonly List<Variant> Variants;
 
         /// <summary>
+        /// Constructs a <c>SelectExpressionBuilder</c> for creating a <see cref="SelectExpression"/>.
+        /// </summary>
+        /// <param name="expression">
+        /// The selector expression that will determine the matching criteria for the <c>SelectExpression</c>.
+        /// </param>
+        /// <returns>
+        /// A new instance of <see cref="SelectExpressionBuilder"/> for further configuration of the <c>SelectExpression</c>.
+        /// </returns>
+        public static SelectExpressionBuilder Builder(IInlineExpression expression)
+        {
+            return new SelectExpressionBuilder(expression);
+        }
+
+        /// <summary>
         ///     Constructs a selection expression from a selector and a list of variants.
         /// </summary>
         /// <param name="selector"><see cref="IInlineExpression" /> used to determine which variant to use.</param>
         /// <param name="variants">List of variants to be chosen for evaluation.</param>
-        public SelectExpression(IInlineExpression selector, List<Variant> variants)
+        internal SelectExpression(IInlineExpression selector, List<Variant> variants)
         {
             Selector = selector;
             Variants = variants;
@@ -1417,65 +1431,81 @@ namespace Linguini.Syntax.Ast
         {
             return HashCode.Combine(Selector, Variants);
         }
-    }
-
-    /// <summary>
-    ///     Represents a builder for constructing a <see cref="SelectExpression" />.
-    ///     This class is used to define and configure a selection expression with multiple
-    ///     variants and an optional default variant.
-    /// </summary>
-    public class SelectExpressionBuilder : IAddVariant
-    {
-        private readonly IInlineExpression _selector;
-        private readonly List<Variant> _variants = new();
 
         /// <summary>
-        ///     Creates selection builder from <see cref="IInlineExpression" />
+        ///     Represents a builder for constructing a <see cref="SelectExpression" />.
+        ///     This class is used to define and configure a selection expression with multiple
+        ///     variants and an optional default variant.
         /// </summary>
-        /// <param name="selector">Expression to be used as a selector</param>
-        public SelectExpressionBuilder(IInlineExpression selector)
+        public class SelectExpressionBuilder : IAddVariant
         {
-            _selector = selector;
-        }
+            private readonly IInlineExpression _selector;
+            private readonly List<Variant> _variants = new();
+            private int _default_set = 0;
 
+            /// <summary>
+            ///     Creates selection builder from <see cref="IInlineExpression" />
+            /// </summary>
+            /// <param name="selector">Expression to be used as a selector</param>
+            public SelectExpressionBuilder(IInlineExpression selector)
+            {
+                _selector = selector;
+            }
 
-        /// <inheritdoc />
-        public IAddVariant AddVariant(string selector, Pattern.PatternBuilder patternBuilder)
-        {
-            _variants.Add(new Variant(selector, patternBuilder.Build()));
-            return this;
-        }
+            /// <summary>
+            /// Adds a new <see cref="Variant" /> to the <see cref="SelectExpression.SelectExpressionBuilder" />.
+            /// </summary>
+            /// <param name="variant">The <see cref="Variant" /> instance to add to the builder.</param>
+            /// <returns>An instance of <see cref="IAddVariant" /> to allow fluent configuration chaining.</returns>
+            public IAddVariant AddVariant(Variant variant)
+            {
+                _variants.Add(variant);
+                if (variant.IsDefault)
+                {
+                    _default_set = _variants.Count;
+                }
+                return this;
+            }
 
-        /// <inheritdoc />
-        public IAddVariant AddVariant(float selector, Pattern.PatternBuilder patternBuilder)
-        {
-            _variants.Add(new Variant(selector, patternBuilder.Build()));
-            return this;
-        }
+            /// <inheritdoc />
+            public IAddVariant AddVariant(string selector, Pattern.PatternBuilder patternBuilder)
+            {
+                _variants.Add(new Variant(selector, patternBuilder.Build()));
+                return this;
+            }
 
-        /// <inheritdoc />
-        public SelectExpressionBuilder SetDefault(int? defaultSelector = null)
-        {
-            var selector = defaultSelector is >= 0 && defaultSelector < _variants.Count
-                ? _variants.Count - 1
-                : defaultSelector!.Value;
-            _variants[selector].InternalDefault = true;
-            return this;
-        }
+            /// <inheritdoc />
+            public IAddVariant AddVariant(float selector, Pattern.PatternBuilder patternBuilder)
+            {
+                _variants.Add(new Variant(selector, patternBuilder.Build()));
+                return this;
+            }
 
-        /// <summary>
-        ///     Builds and returns a new instance of <see cref="SelectExpression" />
-        ///     with the configured selector and variants.
-        /// </summary>
-        /// <returns>A new instance of <see cref="SelectExpression" />.</returns>
-        public SelectExpression Build()
-        {
-            return new SelectExpression(_selector, _variants);
+            /// <inheritdoc />
+            public SelectExpressionBuilder SetDefault(int? defaultSelector = null)
+            {
+                var selector = defaultSelector is >= 0 && defaultSelector < _variants.Count
+                    ? _variants.Count - 1
+                    : defaultSelector!.Value;
+                _variants[selector].InternalDefault = true;
+                return this;
+            }
+
+            /// <summary>
+            ///     Builds and returns a new instance of <see cref="SelectExpression" />
+            ///     with the configured selector and variants.
+            /// </summary>
+            /// <returns>A new instance of <see cref="SelectExpression" />.</returns>
+            public SelectExpression Build()
+            {
+                return new SelectExpression(_selector, _variants);
+            }
         }
     }
 
+
     /// <summary>
-    ///     Common interface for adding variants to the <see cref="SelectExpressionBuilder" />
+    ///     Common interface for adding variants to the <see cref="SelectExpression.SelectExpressionBuilder" />
     /// </summary>
     public interface IAddVariant
     {
@@ -1484,7 +1514,7 @@ namespace Linguini.Syntax.Ast
         /// </summary>
         /// <param name="selector">Text used in selector.</param>
         /// <param name="patternBuilder">Pattern to which the selected builder will resolve.</param>
-        /// <returns>A <see cref="SelectExpressionBuilder" /> with added variant.</returns>
+        /// <returns>A <see cref="SelectExpression.SelectExpressionBuilder" /> with added variant.</returns>
         public IAddVariant AddVariant(string selector, Pattern.PatternBuilder patternBuilder);
 
         /// <summary>
@@ -1492,15 +1522,15 @@ namespace Linguini.Syntax.Ast
         /// </summary>
         /// <param name="selector">Float used in selector.</param>
         /// <param name="patternBuilder">Pattern to which the selected builder will resolve.</param>
-        /// <returns>A <see cref="SelectExpressionBuilder" /> with added variant.</returns>
+        /// <returns>A <see cref="SelectExpression.SelectExpressionBuilder" /> with added variant.</returns>
         public IAddVariant AddVariant(float selector, Pattern.PatternBuilder patternBuilder);
 
         /// <summary>
         ///     Sets the default selector to a given position.
         /// </summary>
         /// <param name="defaultSelector">Which variant will become default (picked in case of no match).</param>
-        /// <returns>A <see cref="SelectExpressionBuilder" /> with given default variant.</returns>
-        public SelectExpressionBuilder SetDefault(int? defaultSelector = null);
+        /// <returns>A <see cref="SelectExpression.SelectExpressionBuilder" /> with given default variant.</returns>
+        public SelectExpression.SelectExpressionBuilder SetDefault(int? defaultSelector = null);
     }
 
     /// <summary>
@@ -1554,30 +1584,17 @@ namespace Linguini.Syntax.Ast
         protected internal Pattern InternalValue;
 
         /// <summary>
-        ///     Constructs a simplified <c>Variant</c> from a type and key.
-        /// </summary>
-        /// <param name="type">Which <see cref="VariantType" /> is this <c>Variant</c>.</param>
-        /// <param name="key">Key of the <c>Variant</c>.</param>
-        public Variant(VariantType type, ReadOnlyMemory<char> key)
-        {
-            Type = type;
-            Key = key;
-            InternalValue = new Pattern();
-            InternalDefault = false;
-        }
-
-        /// <summary>
         ///     Constructs a <c>Variant</c> from a type, key, pattern, and if the variant is default.
         /// </summary>
         /// <param name="type">Which <see cref="VariantType" /> is this <c>Variant</c>.</param>
         /// <param name="key">Key of the <c>Variant</c>.</param>
         /// <param name="pattern">Value of the <c>Variant</c>.</param>
         /// <param name="isDefault">If the <c>Variant</c> is default.</param>
-        public Variant(VariantType type, ReadOnlyMemory<char> key, Pattern pattern, bool isDefault = false)
+        public Variant(VariantType type, ReadOnlyMemory<char> key, Pattern? pattern = null, bool isDefault = false)
         {
             Type = type;
             Key = key;
-            InternalValue = pattern;
+            InternalValue = pattern ?? new Pattern();
             InternalDefault = isDefault;
         }
 
@@ -1655,6 +1672,32 @@ namespace Linguini.Syntax.Ast
             }
 
             return Equals((Variant)obj);
+        }
+        
+        /// <summary>
+        ///     Determines whether two specified <c>Variant</c> instances are equal.
+        /// </summary>
+        /// <param name="left">The first <c>Variant</c> instance to compare.</param>
+        /// <param name="right">The second <c>Variant</c> instance to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the specified <c>Variant</c> instances are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(Variant? left, Variant? right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <summary>
+        ///     Determines whether two specified <c>Variant</c> instances are not equal.
+        /// </summary>
+        /// <param name="left">The first <c>Variant</c> instance to compare.</param>
+        /// <param name="right">The second <c>Variant</c> instance to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the specified <c>Variant</c> instances are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(Variant? left, Variant? right)
+        {
+            return !Equals(left, right);
         }
 
         /// <inheritdoc />

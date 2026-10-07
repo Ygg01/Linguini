@@ -496,11 +496,11 @@ namespace Linguini.Syntax.Ast
             }
 
             /// <summary>
-            ///     Adds a <see cref="SelectExpressionBuilder" />.
+            ///     Adds a <see cref="SelectExpression.SelectExpressionBuilder" />.
             /// </summary>
-            /// <param name="selectExpressionBuilder">The <see cref="SelectExpressionBuilder" /> .</param>
+            /// <param name="selectExpressionBuilder">The <see cref="SelectExpression.SelectExpressionBuilder" /> .</param>
             /// <returns>A <see cref="PatternBuilder" /> instance with the added selection expression.</returns>
-            public PatternBuilder AddSelectExpression(SelectExpressionBuilder selectExpressionBuilder)
+            public PatternBuilder AddSelectExpression(SelectExpression.SelectExpressionBuilder selectExpressionBuilder)
             {
                 _patternElements.Add(new Placeable(selectExpressionBuilder.Build()));
                 return this;
@@ -532,7 +532,7 @@ namespace Linguini.Syntax.Ast
             /// <returns>A Pattern object containing the collected elements.</returns>
             public Pattern Build()
             {
-                return new Pattern(_patternElements);
+                return new Pattern(new List<IPatternElement>(_patternElements));
             }
         }
     }
