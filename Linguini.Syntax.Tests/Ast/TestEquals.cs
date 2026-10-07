@@ -505,7 +505,7 @@ namespace Linguini.Syntax.Tests.Ast
         [Test]
         [Parallelizable]
         [TestCaseSource(nameof(FuncRefTestData))]
-        public void TestDynRef(FunctionReference thisObj, object? other, bool expected)
+        public void TestFunRef(FunctionReference thisObj, object? other, bool expected)
         {
             switch (other)
             {
@@ -558,6 +558,53 @@ namespace Linguini.Syntax.Tests.Ast
                     break;
                 case null:
                     Assert.That(variant.Equals((Variant?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(variant, null), Is.False);
+                    Assert.That(Equals(null, variant), Is.False);
+                    break;
+            }
+
+            Assert.That(variant.Equals(other), Is.EqualTo(expected));
+            Assert.That(variant.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        private static IEnumerable<TestCaseData> SelectTestData()
+        {
+            var selectBuild = SelectExpression.Builder(InlineExpressionBuilder.CreateNumber(2.0f).Build())
+                .AddVariant("0.0", Pattern.Builder().AddTermReference("id"))
+                .SetDefault();
+
+            var same = selectBuild.Build();
+            var same2 = selectBuild.Build();
+            
+            var diff = SelectExpression.Builder(InlineExpressionBuilder.CreateVariableReferences("aa").Build())
+                .AddVariant("0.0", Pattern.Builder().AddTermReference("id"))
+                .AddVariant(0.0f, Pattern.Builder().AddFunctionReference("COUNT"))
+                .SetDefault()
+                .Build();
+
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same, diff, false);
+            yield return new TestCaseData(same, same2, true);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(SelectTestData))]
+        public void TestSelectExpr(SelectExpression variant, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case SelectExpression otherObj:
+                    Assert.That(variant == otherObj, Is.EqualTo(expected));
+                    Assert.That(variant != otherObj, Is.EqualTo(!expected));
+                    Assert.That(variant.Equals(otherObj), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(variant.Equals((SelectExpression?)other), Is.EqualTo(expected));
                     Assert.That(Equals(variant, null), Is.False);
                     Assert.That(Equals(null, variant), Is.False);
                     break;

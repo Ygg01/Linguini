@@ -571,6 +571,15 @@ namespace Linguini.Syntax.Ast
         {
             return !Equals(left, right);
         }
+        
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            var attr = Attribute != null 
+                ? "." + Attribute
+                : "";
+            return $"$${Id}{attr}{Arguments}";
+        }
 
         /// <inheritdoc />
         public override int GetHashCode()
@@ -1200,6 +1209,12 @@ namespace Linguini.Syntax.Ast
         {
             return !(left == right);
         }
+        
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Name}: {Value}";
+        }
     }
 
 
@@ -1431,6 +1446,32 @@ namespace Linguini.Syntax.Ast
         {
             return HashCode.Combine(Selector, Variants);
         }
+        
+        /// <summary>
+        ///     Determines whether two specified <c>SelectExpression</c> instances are equal.
+        /// </summary>
+        /// <param name="left">The first <c>SelectExpression</c> instance to compare.</param>
+        /// <param name="right">The second <c>SelectExpression</c> instance to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the specified <c>SelectExpression</c> instances are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(SelectExpression? left, SelectExpression? right)
+        {
+            return Equals(left, right);
+        }
+
+        /// <summary>
+        ///     Determines whether two specified <c>SelectExpression</c> instances are not equal.
+        /// </summary>
+        /// <param name="left">The first <c>SelectExpression</c> instance to compare.</param>
+        /// <param name="right">The second <c>SelectExpression</c> instance to compare.</param>
+        /// <returns>
+        ///     <c>true</c> if the specified <c>SelectExpression</c> instances are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(SelectExpression? left, SelectExpression? right)
+        {
+            return !Equals(left, right);
+        }
 
         /// <summary>
         ///     Represents a builder for constructing a <see cref="SelectExpression" />.
@@ -1484,9 +1525,10 @@ namespace Linguini.Syntax.Ast
             /// <inheritdoc />
             public SelectExpressionBuilder SetDefault(int? defaultSelector = null)
             {
-                var selector = defaultSelector is >= 0 && defaultSelector < _variants.Count
+                var defaultNumber = defaultSelector ?? _default_set;
+                var selector = defaultNumber >= 0 && defaultSelector < _variants.Count
                     ? _variants.Count - 1
-                    : defaultSelector!.Value;
+                    : defaultNumber;
                 _variants[selector].InternalDefault = true;
                 return this;
             }

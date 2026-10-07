@@ -163,6 +163,12 @@ namespace Linguini.Syntax.Ast
         {
             return Comparer.GetHashCode(this);
         }
+        
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{Id}";
+        }
 
         /// <inheritdoc />
         public class AttributeComparer : IEqualityComparer<Attribute>
