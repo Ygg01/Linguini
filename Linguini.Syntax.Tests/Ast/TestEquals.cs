@@ -651,5 +651,84 @@ namespace Linguini.Syntax.Tests.Ast
             Assert.That(variant.Equals(other), Is.EqualTo(expected));
             Assert.That(variant.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
         }
+        
+        private static IEnumerable<TestCaseData> AstTermTestData()
+        {
+            var builder = AstTerm.Builder("term-id", Pattern.From("aaaa"))
+                .AddAttribute("attr1", Pattern.Builder().AddTermReference("term-rf"))
+                .AddAttribute("attr2", Pattern.Builder().AddText("zero one").AddVariableRef("zed1"));
+            var same = builder.Build();
+            var same2 = builder.Build();
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same, AstTerm.Builder("term-id", Pattern.From("aaaa")).Build(), false);
+            yield return new TestCaseData(same, same2, true);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(AstTermTestData))]
+        public void TestAstMessage(AstTerm variant, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case AstTerm otherObj:
+                    Assert.That(variant == otherObj, Is.EqualTo(expected));
+                    Assert.That(variant != otherObj, Is.EqualTo(!expected));
+                    Assert.That(variant.Equals(otherObj), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(variant.Equals((AstTerm?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(variant, null), Is.False);
+                    Assert.That(Equals(null, variant), Is.False);
+                    break;
+            }
+
+            Assert.That(variant.Equals(other), Is.EqualTo(expected));
+            Assert.That(variant.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        private static IEnumerable<TestCaseData> AstMessageTestData()
+        {
+            var builder = AstMessage.Builder("term-id")
+                .SetPattern(Pattern.Builder().AddText("zztop"))
+                .AddAttribute("attr1", Pattern.Builder().AddTermReference("term-rf"))
+                .AddAttribute("attr2", Pattern.Builder().AddText("zero one").AddVariableRef("zed1"));
+            var same = builder.Build();
+            var same2 = builder.Build();
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same, AstTerm.Builder("term-id", Pattern.From("aaaa")).Build(), false);
+            yield return new TestCaseData(same, same2, true);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(AstMessageTestData))]
+        public void TestAstMessage(AstMessage variant, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case AstMessage otherObj:
+                    Assert.That(variant == otherObj, Is.EqualTo(expected));
+                    Assert.That(variant != otherObj, Is.EqualTo(!expected));
+                    Assert.That(variant.Equals(otherObj), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(variant.Equals((AstMessage?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(variant, null), Is.False);
+                    Assert.That(Equals(null, variant), Is.False);
+                    break;
+            }
+
+            Assert.That(variant.Equals(other), Is.EqualTo(expected));
+            Assert.That(variant.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
     }
 }

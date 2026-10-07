@@ -203,6 +203,30 @@ namespace Linguini.Syntax.Ast
             return Equals((AstMessage)obj);
         }
 
+        /// <summary>
+        ///     Determines whether two <see cref="AstMessage" /> instances are equal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="AstMessage" /> to compare.</param>
+        /// <param name="right">The second instance of <see cref="AstMessage" /> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are equal; otherwise, <c>false</c>.</returns>
+        public static bool operator ==(AstMessage? left, AstMessage? right)
+        {
+            return Equals(left, right);
+        }
+
+        
+        /// <summary>
+        ///     Determines whether two <see cref="AstMessage" /> instances are inequal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="AstMessage" /> to compare.</param>
+        /// <param name="right">The second instance of <see cref="AstMessage" /> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are equal; otherwise, <c>false</c>.</returns>
+        public static bool operator !=(AstMessage? left, AstMessage? right)
+        {
+            return !Equals(left, right);
+        }
+
+        
         /// <inheritdoc />
         public override int GetHashCode()
         {
@@ -261,6 +285,18 @@ namespace Linguini.Syntax.Ast
             public AstMessageBuilder AddAttribute(Attribute attribute)
             {
                 _attributes.Add(attribute);
+                return this;
+            }
+            
+            /// <summary>
+            /// Adds a new attribute to the message being built.
+            /// </summary>
+            /// <param name="id">The identifier of the attribute to be added.</param>
+            /// <param name="value">The value of the attribute, represented as a <see cref="Pattern.PatternBuilder"/> object.</param>
+            /// <returns>The current instance of <see cref="AstMessageBuilder"/> for method chaining.</returns>
+            public AstMessageBuilder AddAttribute(Identifier id, Pattern.PatternBuilder value)
+            {
+                _attributes.Add(new Attribute(id, value));
                 return this;
             }
 
@@ -400,6 +436,28 @@ namespace Linguini.Syntax.Ast
                    Attributes.SequenceEqual(other.Attributes, Attribute.Comparer) &&
                    Equals(InternalComment, other.InternalComment);
         }
+        
+        /// <summary>
+        ///     Determines whether two <see cref="AstTerm" /> instances are equal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="AstTerm" /> to compare.</param>
+        /// <param name="right">The second instance of <see cref="AstTerm" /> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are equal; otherwise, <c>false</c>.</returns>
+        public static bool operator ==(AstTerm? left, AstTerm? right)
+        {
+            return Equals(left, right);
+        }
+        
+        /// <summary>
+        ///     Determines whether two <see cref="AstTerm" /> instances are equal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="AstTerm" /> to compare.</param>
+        /// <param name="right">The second instance of <see cref="AstTerm" /> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are equal; otherwise, <c>false</c>.</returns>
+        public static bool operator !=(AstTerm? left, AstTerm? right)
+        {
+            return !Equals(left, right);
+        }
 
         /// <summary>
         ///     Creates a new instance of <see cref="AstTermBuilder" /> with the specified identifier.
@@ -503,6 +561,18 @@ namespace Linguini.Syntax.Ast
             }
 
             /// <summary>
+            /// Adds a new attribute to the term being built.
+            /// </summary>
+            /// <param name="id">The identifier of the attribute to be added.</param>
+            /// <param name="value">The value of the attribute, represented as a <see cref="Pattern.PatternBuilder"/> object.</param>
+            /// <returns>The current instance of <see cref="AstTerm.AstTermBuilder"/> for method chaining.</returns>
+            public AstTermBuilder AddAttribute(Identifier id, Pattern.PatternBuilder value)
+            {
+                _attributes.Add(new Attribute(id, value));
+                return this;
+            }
+            
+            /// <summary>
             ///     Adds an attribute to the term builder.
             /// </summary>
             /// <param name="attribute">The <see cref="Attribute" /> to be added to the <see cref="AstMessage" />.</param>
@@ -512,19 +582,6 @@ namespace Linguini.Syntax.Ast
             public AstTermBuilder AddAttribute(Attribute attribute)
             {
                 _attributes.Add(attribute);
-                return this;
-            }
-
-            /// <summary>
-            ///     Adds an attribute to the term builder.
-            /// </summary>
-            /// <param name="attributes">The <see cref="Attribute" /> to be added to the <see cref="AstTerm" />.</param>
-            /// <returns>
-            ///     The instance of <see cref="AstTermBuilder" /> for chaining method calls.
-            /// </returns>
-            public AstTermBuilder AddAttributes(IEnumerable<Attribute> attributes)
-            {
-                _attributes.AddRange(attributes);
                 return this;
             }
 

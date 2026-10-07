@@ -511,6 +511,17 @@ namespace Linguini.Syntax.Ast
                 _patternElements.Add(new Placeable(selectExpressionBuilder.Build()));
                 return this;
             }
+            
+            /// <summary>
+            ///     Adds a <see cref="VariableReference" />.
+            /// </summary>
+            /// <param name="variableReference">The <see cref="VariableReference" /> .</param>
+            /// <returns>A <see cref="PatternBuilder" /> instance with the added variable reference expression.</returns>
+            public PatternBuilder AddVariableRef(Identifier variableReference)
+            {
+                _patternElements.Add(new Placeable(new VariableReference(variableReference)));
+                return this;
+            }
 
             /// <summary>
             ///     Adds a pattern element to the pattern.
@@ -540,6 +551,8 @@ namespace Linguini.Syntax.Ast
             {
                 return new Pattern(new List<IPatternElement>(_patternElements));
             }
+
+
         }
     }
 

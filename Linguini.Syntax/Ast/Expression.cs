@@ -331,7 +331,7 @@ namespace Linguini.Syntax.Ast
         /// <inheritdoc />
         public override string ToString()
         {
-            return Id + Arguments;
+            return Id +"()";
         }
     }
 
