@@ -31,61 +31,9 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc />
         public string AsString(IFluentContext context)
         {
-            if (context.DateFormatStr != null)
-            {
-                return Date.ToString(context.DateFormatStr, context.DateFormatInfo);
-            }
-
-            // Can we reuse a formatter?
-            if (context.DateTimeOptions.CanUseDefaultFormatter)
-            {
-                var fmt = new StringBuilder();
-
-                if (context.DateTimeOptions.GetStyleFormat == DateTimeZoneFormat.Date)
-                {
-                    FormatDate(fmt, context.DateFormatInfo, context.DateTimeOptions.DateStyle);
-                }
-                else if (context.DateTimeOptions.GetStyleFormat == DateTimeZoneFormat.Time)
-                {
-                    FormatTime(fmt, context.DateFormatInfo, context.DateTimeOptions.TimeStyle);
-                }
-                else if (context.DateTimeOptions.GetStyleFormat == DateTimeZoneFormat.DateTime &&
-                         (context.DateTimeOptions.DateStyle == DateTimeRepresentation.Full ||
-                          context.DateTimeOptions.TimeStyle == DateTimeRepresentation.Full))
-                {
-                    fmt.Append(context.DateFormatInfo.FullDateTimePattern);
-                }
-                else
-                {
-                    FormatDate(fmt, context.DateFormatInfo, context.DateTimeOptions.DateStyle);
-                    fmt.Append(" ");
-                    FormatTime(fmt, context.DateFormatInfo, context.DateTimeOptions.TimeStyle);
-                }
-
-                context.DateFormatStr = fmt.ToString();
-            }
-            else
-            {
-                switch (context.DateTimeOptions.GetStyleFields)
-                {
-                    case DateTimeZoneFormat.Time:
-                        context.DateFormatStr = ExtractTimeFmt(context.DateTimeOptions, context.DateFormatInfo);
-                        break;
-                    case DateTimeZoneFormat.Date:
-                        context.DateFormatStr = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
-                        break;
-                    case DateTimeZoneFormat.DateTime:
-                        var time = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
-                        var date = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
-                        context.DateFormatStr = $"{date} {time}";
-                        break;
-                    default:
-                        context.DateFormatStr = context.DateFormatInfo.FullDateTimePattern;
-                        break;
-                }
-            }
-
-            return Date.ToString(context.DateFormatStr, context.DateFormatInfo);
+            return context.DateFormatStr != null 
+                ? Date.ToString(context.DateFormatStr, context.DateFormatInfo) 
+                : Date.ToString(context.DateFormatInfo);
         }
 
         /// <inheritdoc />
