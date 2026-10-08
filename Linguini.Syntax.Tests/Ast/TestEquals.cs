@@ -3,6 +3,7 @@ using Linguini.Syntax.Ast;
 using Linguini.Syntax.IO;
 using NUnit.Framework;
 using System;
+using Linguini.Syntax.Parser.Error;
 using Attribute = Linguini.Syntax.Ast.Attribute;
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
@@ -666,7 +667,10 @@ namespace Linguini.Syntax.Tests.Ast
         private static IEnumerable<TestCaseData> AstTermTestData()
         {
             var builder = AstTerm.Builder("term-id", Pattern.From("aaaa"))
-                .AddAttribute("attr1", Pattern.Builder().AddTermReference("term-rf"))
+                .AddAttribute(new Attribute("attr1", Pattern.Builder().AddTermReference("term-rf")))
+                .SetComment("comment")
+                .SetComment(new AstComment(CommentLevel.Comment, "test"))
+                .SetPattern(Pattern.From("AAA"))
                 .AddAttribute("attr2", Pattern.Builder().AddText("zero one").AddVariableRef("zed1"));
             var same = builder.Build();
             var same2 = builder.Build();
@@ -773,6 +777,74 @@ namespace Linguini.Syntax.Tests.Ast
                     break;
                 case null:
                     Assert.That(variant.Equals((Placeable?)other), Is.EqualTo(expected));
+                    Assert.That(Equals(variant, null), Is.False);
+                    Assert.That(Equals(null, variant), Is.False);
+                    break;
+            }
+
+            Assert.That(variant.Equals(other), Is.EqualTo(expected));
+            Assert.That(variant.GetHashCode() == (other?.GetHashCode() ?? 0), Is.EqualTo(expected));
+        }
+        
+        private static IEnumerable<TestCaseData> ResourceTestData()
+        {
+            var comment = new AstComment(CommentLevel.Comment, "text");
+            var astMsg = AstMessage.Builder("term-id")
+                .SetPattern(Pattern.Builder().AddText("zztop"))
+                .SetComment("aaaa cik")
+                .Build();
+            var astMsg2 = AstMessage.Builder("term-id2")
+                .SetPattern(Pattern.Builder().AddText("zztop"))
+                .SetComment("aaaa cik")
+                .Build();
+            var astTerm = AstTerm.Builder("term", Pattern.From("aaa"))
+                .Build();
+
+            var same = new Resource(new List<IEntry>()
+            {
+                comment,
+                astMsg,
+                astTerm
+            }, new List<ParseError>());
+            var same2 = new Resource(new List<IEntry>()
+            {
+                comment,
+                astMsg,
+                astTerm,
+            }, new List<ParseError>()
+            {
+                ParseError.DuplicatedNamedArgument("aa", 3, 3)
+            });
+            
+            var diff = new Resource(new List<IEntry>()
+            {
+                astMsg2,
+                comment,
+                astMsg,
+            }, new List<ParseError>());
+
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, CallArguments.Empty, false);
+            yield return new TestCaseData(same, diff, false);
+            yield return new TestCaseData(same, same2, true);
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCaseSource(nameof(ResourceTestData))]
+        public void TestResources(Resource variant, object? other, bool expected)
+        {
+            switch (other)
+            {
+                case Resource otherObj:
+                    Assert.That(variant == otherObj, Is.EqualTo(expected));
+                    Assert.That(variant != otherObj, Is.EqualTo(!expected));
+                    Assert.That(variant.Equals(otherObj), Is.EqualTo(expected));
+                    break;
+                case null:
+                    Assert.That(variant.Equals((Resource?)other), Is.EqualTo(expected));
                     Assert.That(Equals(variant, null), Is.False);
                     Assert.That(Equals(null, variant), Is.False);
                     break;

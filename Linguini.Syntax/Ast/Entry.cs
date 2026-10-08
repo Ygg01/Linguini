@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Linguini.Syntax.IO;
@@ -11,7 +10,7 @@ namespace Linguini.Syntax.Ast
     /// <summary>
     ///     Represents a Fluent AST resource that contains entries and parse errors.
     /// </summary>
-    public record Resource
+    public class Resource : IEquatable<Resource>
     {
         /// <summary>
         ///     A collection of entries that represent the structural components of a Fluent AST resource.
@@ -46,7 +45,7 @@ namespace Linguini.Syntax.Ast
         }
 
         /// <inheritdoc />
-        public virtual bool Equals(Resource? other)
+        public bool Equals(Resource? other)
         {
             if (other is null)
             {
@@ -60,11 +59,60 @@ namespace Linguini.Syntax.Ast
 
             return Entries.SequenceEqual(other.Entries);
         }
+        
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
 
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((Resource)obj);
+        }
+
+        /// <summary>
+        ///     Determines whether two <see cref="Junk" /> instances are equal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="Junk" /> to compare.</param>
+        /// <param name="right">The second instance of <see cref="Junk" /> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are equal; otherwise, <c>false</c>.</returns>
+        public static bool operator ==(Resource? left, Resource? right)
+        {
+            return Equals(left, right);
+        }
+        
+        /// <summary>
+        ///     Determines whether two <see cref="Junk" /> instances are equal.
+        /// </summary>
+        /// <param name="left">The first instance of <see cref="Junk" /> to compare.</param>
+        /// <param name="right">The second instance of <see cref="Junk" /> to compare.</param>
+        /// <returns><c>true</c> if the specified instances are equal; otherwise, <c>false</c>.</returns>
+        public static bool operator !=(Resource? left, Resource? right)
+        {
+            return !Equals(left, right);
+        }
+        
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return HashCode.Combine(Entries);
+            var hashcode = new HashCode();
+            foreach (var entry in Entries)
+            {
+                hashcode.Add(entry);
+            }
+
+            return hashcode.ToHashCode();
         }
 
         /// <inheritdoc />
@@ -371,7 +419,7 @@ namespace Linguini.Syntax.Ast
         /// </summary>
         public readonly Identifier Id;
 
-        internal readonly AstComment? InternalComment;
+        private readonly AstComment? _internalComment;
 
         /// <summary>
         ///     Represents the location in a source file associated with a specific AST node.
@@ -402,7 +450,7 @@ namespace Linguini.Syntax.Ast
             Value = value;
             Attributes = attributes;
             Location = location;
-            InternalComment = comment;
+            _internalComment = comment;
         }
 
         /// <summary>
@@ -411,7 +459,7 @@ namespace Linguini.Syntax.Ast
         /// <remarks>
         ///     The comment is a metadata added by the user. It can have several levels.
         /// </remarks>
-        public AstComment? Comment => InternalComment;
+        public AstComment? Comment => _internalComment;
 
         /// <inheritdoc />
         public string GetId()
@@ -434,7 +482,7 @@ namespace Linguini.Syntax.Ast
 
             return Identifier.Comparer.Equals(Id, other.Id) && Equals(Value, other.Value) &&
                    Attributes.SequenceEqual(other.Attributes, Attribute.Comparer) &&
-                   Equals(InternalComment, other.InternalComment);
+                   Equals(_internalComment, other._internalComment);
         }
         
         /// <summary>
