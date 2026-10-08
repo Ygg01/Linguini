@@ -62,10 +62,30 @@ namespace Linguini.Shared.Types.Bundle
                     FormatTime(fmt, context.DateFormatInfo, context.DateTimeOptions.TimeStyle);
                 }
 
-                return Date.ToString(fmt.ToString(), context.DateFormatInfo);
+                context.DateFormatStr = fmt.ToString();
+            }
+            else
+            {
+                switch (context.DateTimeOptions.GetStyleFields)
+                {
+                    case DateTimeZoneFormat.Time:
+                        context.DateFormatStr = ExtractTimeFmt(context.DateTimeOptions, context.DateFormatInfo);
+                        break;
+                    case DateTimeZoneFormat.Date:
+                        context.DateFormatStr = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
+                        break;
+                    case DateTimeZoneFormat.DateTime:
+                        var time = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
+                        var date = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
+                        context.DateFormatStr = $"{date} {time}";
+                        break;
+                    default:
+                        context.DateFormatStr = context.DateFormatInfo.FullDateTimePattern;
+                        break;
+                }
             }
 
-            return FullFormatDateTime(context);
+            return Date.ToString(context.DateFormatStr, context.DateFormatInfo);
         }
 
         /// <inheritdoc />
@@ -107,34 +127,6 @@ namespace Linguini.Shared.Types.Bundle
         }
 
 
-        private string FullFormatDateTime(IFluentContext context)
-        {
-            if (context.DateFormatStr != null)
-            {
-                return Date.ToString(context.DateFormatStr, context.DateFormatInfo);
-            }
-
-            switch (context.DateTimeOptions.GetStyleFields)
-            {
-                case DateTimeZoneFormat.Time:
-                    context.DateFormatStr = ExtractTimeFmt(context.DateTimeOptions, context.DateFormatInfo);
-                    break;
-                case DateTimeZoneFormat.Date:
-                    context.DateFormatStr = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
-                    break;
-                case DateTimeZoneFormat.DateTime:
-                    var time = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
-                    var date = ExtractDateFmt(context.DateTimeOptions, context.DateFormatInfo);
-                    context.DateFormatStr = $"{date} {time}";
-                    break;
-                default:
-                    context.DateFormatStr = context.DateFormatInfo.FullDateTimePattern;
-                    break;
-            }
-
-            return Date.ToString(context.DateFormatStr, context.DateFormatInfo);
-        }
-
         /// <summary>
         ///     Extracts a time format string based on the specified formatting options and culture-specific information.
         /// </summary>
@@ -160,33 +152,33 @@ namespace Linguini.Shared.Types.Bundle
 
             var hourStr = dateTimeOptions.Hour switch
             {
-                NumericDateFormat.Numeric  => $"{h}",
+                NumericDateFormat.Numeric => $"{h}",
                 NumericDateFormat.TwoDigit => $"{h}{h}",
-                _                          => null
+                _ => null
             };
             var minStr = (dateTimeOptions.Minute, hourStr == null) switch
             {
-                (NumericDateFormat.TwoDigit, true)  => "mm",
+                (NumericDateFormat.TwoDigit, true) => "mm",
                 (NumericDateFormat.TwoDigit, false) => ":mm",
-                (NumericDateFormat.Numeric, true)   => "m",
-                (NumericDateFormat.Numeric, false)  => ":m",
-                _                                   => null
+                (NumericDateFormat.Numeric, true) => "m",
+                (NumericDateFormat.Numeric, false) => ":m",
+                _ => null
             };
             var secStr = (dateTimeOptions.Second, minStr == null) switch
             {
-                (NumericDateFormat.TwoDigit, true)  => "ss",
+                (NumericDateFormat.TwoDigit, true) => "ss",
                 (NumericDateFormat.TwoDigit, false) => ":ss",
-                (NumericDateFormat.Numeric, true)   => "s",
-                (NumericDateFormat.Numeric, false)  => ":s",
-                _                                   => null
+                (NumericDateFormat.Numeric, true) => "s",
+                (NumericDateFormat.Numeric, false) => ":s",
+                _ => null
             };
 
             var fracStr = dateTimeOptions.FractionalSecondsDigit switch
             {
-                FractionalSecodsDigit.OneDigit    => ".f",
-                FractionalSecodsDigit.TwoDigits   => ".f",
+                FractionalSecodsDigit.OneDigit => ".f",
+                FractionalSecodsDigit.TwoDigits => ".f",
                 FractionalSecodsDigit.ThreeDigits => ".f",
-                _                                 => ""
+                _ => ""
             };
             timeFmt.Append(hourStr);
             timeFmt.Append(minStr);
@@ -209,42 +201,42 @@ namespace Linguini.Shared.Types.Bundle
 
             var startingFmt = recognizedDate switch
             {
-                DateFormatRecognized.Year      => "yyyy",
-                DateFormatRecognized.Month     => "MM",
-                DateFormatRecognized.Day       => "dd",
+                DateFormatRecognized.Year => "yyyy",
+                DateFormatRecognized.Month => "MM",
+                DateFormatRecognized.Day => "dd",
                 DateFormatRecognized.YearMonth => info.YearMonthPattern,
-                DateFormatRecognized.MonthDay  => info.MonthDayPattern,
-                DateFormatRecognized.Short     => info.ShortDatePattern,
-                DateFormatRecognized.Long      => info.LongTimePattern,
-                _                              => ""
+                DateFormatRecognized.MonthDay => info.MonthDayPattern,
+                DateFormatRecognized.Short => info.ShortDatePattern,
+                DateFormatRecognized.Long => info.LongTimePattern,
+                _ => ""
             };
             var yearFmt = dateTimeOptions.Year switch
             {
-                NumericDateFormat.Numeric  => "yyyy",
+                NumericDateFormat.Numeric => "yyyy",
                 NumericDateFormat.TwoDigit => "yy",
-                _                          => ""
+                _ => ""
             };
             var monthFmt = dateTimeOptions.Month switch
             {
-                MonthFormat.Numeric  => "M",
+                MonthFormat.Numeric => "M",
                 MonthFormat.TwoDigit => "MM",
-                MonthFormat.Short    => "MMM",
-                MonthFormat.Long     => "MMMM",
-                _                    => ""
+                MonthFormat.Short => "MMM",
+                MonthFormat.Long => "MMMM",
+                _ => ""
             };
 
             var dayFmt = dateTimeOptions.Day switch
             {
-                NumericDateFormat.Numeric  => "d",
+                NumericDateFormat.Numeric => "d",
                 NumericDateFormat.TwoDigit => "dd",
-                _                          => ""
+                _ => ""
             };
 
             var weekDayFmt = dateTimeOptions.Weekday switch
             {
-                DateTextFormat.Long  => "dddd",
+                DateTextFormat.Long => "dddd",
                 DateTextFormat.Short => "ddd",
-                _                    => ""
+                _ => ""
             };
 
             var finalFmt = Regex.Replace(startingFmt, "y{1,4}", yearFmt);
@@ -838,15 +830,15 @@ namespace Linguini.Shared.Types.Bundle
 
             formatRecognized = (year + month + day + weekDay) switch
             {
-                1  => DateFormatRecognized.Year,
-                2  => DateFormatRecognized.Month,
-                4  => DateFormatRecognized.Day,
-                8  => DateFormatRecognized.Weekday,
-                3  => DateFormatRecognized.YearMonth,
-                6  => DateFormatRecognized.MonthDay,
-                7  => DateFormatRecognized.Short,
+                1 => DateFormatRecognized.Year,
+                2 => DateFormatRecognized.Month,
+                4 => DateFormatRecognized.Day,
+                8 => DateFormatRecognized.Weekday,
+                3 => DateFormatRecognized.YearMonth,
+                6 => DateFormatRecognized.MonthDay,
+                7 => DateFormatRecognized.Short,
                 15 => DateFormatRecognized.Long,
-                _  => DateFormatRecognized.None
+                _ => DateFormatRecognized.None
             };
 
             return formatRecognized != DateFormatRecognized.None;
