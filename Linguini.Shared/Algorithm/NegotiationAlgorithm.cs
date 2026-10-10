@@ -236,13 +236,13 @@ namespace Linguini.Shared.Algorithm
         }
 
 
-        private static bool Matches(LangLocId lid1, LangLocId lid2, bool isRange1, bool isRange2)
+        private static bool Matches(LangLocId lid1, LangLocId lid2, bool isLid1Range, bool isLid2Range)
         {
-            return (isRange1 && lid1.Language.IsEmpty)
-                   || (isRange2 && lid2.Language.IsEmpty)
+            return (isLid1Range && lid1.Language.IsEmpty)
+                   || (isLid2Range && lid2.Language.IsEmpty)
                    || (string.Equals(lid1.LanguageStr, lid2.LanguageStr, StringComparison.OrdinalIgnoreCase)
-                       && SubMatch(lid1.ScriptStr, lid2.ScriptStr, isRange1, isRange2)
-                       && SubMatch(lid1.RegionStr, lid2.RegionStr, isRange1, isRange2));
+                       && SubMatch(lid1.ScriptStr, lid2.ScriptStr, isLid1Range, isLid2Range)
+                       && SubMatch(lid1.RegionStr, lid2.RegionStr, isLid1Range, isLid2Range));
         }
 
         private static bool SubMatch(string? lid1, string? lid2, bool isRange1, bool isRange2)
