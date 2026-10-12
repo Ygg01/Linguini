@@ -20,4 +20,8 @@
         <ProjectReference Include="..\Linguini.Shared\Linguini.Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Types\" />
+    </ItemGroup>
+
 </Project>

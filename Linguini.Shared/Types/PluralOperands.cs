@@ -196,16 +196,7 @@ namespace Linguini.Shared.Types
                 numFractionDigits = backTrace.Length;
                 fractionDigits0 = decStr.Length > 0 ? int.Parse(decStr) : 0;
                 fractionDigits = backTrace.Length > 0 ? int.Parse(backTrace) : 0;
-                // if (!int.TryParse(decStr.ToString(), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits0))
-                // {
-                //     operands = null;
-                //     return false;
-                // }
-                //
-                // if (!int.TryParse(backTrace.ToString(), NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out fractionDigits))
-                // {
-                //     fractionDigits = 0;
-                // }
+
             }
 
             operands = new PluralOperands(

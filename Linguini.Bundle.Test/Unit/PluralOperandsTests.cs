@@ -1,11 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
+using Linguini.Syntax.Ast;
 using NUnit.Framework;
 
-namespace PluralRules.Test.Types
+namespace Linguini.Bundle.Test.Unit
 {
+    [TestFixture]
+    [Parallelizable]
     public class PluralOperandsTests
     {
         [Test]
@@ -87,6 +91,7 @@ namespace PluralRules.Test.Types
                 var byteInput = Convert.ToSByte(input);
                 var x = byteInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
+                Assert.That(operands?.IsInteger, Is.True);
             }
 
             if (input >= short.MinValue && input <= short.MaxValue)
@@ -94,6 +99,7 @@ namespace PluralRules.Test.Types
                 var shortInput = Convert.ToInt16(input);
                 var x = shortInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
+                Assert.That(operands?.IsInteger, Is.True);
             }
 
             if (input >= int.MinValue && input <= int.MaxValue)
@@ -101,11 +107,15 @@ namespace PluralRules.Test.Types
                 var intInput = Convert.ToInt32(input);
                 var x = intInput.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, x, operands);
+                Assert.That(operands?.IsInteger, Is.True);
+
             }
 
             {
                 var r = input.TryPluralOperands(out var operands);
                 CheckInput(n, i, v, w, f, t, r, operands);
+                Assert.That(operands?.IsInteger, Is.True);
+
             }
         }
 
@@ -193,22 +203,45 @@ namespace PluralRules.Test.Types
         [TestCase("1200.50", 1200.5, 1200u, 2, 1, 50, 5, 0)]
         [TestCase("1.20050e3", 1200.5, 1200u, 2, 1, 50, 5, 3)]
         public void TestCase(string numberStr, double abs, ulong intDigit, int visibleFracDigit, int withoutZFracDigit,
-            long fractionWithZ, long trailingZRemoved, long exp)
+            long fractionWithZ, long fractionZRemoved, long exp)
         {
             var number = FluentNumber.FromString(numberStr);
 
             number.TryPluralOperands(out var actualPluralOperands);
             var expectedPluralOperand = new PluralOperands(abs, intDigit, visibleFracDigit, withoutZFracDigit,
-                                                           fractionWithZ, trailingZRemoved, exp);
+                                                           fractionWithZ, fractionZRemoved, exp);
 
-
-            Assert.That(actualPluralOperands, Is.EqualTo(expectedPluralOperand));
+            Assert.That(actualPluralOperands == expectedPluralOperand);
         }
 
         [Test]
         public void TestIncorrectOperand()
         {
             Assert.That("foo".TryPluralOperands(out _), Is.False);
+        }
+        
+        private static IEnumerable<TestCaseData> TestEquality()
+        {
+            "2".TryPluralOperands(out var same);
+            yield return new TestCaseData(same, 3, false);
+            yield return new TestCaseData(same, null, false);
+            yield return new TestCaseData(same, same, true);
+            yield return new TestCaseData(same, new PluralOperands(2.0, 2, 0, 0, 0, 0, 0), true);
+            yield return new TestCaseData(same, new PluralOperands(3.0, 3, 0, 0, 0, 0, 0), false);
+        }
+
+        [Test]
+        [TestCaseSource(nameof(TestEquality))]
+        public void TestEqualityContract(PluralOperands operands, object? other, bool result)
+        {
+            Assert.That(operands.Equals(other), Is.EqualTo(result));
+            Assert.That(operands.GetHashCode() == other?.GetHashCode(), Is.EqualTo(result));
+            if (other is PluralOperands otherOperand)
+            {
+                Assert.That(operands == otherOperand, Is.EqualTo(result));
+
+            }
+
         }
 
         private static void CheckInput(double n, long i, int v, int w, long f, long t, bool x,
