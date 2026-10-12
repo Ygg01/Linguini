@@ -399,26 +399,29 @@ namespace Linguini.Shared.Types
                 int regionEnd;
                 if (IsAscii(input.Span[pos]))
                 {
-                    var length = TryReadAlpha(input, pos);
-
-                    if (length == 2)
+                    if (IsAsciiLetter(input.Span[pos]))
                     {
-                        pos += length;
-                        regionEnd = pos;
-                        oldPos = pos;
-                        return new Range(regionStart, regionEnd);
+                        var length = TryReadAlpha(input, pos);
+                        if (length == 2)
+                        {
+                            pos += length;
+                            regionEnd = pos;
+                            oldPos = pos;
+                            return new Range(regionStart, regionEnd);
+                        }
                     }
-                }
-                else if (char.IsDigit(input.Span[pos]))
-                {
-                    var digitRegionLength = TryReadDigit(input, pos);
-
-                    if (digitRegionLength == 3)
+                    
+                    if (char.IsDigit(input.Span[pos]))
                     {
-                        pos += digitRegionLength;
-                        regionEnd = pos;
-                        oldPos = pos;
-                        return new Range(regionStart, regionEnd);
+                        var digitRegionLength = TryReadDigit(input, pos);
+
+                        if (digitRegionLength == 3)
+                        {
+                            pos += digitRegionLength;
+                            regionEnd = pos;
+                            oldPos = pos;
+                            return new Range(regionStart, regionEnd);
+                        }
                     }
                 }
             }
@@ -491,12 +494,12 @@ namespace Linguini.Shared.Types
 
         private static bool IsAsciiLetter(char c)
         {
-            return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+            return c is >= 'a' and <= 'z' or >= 'A' and <= 'Z';
         }
 
         private static bool IsAsciiDigit(char c)
         {
-            return c >= '0' && c <= '9';
+            return c is >= '0' and <= '9';
         }
     }
 

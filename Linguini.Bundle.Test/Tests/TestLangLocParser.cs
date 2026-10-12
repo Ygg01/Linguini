@@ -14,6 +14,11 @@ namespace Linguini.Bundle.Test.Tests
         [TestCase("sr-Cyrl-RS", "sr", "RS", "Cyrl", ExpectedResult = true)]
         [TestCase("en-", null, null, null, ExpectedResult = false)]
         [TestCase("-en", null, null, null, ExpectedResult = false)]
+        [TestCase("", null, null, null, ExpectedResult = false)]
+        [TestCase("en-123", "en", "123", null, ExpectedResult = true)]
+        [TestCase("en-12a3", null, null, null, ExpectedResult = false)]
+        [TestCase("root", "root", null, null, ExpectedResult = true)]
+        [TestCase("root-", null, null, null, ExpectedResult = false)]
         public bool Test(string input, string expectedLanguage, string? expectedRegion, string? expectedScript)
         {
             var result = LangLocParser.TryParse(

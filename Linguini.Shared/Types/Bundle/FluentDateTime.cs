@@ -140,6 +140,18 @@ namespace Linguini.Shared.Types.Bundle
             return timeFmt.ToString();
         }
 
+        /// <summary>
+        /// Extracts a date format string based on the specified <see cref="FluentDateTimeOptions"/>
+        /// and <see cref="DateTimeFormatInfo"/>.
+        /// </summary>
+        /// <param name="dateTimeOptions">An instance of <see cref="FluentDateTimeOptions"/>
+        /// that specifies the formatting preferences for the date components.</param>
+        /// <param name="info">An instance of <see cref="DateTimeFormatInfo"/> that provides cultural-specific
+        /// information for the date formats.</param>
+        /// <returns>
+        /// A formatted string representing the specified date components based on the
+        /// provided options and culture-specific settings.
+        /// </returns>
         public static string ExtractDateFmt(FluentDateTimeOptions dateTimeOptions, DateTimeFormatInfo info)
         {
             if (!dateTimeOptions.TryGetRecognizedDate(out var recognizedDate))

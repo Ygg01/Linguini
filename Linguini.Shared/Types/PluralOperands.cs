@@ -68,6 +68,9 @@ namespace Linguini.Shared.Types
             C = c;
         }
 
+        /// <summary>
+        /// Is the current Plural operand a number without fractional part?
+        /// </summary>
         public bool IsInteger => F == 0 && W == 0;
 
         /// <summary>
