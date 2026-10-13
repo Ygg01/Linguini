@@ -114,7 +114,6 @@ namespace Linguini.Bundle
                     return FluentDateTime.ExtractDateFmt(dateTimeOptions, info);
                 case DateTimeZoneFormat.DateTime:
                     var time = FluentDateTime.ExtractTimeFmt(dateTimeOptions, info);
-                    ;
                     var dateFmt = FluentDateTime.ExtractDateFmt(dateTimeOptions, info);
                     return $"{dateFmt} {time}";
             }
