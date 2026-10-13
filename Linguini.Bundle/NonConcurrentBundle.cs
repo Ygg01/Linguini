@@ -7,6 +7,7 @@ using Linguini.Bundle.Errors;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
+using Linguini.Shared.Util;
 using Linguini.Syntax.Ast;
 
 // ReSharper disable UnusedType.Global
@@ -15,13 +16,15 @@ namespace Linguini.Bundle
 {
     /// <summary>
     ///     Represents a non-concurrent Fluent bundle.
-    ///     Modification aren't thread-safe.
+    ///     Modification isn't thread-safe.
     /// </summary>
     public sealed class NonConcurrentBundle : FluentBundle, IEquatable<NonConcurrentBundle>
     {
         internal Dictionary<string, FluentFunction> Functions = new();
         internal Dictionary<string, AstMessage> Messages = new();
         internal Dictionary<string, AstTerm> Terms = new();
+        
+        
 
         /// <inheritdoc />
         public bool Equals(NonConcurrentBundle? other)
@@ -36,8 +39,9 @@ namespace Linguini.Bundle
                 return true;
             }
 
-            return base.Equals(other) && Functions.SequenceEqual(other.Functions) && Terms.SequenceEqual(other.Terms) &&
-                   Messages.SequenceEqual(other.Messages);
+            return base.Equals(other) && SharedUtil.CompareDictionaries(Functions, other.Functions) 
+                                      && SharedUtil.CompareDictionaries(Terms, other.Terms) 
+                                      && SharedUtil.CompareDictionaries(Messages, other.Messages);
         }
 
         /// <inheritdoc />

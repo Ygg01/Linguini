@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Linguini.Shared.Types.Bundle;
 
 namespace Linguini.Shared.Util
@@ -8,6 +9,42 @@ namespace Linguini.Shared.Util
     /// </summary>
     public static class SharedUtil
     {
+     
+        /// <summary>
+        /// Method for comparing two dictionaries.
+        /// </summary>
+        /// <param name="dict1">First dictionary to compare</param>
+        /// <param name="dict2">Second dictionary to compare</param>
+        /// <typeparam name="TKey">Type of the keys in the dictionaries</typeparam>
+        /// <typeparam name="TValue">Type of the values in the dictionaries</typeparam>
+        /// <returns><c>true</c> if the dictionaries are equal, otherwise <c>false</c></returns>
+        public static bool CompareDictionaries<TKey, TValue>(
+            IDictionary<TKey, TValue> dict1, 
+            IDictionary<TKey, TValue> dict2)
+        {
+            if (ReferenceEquals(dict1, dict2))
+            {
+                return true;
+            } 
+            if (ReferenceEquals(dict1, null) || ReferenceEquals(dict2, null))
+            {
+                return false;
+            } 
+            if (dict1.Count != dict2.Count)
+            {
+                return false; // Count check
+            }
+
+            foreach (var kvp in dict1)
+            {
+                if (!dict2.TryGetValue(kvp.Key, out var value2) || !EqualityComparer<TValue>.Default.Equals(kvp.Value, value2))
+                {
+                    return false; 
+                }
+            }
+            return true; 
+        }
+        
         /// <summary>
         ///     Method for matching Fluent types.
         ///     Should be overriden if the type has custom value matching. E.g. for datetime
