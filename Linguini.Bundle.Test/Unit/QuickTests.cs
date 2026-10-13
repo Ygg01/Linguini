@@ -375,7 +375,7 @@ you-see = You see { $$object.StartsWith ->
             var (bundle, _) = LinguiniBuilder.Builder()
                 .Locale("en-US")
                 .AddResource(resource)
-                .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
+                .AddFunction("NUMBER", LinguiniFluentFunctions.NumberV0)
                 .AddFunction("IDENTITY", LinguiniFluentFunctions.Identity)
                 .Build();
 
@@ -396,7 +396,7 @@ you-see = You see { $$object.StartsWith ->
             var (bundle, _) = LinguiniBuilder.Builder(true)
                 .Locale("en-US")
                 .AddResource(resource)
-                .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
+                .AddFunction("NUMBER", LinguiniFluentFunctions.NumberV0)
                 .AddFunction("IDENTITY", LinguiniFluentFunctions.Identity)
                 .Build();
 
@@ -420,7 +420,7 @@ bar = Bar {""Baz""}
             var (bundle, err) = LinguiniBuilder.Builder(true)
                 .Locale("en-US")
                 .AddResource(TransformFunc)
-                .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
+                .AddFunction("NUMBER", LinguiniFluentFunctions.NumberV0)
                 .SetTransformFunc(s => s.Replace('a', 'A'))
                 .Build();
             Assert.That(err, Is.Null.Or.Empty);
@@ -443,7 +443,7 @@ baz = {NUMBER(3)}
             var (bundle, err) = LinguiniBuilder.Builder(true)
                 .Locale("en-US")
                 .AddResource(FormatterFuncs)
-                .AddFunction("NUMBER", LinguiniFluentFunctions.Number)
+                .AddFunction("NUMBER", LinguiniFluentFunctions.NumberV0)
                 .SetFormatterFunc(func)
                 .Build();
             Assert.That(err, Is.Null.Or.Empty);

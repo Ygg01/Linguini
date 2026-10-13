@@ -85,19 +85,19 @@ namespace Linguini.Bundle.Test.Unit
         {
             // Style formatting
             yield return new TestCaseData(
-                new DateTimeOffset(2026, 2, 1, 1, 3, 4, TimeSpan.Zero),
+                new DateTime(2026, 2, 1, 1, 3, 4),
                 new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     DateStyle = DateTimeRepresentation.Long
                 })).Returns("Sunday, February 1, 2026");
             yield return new TestCaseData(
-                new DateTimeOffset(2027, 2, 1, 1, 3, 4, TimeSpan.Zero),
+                new DateTime(2027, 2, 1, 1, 3, 4),
                 new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions
                 {
                     TimeStyle = DateTimeRepresentation.Medium
                 })).Returns("01:03");
             yield return new TestCaseData(
-                new DateTimeOffset(2028, 2, 1, 1, 3, 4, TimeSpan.Zero),
+                new DateTime(2028, 2, 1, 1, 3, 4),
                 new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions
                 {
                     DateStyle = DateTimeRepresentation.Short,
@@ -105,21 +105,21 @@ namespace Linguini.Bundle.Test.Unit
                 })).Returns("02/01/2028 01:03");
             // Time formatting
             yield return new TestCaseData(
-                new DateTimeOffset(2023, 2, 1, 1, 3, 4, TimeSpan.Zero),
+                new DateTime(2023, 2, 1, 1, 3, 4),
                 new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     Minute = NumericDateFormat.Numeric,
                     Hour = NumericDateFormat.TwoDigit
                 })).Returns("01:3");
             yield return new TestCaseData(
-                new DateTimeOffset(2023, 2, 1, 2, 3, 4, TimeSpan.Zero),
+                new DateTime(2023, 2, 1, 2, 3, 4),
                 new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     Second = NumericDateFormat.TwoDigit,
                     Hour = NumericDateFormat.TwoDigit
                 })).Returns("0204");
             yield return new TestCaseData(
-                new DateTimeOffset(2023, 2, 1, 12, 3, 4, TimeSpan.Zero),
+                new DateTime(2023, 2, 1, 12, 3, 4),
                 new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     Second = NumericDateFormat.TwoDigit,
@@ -129,14 +129,14 @@ namespace Linguini.Bundle.Test.Unit
                 })).Returns("12:03:04.0");
             // Date
             yield return new TestCaseData(
-                new DateTimeOffset(2021, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTime(2021, 1, 1, 0, 0, 0),
                 new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     Year = NumericDateFormat.Numeric,
                     Month = MonthFormat.TwoDigit
                 })).Returns("01 2021");
             yield return new TestCaseData(
-                new DateTimeOffset(2022, 2, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTime(2022, 2, 1, 0, 0, 0),
                 new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     Day = NumericDateFormat.Numeric,
@@ -148,19 +148,19 @@ namespace Linguini.Bundle.Test.Unit
         {
             // Style formatting
             yield return new TestCaseData(
-                new DateTimeOffset(2026, 2, 1, 1, 3, 4, TimeSpan.Zero),
+                new DateTime(2026, 2, 1, 1, 3, 4),
                 new FluentContext("en-US", dateTimeOptions: new FluentDateTimeOptions
                 {
                     DateStyle = DateTimeRepresentation.Long
                 })).Returns("Sunday, February 1, 2026");
             yield return new TestCaseData(
-                new DateTimeOffset(2027, 2, 1, 14, 3, 4, TimeSpan.Zero),
+                new DateTime(2027, 2, 1, 14, 3, 4),
                 new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions
                 {
                     TimeStyle = DateTimeRepresentation.Medium
                 })).Returns("14:03");
             yield return new TestCaseData(
-                new DateTimeOffset(2028, 2, 1, 1, 3, 4, TimeSpan.Zero),
+                new DateTime(2028, 2, 1, 1, 3, 4),
                 new FluentContext("root", dateTimeOptions: new FluentDateTimeOptions
                 {
                     DateStyle = DateTimeRepresentation.Short,
@@ -172,7 +172,7 @@ namespace Linguini.Bundle.Test.Unit
         [Parallelizable]
         [TestCaseSource(nameof(TestDateFormatCases))]
         [TestCaseSource(nameof(TestDateStyleCases))]
-        public string TestDateFormat(DateTimeOffset input, IFluentContext context)
+        public string TestDateFormat(DateTime input, IFluentContext context)
         {
             var fn = (FluentDateTime)input;
             return fn.AsString(context);

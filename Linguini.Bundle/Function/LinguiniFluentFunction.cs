@@ -27,7 +27,7 @@ namespace Linguini.Bundle.Function
         ///     Returns the converted <see cref="FluentNumber" /> if successful, or a <see cref="FluentErrType" />
         ///     if the conversion fails.
         /// </returns>
-        public static IFluentType Number(IList<IFluentType> args, IDictionary<string, IFluentType> namedArgs)
+        public static IFluentType NumberV0(IList<IFluentType> args, IDictionary<string, IFluentType> namedArgs)
         {
             var num = args[0].ToFluentNumber();
 
@@ -61,7 +61,7 @@ namespace Linguini.Bundle.Function
         ///     Returns the converted <see cref="FluentNumber" /> if successful, or a <see cref="FluentErrType" />
         ///     if the conversion fails.
         /// </returns>
-        public static IFluentType DateTime(IList<IFluentType> args, IDictionary<string, IFluentType> namedArgs)
+        public static IFluentType DateTimeV0(IList<IFluentType> args, IDictionary<string, IFluentType> namedArgs)
         {
             var num = args[0].ToFluentDate();
             if (num == null)
@@ -173,5 +173,6 @@ namespace Linguini.Bundle.Function
 
             return (FluentString)stringConcat.ToString();
         }
+        
     }
 }

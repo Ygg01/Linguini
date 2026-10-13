@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Linguini.Bundle.Builder;
 using Linguini.Bundle.Errors;
+using Linguini.Bundle.Function;
 using Linguini.Bundle.Types;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
@@ -371,6 +372,48 @@ new1  = new
             Assert.That(astMessage.Value, Is.Not.Null);
             builder.FormatPattern(astMessage.Value, null, out var err);
             Assert.That(err, Is.Null);
+        }
+        
+        private static DateTimeOffset Now = new DateTimeOffset(2022, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+        [Test]
+        [Parallelizable]
+        [TestCase("message = {DATETIME($now)}", "12/29/2003 23:58:10")]
+        public void TestDateTimeFormatting(string resource, string expected)
+        {
+            var bundle = LinguiniBuilder.Builder().Locale("root")
+                .AddResource(resource)
+                .AddFunction("DATETIME", LinguiniFluentFunctions.DateTimeV0)
+                .UncheckedBuild();
+            var args = new Dictionary<string, IFluentType>
+            {
+                ["now"] = FluentDateTime.From(new DateTime(2003, 12, 29, 23, 58, 10))
+            };
+            
+            var correct = bundle.TryGetMessage("message", args, out  _, out var message);
+            Assert.That(correct, Is.True);
+            Assert.That(message, Is.Not.Null);
+            Assert.That(message, Is.EqualTo(expected));
+        }
+        
+        [Test]
+        [Parallelizable]
+        [TestCase("message = {NUMBER($num)}", "12.50000")]
+        public void TestNumberFormatting(string resource, string expected)
+        {
+            var bundle = LinguiniBuilder.Builder().Locale("root")
+                .AddResource(resource)
+                .AddFunction("NUMBER", LinguiniFluentFunctions.NumberV0)
+                .UncheckedBuild();
+            var args = new Dictionary<string, IFluentType>
+            {
+                ["num"] = (FluentNumber)12.5
+            };
+            
+            var correct = bundle.TryGetMessage("message", args, out  _, out var message);
+            Assert.That(correct, Is.True);
+            Assert.That(message, Is.Not.Null);
+            Assert.That(message, Is.EqualTo(expected));
         }
     }
 }

@@ -176,14 +176,7 @@ namespace Linguini.Shared.Types.Bundle
         {
             return new FluentNumber(db);
         }
-
-        /// <summary>
-        ///     Overloads an operator to convert a <see cref="float" /> to <see cref="FluentNumber" />.
-        /// </summary>
-        public static implicit operator FluentNumber(float fl)
-        {
-            return new FluentNumber((double)fl);
-        }
+        
 
         /// <inheritdoc />
         public override int GetHashCode()

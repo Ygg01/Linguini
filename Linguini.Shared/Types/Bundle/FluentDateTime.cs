@@ -15,25 +15,32 @@ namespace Linguini.Shared.Types.Bundle
         /// <summary>
         ///     DateTimeOffset value of the fluent date-time.
         /// </summary>
-        public readonly DateTimeOffset Date;
+        public readonly DateTime DateTime;
+
 
         /// <summary>
         ///     Formatting options of this fluent date-time.
         /// </summary>
         public readonly FluentDateTimeOptions? Options;
 
-        private FluentDateTime(DateTimeOffset date, FluentDateTimeOptions? options)
+        /// <summary>
+        ///     DateTimeOffset value of the fluent date-time.
+        /// </summary>
+        public readonly TimeZoneInfo TimeZoneInfo;
+
+        private FluentDateTime(DateTime dateTime, TimeZoneInfo timeZoneInfo, FluentDateTimeOptions? options)
         {
-            Date = date;
+            DateTime = dateTime;
+            TimeZoneInfo = timeZoneInfo;
             Options = options;
         }
 
         /// <inheritdoc />
         public string AsString(IFluentContext context)
         {
-            return context.DateFormatStr != null 
-                ? Date.ToString(context.DateFormatStr, context.DateFormatInfo) 
-                : Date.ToString(context.DateFormatInfo);
+            return context.DateFormatStr != null
+                ? DateTime.ToString(context.DateFormatStr, context.DateFormatInfo)
+                : DateTime.ToString(context.DateFormatInfo);
         }
 
         /// <inheritdoc />
@@ -51,7 +58,42 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc />
         public IFluentType Copy()
         {
-            return new FluentDateTime(Date, Options);
+            return new FluentDateTime(DateTime, TimeZoneInfo, Options);
+        }
+
+        /// <summary>
+        ///     Creates a new instance of <see cref="FluentDateTime" /> representing the current local date and time,
+        ///     with an optional time zone specification.
+        /// </summary>
+        /// <param name="timeZoneInfo">
+        ///     The time zone associated with the current date and time. Defaults to
+        ///     <see cref="TimeZoneInfo.Utc" /> if not specified.
+        /// </param>
+        /// <returns>
+        ///     A new instance of <see cref="FluentDateTime" /> encapsulating the current date, time, and specified time zone
+        ///     information.
+        /// </returns>
+        public static FluentDateTime Now(TimeZoneInfo? timeZoneInfo = null)
+        {
+            return new FluentDateTime(DateTime.Now, timeZoneInfo ?? TimeZoneInfo.Utc, null);
+        }
+
+        /// <summary>
+        ///     Creates a new instance of <see cref="FluentDateTime" /> from the given <see cref="DateTime" /> and optional
+        ///     <see cref="TimeZoneInfo" />.
+        /// </summary>
+        /// <param name="dateTime">The date and time to be wrapped by the <see cref="FluentDateTime" /> instance.</param>
+        /// <param name="timeZoneInfo">
+        ///     The time zone associated with the provided date and time. Defaults to
+        ///     <see cref="TimeZoneInfo.Utc" /> if not specified.
+        /// </param>
+        /// <returns>
+        ///     A new instance of <see cref="FluentDateTime" /> encapsulating the provided date, time, and time zone
+        ///     information.
+        /// </returns>
+        public static FluentDateTime From(DateTime dateTime, TimeZoneInfo? timeZoneInfo = null)
+        {
+            return new FluentDateTime(dateTime, timeZoneInfo ?? TimeZoneInfo.Utc, null);
         }
 
         /// <summary>
@@ -61,7 +103,7 @@ namespace Linguini.Shared.Types.Bundle
         /// <returns><c>true</c> if the current instance is equal to the specified instance; otherwise, <c>false</c>.</returns>
         protected bool Equals(FluentDateTime other)
         {
-            return Date.Equals(other.Date);
+            return DateTime.Equals(other.DateTime);
         }
 
         /// <summary>
@@ -71,7 +113,7 @@ namespace Linguini.Shared.Types.Bundle
         /// <returns>A new <see cref="FluentDateTime" /> instance with the provided formatting options.</returns>
         public FluentDateTime WithFormatting(FluentDateTimeOptions options)
         {
-            return new FluentDateTime(Date, options);
+            return new FluentDateTime(DateTime, TimeZoneInfo, options);
         }
 
 
@@ -100,33 +142,33 @@ namespace Linguini.Shared.Types.Bundle
 
             var hourStr = dateTimeOptions.Hour switch
             {
-                NumericDateFormat.Numeric => $"{h}",
+                NumericDateFormat.Numeric  => $"{h}",
                 NumericDateFormat.TwoDigit => $"{h}{h}",
-                _ => null
+                _                          => null
             };
             var minStr = (dateTimeOptions.Minute, hourStr == null) switch
             {
-                (NumericDateFormat.TwoDigit, true) => "mm",
+                (NumericDateFormat.TwoDigit, true)  => "mm",
                 (NumericDateFormat.TwoDigit, false) => ":mm",
-                (NumericDateFormat.Numeric, true) => "m",
-                (NumericDateFormat.Numeric, false) => ":m",
-                _ => null
+                (NumericDateFormat.Numeric, true)   => "m",
+                (NumericDateFormat.Numeric, false)  => ":m",
+                _                                   => null
             };
             var secStr = (dateTimeOptions.Second, minStr == null) switch
             {
-                (NumericDateFormat.TwoDigit, true) => "ss",
+                (NumericDateFormat.TwoDigit, true)  => "ss",
                 (NumericDateFormat.TwoDigit, false) => ":ss",
-                (NumericDateFormat.Numeric, true) => "s",
-                (NumericDateFormat.Numeric, false) => ":s",
-                _ => null
+                (NumericDateFormat.Numeric, true)   => "s",
+                (NumericDateFormat.Numeric, false)  => ":s",
+                _                                   => null
             };
 
             var fracStr = dateTimeOptions.FractionalSecondsDigit switch
             {
-                FractionalSecodsDigit.OneDigit => ".f",
-                FractionalSecodsDigit.TwoDigits => ".f",
+                FractionalSecodsDigit.OneDigit    => ".f",
+                FractionalSecodsDigit.TwoDigits   => ".f",
                 FractionalSecodsDigit.ThreeDigits => ".f",
-                _ => ""
+                _                                 => ""
             };
             timeFmt.Append(hourStr);
             timeFmt.Append(minStr);
@@ -141,16 +183,20 @@ namespace Linguini.Shared.Types.Bundle
         }
 
         /// <summary>
-        /// Extracts a date format string based on the specified <see cref="FluentDateTimeOptions"/>
-        /// and <see cref="DateTimeFormatInfo"/>.
+        ///     Extracts a date format string based on the specified <see cref="FluentDateTimeOptions" />
+        ///     and <see cref="DateTimeFormatInfo" />.
         /// </summary>
-        /// <param name="dateTimeOptions">An instance of <see cref="FluentDateTimeOptions"/>
-        /// that specifies the formatting preferences for the date components.</param>
-        /// <param name="info">An instance of <see cref="DateTimeFormatInfo"/> that provides cultural-specific
-        /// information for the date formats.</param>
+        /// <param name="dateTimeOptions">
+        ///     An instance of <see cref="FluentDateTimeOptions" />
+        ///     that specifies the formatting preferences for the date components.
+        /// </param>
+        /// <param name="info">
+        ///     An instance of <see cref="DateTimeFormatInfo" /> that provides cultural-specific
+        ///     information for the date formats.
+        /// </param>
         /// <returns>
-        /// A formatted string representing the specified date components based on the
-        /// provided options and culture-specific settings.
+        ///     A formatted string representing the specified date components based on the
+        ///     provided options and culture-specific settings.
         /// </returns>
         public static string ExtractDateFmt(FluentDateTimeOptions dateTimeOptions, DateTimeFormatInfo info)
         {
@@ -161,42 +207,42 @@ namespace Linguini.Shared.Types.Bundle
 
             var startingFmt = recognizedDate switch
             {
-                DateFormatRecognized.Year => "yyyy",
-                DateFormatRecognized.Month => "MM",
-                DateFormatRecognized.Day => "dd",
+                DateFormatRecognized.Year      => "yyyy",
+                DateFormatRecognized.Month     => "MM",
+                DateFormatRecognized.Day       => "dd",
                 DateFormatRecognized.YearMonth => info.YearMonthPattern,
-                DateFormatRecognized.MonthDay => info.MonthDayPattern,
-                DateFormatRecognized.Short => info.ShortDatePattern,
-                DateFormatRecognized.Long => info.LongTimePattern,
-                _ => ""
+                DateFormatRecognized.MonthDay  => info.MonthDayPattern,
+                DateFormatRecognized.Short     => info.ShortDatePattern,
+                DateFormatRecognized.Long      => info.LongTimePattern,
+                _                              => ""
             };
             var yearFmt = dateTimeOptions.Year switch
             {
-                NumericDateFormat.Numeric => "yyyy",
+                NumericDateFormat.Numeric  => "yyyy",
                 NumericDateFormat.TwoDigit => "yy",
-                _ => ""
+                _                          => ""
             };
             var monthFmt = dateTimeOptions.Month switch
             {
-                MonthFormat.Numeric => "M",
+                MonthFormat.Numeric  => "M",
                 MonthFormat.TwoDigit => "MM",
-                MonthFormat.Short => "MMM",
-                MonthFormat.Long => "MMMM",
-                _ => ""
+                MonthFormat.Short    => "MMM",
+                MonthFormat.Long     => "MMMM",
+                _                    => ""
             };
 
             var dayFmt = dateTimeOptions.Day switch
             {
-                NumericDateFormat.Numeric => "d",
+                NumericDateFormat.Numeric  => "d",
                 NumericDateFormat.TwoDigit => "dd",
-                _ => ""
+                _                          => ""
             };
 
             var weekDayFmt = dateTimeOptions.Weekday switch
             {
-                DateTextFormat.Long => "dddd",
+                DateTextFormat.Long  => "dddd",
                 DateTextFormat.Short => "ddd",
-                _ => ""
+                _                    => ""
             };
 
             var finalFmt = Regex.Replace(startingFmt, "y{1,4}", yearFmt);
@@ -217,10 +263,10 @@ namespace Linguini.Shared.Types.Bundle
                     sb.Append(dateTimeFormatInfo.LongDatePattern);
                     break;
                 case DateTimeRepresentation.Medium:
-                    sb.Append(Date.ToString(dateTimeFormatInfo));
+                    sb.Append(DateTime.ToString(dateTimeFormatInfo));
                     break;
                 case DateTimeRepresentation.Short:
-                    sb.Append(Date.ToString(dateTimeFormatInfo.ShortDatePattern, dateTimeFormatInfo));
+                    sb.Append(DateTime.ToString(dateTimeFormatInfo.ShortDatePattern, dateTimeFormatInfo));
                     break;
             }
         }
@@ -232,13 +278,13 @@ namespace Linguini.Shared.Types.Bundle
             {
                 case DateTimeRepresentation.Full:
                 case DateTimeRepresentation.Long:
-                    sb.Append(Date.ToString(dateTimeFormatInfo.LongTimePattern, dateTimeFormatInfo));
+                    sb.Append(DateTime.ToString(dateTimeFormatInfo.LongTimePattern, dateTimeFormatInfo));
                     break;
                 case DateTimeRepresentation.Medium:
-                    sb.Append(Date.ToString(dateTimeFormatInfo));
+                    sb.Append(DateTime.ToString(dateTimeFormatInfo));
                     break;
                 case DateTimeRepresentation.Short:
-                    sb.Append(Date.ToString(dateTimeFormatInfo.ShortDatePattern, dateTimeFormatInfo));
+                    sb.Append(DateTime.ToString(dateTimeFormatInfo.ShortDatePattern, dateTimeFormatInfo));
                     break;
             }
         }
@@ -267,20 +313,20 @@ namespace Linguini.Shared.Types.Bundle
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return Date.GetHashCode();
+            return DateTime.GetHashCode();
         }
 
         /// <summary>
-        ///     Implicitly converts a <see cref="DateTimeOffset" /> to a <see cref="FluentDateTime" /> instance.
+        ///     Implicitly converts a <see cref="DateTime" /> to a <see cref="FluentDateTime" /> instance at UTC timezone.
         /// </summary>
         /// <param name="input">The <see cref="DateTimeOffset" /> value to be converted.</param>
         /// <returns>
         ///     A new <see cref="FluentDateTime" /> instance initialized with the specified <see cref="DateTimeOffset" />
         ///     value.
         /// </returns>
-        public static implicit operator FluentDateTime(DateTimeOffset input)
+        public static implicit operator FluentDateTime(DateTime input)
         {
-            return new FluentDateTime(input, null);
+            return new FluentDateTime(input, TimeZoneInfo.Utc, null);
         }
     }
 
@@ -790,15 +836,15 @@ namespace Linguini.Shared.Types.Bundle
 
             formatRecognized = (year + month + day + weekDay) switch
             {
-                1 => DateFormatRecognized.Year,
-                2 => DateFormatRecognized.Month,
-                4 => DateFormatRecognized.Day,
-                8 => DateFormatRecognized.Weekday,
-                3 => DateFormatRecognized.YearMonth,
-                6 => DateFormatRecognized.MonthDay,
-                7 => DateFormatRecognized.Short,
+                1  => DateFormatRecognized.Year,
+                2  => DateFormatRecognized.Month,
+                4  => DateFormatRecognized.Day,
+                8  => DateFormatRecognized.Weekday,
+                3  => DateFormatRecognized.YearMonth,
+                6  => DateFormatRecognized.MonthDay,
+                7  => DateFormatRecognized.Short,
                 15 => DateFormatRecognized.Long,
-                _ => DateFormatRecognized.None
+                _  => DateFormatRecognized.None
             };
 
             return formatRecognized != DateFormatRecognized.None;

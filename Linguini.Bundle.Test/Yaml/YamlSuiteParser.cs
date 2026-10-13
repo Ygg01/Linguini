@@ -125,7 +125,7 @@ namespace Linguini.Bundle.Test.Yaml
                             AddFunc(bundle, funcName, LinguiniFluentFunctions.Sum, errors);
                             break;
                         case "NUMBER":
-                            AddFunc(bundle, funcName, LinguiniFluentFunctions.Number, errors);
+                            AddFunc(bundle, funcName, LinguiniFluentFunctions.NumberV0, errors);
                             break;
                         case "IDENTITY":
                             AddFunc(bundle, funcName, LinguiniFluentFunctions.Identity, errors);
