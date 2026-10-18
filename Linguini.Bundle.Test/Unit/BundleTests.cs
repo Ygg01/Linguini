@@ -374,11 +374,13 @@ new1  = new
             Assert.That(err, Is.Null);
         }
         
-        private static DateTimeOffset Now = new DateTimeOffset(2022, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        private static FluentDateTime NowArg = FluentDateTime.From(new (2003, 12, 29, 23, 58, 10));
 
         [Test]
         [Parallelizable]
         [TestCase("message = {DATETIME($now)}", "12/29/2003 23:58:10")]
+        [TestCase(@"message = {DATETIME($now, hour12: ""true"")}", "12/29/2003 23:58:10")]
+
         public void TestDateTimeFormatting(string resource, string expected)
         {
             var bundle = LinguiniBuilder.Builder().Locale("root")
@@ -387,7 +389,7 @@ new1  = new
                 .UncheckedBuild();
             var args = new Dictionary<string, IFluentType>
             {
-                ["now"] = FluentDateTime.From(new DateTime(2003, 12, 29, 23, 58, 10))
+                ["now"] = NowArg
             };
             
             var correct = bundle.TryGetMessage("message", args, out  _, out var message);
@@ -398,8 +400,9 @@ new1  = new
         
         [Test]
         [Parallelizable]
-        [TestCase("message = {NUMBER($num)}", "12.50000")]
-        public void TestNumberFormatting(string resource, string expected)
+        [TestCase("message = {NUMBER($num)}", 1233.4, "1233.4000")]
+        [TestCase("message = {NUMBER($num, maximumFractionDigits: 2)}", 1233.456, "1233.46")]  
+        public void TestNumberFormatting(string resource, double num, string expected)
         {
             var bundle = LinguiniBuilder.Builder().Locale("root")
                 .AddResource(resource)
@@ -407,7 +410,7 @@ new1  = new
                 .UncheckedBuild();
             var args = new Dictionary<string, IFluentType>
             {
-                ["num"] = (FluentNumber)12.5
+                ["num"] = (FluentNumber)num
             };
             
             var correct = bundle.TryGetMessage("message", args, out  _, out var message);
