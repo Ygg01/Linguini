@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Linguini.Bundle.Types;
+using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 
 namespace Linguini.Bundle.Function
@@ -42,7 +43,8 @@ namespace Linguini.Bundle.Function
             }
 
             var numOptions = FluentNumberOptions.ToNumberOption(namedArgs);
-            return num.WithFormatting(numOptions);
+            var context = new FluentContext(new LangLocId("root"), numOptions);
+            return (FluentString)num.AsString(context);
         }
 
         /// <summary>
@@ -63,19 +65,20 @@ namespace Linguini.Bundle.Function
         /// </returns>
         public static IFluentType DateTimeV0(IList<IFluentType> args, IDictionary<string, IFluentType> namedArgs)
         {
-            var num = args[0].ToFluentDate();
-            if (num == null)
+            var fluentDate = args[0].ToFluentDate();
+            if (fluentDate == null)
             {
                 return new FluentErrType();
             }
 
             if (namedArgs.Count <= 0)
             {
-                return num;
+                return fluentDate;
             }
 
-            var numOptions = FluentDateTimeOptions.ToDateOptions(namedArgs);
-            return num.WithFormatting(numOptions);
+            var dateOptions = FluentDateTimeOptions.ToDateOptions(namedArgs);
+            var context = new FluentContext(new LangLocId("root"), null, dateOptions);
+            return (FluentString)fluentDate.AsString(context);
         }
 
         /// <summary>
