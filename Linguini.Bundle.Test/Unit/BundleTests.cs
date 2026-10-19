@@ -374,7 +374,7 @@ new1  = new
             Assert.That(err, Is.Null);
         }
         
-        private static FluentDateTime NowArg = FluentDateTime.From(new (2003, 12, 29, 23, 58, 10));
+        private static readonly FluentDateTime NowArg = FluentDateTime.From(new (2003, 12, 29, 23, 58, 10));
 
         [Test]
         [Parallelizable]
@@ -402,6 +402,8 @@ new1  = new
         [Parallelizable]
         [TestCase("message = {NUMBER($num)}", 1233.4, "1233.4000")]
         [TestCase("message = {NUMBER($num, maximumFractionDigits: 2)}", 1233.456, "1233.46")]  
+        [TestCase("message = {NUMBER($num, maximumFractionDigits: 2, minimumIntegerDigits: 5)}", 1233.456, "01233.46")]  
+
         public void TestNumberFormatting(string resource, double num, string expected)
         {
             var bundle = LinguiniBuilder.Builder().Locale("root")
