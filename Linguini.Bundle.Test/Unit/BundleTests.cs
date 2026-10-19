@@ -403,7 +403,8 @@ new1  = new
         [TestCase("message = {NUMBER($num)}", 1233.4, "1233.4000")]
         [TestCase("message = {NUMBER($num, maximumFractionDigits: 2)}", 1233.456, "1233.46")]  
         [TestCase("message = {NUMBER($num, maximumFractionDigits: 2, minimumIntegerDigits: 5)}", 1233.456, "01233.46")]  
-
+        [TestCase(@"message = {NUMBER($num, useGrouping: ""true"")}", 123456, "123,456.00")] 
+        [TestCase(@"message = {NUMBER($num, useGrouping: ""true"", minimumFractionDigits: 0)}", 123456, "123,456")]  
         public void TestNumberFormatting(string resource, double num, string expected)
         {
             var bundle = LinguiniBuilder.Builder().Locale("root")

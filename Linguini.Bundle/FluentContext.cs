@@ -169,7 +169,7 @@ namespace Linguini.Bundle
         ///     A string that represents the number format pattern when applicable, or null if the given options
         ///     require no specific pattern.
         /// </returns>
-        protected static string? ProcessNumberOptions(FluentNumberOptions? numberOptions,
+        private static string? ProcessNumberOptions(FluentNumberOptions? numberOptions,
             ref NumberFormatInfo numberFormatInfo)
         {
             if (numberOptions == null)
@@ -193,6 +193,13 @@ namespace Linguini.Bundle
                 return numberOptions.MinimumFractionDigits != null || numberOptions.MinimumFractionDigits > 0
                     ? $"G{numberOptions.MinimumFractionDigits}"
                     : "G";
+            }
+
+            if (numberOptions.UseGrouping == UseGrouping.True || numberOptions.UseGrouping == UseGrouping.Always)
+            {
+                return numberOptions.MinimumFractionDigits != null
+                    ? $"N{numberOptions.MinimumFractionDigits}"
+                    : "N";
             }
 
             if (numberOptions.MinimumFractionDigits != null)
