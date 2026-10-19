@@ -211,6 +211,30 @@ namespace Linguini.Bundle.Test.Tests
                     NegotiationStrategy.Filtering,
                     null)
                 .Returns(new[] { "en-Latn-US" });
+            yield return new TestCaseData(
+                    new[] { "sr" },
+                    new[] { "sr-Cyrl-SR" },
+                    NegotiationStrategy.Filtering,
+                    null)
+                .Returns(new[] { "sr-Cyrl-SR" });
+            yield return new TestCaseData(
+                    new[] { "sr-RU" },
+                    new[] { "sr-Latn-SR" },
+                    NegotiationStrategy.Filtering,
+                    null)
+                .Returns(new[] { "sr-Latn-SR" });
+            yield return new TestCaseData(
+                    new[] { "zh-US" },
+                    new[] { "zh-Hant-US" },
+                    NegotiationStrategy.Filtering,
+                    null)
+                .Returns(new[] { "zh-Hant-US" });
+            yield return new TestCaseData(
+                    new[] { "zh-GB" },
+                    new[] { "zh-Hant-GB" },
+                    NegotiationStrategy.Filtering,
+                    null)
+                .Returns(new[] { "zh-Hant-GB" });
             // Disabled until variants are implemented
             // yield return new TestCaseData(new[] { "en-Latn-US-windows" }, new[] { "en-Latn-US-windows" },
             //         NegotiationStrategy.Filtering, null)

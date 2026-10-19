@@ -116,8 +116,6 @@ namespace Linguini.Shared.Algorithm
                 return new LangLocId(id.LanguageStr, region, id.ScriptStr);
             }
 
-            ;
-
             return null;
         }
     }
