@@ -380,6 +380,10 @@ new1  = new
         [Parallelizable]
         [TestCase("message = {DATETIME($now)}", "12/29/2003 23:58:10")]
         [TestCase(@"message = {DATETIME($now, hour12: ""true"")}", "12/29/2003 23:58:10")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""medium"")}", "Mon, 29 Dec 2003")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""long"")}", "Monday, 29 December 2003")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""long"", timeStyle: ""short"")}", "Monday, 29 December 2003 23:58")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""medium"", timeStyle: ""long"")}", "Mon, 29 Dec 2003 23:58:10")]
 
         public void TestDateTimeFormatting(string resource, string expected)
         {

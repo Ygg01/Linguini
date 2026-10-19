@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using Linguini.Shared.Types;
 using Linguini.Shared.Types.Bundle;
 
@@ -132,7 +133,10 @@ namespace Linguini.Bundle
                     sb.Append(dateTimeFormatInfo.LongDatePattern);
                     break;
                 case DateTimeRepresentation.Medium:
-                    sb.Append(dateTimeFormatInfo.RFC1123Pattern);
+                    var longDate = dateTimeFormatInfo.LongDatePattern;
+                    longDate = Regex.Replace(longDate, "d{4}", "ddd");
+                    longDate = Regex.Replace(longDate, "M{4}", "MMM");
+                    sb.Append(longDate);
                     break;
                 case DateTimeRepresentation.Short:
                     sb.Append(dateTimeFormatInfo.ShortDatePattern);
