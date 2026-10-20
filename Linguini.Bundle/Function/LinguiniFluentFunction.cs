@@ -77,6 +77,14 @@ namespace Linguini.Bundle.Function
             }
 
             var dateOptions = FluentDateTimeOptions.ToDateOptions(namedArgs);
+            if ((dateOptions.TimeStyle != null || dateOptions.DateStyle != null) &&
+                (dateOptions.Hour12 != null || dateOptions.Year != null || dateOptions.Month != null || dateOptions.Day != null 
+                    || dateOptions.Hour != null || dateOptions.Minute != null || dateOptions.Second != null || dateOptions.FractionalSecondsDigit != null))
+            {
+                return new FluentErrType(
+                    "When dateStyle and timeStyle are specified, other styling fields must be unspecified.");
+            }
+
             var context = new FluentContext(new LangLocId("root"), null, dateOptions);
             return (FluentString)fluentDate.AsString(context);
         }
@@ -176,6 +184,5 @@ namespace Linguini.Bundle.Function
 
             return (FluentString)stringConcat.ToString();
         }
-        
     }
 }

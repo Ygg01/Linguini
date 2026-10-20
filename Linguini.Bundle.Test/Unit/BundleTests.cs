@@ -373,8 +373,8 @@ new1  = new
             builder.FormatPattern(astMessage.Value, null, out var err);
             Assert.That(err, Is.Null);
         }
-        
-        private static readonly FluentDateTime NowArg = FluentDateTime.From(new (2003, 12, 29, 23, 58, 10));
+
+        private static readonly FluentDateTime NowArg = FluentDateTime.From(new(2003, 12, 29, 23, 58, 10));
 
         [Test]
         [Parallelizable]
@@ -382,9 +382,15 @@ new1  = new
         [TestCase(@"message = {DATETIME($now, hour12: ""true"")}", "12/29/2003 23:58:10")]
         [TestCase(@"message = {DATETIME($now, dateStyle: ""medium"")}", "Mon, 29 Dec 2003")]
         [TestCase(@"message = {DATETIME($now, dateStyle: ""long"")}", "Monday, 29 December 2003")]
-        [TestCase(@"message = {DATETIME($now, dateStyle: ""long"", timeStyle: ""short"")}", "Monday, 29 December 2003 23:58")]
-        [TestCase(@"message = {DATETIME($now, dateStyle: ""medium"", timeStyle: ""long"")}", "Mon, 29 Dec 2003 23:58:10")]
-
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""long"", timeStyle: ""short"")}",
+                  "Monday, 29 December 2003 23:58")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""medium"", timeStyle: ""long"")}",
+                  "Mon, 29 Dec 2003 23:58:10")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""short"", timeStyle: ""long"")}", "12/29/2003 23:58:10")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""short"", hour12: ""true"")}",
+                  "When dateStyle and timeStyle are specified, other styling fields must be unspecified.")]
+        [TestCase(@"message = {DATETIME($now, year: ""long"", month: ""short"")}",
+                  "")]
         public void TestDateTimeFormatting(string resource, string expected)
         {
             var bundle = LinguiniBuilder.Builder().Locale("root")
@@ -395,20 +401,20 @@ new1  = new
             {
                 ["now"] = NowArg
             };
-            
-            var correct = bundle.TryGetMessage("message", args, out  _, out var message);
+
+            var correct = bundle.TryGetMessage("message", args, out _, out var message);
             Assert.That(correct, Is.True);
             Assert.That(message, Is.Not.Null);
             Assert.That(message, Is.EqualTo(expected));
         }
-        
+
         [Test]
         [Parallelizable]
         [TestCase("message = {NUMBER($num)}", 1233.4, "1233.4000")]
-        [TestCase("message = {NUMBER($num, maximumFractionDigits: 2)}", 1233.456, "1233.46")]  
-        [TestCase("message = {NUMBER($num, maximumFractionDigits: 2, minimumIntegerDigits: 5)}", 1233.456, "01233.46")]  
-        [TestCase(@"message = {NUMBER($num, useGrouping: ""true"")}", 123456, "123,456.00")] 
-        [TestCase(@"message = {NUMBER($num, useGrouping: ""true"", minimumFractionDigits: 0)}", 123456, "123,456")]  
+        [TestCase("message = {NUMBER($num, maximumFractionDigits: 2)}", 1233.456, "1233.46")]
+        [TestCase("message = {NUMBER($num, maximumFractionDigits: 2, minimumIntegerDigits: 5)}", 1233.456, "01233.46")]
+        [TestCase(@"message = {NUMBER($num, useGrouping: ""true"")}", 123456, "123,456.00")]
+        [TestCase(@"message = {NUMBER($num, useGrouping: ""true"", minimumFractionDigits: 0)}", 123456, "123,456")]
         public void TestNumberFormatting(string resource, double num, string expected)
         {
             var bundle = LinguiniBuilder.Builder().Locale("root")
@@ -419,8 +425,8 @@ new1  = new
             {
                 ["num"] = (FluentNumber)num
             };
-            
-            var correct = bundle.TryGetMessage("message", args, out  _, out var message);
+
+            var correct = bundle.TryGetMessage("message", args, out _, out var message);
             Assert.That(correct, Is.True);
             Assert.That(message, Is.Not.Null);
             Assert.That(message, Is.EqualTo(expected));
