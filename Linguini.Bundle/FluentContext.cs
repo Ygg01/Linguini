@@ -135,7 +135,7 @@ namespace Linguini.Bundle
                 case DateTimeRepresentation.Medium:
                     var longDate = dateTimeFormatInfo.LongDatePattern;
                     longDate = Regex.Replace(longDate, "d{4}", "ddd");
-                    longDate = Regex.Replace(longDate, "M{4}", "MMM");
+                    longDate = Regex.Replace(longDate, "M{3,4}", "MMM");
                     sb.Append(longDate);
                     break;
                 case DateTimeRepresentation.Short:

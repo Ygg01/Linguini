@@ -374,23 +374,33 @@ new1  = new
             Assert.That(err, Is.Null);
         }
 
-        private static readonly FluentDateTime NowArg = FluentDateTime.From(new(2003, 12, 29, 23, 58, 10));
+        private static readonly FluentDateTime NowArg = FluentDateTime.From(new(2003, 1, 2, 23, 4, 10));
 
         [Test]
         [Parallelizable]
-        [TestCase("message = {DATETIME($now)}", "12/29/2003 23:58:10")]
-        [TestCase(@"message = {DATETIME($now, hour12: ""true"")}", "12/29/2003 23:58:10")]
-        [TestCase(@"message = {DATETIME($now, dateStyle: ""medium"")}", "Mon, 29 Dec 2003")]
-        [TestCase(@"message = {DATETIME($now, dateStyle: ""long"")}", "Monday, 29 December 2003")]
-        [TestCase(@"message = {DATETIME($now, dateStyle: ""long"", timeStyle: ""short"")}",
-                  "Monday, 29 December 2003 23:58")]
+        [TestCase("message = {DATETIME($now)}", "01/02/2003 23:04:10")]
+        [TestCase(@"message = {DATETIME($now, hour12: ""true"")}", "01/02/2003 23:04:10")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""medium"")}", "Thu, 02 Jan 2003")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""long"")}", "Thursday, 02 January 2003")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""short"", timeStyle: ""short"")}",
+                  "01/02/2003 23:04")]
         [TestCase(@"message = {DATETIME($now, dateStyle: ""medium"", timeStyle: ""long"")}",
-                  "Mon, 29 Dec 2003 23:58:10")]
-        [TestCase(@"message = {DATETIME($now, dateStyle: ""short"", timeStyle: ""long"")}", "12/29/2003 23:58:10")]
+                  "Thu, 02 Jan 2003 23:04:10")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""short"", timeStyle: ""long"")}", "01/02/2003 23:04:10")]
         [TestCase(@"message = {DATETIME($now, dateStyle: ""short"", hour12: ""true"")}",
                   "When dateStyle and timeStyle are specified, other styling fields must be unspecified.")]
-        [TestCase(@"message = {DATETIME($now, year: ""long"", month: ""short"")}",
-                  "")]
+        [TestCase(@"message = {DATETIME($now, year: ""numeric"", month: ""short"")}",
+                  "2003 Jan")]
+        [TestCase(@"message = {DATETIME($now, year: ""2-digit"", month: ""short"", day: ""numeric"")}",
+                  "Jan/2/03")]
+        [TestCase(@"message = {DATETIME($now, year: ""numeric"", month: ""short"")}",
+                  "2003 Jan")]
+        [TestCase(@"message = {DATETIME($now, year: ""numeric"", month: ""long"", day: ""2-digit"", hour: ""numeric"")}",
+                  "January/02/2003 23")]
+        [TestCase(@"message = {DATETIME($now, year: ""numeric"", month: ""numeric"", day: ""2-digit"", hour: ""numeric"")}",
+                  "1/2/2003 23")]
+        [TestCase(@"message = {DATETIME($now, year: ""numeric"", month: ""2-digit"", day: ""2-digit"", hour: ""numeric"", minute: ""numeric"")}",
+                  "01/02/2003 23:4")]
         public void TestDateTimeFormatting(string resource, string expected)
         {
             var bundle = LinguiniBuilder.Builder().Locale("root")
