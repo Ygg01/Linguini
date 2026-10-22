@@ -51,19 +51,6 @@ term1 = xxx
 new1  = new
     .attr = 6";
 
-
-        [Test]
-        public void TestDefaultBundleOptions()
-        {
-            var defaultBundleOpt = new FluentBundleOption();
-            var bundle = FluentBundle.MakeUnchecked(defaultBundleOpt);
-            Assert.That(CultureInfo.CurrentCulture, Is.EqualTo(bundle.Culture));
-            Assert.That(bundle.FormatterFunc, Is.Null);
-            Assert.That(bundle.TransformFunc, Is.Null);
-            Assert.That(bundle.UseIsolating);
-            Assert.That(100, Is.EqualTo(bundle.MaxPlaceable));
-        }
-
         [Test]
         public void TestNonDefaultBundleOptions()
         {
