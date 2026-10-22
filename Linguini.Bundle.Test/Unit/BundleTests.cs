@@ -120,7 +120,7 @@ new1  = new
         {
             var bundler = LinguiniBuilder.Builder()
                 .Locales("en-US", "sr-RS")
-                .AddResources(Wrong, Res1)
+                .AddResources((new StringReader(Wrong), Res1))
                 .SetFormatterFunc(_formatter)
                 .SetTransformFunc(_transform)
                 .AddFunction("id", _idFunc)

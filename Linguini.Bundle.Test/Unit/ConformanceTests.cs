@@ -89,6 +89,7 @@ term = term
         {
             Assert.That(bundle.HasAttrMessage("term.attr"), Is.True);
             Assert.That(bundle.HasAttrMessage("term.notExistent"), Is.False);
+            Assert.That(bundle.HasAttrMessage("nonExistentTerm.notExistentAttr"), Is.False);
         }
 
         #endregion

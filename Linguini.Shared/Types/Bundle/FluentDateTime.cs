@@ -254,42 +254,6 @@ namespace Linguini.Shared.Types.Bundle
             return finalFmt;
         }
 
-        private void FormatDate(StringBuilder sb, DateTimeFormatInfo dateTimeFormatInfo,
-            DateTimeRepresentation? dateStyle)
-        {
-            switch (dateStyle)
-            {
-                case DateTimeRepresentation.Full:
-                case DateTimeRepresentation.Long:
-                    sb.Append(dateTimeFormatInfo.LongDatePattern);
-                    break;
-                case DateTimeRepresentation.Medium:
-                    sb.Append(DateTime.ToString(dateTimeFormatInfo));
-                    break;
-                case DateTimeRepresentation.Short:
-                    sb.Append(DateTime.ToString(dateTimeFormatInfo.ShortDatePattern, dateTimeFormatInfo));
-                    break;
-            }
-        }
-
-        private void FormatTime(StringBuilder sb, DateTimeFormatInfo dateTimeFormatInfo,
-            DateTimeRepresentation? timeStyle)
-        {
-            switch (timeStyle)
-            {
-                case DateTimeRepresentation.Full:
-                case DateTimeRepresentation.Long:
-                    sb.Append(DateTime.ToString(dateTimeFormatInfo.LongTimePattern, dateTimeFormatInfo));
-                    break;
-                case DateTimeRepresentation.Medium:
-                    sb.Append(DateTime.ToString(dateTimeFormatInfo));
-                    break;
-                case DateTimeRepresentation.Short:
-                    sb.Append(DateTime.ToString(dateTimeFormatInfo.ShortDatePattern, dateTimeFormatInfo));
-                    break;
-            }
-        }
-
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {

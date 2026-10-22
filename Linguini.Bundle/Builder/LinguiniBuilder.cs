@@ -100,26 +100,7 @@ namespace Linguini.Bundle.Builder
             /// <param name="unparsedResourceArray">String array of string fragments</param>
             /// <returns>The <see cref="IReadyStep">next step (final)</see> in the builder.</returns>
             IReadyStep AddResources(params string[] unparsedResourceArray);
-
-            /// <summary>
-            ///     Adds an enumerable list of <see cref="TextReader" /> to the builder.
-            /// </summary>
-            /// <param name="unparsedStreamList">An enumerable collection of unparsed resources.</param>
-            /// <returns>An instance of <see cref="IReadyStep" /> representing the next step in the builder.</returns>
-            [Obsolete(
-                "Method is obsolete, please use IResourceStep.AddResources(IEnumerable<(TextReader, string?)>) instead.",
-                true)]
-            IReadyStep AddResources(IEnumerable<TextReader> unparsedStreamList);
-
-            /// <summary>
-            ///     Adds an array  of <see cref="TextReader" /> to the builder.
-            /// </summary>
-            /// <param name="unparsedStreamList">An array of unparsed text in <see cref="TextReader" />s.</param>
-            /// <returns>An instance of <see cref="IReadyStep" /> representing the next step in the builder.</returns>
-            [Obsolete(
-                "Method is obsolete, please use IResourceStep.AddResources(params (TextReader, string?)[]) instead.",
-                true)]
-            IReadyStep AddResources(params TextReader[] unparsedStreamList);
+            
 
             /// <summary>
             ///     Adds a fragments to a <see cref="FluentBundle" />.
@@ -450,18 +431,6 @@ namespace Linguini.Bundle.Builder
             }
 
             /// <inheritdoc />
-            public IReadyStep AddResources(params TextReader[] unparsedStreamList)
-            {
-                foreach (var unparsed in unparsedStreamList)
-                {
-                    var parsed = LinguiniParser.FromTextReader(unparsed, "???", _enableExperimental).Parse();
-                    _resources.Add(parsed);
-                }
-
-                return this;
-            }
-
-            /// <inheritdoc />
             public IReadyStep AddResource(string resource, string? filename = null)
             {
                 var parsed = LinguiniParser.FromFragment(resource, filename, _enableExperimental).Parse();
@@ -553,19 +522,6 @@ namespace Linguini.Bundle.Builder
                 foreach (var unparsed in unparsedResourceArray)
                 {
                     var parsed = LinguiniParser.FromFragment(unparsed, enableExperimental: _enableExperimental).Parse();
-                    _resources.Add(parsed);
-                }
-
-                return this;
-            }
-
-            /// <inheritdoc />
-            public IReadyStep AddResources(IEnumerable<TextReader> unparsedStream)
-            {
-                foreach (var unparsed in unparsedStream)
-                {
-                    var parsed = LinguiniParser.FromTextReader(unparsed, "???", _enableExperimental)
-                        .Parse();
                     _resources.Add(parsed);
                 }
 

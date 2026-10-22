@@ -439,7 +439,7 @@ namespace Linguini.Shared.Types.Bundle
                     conversionSuccess = true;
                     break;
                 default:
-                    style = default;
+                    style = FluentNumberStyle.Decimal;;
                     conversionSuccess = false;
                     break;
             }
