@@ -167,8 +167,8 @@ namespace Linguini.Shared.Types.Bundle
             var fracStr = dateTimeOptions.FractionalSecondsDigit switch
             {
                 FractionalSecodsDigit.OneDigit    => ".f",
-                FractionalSecodsDigit.TwoDigits   => ".f",
-                FractionalSecodsDigit.ThreeDigits => ".f",
+                FractionalSecodsDigit.TwoDigits   => ".ff",
+                FractionalSecodsDigit.ThreeDigits => ".fff",
                 _                                 => ""
             };
             timeFmt.Append(hourStr);
@@ -524,38 +524,6 @@ namespace Linguini.Shared.Types.Bundle
         #endregion
     }
 
-
-    /// <summary>
-    ///     The hour cycle to use. Possible values are "h11", "h12", "h23", and "h24";
-    ///     the default is inferred from hour12 and locale.
-    /// </summary>
-    public enum HourCycle : byte
-    {
-        /// <summary>
-        ///     Represents a 12-hour clock with the hour ranging from 0 to 11.
-        ///     Commonly used in locales or formats where the ante meridiem (AM) and post meridiem (PM) designations are separate.
-        /// </summary>
-        H11,
-
-        /// <summary>
-        ///     Represents a 12-hour clock with the hour ranging from 1 to 12.
-        ///     Commonly used in locales or formats with ante meridiem (AM) and post meridiem (PM) designations.
-        /// </summary>
-        H12,
-
-        /// <summary>
-        ///     Represents a 24-hour clock with the hour ranging from 0 to 23.
-        ///     Commonly used in locales or formats where the day is divided into 24 distinct hours without an ante meridiem (AM)
-        ///     or post meridiem (PM) designation.
-        /// </summary>
-        H23,
-
-        /// <summary>
-        ///     Represents a 24-hour clock with the hour ranging from 1 to 24.
-        ///     Commonly used in locales or formats that follow a military or standard time representation without AM/PM markers.
-        /// </summary>
-        H24
-    }
 
     /// <summary>
     ///     Specifies the representation style for date and time values.
