@@ -386,6 +386,8 @@ new1  = new
                   "01/02/2003 23:04")]
         [TestCase(@"message = {DATETIME($now, dateStyle: ""medium"", timeStyle: ""long"")}",
                   "Thu, 02 Jan 2003 23:04:10")]
+        [TestCase(@"message = {DATETIME($now, dateStyle: ""full"", timeStyle: ""full"")}",
+            "Thursday, 02 January 2003 23:04:10")]
         [TestCase(@"message = {DATETIME($now, dateStyle: ""short"", timeStyle: ""long"")}", "01/02/2003 23:04:10")]
         [TestCase(@"message = {DATETIME($now, dateStyle: ""short"", hour12: ""true"")}",
                   "When dateStyle and timeStyle are specified, other styling fields must be unspecified.")]
