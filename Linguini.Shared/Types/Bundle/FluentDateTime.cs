@@ -36,8 +36,9 @@ namespace Linguini.Shared.Types.Bundle
         }
 
         /// <inheritdoc />
-        public string AsString(IFluentContext context)
+        public string AsString(IFluentContext originalContext)
         {
+            var context = Options == null ? originalContext : originalContext.WithDateOptions(Options);
             return context.DateFormatStr != null
                 ? DateTime.ToString(context.DateFormatStr, context.DateFormatInfo)
                 : DateTime.ToString(context.DateFormatInfo);

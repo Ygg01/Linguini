@@ -78,8 +78,9 @@ namespace Linguini.Shared.Types.Bundle
         }
 
         /// <inheritdoc />
-        public string AsString(IFluentContext context)
+        public string AsString(IFluentContext originalContext)
         {
+            var context = Options == null ? originalContext : originalContext.WithNumOptions(Options);
             var fractionsDigits = context.NumberOptions.MinimumFractionDigits == null
                 ? _operands != null
                     ? (int)_operands.F

@@ -41,10 +41,9 @@ namespace Linguini.Bundle.Function
             {
                 return num;
             }
-
+            
             var numOptions = FluentNumberOptions.ToNumberOption(namedArgs);
-            var context = new FluentContext(new LangLocId("root"), numOptions);
-            return (FluentString)num.AsString(context);
+            return num.WithFormatting(numOptions);
         }
 
         /// <summary>
@@ -85,8 +84,7 @@ namespace Linguini.Bundle.Function
                     "When dateStyle and timeStyle are specified, other styling fields must be unspecified.");
             }
 
-            var context = new FluentContext(new LangLocId("root"), null, dateOptions);
-            return (FluentString)fluentDate.AsString(context);
+            return fluentDate.WithFormatting(dateOptions);
         }
 
         /// <summary>

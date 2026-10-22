@@ -53,6 +53,20 @@ namespace Linguini.Shared.Types.Bundle
         ///     Date formatter for FluentDates
         /// </summary>
         public DateTimeFormatInfo DateFormatInfo { get; }
+
+        /// <summary>
+        /// Create a clone of the existing context with new number options
+        /// </summary>
+        /// <param name="numberOptions">New <see cref="FluentNumberOptions"/> to use.</param>
+        /// <returns>New deep-cloned <c>IFluentContext</c>.</returns>
+        public IFluentContext WithNumOptions(FluentNumberOptions numberOptions);
+        
+        /// <summary>
+        /// Create a clone of the existing context with new date-time options
+        /// </summary>
+        /// <param name="dateOptions">New <see cref="FluentDateTimeOptions"/>  to use.</param>
+        /// <returns>New deep-cloned <c>IFluentContext</c>.</returns>
+        public IFluentContext WithDateOptions(FluentDateTimeOptions dateOptions);
     }
 
     /// <summary>
@@ -102,5 +116,17 @@ namespace Linguini.Shared.Types.Bundle
 
         /// <inheritdoc />
         public DateTimeFormatInfo DateFormatInfo { get; }
+
+        /// <inheritdoc />
+        public IFluentContext WithNumOptions(FluentNumberOptions numberOptions)
+        {
+            return this;
+        }
+
+        /// <inheritdoc />
+        public IFluentContext WithDateOptions(FluentDateTimeOptions dateOptions)
+        {
+            return this;
+        }
     }
 }

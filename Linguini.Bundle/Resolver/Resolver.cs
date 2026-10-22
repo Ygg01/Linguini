@@ -27,7 +27,9 @@ namespace Linguini.Bundle.Resolver
         public static string FormatPattern(this Pattern pattern, Scope scope)
         {
             var fluentType = pattern.ResolvePattern(scope);
-            return scope.FormatterFunc != null ? scope.FormatterFunc(fluentType) : fluentType.AsString();
+            return scope.FormatterFunc != null 
+                ? scope.FormatterFunc(fluentType) 
+                : fluentType.AsString(scope.Bundle.Context);
         }
 
         private static IFluentType ResolvePattern(this Pattern pattern, Scope scope)
@@ -443,7 +445,7 @@ namespace Linguini.Bundle.Resolver
         internal void WritePlaceable(IFluentType fluentType)
         {
             Scope.PopTraveled();
-            Builder?.Append(fluentType.AsString());
+            Builder?.Append(fluentType.AsString(Scope.Bundle.Context));
         }
 
 

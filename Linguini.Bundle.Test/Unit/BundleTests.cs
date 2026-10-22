@@ -398,7 +398,7 @@ new1  = new
         [TestCase(@"message = {DATETIME($now, year: ""numeric"", month: ""long"", day: ""2-digit"", hour: ""numeric"")}",
                   "January/02/2003 23")]
         [TestCase(@"message = {DATETIME($now, year: ""numeric"", month: ""numeric"", day: ""2-digit"", hour: ""numeric"")}",
-                  "1/2/2003 23")]
+                  "1/02/2003 23")]
         [TestCase(@"message = {DATETIME($now, year: ""numeric"", month: ""2-digit"", day: ""2-digit"", hour: ""numeric"", minute: ""numeric"")}",
                   "01/02/2003 23:4")]
         public void TestDateTimeFormatting(string resource, string expected)
@@ -425,7 +425,9 @@ new1  = new
         [TestCase("message = {NUMBER($num, maximumFractionDigits: 2, minimumIntegerDigits: 5)}", 1233.456, "01233.46")]
         [TestCase(@"message = {NUMBER($num, useGrouping: ""true"")}", 123456, "123,456.00")]
         [TestCase(@"message = {NUMBER($num, useGrouping: ""true"", minimumFractionDigits: 0)}", 123456, "123,456")]
-        public void TestNumberFormatting(string resource, double num, string expected)
+        [TestCase(@"message = {NUMBER($num, style:""percent"", minimumFractionDigits: 2)}", 0.032, "3.20 %")]
+        [TestCase(@"message = {NUMBER($num, style:""currency"", currency:""RSD"", minimumFractionDigits: 2)}", 32, "RSD32.00")]
+       public void TestNumberFormatting(string resource, double num, string expected)
         {
             var bundle = LinguiniBuilder.Builder().Locale("root")
                 .AddResource(resource)

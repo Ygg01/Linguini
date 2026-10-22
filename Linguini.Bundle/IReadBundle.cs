@@ -46,7 +46,7 @@ namespace Linguini.Bundle
         /// </summary>
         /// <param name="pattern">The pattern to format.</param>
         /// <param name="args">The dictionary of arguments to replace the variables.</param>
-        /// <param name="errors">The list of FluentErrors, if any occurred during formatting.</param>
+        /// <param name="errors">The list of FluentErrors, if any, occurred during formatting.</param>
         /// <returns>The formatted string.</returns>
         string FormatPattern(Pattern pattern, IDictionary<string, IFluentType>? args,
             [NotNullWhen(false)] out IList<FluentError>? errors);
@@ -57,7 +57,7 @@ namespace Linguini.Bundle
         /// </summary>
         /// <param name="pattern">The pattern to format.</param>
         /// <param name="args">The dictionary of arguments to replace the variables.</param>
-        /// <param name="errors">The reference to a list of FluentErrors, will be full if any occurred during formatting.</param>
+        /// <param name="errors">The reference to a list of FluentErrors will be full if any occurred during formatting.</param>
         /// <returns>The formatted string.</returns>
         [Obsolete(
             "Use TryGetPattern(Pattern pattern, IDictionary<string, IFluentType>? args, out string? result, out IList<FluentError>? errors) instead.")]
@@ -179,7 +179,7 @@ namespace Linguini.Bundle
         /// <param name="id">The ID of the message to retrieve.</param>
         /// <param name="args">Optional. A dictionary of arguments to be inserted into the message.</param>
         /// <param name="errors">
-        ///     Optional. When the method returns false, a list of errors encountered during the retrieval
+        ///     Optional. When the method returns false, a list of errors is encountered during the retrieval
         ///     process.
         /// </param>
         /// <param name="message">Optional. When the method returns true, the retrieved message. Null if no message is found.</param>
@@ -195,10 +195,10 @@ namespace Linguini.Bundle
 
 
         /// <summary>
-        ///     Determines whether the given identifier with attribute has a message.
+        ///     Determines whether the given identifier with an attribute has a message.
         /// </summary>
         /// <param name="idWithAttr">The identifier with attribute.</param>
-        /// <returns>True if the identifier with attribute has a message; otherwise, false.</returns>
+        /// <returns>True if the identifier with an attribute has a message; otherwise, false.</returns>
         bool HasAttrMessage(string idWithAttr)
         {
             var attributes = idWithAttr.IndexOf('.');
@@ -241,7 +241,7 @@ namespace Linguini.Bundle
         /// <summary>
         ///     Tries to retrieve an attribute message.
         /// </summary>
-        /// <param name="msgWithAttr">The message with attribute.</param>
+        /// <param name="msgWithAttr">The message with an attribute.</param>
         /// <param name="args">The arguments passed with the message.</param>
         /// <param name="errors">The list of errors that occurred during the message retrieval process.</param>
         /// <param name="message">The retrieved message.</param>
@@ -256,7 +256,7 @@ namespace Linguini.Bundle
         /// <summary>
         ///     Tries to retrieve an attribute message.
         /// </summary>
-        /// <param name="msgWithAttr">The message with attribute.</param>
+        /// <param name="msgWithAttr">The message with an attribute.</param>
         /// <param name="args">The arguments passed with the message.</param>
         /// <param name="errors">The list of errors that occurred during the message retrieval process.</param>
         /// <param name="message">The retrieved message.</param>
@@ -295,7 +295,7 @@ namespace Linguini.Bundle
         /// <param name="id">The identifier of the message.</param>
         /// <param name="attribute">The attribute of the message.</param>
         /// <param name="args">The arguments to format the message with.</param>
-        /// <param name="errors">The reference to list of errors that occurred during the message retrieval process.</param>
+        /// <param name="errors">The reference to a list of errors that occurred during the message retrieval process.</param>
         /// <param name="message">The retrieved message.</param>
         /// <returns>True if the message was successfully retrieved, otherwise false.</returns>
         public bool TryGetMessageErrRef(string id, string? attribute, IDictionary<string, IFluentType>? args,
@@ -361,7 +361,7 @@ namespace Linguini.Bundle
         /// </summary>
         /// <param name="bundle">The bundle to retrieve the message from.</param>
         /// <param name="idWithAttr">The identifier with attribute.</param>
-        /// <returns>True if the identifier with attribute has a message; otherwise, false.</returns>
+        /// <returns>True if the identifier with an attribute has a message; otherwise, false.</returns>
         public static bool HasAttrMessage(this IReadBundle bundle, string idWithAttr)
         {
             return bundle.HasAttrMessage(idWithAttr);
@@ -371,7 +371,7 @@ namespace Linguini.Bundle
         ///     Convenience method for <see cref="IReadBundle.GetAttrMessage" />
         /// </summary>
         /// <param name="bundle">The bundle to retrieve the message from.</param>
-        /// <param name="msgWithAttr">The message with attribute to retrieve.</param>
+        /// <param name="msgWithAttr">The message with an attribute to retrieve.</param>
         /// <param name="args">Optional arguments to format the message.</param>
         /// <returns>The attribute message from the read bundle.</returns>
         public static string? GetAttrMessage(this IReadBundle bundle, string msgWithAttr,
@@ -406,7 +406,7 @@ namespace Linguini.Bundle
         ///     Convenience method for <see cref="IReadBundle.TryGetAttrMessage" />
         /// </summary>
         /// <param name="bundle">The bundle to retrieve the message from.</param>
-        /// <param name="msgWithAttr">The message with attribute</param>
+        /// <param name="msgWithAttr">The message with an attribute</param>
         /// <param name="args">Optional arguments to be passed to the attribute message.</param>
         /// <param name="errors">
         ///     When this method returns false, contains a list of errors that occurred while trying to retrieve

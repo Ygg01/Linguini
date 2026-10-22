@@ -82,7 +82,7 @@ namespace Linguini.Bundle
         public bool EnableExtensions { get; init; }
 
         /// <inheritdoc />
-        public IFluentContext Context { get; } = InvariantContext.Default;
+        public IFluentContext Context { get; init; }
 
         /// <summary>
         ///     Determines if the provided identifier has a message associated with it.
@@ -440,6 +440,7 @@ namespace Linguini.Bundle
                     TransformFunc = option.TransformFunc,
                     MaxPlaceable = option.MaxPlaceable,
                     UseIsolating = option.UseIsolating,
+                    Context = new FluentContext(primaryLocale),
                     Functions = new ConcurrentDictionary<string, FluentFunction>(func)
                 },
                 _ => new NonConcurrentBundle
@@ -451,6 +452,7 @@ namespace Linguini.Bundle
                     TransformFunc = option.TransformFunc,
                     MaxPlaceable = option.MaxPlaceable,
                     UseIsolating = option.UseIsolating,
+                    Context = new FluentContext(primaryLocale),
                     Functions = func
                 }
             };

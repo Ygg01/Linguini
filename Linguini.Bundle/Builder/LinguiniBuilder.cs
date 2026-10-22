@@ -440,7 +440,6 @@ namespace Linguini.Bundle.Builder
                         errors ??= new List<FluentError>();
                         errors.AddRange(resErr);
                     }
-
                 return (bundle, errors);
             }
 

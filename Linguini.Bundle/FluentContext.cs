@@ -47,6 +47,7 @@ namespace Linguini.Bundle
             NumberFormatInfo = numInfo;
         }
 
+     
         /// <inheritdoc />
         public LangLocId Locale { get; }
 
@@ -70,6 +71,18 @@ namespace Linguini.Bundle
 
         /// <inheritdoc />
         public DateTimeFormatInfo DateFormatInfo { get; }
+
+        /// <inheritdoc />
+        public IFluentContext WithNumOptions(FluentNumberOptions numberOptions)
+        {
+            return new FluentContext(Locale, numberOptions, DateTimeOptions);
+        }
+
+        /// <inheritdoc />
+        public IFluentContext WithDateOptions(FluentDateTimeOptions dateOptions)
+        {
+            return new FluentContext(Locale, NumberOptions, dateOptions);
+        }
 
         private static string? ProcessDateTimeOptions(FluentDateTimeOptions dateTimeOptions,
             ref DateTimeFormatInfo info)
