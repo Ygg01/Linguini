@@ -125,10 +125,6 @@ namespace Linguini.Shared.Types.Bundle
         ///     The formatting options specifying which components of the time (hour, minute, second,
         ///     fractional seconds) should be included and how they should be formatted.
         /// </param>
-        /// <param name="info">
-        ///     The culture-specific <see cref="DateTimeFormatInfo" /> that provides data, such as time separators
-        ///     and AM/PM designators.
-        /// </param>
         /// <returns>
         ///     A string representing the formatted time pattern based on the provided options and culture-specific
         ///     information.
@@ -412,12 +408,7 @@ namespace Linguini.Shared.Types.Bundle
             {
                 dateTimeOptions.FractionalSecondsDigit = fractionalSecond;
             }
-
-            if (namedArgs.TryGetValue("timeZoneName", out var ft12) &&
-                ft12 is FluentString timeZoneReprStr && timeZoneReprStr.TryIntoTimeZoneNameFormat(out var timeZoneName))
-            {
-                dateTimeOptions.TimeZoneName = timeZoneName;
-            }
+            
 
             if (namedArgs.TryGetValue("dateStyle", out var ft13) &&
                 ft13 is FluentString dateStyleReprStr &&
@@ -498,12 +489,7 @@ namespace Linguini.Shared.Types.Bundle
         ///     are from 1 to 3.
         /// </summary>
         public FractionalSecodsDigit? FractionalSecondsDigit;
-
-        /// <summary>
-        ///     Represents the format in which the time zone name is displayed.
-        ///     Possible values include "Long", "Short", "ShortOffset", "LongOffset", "ShortGeneric", and "LongGeneric".
-        /// </summary>
-        public TimeZoneRepresentation? TimeZoneName;
+        
 
         #endregion
 
@@ -601,42 +587,6 @@ namespace Linguini.Shared.Types.Bundle
         ///     Three fractional second digits.
         /// </summary>
         ThreeDigits = 3
-    }
-
-    /// <summary>
-    ///     The localized representation of the time zone name.
-    /// </summary>
-    public enum TimeZoneRepresentation : byte
-    {
-        /// <summary>
-        ///     Long localized form (e.g., <c>Pacific Standard Time</c>, <c>Nordamerikanische Westküsten-Normalzeit</c>)
-        /// </summary>
-        Long = 1,
-
-        /// <summary>
-        ///     Short localized form (e.g., <c>PST</c>, <c>GMT-8</c>)
-        /// </summary>
-        Short = 2,
-
-        /// <summary>
-        ///     Short localized GMT format (e.g.,<c>GMT-8</c>)
-        /// </summary>
-        ShortOffset = 3,
-
-        /// <summary>
-        ///     Long localized GMT format (e.g., <c>GMT-08:00</c>)
-        /// </summary>
-        LongOffset = 4,
-
-        /// <summary>
-        ///     Short generic non-location format (e.g., <c>PT</c>, <c>Los Angeles Zeit</c>)
-        /// </summary>
-        ShortGeneric = 5,
-
-        /// <summary>
-        ///     Long generic non-location format (e.g., <c>Pacific Time</c>, <c>Nordamerikanische Westküstenzeit</c>)
-        /// </summary>
-        LongGeneric = 6
     }
 
     /// <summary>
@@ -910,55 +860,6 @@ namespace Linguini.Shared.Types.Bundle
 
             style = default;
             return false;
-        }
-
-        /// <summary>
-        ///     Attempts to convert the current <see cref="FluentString" /> instance into a <see cref="TimeZoneRepresentation" />
-        ///     enumeration value.
-        /// </summary>
-        /// <param name="fs">The <see cref="FluentString" /> instance to convert.</param>
-        /// <param name="style">
-        ///     When this method returns, contains the corresponding <see cref="TimeZoneRepresentation" /> value if the conversion
-        ///     is successful;
-        ///     otherwise, contains the default value of <see cref="TimeZoneRepresentation" />.
-        /// </param>
-        /// <returns><c>true</c> if the conversion is successful; otherwise, <c>false</c>.</returns>
-        public static bool TryIntoTimeZoneNameFormat(this FluentString fs, out TimeZoneRepresentation style)
-        {
-            bool conversionSuccess;
-            switch ((string)fs)
-            {
-                case "long":
-                    style = TimeZoneRepresentation.Long;
-                    conversionSuccess = true;
-                    break;
-                case "short":
-                    style = TimeZoneRepresentation.Short;
-                    conversionSuccess = true;
-                    break;
-                case "shortOffset":
-                    style = TimeZoneRepresentation.ShortOffset;
-                    conversionSuccess = true;
-                    break;
-                case "longOffset":
-                    style = TimeZoneRepresentation.LongOffset;
-                    conversionSuccess = true;
-                    break;
-                case "shortGeneric":
-                    style = TimeZoneRepresentation.ShortGeneric;
-                    conversionSuccess = true;
-                    break;
-                case "longGeneric":
-                    style = TimeZoneRepresentation.LongGeneric;
-                    conversionSuccess = true;
-                    break;
-                default:
-                    style = default;
-                    conversionSuccess = false;
-                    break;
-            }
-
-            return conversionSuccess;
         }
 
         /// <summary>
