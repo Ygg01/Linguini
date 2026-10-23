@@ -214,7 +214,7 @@ namespace Linguini.Shared.Types.Bundle
                 DateFormatRecognized.YearMonth => info.YearMonthPattern,
                 DateFormatRecognized.MonthDay  => info.MonthDayPattern,
                 DateFormatRecognized.Short     => info.ShortDatePattern,
-                DateFormatRecognized.Long      => info.LongTimePattern,
+                DateFormatRecognized.Long      => info.LongDatePattern,
                 _                              => ""
             };
             var yearFmt = dateTimeOptions.Year switch
@@ -242,8 +242,7 @@ namespace Linguini.Shared.Types.Bundle
             var weekDayFmt = dateTimeOptions.Weekday switch
             {
                 DateTextFormat.Long  => "dddd",
-                DateTextFormat.Short => "ddd",
-                _                    => ""
+                _                    => "ddd"
             };
 
             var finalFmt = Regex.Replace(startingFmt, "y{1,4}", yearFmt);
@@ -539,11 +538,6 @@ namespace Linguini.Shared.Types.Bundle
         ///     Short representation style for time unit. E.g. `Thu` or `AD`.
         /// </summary>
         Short = 2,
-
-        /// <summary>
-        ///     Extremely short representation style for time unit. E.g. `T` or `A`.
-        /// </summary>
-        Narrow = 3
     }
 
     /// <summary>
@@ -805,10 +799,6 @@ namespace Linguini.Shared.Types.Bundle
                 case "short":
                     conversionSuccess = true;
                     style = DateTextFormat.Short;
-                    break;
-                case "narrow":
-                    conversionSuccess = true;
-                    style = DateTextFormat.Narrow;
                     break;
                 default:
                     conversionSuccess = false;
