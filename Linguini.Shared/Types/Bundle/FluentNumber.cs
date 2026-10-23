@@ -231,8 +231,6 @@ namespace Linguini.Shared.Types.Bundle
             MinimumIntegerDigits = null;
             MinimumFractionDigits = null;
             MaximumFractionDigits = null;
-            MinimumSignificantDigits = null;
-            MaximumSignificantDigits = null;
         }
 
         /// <summary>
@@ -240,8 +238,6 @@ namespace Linguini.Shared.Types.Bundle
         /// </summary>
         public bool CanUseDefaultFormatter => !MinimumIntegerDigits.HasValue
                                               && !MaximumFractionDigits.HasValue
-                                              && !MinimumSignificantDigits.HasValue
-                                              && !MaximumSignificantDigits.HasValue
                                               && Currency == null;
 
         /// <summary>
@@ -293,18 +289,6 @@ namespace Linguini.Shared.Types.Bundle
                 numberOption.MaximumFractionDigits = (byte)maxFracDigNum;
             }
 
-            if (options.TryGetValue("minimumSignificantDigits", out var minSigDig) &&
-                minSigDig is FluentNumber minSigDigNum)
-            {
-                numberOption.MinimumSignificantDigits = (byte)minSigDigNum;
-            }
-
-            if (options.TryGetValue("maximumSignificantDigits", out var maxSigDig) &&
-                maxSigDig is FluentNumber maxSigDigNum)
-            {
-                numberOption.MaximumSignificantDigits = (byte)maxSigDigNum;
-            }
-
             return numberOption;
         }
 
@@ -342,18 +326,6 @@ namespace Linguini.Shared.Types.Bundle
         ///     Defaults to Culture's <see cref="NumberFormatInfo" />.
         /// </summary>
         public byte? MaximumFractionDigits;
-
-        /// <summary>
-        ///     The minimum number of significant digits to use. Possible values are from <c>1</c> to <c>21</c>.
-        ///     Defaults to Culture's <see cref="NumberFormatInfo" />.
-        /// </summary>
-        public byte? MinimumSignificantDigits;
-
-        /// <summary>
-        ///     The maximum  number of significant digits to use. Possible values are from <c>1</c> to <c>21</c>;
-        ///     Defaults to Culture's <see cref="NumberFormatInfo" />.
-        /// </summary>
-        public byte? MaximumSignificantDigits;
 
         #endregion
     }

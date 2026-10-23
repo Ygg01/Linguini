@@ -536,8 +536,9 @@ namespace Linguini.Bundle
             var maxFracDigit = Math.Max(mandatoryFrac,
                                         numberOptions.MaximumFractionDigits ?? 0);
             var optionalFrac = SaturatingSubtract(maxFracDigit, mandatoryFrac);
+            var mandatoryIntDigit = numberOptions.MinimumIntegerDigits ?? 0;
 
-            stringBuild.Append('0', numberOptions.MinimumIntegerDigits ?? 0);
+            stringBuild.Append('0', mandatoryIntDigit);
             stringBuild.Append(decimalSeparator);
             stringBuild.Append('0', mandatoryFrac);
             stringBuild.Append('#', optionalFrac);
