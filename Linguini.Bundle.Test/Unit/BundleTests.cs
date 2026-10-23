@@ -44,12 +44,14 @@ term2 = val2
 
         private const string Replace1 = @"
 term1 = val1
-term2 = val2";
+term2 = val2
+-term3 = val3";
 
         private const string Replace2 = @"
 term1 = xxx
 new1  = new
-    .attr = 6";
+    .attr = 6
+-term3 = val3";
 
         [Test]
         public void TestNonDefaultBundleOptions()
@@ -92,6 +94,7 @@ new1  = new
             Assert.That("val1", Is.EqualTo(termMsg));
             Assert.That(bundle.TryGetAttrMessage("term2", null, out _, out var termMsg2));
             Assert.That("val2", Is.EqualTo(termMsg2));
+            Assert.That(bundle.TryGetAstTerm("term3", out var oldTerm));
 
             bundle.AddResourceOverriding(Replace2);
             Assert.That(bundle.TryGetAttrMessage("term2", null, out _, out _));
@@ -99,6 +102,8 @@ new1  = new
             Assert.That("xxx", Is.EqualTo(termMsg));
             Assert.That(bundle.TryGetAttrMessage("new1.attr", null, out _, out var newMsg));
             Assert.That("6", Is.EqualTo(newMsg));
+            Assert.That(bundle.TryGetAstTerm("term3", out var newTerm));
+            Assert.That(newTerm, Is.EqualTo(oldTerm));
         }
 
         [Test]
