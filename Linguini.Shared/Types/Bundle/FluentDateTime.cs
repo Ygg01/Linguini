@@ -133,7 +133,7 @@ namespace Linguini.Shared.Types.Bundle
         ///     A string representing the formatted time pattern based on the provided options and culture-specific
         ///     information.
         /// </returns>
-        public static string ExtractTimeFmt(FluentDateTimeOptions dateTimeOptions, DateTimeFormatInfo info)
+        public static string ExtractTimeFmt(FluentDateTimeOptions dateTimeOptions)
         {
             var timeFmt = new StringBuilder();
             var h = dateTimeOptions.Hour12 == true

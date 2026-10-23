@@ -123,11 +123,11 @@ namespace Linguini.Bundle
             switch (dateTimeOptions.GetStyleFields)
             {
                 case DateTimeZoneFormat.Time:
-                    return FluentDateTime.ExtractTimeFmt(dateTimeOptions, info);
+                    return FluentDateTime.ExtractTimeFmt(dateTimeOptions);
                 case DateTimeZoneFormat.Date:
                     return FluentDateTime.ExtractDateFmt(dateTimeOptions, info);
                 case DateTimeZoneFormat.DateTime:
-                    var time = FluentDateTime.ExtractTimeFmt(dateTimeOptions, info);
+                    var time = FluentDateTime.ExtractTimeFmt(dateTimeOptions);
                     var dateFmt = FluentDateTime.ExtractDateFmt(dateTimeOptions, info);
                     return $"{dateFmt} {time}";
             }

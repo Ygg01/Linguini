@@ -407,6 +407,8 @@ new1  = new
             "01/02/2003")]
         [TestCase(@"message = {DATETIME($now, year: ""numeric"", month: ""2-digit"", day: ""2-digit"", weekday: ""long"")}",
             "Thursday, 02 01 2003")]
+        [TestCase(@"message = {DATETIME($now, year: ""numeric"", month: ""2-digit"", day: ""2-digit"", weekday: ""long"", timeZoneName: ""long"")}",
+            "Thursday, 02 01 2003")]
         public void TestDateTimeFormatting(string resource, string expected)
         {
             var bundle = LinguiniBuilder.Builder().Locale("root")
